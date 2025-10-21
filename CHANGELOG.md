@@ -10,10 +10,44 @@
 ## [Unreleased]
 
 ### В разработке
-- Базовая структура проекта
 - Backend API endpoints
 - Frontend React приложение
 - Визуализация графиков (ECharts)
+
+---
+
+## [0.2.0] - 2025-10-21
+
+### Added
+- **Изучена официальная документация** (следуя критическому правилу из Claude.md):
+  - React 18: hooks patterns (useState, useEffect, useMemo, useCallback), composition, performance
+  - ECharts: интеграция с React через echarts-for-react, конфигурация, рендеринг
+  - TypeScript: strict mode, interfaces, generic types, best practices
+
+- **Анализ тестового файла** `test-data/Vesta 1.6 IM.det`:
+  - Выполнен детальный анализ структуры файла (462 строки)
+  - Найдено 17 расчётов с маркерами ($1-$9.3)
+  - Определены 24 параметра данных
+  - **ВАЖНО:** Учтено что первая колонка служебная (номера строк)
+
+- **Создан файл `shared-types.ts`** (300+ строк):
+  - Core Types: `EngineMetadata`, `DataPoint`, `Calculation`, `ProjectData`, `ProjectInfo`
+  - API Types: `GetProjectsResponse`, `GetProjectResponse`, `ErrorResponse`
+  - Chart Types: `ChartParameter`, `ChartPreset`, `ChartPresetConfig`, `SelectedCalculations`
+  - Export Types: `ChartExportFormat`, `DataExportFormat` с опциями экспорта
+  - Полная типизация TypeScript на основе РЕАЛЬНОЙ структуры .det файла
+
+### Documentation
+- **Roadmap обновлён:**
+  - Этап 1 "Изучение и анализ данных" отмечен как завершённый
+  - Прогресс: 14/40+ задач (35%)
+  - Добавлена детальная секция с результатами Этапа 1
+  - Обновлён текущий статус проекта
+
+### Notes
+- Этап 0 (Подготовка) + Этап 1 (Изучение) завершены
+- Следующий этап: Этап 2 - Backend базовая структура
+- Следование принципу: "Официальная документация ПЕРВИЧНА!"
 
 ---
 

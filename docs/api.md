@@ -1,8 +1,19 @@
 # API Документация
 
 **Дата:** 21 октября 2025
-**Версия:** 1.0
+**Версия:** 1.0 (обновлено после версии 0.2.0)
 **Base URL:** `http://localhost:3000`
+
+---
+
+## ⚠️ ВАЖНО: TypeScript типы
+
+Все типы данных определены в файле **[shared-types.ts](../shared-types.ts)**.
+
+**Использование типов:**
+- См. раздел "TypeScript Types" в конце этого документа
+- Полные определения типов: [shared-types.ts](../shared-types.ts)
+- Архитектура типов: [architecture.md](architecture.md#typescript-типы-shared-typests)
 
 ---
 
@@ -596,9 +607,205 @@ Response: Comparison statistics
 
 ---
 
-**API готов к использованию! 🚀**
+## TypeScript Types
+
+**Статус:** ✅ Реализовано (версия 0.2.0)
+
+Все типы данных определены в **[shared-types.ts](../shared-types.ts)** (300+ строк).
+
+### Основные типы
+
+**Core Types:**
+```typescript
+// Метаданные двигателя
+interface EngineMetadata {
+  numCylinders: number;
+  engineType: 'NATUR' | 'TURBO' | 'SUPERCHARGED';
+}
+
+// Одна точка данных (одна строка в .det файле)
+interface DataPoint {
+  RPM: number;
+  PAv: number;        // Средняя мощность (кВт)
+  Torque: number;     // Момент (Н·м)
+  PurCyl: [number, number, number, number];   // Коэф. наполнения
+  TUbMax: [number, number, number, number];   // Темп. выхлопа (°C)
+  TCylMax: [number, number, number, number];  // Темп. цилиндра (°C)
+  PCylMax: [number, number, number, number];  // Давление (бар)
+  Deto: [number, number, number, number];     // Детонация
+  Convergence: number;
+}
+
+// Один расчёт
+interface Calculation {
+  id: string;                 // Например: "1", "3.1"
+  marker: string;             // Например: "$1", "$3.1"
+  dataPoints: DataPoint[];
+  metadata?: CalculationMetadata;
+}
+
+// Полный проект
+interface ProjectData {
+  id: string;
+  name: string;
+  filePath: string;
+  metadata: EngineMetadata;
+  calculations: Calculation[];
+  modifiedAt: Date;
+  fileSize: number;
+}
+
+// Краткая информация
+interface ProjectInfo {
+  id: string;
+  name: string;
+  calculationsCount: number;
+  numCylinders: number;
+  engineType: 'NATUR' | 'TURBO' | 'SUPERCHARGED';
+  modifiedAt: Date;
+  fileSize: number;
+}
+```
+
+**API Response Types:**
+```typescript
+interface GetProjectsResponse {
+  projects: ProjectInfo[];
+}
+
+interface GetProjectResponse {
+  project: ProjectData;
+}
+
+interface ErrorResponse {
+  error: {
+    message: string;
+    code?: string;
+    details?: unknown;
+  };
+}
+```
+
+**Chart Types:**
+```typescript
+type ChartParameter =
+  | 'RPM' | 'PAv' | 'Torque'
+  | 'PurCyl1' | 'PurCyl2' | 'PurCyl3' | 'PurCyl4'
+  | 'TUbMax1' | 'TUbMax2' | 'TUbMax3' | 'TUbMax4'
+  | 'TCylMax1' | 'TCylMax2' | 'TCylMax3' | 'TCylMax4'
+  | 'PCylMax1' | 'PCylMax2' | 'PCylMax3' | 'PCylMax4'
+  | 'Deto1' | 'Deto2' | 'Deto3' | 'Deto4'
+  | 'Convergence';
+
+type ChartPreset = 'preset1' | 'preset2' | 'preset3' | 'custom';
+
+interface ChartPresetConfig {
+  id: ChartPreset;
+  name: string;
+  description: string;
+  parameters: ChartParameter[];
+  dualYAxis: boolean;
+  yAxisLeft?: ChartParameter[];
+  yAxisRight?: ChartParameter[];
+}
+
+interface SelectedCalculations {
+  calculationIds: string[];
+  colors: Record<string, string>;
+}
+```
+
+**Export Types:**
+```typescript
+type ChartExportFormat = 'png' | 'svg' | 'jpg';
+type DataExportFormat = 'csv' | 'excel' | 'json';
+
+interface ChartExportOptions {
+  format: ChartExportFormat;
+  width?: number;
+  height?: number;
+  backgroundColor?: string;
+  pixelRatio?: number;
+}
+
+interface DataExportOptions {
+  format: DataExportFormat;
+  includeMetadata?: boolean;
+  selectedOnly?: boolean;
+}
+```
+
+### Использование в коде
+
+**Backend (Node.js с JSDoc):**
+```javascript
+/**
+ * @typedef {import('../shared-types').ProjectData} ProjectData
+ * @typedef {import('../shared-types').Calculation} Calculation
+ */
+
+/**
+ * Parse .det file and return structured data
+ * @param {string} filePath - Path to .det file
+ * @returns {Promise<ProjectData>}
+ */
+async function parseDetFile(filePath) {
+  // Implementation
+}
+```
+
+**Frontend (React с TypeScript):**
+```typescript
+import type {
+  ProjectData,
+  Calculation,
+  ChartPreset,
+  SelectedCalculations
+} from '../shared-types';
+
+interface ProjectPageProps {
+  projectId: string;
+}
+
+const ProjectPage: React.FC<ProjectPageProps> = ({ projectId }) => {
+  const [data, setData] = useState<ProjectData | null>(null);
+  const [selected, setSelected] = useState<SelectedCalculations>({
+    calculationIds: [],
+    colors: {}
+  });
+
+  // Full type safety
+};
+```
+
+### Преимущества
+
+1. **Single Source of Truth** - все типы в одном файле
+2. **Type Safety** - ошибки выявляются на этапе компиляции
+3. **Sync** - backend и frontend используют одинаковые типы
+4. **Autocomplete** - IDE подсказывает доступные поля
+5. **Documentation** - типы служат документацией
+
+### Основано на реальных данных
+
+Типы созданы на основе анализа файла `test-data/Vesta 1.6 IM.det`:
+- 462 строки
+- 17 расчётов ($1-$9.3)
+- 24 параметра данных
+- **Учтено:** первая колонка служебная (номера строк)
+
+### Ссылки
+
+- **Полный файл:** [shared-types.ts](../shared-types.ts)
+- **Архитектура:** [architecture.md](architecture.md#typescript-типы-shared-typests)
+- **Roadmap:** [roadmap.md](../roadmap.md)
+
+---
+
+**API спроектирован и готов к реализации! 🚀**
 
 **Следующие шаги:**
 1. Реализовать backend endpoints согласно спецификации
-2. Создать frontend API client
+2. Создать frontend API client с типизацией
+3. Использовать типы из shared-types.ts везде
 3. Тестировать все endpoints

@@ -518,12 +518,130 @@ interface DataPoint {
 
 ---
 
+## TypeScript типы (shared-types.ts)
+
+**Статус:** ✅ Реализовано (версия 0.2.0)
+
+### Расположение
+
+Файл **[shared-types.ts](../shared-types.ts)** в корне проекта содержит все общие типы для backend и frontend.
+
+### Структура типов
+
+**Core Types (Основные типы данных):**
+```typescript
+EngineMetadata      // Метаданные двигателя (цилиндры, тип)
+DataPoint           // Одна точка данных (RPM + 23 параметра)
+Calculation         // Один расчёт (маркер + массив точек)
+ProjectData         // Полный проект (метаданные + расчёты)
+ProjectInfo         // Краткая информация для списка
+```
+
+**API Types (Типы для REST API):**
+```typescript
+GetProjectsResponse    // Ответ: список проектов
+GetProjectResponse     // Ответ: данные проекта
+ErrorResponse          // Стандартная ошибка
+```
+
+**Chart Types (Типы для графиков):**
+```typescript
+ChartParameter         // Параметры для отображения
+ChartPreset            // Пресеты графиков (preset1-4, custom)
+ChartPresetConfig      // Конфигурация пресета
+SelectedCalculations   // Выбранные расчёты для сравнения
+```
+
+**Export Types (Типы для экспорта):**
+```typescript
+ChartExportFormat      // PNG, SVG, JPG
+DataExportFormat       // CSV, Excel, JSON
+ChartExportOptions     // Опции экспорта графиков
+DataExportOptions      // Опции экспорта данных
+```
+
+### Использование
+
+**Backend (JavaScript/Node.js):**
+```javascript
+// Backend будет использовать JSDoc для типизации
+/**
+ * @typedef {import('../shared-types').ProjectData} ProjectData
+ */
+
+/**
+ * @param {string} filePath
+ * @returns {Promise<ProjectData>}
+ */
+async function parseDetFile(filePath) {
+  // ...
+}
+```
+
+**Frontend (TypeScript/React):**
+```typescript
+import type {
+  ProjectData,
+  Calculation,
+  ChartPreset
+} from '../shared-types';
+
+// Полная типизация компонентов
+```
+
+### Особенности типов
+
+**Основано на РЕАЛЬНЫХ данных:**
+- Анализ файла `test-data/Vesta 1.6 IM.det` (462 строки, 17 расчётов)
+- 24 параметра данных (RPM, P-Av, Torque, массивы по цилиндрам)
+- **ВАЖНО:** Учтено что первая колонка служебная
+
+**Массивы для цилиндров:**
+```typescript
+interface DataPoint {
+  // Параметры по цилиндрам (всегда 4 значения)
+  PurCyl: [number, number, number, number];
+  TUbMax: [number, number, number, number];
+  TCylMax: [number, number, number, number];
+  PCylMax: [number, number, number, number];
+  Deto: [number, number, number, number];
+}
+```
+
+**Строгая типизация:**
+```typescript
+// Только разрешённые типы двигателя
+type EngineType = 'NATUR' | 'TURBO' | 'SUPERCHARGED';
+
+// Только разрешённые параметры для графиков
+type ChartParameter = 'RPM' | 'PAv' | 'Torque' | ...;
+```
+
+### Преимущества общих типов
+
+1. **Single Source of Truth** - типы в одном месте
+2. **Sync между backend/frontend** - одинаковые типы данных
+3. **Type safety** - ошибки выявляются на этапе компиляции
+4. **Autocomplete** - IDE подсказывает доступные поля
+5. **Документация** - типы = документация структуры данных
+
+### Обновление типов
+
+При изменении структуры данных:
+1. Обнови `shared-types.ts`
+2. Проверь что backend и frontend компилируются
+3. Обнови эту документацию
+4. Обнови `docs/api.md` с новыми типами
+
+---
+
 ## Следующие шаги
 
 После изучения архитектуры:
-1. Изучи [docs/api.md](api.md) - API endpoints
-2. Открой [roadmap.md](../roadmap.md) - начни реализацию
-3. Следуй принципам архитектуры при написании кода
+1. Изучи [shared-types.ts](../shared-types.ts) - все типы данных
+2. Изучи [docs/api.md](api.md) - API endpoints
+3. Открой [roadmap.md](../roadmap.md) - начни реализацию
+4. Следуй принципам архитектуры при написании кода
 
 ---
 
