@@ -7,6 +7,8 @@
 import express from 'express';
 import cors from 'cors';
 import { loadConfig, validateConfig } from './config.js';
+import projectsRouter from './routes/projects.js';
+import dataRouter from './routes/data.js';
 
 // Инициализация Express
 const app = express();
@@ -47,33 +49,32 @@ app.get('/health', (req, res) => {
 app.get('/api', (req, res) => {
   res.json({
     name: 'Engine Results Viewer API',
-    version: '0.2.0',
+    version: '1.0.0',
+    description: 'REST API for engine calculation data visualization',
     endpoints: {
-      health: 'GET /health',
-      projects: 'GET /api/projects (coming soon)',
-      project: 'GET /api/project/:id (coming soon)'
-    }
+      health: {
+        method: 'GET',
+        path: '/health',
+        description: 'Health check endpoint'
+      },
+      projects: {
+        method: 'GET',
+        path: '/api/projects',
+        description: 'Get list of all available projects'
+      },
+      project: {
+        method: 'GET',
+        path: '/api/project/:id',
+        description: 'Get full data for a specific project'
+      }
+    },
+    documentation: 'See docs/api.md for detailed API documentation'
   });
 });
 
-// Placeholder for future routes
-app.get('/api/projects', (req, res) => {
-  res.status(501).json({
-    error: {
-      message: 'Not implemented yet',
-      code: 'NOT_IMPLEMENTED'
-    }
-  });
-});
-
-app.get('/api/project/:id', (req, res) => {
-  res.status(501).json({
-    error: {
-      message: 'Not implemented yet',
-      code: 'NOT_IMPLEMENTED'
-    }
-  });
-});
+// API Routes
+app.use('/api/projects', projectsRouter);
+app.use('/api/project', dataRouter);
 
 /**
  * Error Handling Middleware

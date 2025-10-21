@@ -13,6 +13,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Cached configuration (loaded once at startup)
+let cachedConfig = null;
+
 /**
  * @typedef {Object} AppConfig
  * @property {Object} server
@@ -37,10 +40,16 @@ const __dirname = path.dirname(__filename);
 /**
  * Загрузить конфигурацию из config.yaml
  *
+ * @param {boolean} forceReload - Force reload config from file (ignore cache)
  * @returns {Promise<AppConfig>} Конфигурация приложения
  * @throws {Error} Если файл не найден или невалидный YAML
  */
-export async function loadConfig() {
+export async function loadConfig(forceReload = false) {
+  // Return cached config if available and not forcing reload
+  if (cachedConfig && !forceReload) {
+    return cachedConfig;
+  }
+
   try {
     // Путь к config.yaml (в корне проекта, на уровень выше backend/)
     const configPath = path.join(__dirname, '..', '..', 'config.yaml');
@@ -59,6 +68,9 @@ export async function loadConfig() {
     console.log(`   Data folder: ${config.files.path}`);
     console.log(`   Server: ${config.server.host}:${config.server.port}`);
 
+    // Cache the config
+    cachedConfig = config;
+
     return config;
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -66,6 +78,21 @@ export async function loadConfig() {
     }
     throw new Error(`Failed to load config: ${error.message}`);
   }
+}
+
+/**
+ * Получить закэшированную конфигурацию (синхронно)
+ *
+ * ВАЖНО: Конфигурация должна быть загружена при старте сервера!
+ *
+ * @returns {AppConfig} Конфигурация приложения
+ * @throws {Error} Если конфигурация ещё не загружена
+ */
+export function getConfig() {
+  if (!cachedConfig) {
+    throw new Error('Configuration not loaded. Call loadConfig() first at server startup.');
+  }
+  return cachedConfig;
 }
 
 /**
@@ -116,6 +143,7 @@ export function validateConfig(config) {
 // Default export
 export default {
   loadConfig,
+  getConfig,
   getDataFolderPath,
   validateConfig
 };
