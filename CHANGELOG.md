@@ -10,9 +10,58 @@
 ## [Unreleased]
 
 ### В разработке
-- Backend API endpoints
+- Backend парсер .det файлов (fileParser.js)
+- Backend сканер папки (fileScanner.js)
+- Backend API endpoints (routes)
 - Frontend React приложение
 - Визуализация графиков (ECharts)
+
+---
+
+## [0.3.0] - 2025-10-21
+
+### Added
+- **Backend базовая структура** (Этап 2, часть 1):
+  - Создана папка `backend/` с правильной структурой
+  - `package.json`: ES Modules, dependencies (express, cors, js-yaml, chokidar)
+  - `.gitignore`: правила игнорирования для backend
+  - 88 npm пакетов установлено, 0 уязвимостей
+
+- **backend/src/config.js** (120 строк):
+  - Функция `loadConfig()` - загрузка и парсинг config.yaml
+  - Функция `getDataFolderPath()` - абсолютный путь к данным
+  - Функция `validateConfig()` - валидация конфигурации
+  - Полная типизация JSDoc для всех функций
+  - Обработка ошибок (файл не найден, невалидный YAML)
+
+- **backend/src/server.js** (160 строк):
+  - Express сервер с полной настройкой
+  - CORS middleware (frontend: localhost:5173)
+  - JSON parsing middleware
+  - Request logging
+  - Endpoints:
+    - `GET /health` - проверка работоспособности
+    - `GET /api` - информация об API
+    - `GET /api/projects` - placeholder (501)
+    - `GET /api/project/:id` - placeholder (501)
+  - Error handling (404 handler, global error handler)
+  - Graceful shutdown (SIGTERM, SIGINT)
+  - Configuration validation при старте
+
+### Testing
+- ✅ Сервер успешно запускается на localhost:3000
+- ✅ Health endpoint работает: `{"status": "ok", ...}`
+- ✅ API info endpoint работает: показывает доступные endpoints
+- ✅ Конфигурация загружается из config.yaml
+- ✅ Валидация конфигурации проходит успешно
+
+### Documentation
+- Документация будет обновлена после завершения этапа
+
+### Notes
+- Backend базовая структура готова
+- Следующее: создать fileParser.js и fileScanner.js
+- Прогресс: ~20/40+ задач (50%)
 
 ---
 

@@ -56,26 +56,43 @@ npm install
 ```
 backend/
 ├── src/
-│   ├── server.js         # Express сервер
-│   ├── config.js         # Загрузка config.yaml
-│   ├── fileScanner.js    # Сканирование папки test-data/
-│   ├── fileParser.js     # Парсинг .det файлов
-│   └── routes/
-│       ├── projects.js   # GET /api/projects
-│       └── data.js       # GET /api/project/:id
-├── package.json
-└── .gitignore
+│   ├── server.js         # ✅ Express сервер
+│   ├── config.js         # ✅ Загрузка config.yaml
+│   ├── fileScanner.js    # ⏳ Сканирование папки (в разработке)
+│   ├── fileParser.js     # ⏳ Парсинг .det (в разработке)
+│   └── routes/           # 📁 API routes (placeholder)
+│       ├── projects.js   # ⏳ GET /api/projects
+│       └── data.js       # ⏳ GET /api/project/:id
+├── package.json          # ✅ npm конфигурация
+├── .gitignore           # ✅ Правила игнорирования
+└── node_modules/        # ✅ 88 пакетов
 ```
 
 ### 4. Запуск backend
+
+**Режим разработки (с auto-reload):**
 ```bash
 npm run dev
 ```
 
+**Production режим:**
+```bash
+npm start
+```
+
 **Результат:**
 ```
-Backend server started on http://localhost:3000
-Health check: http://localhost:3000/health
+📋 Loading configuration...
+✅ Configuration loaded successfully
+   Data folder: ./test-data
+   Server: localhost:3000
+✅ Configuration validation passed
+
+🚀 Server started successfully!
+   URL: http://localhost:3000
+   Environment: development
+   Health check: http://localhost:3000/health
+   API info: http://localhost:3000/api
 ```
 
 ### 5. Проверка работы
