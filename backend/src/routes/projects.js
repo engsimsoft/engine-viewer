@@ -116,7 +116,7 @@ router.get('/', async (req, res, next) => {
       fileSizeFormatted: formatFileSize(project.fileSize),
       lastModified: project.modifiedAt,
       created: project.createdAt,
-      metadata: allMetadata.get(project.fileName.replace('.det', '')) || null
+      metadata: allMetadata.get(project.id) || null // Use project.id instead of fileName
     }));
 
     // Sort by last modified date (newest first)
