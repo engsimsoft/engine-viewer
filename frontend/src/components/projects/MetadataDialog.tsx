@@ -96,20 +96,29 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
 
     try {
       // Отправка на Backend API
-      await axios.post(`/api/projects/${project.id}/metadata`, values);
+      const response = await axios.post(`/api/projects/${project.id}/metadata`, values);
 
-      // Успех
-      toast.success('Метаданные проекта сохранены');
-      onOpenChange(false);
+      // Проверка успешного ответа
+      if (response.status === 200 && response.data.metadata) {
+        // Успех
+        toast.success('Метаданные проекта сохранены');
+        onOpenChange(false);
 
-      // Вызов callback для обновления данных
-      if (onSuccess) {
-        onSuccess();
+        // Вызов callback для обновления данных
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
       // Ошибка
       console.error('Failed to save metadata:', error);
-      toast.error('Не удалось сохранить метаданные');
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(`Ошибка: ${error.response.data.error || 'Не удалось сохранить метаданные'}`);
+      } else {
+        toast.error('Не удалось сохранить метаданные');
+      }
     }
   };
 
