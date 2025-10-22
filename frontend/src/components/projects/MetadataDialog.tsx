@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -66,26 +67,28 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
   const form = useForm<MetadataFormValues>({
     resolver: zodResolver(metadataFormSchema),
     defaultValues: {
-      description: project?.description || '',
-      client: project?.client || '',
-      tags: project?.tags || [],
-      status: project?.status || 'active',
-      notes: project?.notes || '',
-      color: project?.color || '#3b82f6', // Default blue
+      description: '',
+      client: '',
+      tags: [],
+      status: 'active',
+      notes: '',
+      color: '#3b82f6',
     },
   });
 
-  // Обновление значений при изменении project
-  if (project && open) {
-    form.reset({
-      description: project.description || '',
-      client: project.client || '',
-      tags: project.tags || [],
-      status: project.status || 'active',
-      notes: project.notes || '',
-      color: project.color || '#3b82f6',
-    });
-  }
+  // Обновление значений при изменении project (в useEffect!)
+  useEffect(() => {
+    if (project && open) {
+      form.reset({
+        description: project.description || '',
+        client: project.client || '',
+        tags: project.tags || [],
+        status: project.status || 'active',
+        notes: project.notes || '',
+        color: project.color || '#3b82f6',
+      });
+    }
+  }, [project, open, form]);
 
   // Отправка формы
   const onSubmit = async (values: MetadataFormValues) => {
