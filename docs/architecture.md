@@ -290,18 +290,24 @@ Data Access Layer (API, File System)
 
 **components/** - Переиспользуемые компоненты
 - `ProjectCard` - карточка проекта
-- `ChartPreset1-4` - пресеты графиков
-- `DataTable` - таблица данных
-- `CalculationSelector` - выбор расчётов
+- `MetadataDialog` - диалог редактирования метаданных
+- `TagInput` - компонент для управления тегами
 - `LoadingSpinner` - индикатор загрузки
 - `ErrorMessage` - сообщение об ошибке
 - `EmptyState` - пустое состояние
+- **Visualization components:**
+  - `CalculationSelector` - выбор расчётов (макс 5) с checkbox и цветными индикаторами
+  - `ChartPreset1` - график "Мощность и момент" (dual Y-axes) ✅
+  - `ChartPreset2` - в разработке
+  - `ChartPreset3` - в разработке
+  - `ChartPreset4` - в разработке
+  - `DataTable` - таблица данных (в разработке)
 
 **hooks/** - Custom hooks
-- `useProjects` - загрузка списка проектов
-- `useProjectData` - загрузка данных проекта
-- `useSelectedCalculations` - управление выбранными расчётами
-- `useChartPreset` - управление пресетами
+- `useProjects` - загрузка списка проектов ✅
+- `useProjectData` - загрузка данных проекта по ID (с race condition handling) ✅
+- `useSelectedCalculations` - управление выбранными расчётами (макс 5) ✅
+- `useChartPreset` - управление пресетами (в разработке)
 
 **api/client.ts** - API клиент
 - Axios instance
@@ -418,6 +424,302 @@ interface DataPoint {
   Torque: number;
   "PurCyl( 1)": number;
   // ... все остальные параметры
+}
+```
+
+---
+
+## Компоненты визуализации (Этап 7) ✅
+
+### Архитектура страницы ProjectPage
+
+**Layout:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ProjectPage                                                │
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │  Project Info Card                                    │ │
+│  │  - Название проекта, тип двигателя, цилиндры         │ │
+│  │  - Badge с количеством расчётов                       │ │
+│  └───────────────────────────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────────┐  ┌───────────────────────────────────┐ │
+│  │ CalculationSel  │  │  Visualization Area              │ │
+│  │                 │  │                                  │ │
+│  │ □ Calc 1 🔴     │  │  ChartPreset1                    │ │
+│  │ ☑ Calc 2 🟢     │  │  ┌────────────────────────────┐ │ │
+│  │ ☑ Calc 3 🔵     │  │  │  Power & Torque Chart      │ │ │
+│  │ □ Calc 4 🟡     │  │  │  (Dual Y-axes)             │ │ │
+│  │ □ Calc 5 🟣     │  │  │                            │ │ │
+│  │                 │  │  │  Left Y: Power (kW)        │ │ │
+│  │ Selected: 2/5   │  │  │  Right Y: Torque (N·m)     │ │ │
+│  │                 │  │  │  X: RPM                    │ │ │
+│  └─────────────────┘  │  │                            │ │ │
+│                        │  │  [DataZoom Slider]         │ │ │
+│                        │  └────────────────────────────┘ │ │
+│                        └───────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Custom Hooks для визуализации
+
+**useProjectData.ts** - Загрузка данных проекта
+```typescript
+// Функциональность:
+- Загрузка детальных данных проекта по ID из API
+- State management: project, loading, error
+- Race condition handling (ignore flag в useEffect)
+- Функция refetch для повторной загрузки
+- Автоматическая очистка при размонтировании
+
+// Использование:
+const { project, loading, error, refetch } = useProjectData(id);
+```
+
+**useSelectedCalculations.ts** - Управление выбором расчётов
+```typescript
+// Функциональность:
+- Управление массивом selectedIds (максимум 5 элементов)
+- toggleCalculation(id) - добавить/убрать расчёт из выбранных
+- Валидация максимального количества (MAX_CALCULATIONS = 5)
+- Хелперы: isSelected, isMaxReached, canSelect, count, maxCount
+- clearSelection() для сброса выбора
+
+// Использование:
+const {
+  selectedIds,
+  toggleCalculation,
+  isMaxReached,
+  count,
+  maxCount
+} = useSelectedCalculations();
+```
+
+### Компоненты визуализации
+
+**CalculationSelector.tsx** - UI выбора расчётов
+```typescript
+// Функциональность:
+- Отображение списка расчётов с checkboxes (Radix UI)
+- Цветные индикаторы для каждого расчёта (синхронизированы с графиком)
+- Badge с счётчиком выбранных расчётов (2/5)
+- Автоматическое отключение checkboxes при достижении лимита
+- Tooltip предупреждение при превышении лимита
+
+// Props:
+- calculations: Calculation[]       // Все расчёты проекта
+- selectedIds: string[]              // Выбранные ID расчётов
+- onToggle: (id: string) => void     // Callback при клике
+- isMaxReached: boolean              // Достигнут ли лимит
+- maxCount: number                   // Максимум выборов (5)
+
+// Цвета из config.yaml:
+const CALCULATION_COLORS = [
+  '#ff6b6b',  // Красный
+  '#4ecdc4',  // Бирюзовый
+  '#45b7d1',  // Синий
+  '#f9ca24',  // Жёлтый
+  '#a29bfe',  // Фиолетовый
+];
+```
+
+**ChartPreset1.tsx** - График "Мощность и момент"
+```typescript
+// Функциональность:
+- Dual Y-axes chart (ECharts)
+- Левая ось: P-Av (Мощность в кВт)
+- Правая ось: Torque (Момент в Н·м)
+- Ось X: RPM (Обороты двигателя)
+- DataZoom slider для интерактивного зумирования
+- Tooltip с кастомным форматированием (цвет + единицы)
+- Legend для переключения видимости серий
+- Цветовая схема: синхронизирована с CalculationSelector
+
+// Props:
+- calculations: Calculation[]       // Все расчёты проекта
+- selectedIds: string[]             // Выбранные ID для отображения
+
+// Оптимизация:
+- useMemo для chartOption (пересчёт только при изменении selectedIds)
+- Фильтрация расчётов по selectedIds
+- Циклическое повторение цветов (index % colors.length)
+
+// Линии:
+- Мощность: сплошная линия (solid), привязана к yAxisIndex: 0
+- Момент: пунктирная линия (dashed), привязана к yAxisIndex: 1
+```
+
+**chartConfig.ts** - Базовая конфигурация ECharts
+```typescript
+// Экспорт функций:
+- getBaseChartConfig(): базовая конфигурация для всех графиков
+  - grid (отступы для dual Y-axes)
+  - tooltip (trigger: 'axis', custom formatter)
+  - legend (position: top center)
+  - dataZoom (slider + inside zoom)
+  - animation: true
+
+- createXAxis(name): создание оси X
+  - type: 'value'
+  - name: название (например "RPM")
+  - nameLocation: 'middle'
+  - axisLabel.formatter для тысяч (1000 → 1k)
+
+- createYAxis(name, position, color): создание оси Y
+  - type: 'value'
+  - position: 'left' | 'right'
+  - name: название (например "Мощность (кВт)")
+  - nameTextStyle.color: цвет оси
+  - splitLine: пунктирная линия сетки
+
+- getCalculationColor(index): получить цвет для расчёта
+  - Циклическое повторение из CALCULATION_COLORS
+  - index % 5 для бесконечного количества расчётов
+
+// Константы:
+const CALCULATION_COLORS: string[] = [...]  // 5 цветов из config.yaml
+```
+
+### Data Flow для визуализации
+
+```
+User открывает /project/:id
+         ↓
+ProjectPage.tsx рендерится
+         ↓
+useProjectData(id) вызывается
+         ↓
+api.getProject(id) → Backend
+         ↓
+Backend парсит .det файл
+         ↓
+Response: EngineProject JSON
+         ↓
+project state обновляется
+         ↓
+ProjectPage передаёт project.calculations в:
+  - CalculationSelector (для выбора)
+  - ChartPreset1 (для отображения)
+         ↓
+User выбирает расчёты через checkboxes
+         ↓
+toggleCalculation(id) вызывается
+         ↓
+selectedIds state обновляется (useSelectedCalculations)
+         ↓
+ChartPreset1 получает новый selectedIds
+         ↓
+useMemo пересчитывает chartOption
+         ↓
+ECharts re-renders с новыми сериями
+```
+
+### ECharts интеграция
+
+**echarts-for-react:**
+```typescript
+import ReactECharts from 'echarts-for-react';
+
+// Использование:
+<ReactECharts
+  option={chartOption}           // EChartsOption
+  style={{ height: '600px' }}    // Размер графика
+  opts={{ renderer: 'canvas' }}  // Или 'svg'
+/>
+
+// chartOption:
+- Полная типизация: EChartsOption из echarts
+- Включает: title, xAxis, yAxis[], series[], tooltip, legend, dataZoom
+```
+
+**Performance оптимизации:**
+```typescript
+// 1. useMemo для chartOption
+const chartOption = useMemo((): EChartsOption => {
+  // Пересчёт только при изменении selectedCalculations
+}, [selectedCalculations]);
+
+// 2. useMemo для selectedCalculations
+const selectedCalculations = useMemo(() => {
+  return calculations.filter(calc => selectedIds.includes(calc.id));
+}, [calculations, selectedIds]);
+
+// 3. useCallback для toggleCalculation
+const toggleCalculation = useCallback((id: string) => {
+  // Стабильная ссылка функции
+}, []);
+```
+
+### Обработка состояний в ProjectPage
+
+```typescript
+// Loading state
+if (loading) {
+  return <LoadingSpinner />;
+}
+
+// Error state
+if (error) {
+  return <ErrorMessage message={error} onRetry={refetch} />;
+}
+
+// Empty state (проект не найден)
+if (!project) {
+  return <div>Проект не найден</div>;
+}
+
+// Success state - рендер UI
+return (
+  <ProjectPage with data />
+);
+```
+
+### Technical Details
+
+**Race condition handling в useProjectData:**
+```typescript
+useEffect(() => {
+  let ignore = false;  // Флаг для отмены устаревших запросов
+
+  const fetchProject = async () => {
+    const data = await projectsApi.getProject(projectId);
+    if (!ignore) {  // Обновить state только если не отменено
+      setProject(data);
+    }
+  };
+
+  fetchProject();
+
+  return () => {
+    ignore = true;  // Cleanup: отменить при размонтировании
+  };
+}, [projectId]);
+```
+
+**Checkbox component (Radix UI):**
+```typescript
+// Установлено:
+@radix-ui/react-checkbox
+
+// Компонент: frontend/src/components/ui/checkbox.tsx
+- ForwardRef для передачи ref
+- TailwindCSS стилизация (border-primary, data-[state=checked]:bg-primary)
+- Check icon из lucide-react
+```
+
+**API response format fix:**
+```typescript
+// Backend возвращает:
+{
+  success: true,
+  data: { ...EngineProject },
+  meta: { ... }
+}
+
+// Frontend должен извлечь:
+if (response.data && response.data.success && response.data.data) {
+  return response.data.data;
 }
 ```
 

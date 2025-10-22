@@ -77,8 +77,12 @@ export async function getProjects(): Promise<ProjectInfo[]> {
  */
 export async function getProject(id: string): Promise<EngineProject> {
   try {
-    const { data } = await api.get<ProjectDetailsResponse>(`/project/${id}`);
-    return data.project;
+    const response = await api.get<any>(`/project/${id}`);
+    // Backend возвращает {success: true, data: {...}}
+    if (response.data && response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Invalid response format from server');
   } catch (error) {
     handleApiError(error);
   }

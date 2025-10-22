@@ -151,9 +151,9 @@ npm run preview  # Превью production сборки
 
 ## Статус проекта
 
-**Версия:** 1.4.0
+**Версия:** 1.5.0
 
-**Прогресс:** ~65/70+ задач (93%)
+**Прогресс:** ~75/80+ задач (94%)
 
 **Завершённые этапы:**
 - ✅ Этап 0: Подготовка и документация
@@ -164,9 +164,10 @@ npm run preview  # Превью production сборки
 - ✅ Этап 3.5.2: Backend метаданные расширение
 - ✅ Этап 4: Frontend Setup + shadcn/ui
 - ✅ Этап 5: HomePage с карточками проектов
-- ✅ Этап 6: MetadataDialog (редактирование метаданных) ⭐
+- ✅ Этап 6: MetadataDialog (редактирование метаданных)
+- ✅ Этап 7: ProjectPage + Визуализация (ChartPreset1 - Мощность и момент) ⭐
 
-**Текущий этап:** Этап 7 - Страница визуализации с первым пресетом графиков (следующий)
+**Текущий этап:** Этап 8 - Остальные пресеты графиков (следующий)
 
 **Backend готов** ✅:
 - REST API для .det файлов (GET /projects, GET /project/:id)
@@ -178,11 +179,16 @@ npm run preview  # Превью production сборки
 **Frontend готов** ✅:
 - Vite + React 18.2 + TypeScript 5.3
 - TailwindCSS v4 с Vite plugin
-- shadcn/ui компоненты (14+ компонентов)
+- shadcn/ui компоненты (15+ компонентов)
+- ECharts 5.5 + echarts-for-react (интеграция визуализации)
 - React Router v6 (HomePage, ProjectPage)
 - HomePage с карточками проектов (ProjectCard)
+- ProjectPage с визуализацией (CalculationSelector + ChartPreset1)
 - MetadataDialog (react-hook-form + zod валидация)
 - TagInput компонент для управления тегами
+- Custom hooks (useProjects, useProjectData, useSelectedCalculations)
+- ChartPreset1: График "Мощность и момент" (dual Y-axes)
+- CalculationSelector: Выбор расчётов (макс 5) с цветными индикаторами
 - Toast notifications (Sonner)
 - Axios API клиент с error handling
 - Vite proxy для backend API (с rewrite)
