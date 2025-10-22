@@ -26,18 +26,18 @@ interface ParameterOption {
 }
 
 const PARAMETER_OPTIONS: ParameterOption[] = [
-  { id: 'P-Av', label: 'Средняя мощность', unit: 'кВт', isArray: false },
-  { id: 'Torque', label: 'Крутящий момент', unit: 'Н·м', isArray: false },
-  { id: 'PCylMax', label: 'Давление в цилиндре', unit: 'бар', isArray: true },
-  { id: 'TCylMax', label: 'Температура в цилиндре', unit: 'K', isArray: true },
-  { id: 'TUbMax', label: 'Температура выпуска', unit: 'K', isArray: true },
-  { id: 'PurCyl', label: 'Коэффициент наполнения', unit: '', isArray: true },
-  { id: 'Deto', label: 'Детонация', unit: '', isArray: true },
-  { id: 'Convergence', label: 'Сходимость', unit: '', isArray: false },
+  { id: 'P-Av', label: 'P-Av', unit: 'кВт', isArray: false },
+  { id: 'Torque', label: 'Torque', unit: 'Н·м', isArray: false },
+  { id: 'PCylMax', label: 'PCylMax', unit: 'бар', isArray: true },
+  { id: 'TCylMax', label: 'TCylMax', unit: 'K', isArray: true },
+  { id: 'TUbMax', label: 'TUbMax', unit: 'K', isArray: true },
+  { id: 'PurCyl', label: 'PurCyl', unit: '', isArray: true },
+  { id: 'Deto', label: 'Deto', unit: '', isArray: true },
+  { id: 'Convergence', label: 'Convergence', unit: '', isArray: false },
 ];
 
 /**
- * Пресет 4: Кастомный график
+ * Пресет 4: Custom Chart
  *
  * Позволяет пользователю выбрать любые параметры для отображения.
  * Можно выбрать несколько параметров одновременно.
@@ -143,7 +143,7 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
     return {
       ...baseConfig,
       title: {
-        text: 'Кастомный график',
+        text: 'Custom Chart',
         left: 'center',
         top: 10,
         textStyle: {
@@ -157,7 +157,7 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
         top: 40,
         type: 'scroll',
       },
-      xAxis: createXAxis('Обороты (RPM)'),
+      xAxis: createXAxis('RPM'),
       yAxis: createYAxis(yAxisName, 'left', '#2ca02c'),
       series,
     };

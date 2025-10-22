@@ -15,17 +15,17 @@ interface ChartPreset2Props {
 }
 
 /**
- * Пресет 2: Давление в цилиндрах
+ * Пресет 2: PCylMax (Cylinder Pressure)
  *
  * График с одной осью Y:
- * - Ось Y: PCylMax (Максимальное давление в цилиндре, бар)
- * - Ось X: RPM (обороты)
+ * - Ось Y: PCylMax (бар)
+ * - Ось X: RPM
  * - Отдельные линии для каждого цилиндра каждого расчёта
  *
  * Пример: Если выбрано 2 расчёта ($1, $2) и двигатель 4-цилиндровый,
  * то на графике будет 8 линий:
- * - $1 - Цилиндр 1, $1 - Цилиндр 2, $1 - Цилиндр 3, $1 - Цилиндр 4
- * - $2 - Цилиндр 1, $2 - Цилиндр 2, $2 - Цилиндр 3, $2 - Цилиндр 4
+ * - $1 - Cyl 1, $1 - Cyl 2, $1 - Cyl 3, $1 - Cyl 4
+ * - $2 - Cyl 1, $2 - Cyl 2, $2 - Cyl 3, $2 - Cyl 4
  *
  * @example
  * ```tsx
@@ -78,7 +78,7 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
 
         // Серия для давления в цилиндре
         series.push({
-          name: `${calculationName} - Цил. ${cylinderNumber}`,
+          name: `${calculationName} - Cyl ${cylinderNumber}`,
           type: 'line',
           yAxisIndex: 0,
           data: pressureData,
@@ -99,14 +99,14 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
         });
 
         // Добавляем в легенду
-        legendData.push(`${calculationName} - Цил. ${cylinderNumber}`);
+        legendData.push(`${calculationName} - Cyl ${cylinderNumber}`);
       }
     });
 
     return {
       ...baseConfig,
       title: {
-        text: 'Давление в цилиндрах',
+        text: 'PCylMax (Cylinder Pressure)',
         left: 'center',
         top: 10,
         textStyle: {
@@ -120,8 +120,8 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
         top: 40,
         type: 'scroll', // Скролл если много легенд
       },
-      xAxis: createXAxis('Обороты (RPM)'),
-      yAxis: createYAxis('Давление (бар)', 'left', '#1f77b4'),
+      xAxis: createXAxis('RPM'),
+      yAxis: createYAxis('PCylMax (бар)', 'left', '#1f77b4'),
       series,
     };
   }, [selectedCalculations]);

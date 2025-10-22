@@ -16,23 +16,23 @@ interface PresetOption {
 const PRESET_OPTIONS: PresetOption[] = [
   {
     id: 'preset1',
-    label: 'Пресет 1',
-    description: 'Мощность и момент',
+    label: 'Preset 1',
+    description: 'P-Av & Torque',
   },
   {
     id: 'preset2',
-    label: 'Пресет 2',
-    description: 'Давление в цилиндрах',
+    label: 'Preset 2',
+    description: 'PCylMax (Cylinder Pressure)',
   },
   {
     id: 'preset3',
-    label: 'Пресет 3',
-    description: 'Температурный режим',
+    label: 'Preset 3',
+    description: 'Temperature (TCylMax & TUbMax)',
   },
   {
     id: 'preset4',
-    label: 'Пресет 4',
-    description: 'Кастомный график',
+    label: 'Preset 4',
+    description: 'Custom Chart',
   },
 ];
 

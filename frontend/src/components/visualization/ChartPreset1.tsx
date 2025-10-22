@@ -62,7 +62,7 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
 
       // Серия для мощности (левая ось Y)
       series.push({
-        name: `${calculationName} - Мощность`,
+        name: `${calculationName} - P-Av`,
         type: 'line',
         yAxisIndex: 0, // Левая ось
         data: powerData,
@@ -83,7 +83,7 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
 
       // Серия для момента (правая ось Y)
       series.push({
-        name: `${calculationName} - Момент`,
+        name: `${calculationName} - Torque`,
         type: 'line',
         yAxisIndex: 1, // Правая ось
         data: torqueData,
@@ -104,14 +104,14 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
       });
 
       // Добавляем в легенду
-      legendData.push(`${calculationName} - Мощность`);
-      legendData.push(`${calculationName} - Момент`);
+      legendData.push(`${calculationName} - P-Av`);
+      legendData.push(`${calculationName} - Torque`);
     });
 
     return {
       ...baseConfig,
       title: {
-        text: 'Мощность и крутящий момент',
+        text: 'P-Av & Torque',
         left: 'center',
         top: 10,
         textStyle: {
@@ -124,11 +124,11 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
         data: legendData,
         top: 40,
       },
-      xAxis: createXAxis('Обороты (RPM)'),
+      xAxis: createXAxis('RPM'),
       yAxis: [
-        createYAxis('Мощность (кВт)', 'left', '#1f77b4'),
-        createYAxis('Момент (Н·м)', 'right', '#ff7f0e'),
-      ],
+        createYAxis('P-Av (кВт)', 'left', '#1f77b4'),
+        createYAxis('Torque (Н·м)', 'right', '#ff7f0e'),
+      ] as any,
       series,
     };
   }, [selectedCalculations]);

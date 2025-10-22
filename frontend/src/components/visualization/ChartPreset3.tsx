@@ -15,20 +15,20 @@ interface ChartPreset3Props {
 }
 
 /**
- * Пресет 3: Температурный режим
+ * Пресет 3: Temperature (TCylMax & TUbMax)
  *
  * График с одной осью Y:
- * - Ось Y: Температура (K)
- * - Ось X: RPM (обороты)
+ * - Ось Y: Temperature (K)
+ * - Ось X: RPM
  * - Две линии для каждого расчёта:
  *   1. TCylMax (средняя по всем цилиндрам) - сплошная линия
  *   2. TUbMax (средняя по всем цилиндрам) - пунктирная линия
  *
  * Пример: Если выбрано 2 расчёта ($1, $2), то на графике будет 4 линии:
- * - $1 - Температура в цилиндре (TCylMax)
- * - $1 - Температура выпускных газов (TUbMax)
- * - $2 - Температура в цилиндре (TCylMax)
- * - $2 - Температура выпускных газов (TUbMax)
+ * - $1 - TCylMax
+ * - $1 - TUbMax
+ * - $2 - TCylMax
+ * - $2 - TUbMax
  *
  * @example
  * ```tsx
@@ -80,7 +80,7 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
 
       // Серия для TCylMax (температура в цилиндре) - сплошная линия
       series.push({
-        name: `${calculationName} - T цилиндра`,
+        name: `${calculationName} - TCylMax`,
         type: 'line',
         yAxisIndex: 0,
         data: tCylMaxData,
@@ -102,7 +102,7 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
 
       // Серия для TUbMax (температура выпускных газов) - пунктирная линия
       series.push({
-        name: `${calculationName} - T выпуска`,
+        name: `${calculationName} - TUbMax`,
         type: 'line',
         yAxisIndex: 0,
         data: tUbMaxData,
@@ -123,14 +123,14 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
       });
 
       // Добавляем в легенду
-      legendData.push(`${calculationName} - T цилиндра`);
-      legendData.push(`${calculationName} - T выпуска`);
+      legendData.push(`${calculationName} - TCylMax`);
+      legendData.push(`${calculationName} - TUbMax`);
     });
 
     return {
       ...baseConfig,
       title: {
-        text: 'Температурный режим',
+        text: 'Temperature (TCylMax & TUbMax)',
         left: 'center',
         top: 10,
         textStyle: {
@@ -143,8 +143,8 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
         data: legendData,
         top: 40,
       },
-      xAxis: createXAxis('Обороты (RPM)'),
-      yAxis: createYAxis('Температура (K)', 'left', '#d62728'),
+      xAxis: createXAxis('RPM'),
+      yAxis: createYAxis('Temperature (K)', 'left', '#d62728'),
       series,
     };
   }, [selectedCalculations]);
