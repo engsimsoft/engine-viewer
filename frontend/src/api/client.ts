@@ -29,13 +29,18 @@ const api = axios.create({
  * Обработка ошибок API
  */
 export class ApiError extends Error {
+  statusCode?: number;
+  originalError?: AxiosError;
+
   constructor(
     message: string,
-    public statusCode?: number,
-    public originalError?: AxiosError
+    statusCode?: number,
+    originalError?: AxiosError
   ) {
     super(message);
     this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.originalError = originalError;
   }
 }
 

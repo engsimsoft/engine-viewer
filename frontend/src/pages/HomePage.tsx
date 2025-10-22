@@ -1,15 +1,32 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '@/hooks/useProjects';
 import ProjectCard from '@/components/projects/ProjectCard';
+import { MetadataDialog } from '@/components/projects/MetadataDialog';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
+import type { ProjectInfo } from '@/types';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { projects, loading, error, refetch } = useProjects();
 
+  // Диалог редактирования метаданных
+  const [editingProject, setEditingProject] = useState<ProjectInfo | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const handleOpenProject = (id: string) => {
     navigate(`/project/${id}`);
+  };
+
+  const handleEditProject = (project: ProjectInfo) => {
+    setEditingProject(project);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogSuccess = () => {
+    // Обновить список проектов после сохранения
+    refetch();
   };
 
   if (loading) {
@@ -58,10 +75,19 @@ export default function HomePage() {
                 key={project.id}
                 project={project}
                 onOpen={handleOpenProject}
+                onEdit={handleEditProject}
               />
             ))}
           </div>
         )}
+
+        {/* Metadata Dialog */}
+        <MetadataDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          project={editingProject}
+          onSuccess={handleDialogSuccess}
+        />
       </div>
     </div>
   );

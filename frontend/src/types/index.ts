@@ -92,17 +92,29 @@ export interface ProjectMetadata {
  */
 export interface ProjectInfo {
   id: string;                 // ID проекта (имя файла без расширения)
+  name: string;               // Имя проекта (без расширения)
   fileName: string;           // Полное имя файла
   engineType: string;         // Тип двигателя
   numCylinders: number;       // Количество цилиндров
   calculationsCount: number;  // Количество расчетов
+  lastModified: string;       // ISO дата последнего изменения файла
   // Метаданные (опциональные, если не созданы пользователем)
   description?: string;
   client?: string;
   tags?: string[];
   status?: 'active' | 'completed' | 'archived';
   color?: string;
+  notes?: string;
   updatedAt?: string;
+  metadata?: {                // Вложенный объект метаданных (для удобства)
+    description?: string;
+    client?: string;
+    tags?: string[];
+    status?: 'active' | 'completed' | 'archived';
+    color?: string;
+    notes?: string;
+    updatedAt?: string;
+  };
 }
 
 // ====================================================================

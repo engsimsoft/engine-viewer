@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wrench, CheckCircle, Archive, Calendar, Cpu, FileText } from 'lucide-react';
+import { Wrench, CheckCircle, Archive, Calendar, Cpu, FileText, Edit } from 'lucide-react';
 import type { ProjectInfo } from '@/types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -9,9 +9,10 @@ import { ru } from 'date-fns/locale';
 interface ProjectCardProps {
   project: ProjectInfo;
   onOpen: (id: string) => void;
+  onEdit?: (project: ProjectInfo) => void;
 }
 
-export default function ProjectCard({ project, onOpen }: ProjectCardProps) {
+export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProps) {
   const metadata = project.metadata;
 
   // Status icon and color mapping
@@ -100,9 +101,21 @@ export default function ProjectCard({ project, onOpen }: ProjectCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex gap-2">
+        {onEdit && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(project);
+            }}
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+        )}
         <Button
-          className="w-full"
+          className="flex-1"
           onClick={(e) => {
             e.stopPropagation();
             onOpen(project.id);
