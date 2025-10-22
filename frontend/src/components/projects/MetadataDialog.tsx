@@ -79,13 +79,15 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
   // Обновление значений при изменении project (в useEffect!)
   useEffect(() => {
     if (project && open) {
+      // Читаем данные из вложенного объекта metadata (если есть) или defaults
+      const metadata = project.metadata || {};
       form.reset({
-        description: project.description || '',
-        client: project.client || '',
-        tags: project.tags || [],
-        status: project.status || 'active',
-        notes: project.notes || '',
-        color: project.color || '#3b82f6',
+        description: metadata.description || '',
+        client: metadata.client || '',
+        tags: metadata.tags || [],
+        status: metadata.status || 'active',
+        notes: metadata.notes || '',
+        color: metadata.color || '#3b82f6',
       });
     }
   }, [project, open, form]);
@@ -96,29 +98,20 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
 
     try {
       // Отправка на Backend API
-      const response = await axios.post(`/api/projects/${project.id}/metadata`, values);
+      await axios.post(`/api/projects/${project.id}/metadata`, values);
 
-      // Проверка успешного ответа
-      if (response.status === 200 && response.data.metadata) {
-        // Успех
-        toast.success('Метаданные проекта сохранены');
-        onOpenChange(false);
+      // Успех
+      toast.success('Метаданные проекта сохранены');
+      onOpenChange(false);
 
-        // Вызов callback для обновления данных
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        throw new Error('Invalid response from server');
+      // Вызов callback для обновления данных
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
       // Ошибка
       console.error('Failed to save metadata:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        toast.error(`Ошибка: ${error.response.data.error || 'Не удалось сохранить метаданные'}`);
-      } else {
-        toast.error('Не удалось сохранить метаданные');
-      }
+      toast.error('Не удалось сохранить метаданные');
     }
   };
 
@@ -138,7 +131,7 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {project?.description ? 'Редактировать метаданные' : 'Добавить метаданные'}
+            {project?.metadata ? 'Редактировать метаданные' : 'Добавить метаданные'}
           </DialogTitle>
           <DialogDescription>
             Проект: <span className="font-medium">{project?.fileName}</span>

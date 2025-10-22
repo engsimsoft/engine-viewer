@@ -34,6 +34,7 @@ npm run dev
 - **[docs/setup.md](docs/setup.md)** - детальная установка и настройка
 - **[docs/architecture.md](docs/architecture.md)** - архитектура проекта
 - **[docs/api.md](docs/api.md)** - API документация
+- **[docs/troubleshooting.md](docs/troubleshooting.md)** - решение проблем ⭐
 
 ### Документы требований
 - **[engine-viewer-tech-spec .md](engine-viewer-tech-spec%20.md)** - полное техническое задание
@@ -150,9 +151,9 @@ npm run preview  # Превью production сборки
 
 ## Статус проекта
 
-**Версия:** 1.2.0
+**Версия:** 1.4.0
 
-**Прогресс:** ~58/60+ задач (96%)
+**Прогресс:** ~65/70+ задач (93%)
 
 **Завершённые этапы:**
 - ✅ Этап 0: Подготовка и документация
@@ -162,8 +163,10 @@ npm run preview  # Превью production сборки
 - ✅ Этап 3.5.1: Backend метаданные MVP
 - ✅ Этап 3.5.2: Backend метаданные расширение
 - ✅ Этап 4: Frontend Setup + shadcn/ui
+- ✅ Этап 5: HomePage с карточками проектов
+- ✅ Этап 6: MetadataDialog (редактирование метаданных) ⭐
 
-**Текущий этап:** Этап 5 - HomePage с карточками проектов (следующий)
+**Текущий этап:** Этап 7 - Страница визуализации с первым пресетом графиков (следующий)
 
 **Backend готов** ✅:
 - REST API для .det файлов (GET /projects, GET /project/:id)
@@ -173,9 +176,14 @@ npm run preview  # Превью production сборки
 - Полная TypeScript типизация
 
 **Frontend готов** ✅:
-- Vite + React 19 + TypeScript 5.9
+- Vite + React 18.2 + TypeScript 5.3
 - TailwindCSS v4 с Vite plugin
-- shadcn/ui компоненты (8 штук)
+- shadcn/ui компоненты (14+ компонентов)
+- React Router v6 (HomePage, ProjectPage)
+- HomePage с карточками проектов (ProjectCard)
+- MetadataDialog (react-hook-form + zod валидация)
+- TagInput компонент для управления тегами
+- Toast notifications (Sonner)
 - Axios API клиент с error handling
 - Vite proxy для backend API (с rewrite)
 - TypeScript path aliases (@/*)
