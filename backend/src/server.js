@@ -9,6 +9,7 @@ import cors from 'cors';
 import { loadConfig, validateConfig } from './config.js';
 import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
+import metadataRouter from './routes/metadata.js';
 
 // Инициализация Express
 const app = express();
@@ -59,22 +60,41 @@ app.get('/api', (req, res) => {
       },
       projects: {
         method: 'GET',
-        path: '/api/projects',
+        path: '/projects',
         description: 'Get list of all available projects'
       },
       project: {
         method: 'GET',
-        path: '/api/project/:id',
+        path: '/project/:id',
         description: 'Get full data for a specific project'
+      },
+      metadata: {
+        get: {
+          method: 'GET',
+          path: '/projects/:id/metadata',
+          description: 'Get project metadata'
+        },
+        save: {
+          method: 'POST',
+          path: '/projects/:id/metadata',
+          description: 'Create or update project metadata'
+        },
+        delete: {
+          method: 'DELETE',
+          path: '/projects/:id/metadata',
+          description: 'Delete project metadata'
+        }
       }
     },
-    documentation: 'See docs/api.md for detailed API documentation'
+    documentation: 'See docs/api.md for detailed API documentation',
+    note: 'When accessed through frontend proxy (http://localhost:5173/api/*), the /api prefix is automatically stripped'
   });
 });
 
 // API Routes
-app.use('/api/projects', projectsRouter);
-app.use('/api/project', dataRouter);
+app.use('/projects', projectsRouter);
+app.use('/projects', metadataRouter); // Metadata routes: /projects/:id/metadata
+app.use('/project', dataRouter);
 
 /**
  * Error Handling Middleware

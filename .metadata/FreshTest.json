@@ -1,0 +1,13 @@
+{
+  "description": "Обновлённое описание",
+  "client": "Updated Fresh Client",
+  "tags": [
+    "updated"
+  ],
+  "notes": "Обновление после создания",
+  "status": "completed",
+  "color": "#ef4444",
+  "projectId": "FreshTest",
+  "updatedAt": "2025-10-22T08:00:25.010Z",
+  "createdAt": "2025-10-22T08:00:22.920Z"
+}

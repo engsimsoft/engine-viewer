@@ -1,7 +1,11 @@
 /**
- * TypeScript типы для данных двигателя из .det файлов
- * Основано на анализе тестового файла: Vesta 1.6 IM.det
+ * TypeScript типы для Engine Results Viewer Frontend
+ * Синхронизировано с backend/src/types/engineData.ts
  */
+
+// ====================================================================
+// Backend Types (синхронизировано с backend)
+// ====================================================================
 
 /**
  * Метаданные двигателя из первой строки .det файла
@@ -67,38 +71,6 @@ export interface EngineProject {
 }
 
 /**
- * Структура для API ответа со списком проектов
- */
-export interface ProjectsListResponse {
-  projects: {
-    id: string;               // ID проекта (имя файла без расширения)
-    fileName: string;         // Полное имя файла
-    engineType: string;       // Тип двигателя
-    numCylinders: number;     // Количество цилиндров
-    calculationsCount: number; // Количество расчетов
-  }[];
-}
-
-/**
- * Структура для API ответа с детальными данными проекта
- */
-export interface ProjectDetailsResponse {
-  project: EngineProject;
-}
-
-/**
- * Параметры для фильтрации и выбора данных
- */
-export interface DataQueryParams {
-  calculationIds?: string[];  // ID расчетов для выбора (например ["$1", "$2"])
-  rpmRange?: {                // Диапазон оборотов
-    min: number;
-    max: number;
-  };
-  parameters?: string[];      // Какие параметры вернуть (RPM, Torque, и т.д.)
-}
-
-/**
  * Метаданные проекта (пользовательская информация о проекте)
  * Хранятся в .metadata/<projectId>.json
  */
@@ -131,4 +103,94 @@ export interface ProjectInfo {
   status?: 'active' | 'completed' | 'archived';
   color?: string;
   updatedAt?: string;
+}
+
+// ====================================================================
+// API Response Types
+// ====================================================================
+
+/**
+ * Структура для API ответа со списком проектов
+ */
+export interface ProjectsListResponse {
+  projects: ProjectInfo[];
+}
+
+/**
+ * Структура для API ответа с детальными данными проекта
+ */
+export interface ProjectDetailsResponse {
+  project: EngineProject;
+}
+
+/**
+ * Параметры для фильтрации и выбора данных
+ */
+export interface DataQueryParams {
+  calculationIds?: string[];  // ID расчетов для выбора (например ["$1", "$2"])
+  rpmRange?: {                // Диапазон оборотов
+    min: number;
+    max: number;
+  };
+  parameters?: string[];      // Какие параметры вернуть (RPM, Torque, и т.д.)
+}
+
+// ====================================================================
+// UI-Specific Types
+// ====================================================================
+
+/**
+ * Режим отображения списка проектов
+ */
+export type ViewMode = 'cards' | 'list';
+
+/**
+ * Сортировка списка проектов
+ */
+export type SortBy = 'date' | 'name' | 'calculations' | 'status';
+
+/**
+ * Фильтр по статусу проекта
+ */
+export type FilterStatus = 'all' | 'active' | 'completed' | 'archived';
+
+/**
+ * Состояние загрузки данных
+ */
+export interface LoadingState {
+  isLoading: boolean;
+  error: string | null;
+}
+
+/**
+ * Настройки отображения графиков
+ */
+export interface ChartPreset {
+  id: string;
+  name: string;
+  description: string;
+  parameters: string[];       // Список параметров для отображения
+}
+
+/**
+ * Выбранные расчёты для сравнения (макс. 5)
+ */
+export interface SelectedCalculations {
+  projectId: string;
+  calculationIds: string[];   // Максимум 5
+}
+
+/**
+ * Формат экспорта
+ */
+export type ExportFormat = 'png' | 'svg' | 'csv' | 'xlsx';
+
+/**
+ * Опции экспорта графика
+ */
+export interface ExportOptions {
+  format: ExportFormat;
+  fileName: string;
+  width?: number;
+  height?: number;
 }

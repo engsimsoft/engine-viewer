@@ -10,10 +10,219 @@
 ## [Unreleased]
 
 ### Planned
-- Frontend базовая структура (Vite + React + TypeScript)
-- API клиент (axios)
-- Базовые компоненты (Layout, Navbar, Loading, Error)
-- Первый пресет графиков (Мощность и крутящий момент)
+- React Router setup
+- HomePage - режим карточки (ProjectCard компонент)
+- MetadataDialog - диалог редактирования метаданных
+- Visualization page (графики ECharts)
+
+---
+
+## [1.2.0] - 2025-10-22
+
+### Added - Frontend Setup (Этап 4) ✅
+- **Vite + React + TypeScript проект**:
+  - Frontend проект создан с шаблоном `react-ts`
+  - 237 зависимостей установлено, 0 уязвимостей
+  - Dev server работает на `http://localhost:5173`
+
+- **TailwindCSS v4 + Vite plugin**:
+  - Установлен `@tailwindcss/vite` (новый подход 2025)
+  - Настроена интеграция через Vite plugin (не PostCSS)
+  - `index.css` обновлён на `@import "tailwindcss";`
+  - CSS переменные для светлой/тёмной темы настроены автоматически
+
+- **TypeScript Path Aliases**:
+  - Настроен алиас `@/*` → `./src/*`
+  - Обновлены `tsconfig.json` и `tsconfig.app.json`
+  - Обновлен `vite.config.ts` для резолва путей
+  - Импорты вида `@/components/ui/button` работают корректно
+
+- **Vite Proxy для API**:
+  - Настроен proxy `/api` → `http://localhost:3000`
+  - Добавлен `rewrite` для удаления префикса `/api` перед проксированием
+  - Backend routes обновлены (убран префикс `/api`)
+  - Health check и projects API работают корректно через proxy
+
+- **shadcn/ui интеграция**:
+  - Инициализирован с цветовой схемой "Neutral"
+  - Создан `components.json` конфигурация
+  - Создан `src/lib/utils.ts` с `cn()` утилитой
+  - Установлено 8 базовых компонентов:
+    - Button, Card, Input, Dialog
+    - Select, Badge, Separator, Sonner (вместо устаревшего Toast)
+
+- **Структура папок**:
+  ```
+  frontend/src/
+  ├── components/
+  │   ├── ui/              ← shadcn/ui компоненты (8 файлов)
+  │   ├── layout/          ← для Layout, Header
+  │   ├── shared/          ← общие компоненты
+  │   ├── projects/        ← ProjectCard, ProjectList
+  │   └── metadata/        ← MetadataDialog
+  ├── pages/               ← HomePage, ProjectPage
+  ├── hooks/               ← custom hooks
+  ├── types/               ← TypeScript типы
+  ├── api/                 ← API client
+  └── lib/                 ← shadcn utils
+  ```
+
+- **TypeScript типы** (`src/types/index.ts`):
+  - Синхронизировано с `backend/src/types/engineData.ts`:
+    - EngineMetadata, DataPoint, Calculation, EngineProject
+    - ProjectMetadata, ProjectInfo
+  - API Response типы:
+    - ProjectsListResponse, ProjectDetailsResponse, DataQueryParams
+  - UI-specific типы:
+    - ViewMode, SortBy, FilterStatus
+    - LoadingState, ChartPreset, SelectedCalculations
+    - ExportFormat, ExportOptions
+
+- **API клиент** (`src/api/client.ts`):
+  - Axios instance с базовой конфигурацией (`baseURL: '/api'`)
+  - Timeout: 10 секунд
+  - Кастомный класс `ApiError` для обработки ошибок
+  - Реализовано 6 методов:
+    - `getProjects()` - список всех проектов
+    - `getProject(id)` - детальные данные проекта
+    - `getMetadata(id)` - метаданные проекта (null если нет)
+    - `saveMetadata(id, metadata)` - создание/обновление метаданных
+    - `deleteMetadata(id)` - удаление метаданных
+    - `healthCheck()` - проверка соединения с backend
+
+- **Тестовое приложение** (`src/App.tsx`):
+  - Демонстрационный UI для проверки интеграции
+  - API Health Check индикатор
+  - Кнопка загрузки проектов с отображением результатов
+  - Использует все установленные shadcn/ui компоненты
+  - Полностью типизировано TypeScript
+
+### Testing - Frontend Setup
+- ✅ Backend запущен на `http://localhost:3000`:
+  - Health check: `{"status":"ok","uptime":217s}` ✅
+  - `/api/projects` возвращает 2 проекта (BMW M42, Vesta 1.6 IM) ✅
+- ✅ Frontend запущен на `http://localhost:5173`:
+  - Vite dev server стартовал за 597ms ✅
+  - TailwindCSS компилируется корректно ✅
+  - shadcn/ui компоненты импортируются без ошибок ✅
+  - TypeScript path aliases работают ✅
+- ✅ API интеграция:
+  - Proxy работает (frontend → backend) ✅
+  - API клиент успешно выполняет запросы ✅
+  - Типы полностью совместимы с backend ✅
+
+### Performance - Frontend Setup
+- **Vite dev server start**: 597ms (очень быстро)
+- **npm install**: 47s для 237 пакетов
+- **shadcn/ui init**: ~10s
+- **TypeScript compilation**: мгновенная (Vite HMR)
+
+### Fixed
+- **Vite Proxy Issue** (22 окт, 11:44 UTC):
+  - Проблема: Прокси не работал, browser показывал 404 на `/api/health`
+  - Причина: Прокси НЕ удалял префикс `/api`, backend получал `/api/health` вместо `/health`
+  - Решение из официальной документации Vite:
+    - Добавлен `rewrite: (path) => path.replace(/^\/api/, '')` в vite.config.ts
+    - Обновлены роуты в backend/src/server.js (убран префикс `/api`)
+  - Результат: Health check и projects API работают корректно ✅
+  - Источник решения: https://vite.dev/config/server-options.html (WebFetch)
+
+### Documentation
+- Roadmap обновлён:
+  - Этап 4 отмечен как завершённый (все фичи 1-5) ✅
+  - Прогресс: ~58/60+ задач (96%)
+  - Следующее: Этап 5 - HomePage с карточками проектов
+- CHANGELOG.md обновлён (эта запись)
+
+---
+
+## [1.1.0] - 2025-10-22
+
+### Added
+- **Project Metadata API** (Этапы 3.5.1 и 3.5.2 завершены):
+  - `backend/src/services/metadataService.js` (200+ строк) - полное управление метаданными
+  - `backend/src/routes/metadata.js` (150+ строк) - REST endpoints для метаданных
+  - Хранение метаданных в `.metadata/*.json` файлах
+  - Интеграция метаданных в `GET /api/projects` endpoint
+
+- **Metadata Service функции**:
+  - `getMetadata(projectId)` - получить метаданные проекта
+  - `saveMetadata(projectId, metadata)` - создать/обновить метаданные
+  - `deleteMetadata(projectId)` - удалить метаданные
+  - `getAllMetadata()` - получить все метаданные (Map)
+  - `hasMetadata(projectId)` - проверить существование
+  - `ensureMetadataDir()` - создать `.metadata/` директорию
+  - Автоматическое управление timestamps (createdAt, updatedAt)
+
+- **API endpoints (3 новых)**:
+  - `GET /api/projects/:id/metadata` - получить метаданные проекта (404 если нет)
+  - `POST /api/projects/:id/metadata` - создать/обновить метаданные с валидацией
+  - `DELETE /api/projects/:id/metadata` - удалить метаданные (204 No Content)
+
+- **TypeScript типы** (в backend/src/types/engineData.ts):
+  - `ProjectMetadata` - метаданные проекта (description, client, tags, notes, status, color, timestamps)
+  - `ProjectInfo` - расширенная информация о проекте (комбинация .det данных + метаданных)
+
+- **Валидация метаданных**:
+  - Обязательные поля: description, client, tags, notes, status, color
+  - Валидация status (active/completed/archived)
+  - Валидация типов (tags должен быть массив)
+  - 400 Bad Request с понятными сообщениями об ошибках
+
+### Changed
+- **backend/src/routes/projects.js**:
+  - Добавлен импорт `getAllMetadata` из metadataService
+  - GET /api/projects теперь автоматически включает метаданные для каждого проекта
+  - Поле `metadata` добавлено к каждому проекту (`null` если метаданные не созданы)
+  - Обновлён JSDoc тип `ProjectListItem` (добавлено поле `metadata`)
+
+- **Timestamp management**:
+  - `createdAt` устанавливается при первом создании метаданных
+  - `updatedAt` автоматически обновляется при каждом сохранении
+  - `createdAt` сохраняется при обновлении существующих метаданных
+
+### Fixed
+- Исправлена ошибка сохранения `createdAt` при обновлении метаданных:
+  - **Было**: пытались взять `createdAt` из входящего объекта (которого там нет)
+  - **Стало**: читаем существующие метаданные через `getMetadata()` и сохраняем `createdAt`
+
+### Performance
+- **getAllMetadata()**: ~2-5ms для загрузки всех метаданных из `.metadata/`
+- **GET /api/projects** с метаданными: ~10-12ms (включая загрузку метаданных)
+- Эффективное кэширование (Map) для метаданных в памяти
+- Graceful error handling (пропускает невалидные JSON файлы)
+
+### Testing
+- ✅ GET /api/projects/:id/metadata:
+  - Получение существующих метаданных (200) ✅
+  - Получение несуществующих метаданных (404) ✅
+- ✅ POST /api/projects/:id/metadata:
+  - Создание новых метаданных (created: true) ✅
+  - Обновление существующих метаданных (created: false) ✅
+  - Валидация missing fields (400) ✅
+  - Валидация invalid status (400) ✅
+  - Сохранение createdAt при обновлении ✅
+- ✅ DELETE /api/projects/:id/metadata:
+  - Удаление существующих метаданных (204 No Content) ✅
+  - Удаление несуществующих метаданных (404) ✅
+- ✅ GET /api/projects интеграция:
+  - Метаданные автоматически загружаются ✅
+  - Проекты без метаданных имеют `metadata: null` ✅
+
+### Documentation
+- Roadmap обновлён:
+  - Этап 3.5.1 отмечен как завершённый (1 час 10 минут)
+  - Этап 3.5.2 отмечен как завершённый (40 минут)
+  - Прогресс: ~47/60+ задач (78%)
+- CHANGELOG.md обновлён (эта запись)
+- Roadmap версия: 2.0 (переписан по принципам документа "1.8 Планирование и Roadmap.md")
+
+### Notes
+- **Backend метаданных полностью готов для Frontend** ✅
+- `.metadata/` директория создаётся автоматически при первом сохранении
+- Метаданные опциональные - проекты без метаданных работают нормально
+- JSON файлы метаданных имеют красивое форматирование (indent: 2)
+- Следующий этап: Frontend Setup + shadcn/ui
 
 ---
 

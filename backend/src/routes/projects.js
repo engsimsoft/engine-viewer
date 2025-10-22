@@ -10,6 +10,7 @@
 import { Router } from 'express';
 import { scanProjects, getDirectoryStats, formatFileSize } from '../services/fileScanner.js';
 import { getConfig, getDataFolderPath } from '../config.js';
+import { getAllMetadata } from '../services/metadataService.js';
 
 const router = Router();
 
@@ -25,6 +26,7 @@ const router = Router();
  * @property {string} fileSizeFormatted - Human-readable file size (e.g., "156.3 KB")
  * @property {string} lastModified - ISO 8601 date string of last modification
  * @property {string} created - ISO 8601 date string of file creation
+ * @property {Object|null} metadata - Project metadata (optional, null if not set)
  */
 
 /**
@@ -99,6 +101,9 @@ router.get('/', async (req, res, next) => {
     // Get directory statistics
     const dirStats = await getDirectoryStats(dataFolderPath, config.files.extensions);
 
+    // Load all metadata
+    const allMetadata = await getAllMetadata();
+
     // Transform projects to API response format
     const projectsData = projects.map(project => ({
       id: project.id,
@@ -110,7 +115,8 @@ router.get('/', async (req, res, next) => {
       fileSize: project.fileSize,
       fileSizeFormatted: formatFileSize(project.fileSize),
       lastModified: project.modifiedAt,
-      created: project.createdAt
+      created: project.createdAt,
+      metadata: allMetadata.get(project.fileName.replace('.det', '')) || null
     }));
 
     // Sort by last modified date (newest first)

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testAPI()">Test Backend Connection</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+
+            try {
+                // Test direct backend
+                const directResponse = await fetch('http://localhost:3000/health');
+                const directData = await directResponse.json();
+                resultEl.textContent += '\n✅ Direct backend (localhost:3000): ' + JSON.stringify(directData, null, 2);
+
+                // Test through proxy
+                const proxyResponse = await fetch('/api/health');
+                const proxyData = await proxyResponse.json();
+                resultEl.textContent += '\n\n✅ Through Vite proxy (/api): ' + JSON.stringify(proxyData, null, 2);
+
+                resultEl.textContent += '\n\n🎉 SUCCESS! Both work!';
+            } catch (error) {
+                resultEl.textContent += '\n\n❌ ERROR: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

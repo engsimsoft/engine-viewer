@@ -2,8 +2,9 @@
 
 **Engine Results Viewer REST API**
 
-**Версия:** 1.0.0 (21 октября 2025)
-**Base URL:** `http://localhost:3000`
+**Версия:** 1.2.0 (22 октября 2025)
+**Base URL (Backend):** `http://localhost:3000`
+**Base URL (Frontend Proxy):** `http://localhost:5173/api` → проксируется на backend
 **Статус:** ✅ Реализовано и протестировано
 
 ---
@@ -157,14 +158,20 @@ curl http://localhost:3000/api
 
 Get a list of all available engine calculation projects.
 
-**Endpoint:** `GET /api/projects`
+**Endpoint:** `GET /projects`
 
 **Query Parameters:** None
 
-**Request:**
+**Request (Direct to Backend):**
 ```bash
-curl http://localhost:3000/api/projects
+curl http://localhost:3000/projects
 ```
+
+**Request (Through Frontend Proxy):**
+```bash
+curl http://localhost:5173/api/projects
+```
+Note: Frontend proxy automatically strips `/api` prefix before forwarding to backend.
 
 **Response:**
 ```json
@@ -248,16 +255,21 @@ curl http://localhost:3000/api/projects
 
 Get full calculation data for a specific project by ID.
 
-**Endpoint:** `GET /api/project/:id`
+**Endpoint:** `GET /project/:id`
 
 **URL Parameters:**
 - `id` (string, required): Project identifier (normalized slug)
   - Format: lowercase letters, numbers, hyphens only
   - Examples: "bmw-m42", "vesta-16-im"
 
-**Request:**
+**Request (Direct to Backend):**
 ```bash
-curl http://localhost:3000/api/project/vesta-16-im
+curl http://localhost:3000/project/vesta-16-im
+```
+
+**Request (Through Frontend Proxy):**
+```bash
+curl http://localhost:5173/api/project/vesta-16-im
 ```
 
 **Response:**
@@ -844,6 +856,135 @@ app.use(cors({
 
 ---
 
+## Project Metadata API
+
+**Added in v1.1.0** - Manage project metadata (description, client, tags, notes, status, color).
+
+### Metadata Structure
+
+```typescript
+interface ProjectMetadata {
+  projectId: string;
+  description: string;
+  client: string;
+  tags: string[];
+  notes: string;
+  status: 'active' | 'completed' | 'archived';
+  color: string;          // HEX color
+  createdAt: string;      // ISO 8601
+  updatedAt: string;      // ISO 8601
+}
+```
+
+### GET /projects/:id/metadata
+
+Get metadata for a specific project.
+
+**Request (Direct to Backend):**
+```bash
+curl http://localhost:3000/projects/vesta-16-im/metadata
+```
+
+**Request (Through Frontend Proxy):**
+```bash
+curl http://localhost:5173/api/projects/vesta-16-im/metadata
+```
+
+**Response:**
+```json
+{
+  "metadata": {
+    "projectId": "Vesta 1.6 IM",
+    "description": "Калибровка двигателя Vesta 1.6 IM",
+    "client": "АвтоВАЗ",
+    "tags": ["vesta", "production"],
+    "notes": "Базовая калибровка",
+    "status": "active",
+    "color": "#3b82f6",
+    "createdAt": "2025-10-22T10:00:00.000Z",
+    "updatedAt": "2025-10-22T11:00:00.000Z"
+  }
+}
+```
+
+**Status codes:** 200 (OK), 404 (Not found), 500 (Error)
+
+### POST /projects/:id/metadata
+
+Create or update project metadata.
+
+**Request (Direct to Backend):**
+```bash
+curl -X POST http://localhost:3000/projects/vesta-16-im/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Updated description", "status": "active"}'
+```
+
+**Request (Through Frontend Proxy):**
+```bash
+curl -X POST http://localhost:5173/api/projects/vesta-16-im/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Updated description", "status": "active"}'
+```
+
+**Request Body:**
+```json
+{
+  "description": "Калибровка двигателя",
+  "client": "АвтоВАЗ",
+  "tags": ["vesta", "production"],
+  "notes": "Базовая калибровка",
+  "status": "active",
+  "color": "#3b82f6"
+}
+```
+
+**Response:**
+```json
+{
+  "metadata": { /* ProjectMetadata */ },
+  "created": true  // true if created, false if updated
+}
+```
+
+**Status codes:** 200 (OK), 400 (Bad request), 500 (Error)
+
+### DELETE /projects/:id/metadata
+
+Delete project metadata.
+
+**Request (Direct to Backend):**
+```bash
+curl -X DELETE http://localhost:3000/projects/vesta-16-im/metadata
+```
+
+**Request (Through Frontend Proxy):**
+```bash
+curl -X DELETE http://localhost:5173/api/projects/vesta-16-im/metadata
+```
+
+**Response:** 204 No Content (success), 404 (Not found), 500 (Error)
+
+**curl examples (Backend):**
+```bash
+# Get metadata
+curl http://localhost:3000/projects/vesta-16-im/metadata
+
+# Create/update metadata
+curl -X POST http://localhost:3000/projects/vesta-16-im/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"description":"Test","client":"Client","tags":[],"notes":"","status":"active","color":"#000"}'
+
+# Delete metadata
+curl -X DELETE http://localhost:3000/projects/vesta-16-im/metadata
+```
+
+**Storage:** Metadata stored in `.metadata/<projectId>.json` files.
+
+**Integration:** GET /projects automatically includes `metadata` field for each project.
+
+---
+
 ## Future Enhancements
 
 Possible endpoints for future versions:
@@ -878,8 +1019,9 @@ backend/
 │   ├── server.js           # Express server
 │   ├── config.js           # Configuration loader
 │   ├── routes/
-│   │   ├── projects.js     # GET /api/projects
-│   │   └── data.js         # GET /api/project/:id
+│   │   ├── projects.js     # GET /projects
+│   │   ├── data.js         # GET /project/:id
+│   │   └── metadata.js     # Metadata CRUD endpoints
 │   └── services/
 │       ├── fileParser.js   # .det file parser
 │       └── fileScanner.js  # Directory scanner
@@ -943,4 +1085,4 @@ backend/
 
 **API fully implemented and tested! 🚀**
 
-**Last updated:** 21 октября 2025
+**Last updated:** 22 октября 2025 (added Project Metadata API v1.1.0)
