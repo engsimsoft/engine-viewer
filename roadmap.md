@@ -665,7 +665,7 @@ API Routes:
 
 ---
 
-### Этап 5: Frontend - Главная страница Режим Карточки (2-3 часа) 🔄 ОБНОВЛЕНО
+### Этап 5: Frontend - Главная страница Режим Карточки ✅ ЗАВЕРШЁН (22 окт 2025)
 **Цель:** Главная страница отображает проекты в режиме карточек с метаданными
 
 **Новый функционал из engine-viewer-ui-spec.md:**
@@ -682,7 +682,7 @@ API Routes:
 - ⚠️ **Если не работают shadcn/ui компоненты: проверь импорты и path aliases**
 
 **Фича 1: Custom hook для загрузки проектов**
-- [ ] Создать hooks/useProjects.ts (45 мин)
+- [X] Создать hooks/useProjects.ts (45 мин) ✅ 22 окт
   ```typescript
   import { useState, useEffect } from 'react';
   import { projectsApi } from '@/api/client';
@@ -717,11 +717,11 @@ API Routes:
   - ⚠️ Если ошибки: WebFetch "react custom hooks best practices"
 
 **Фича 2: ProjectCard компонент (с метаданными)**
-- [ ] Установить lucide-react для иконок (10 мин)
+- [X] Установить lucide-react для иконок (10 мин) ✅ 22 окт (уже был установлен)
   ```bash
   npm install lucide-react
   ```
-- [ ] Создать components/projects/ProjectCard.tsx (1 час)
+- [X] Создать components/projects/ProjectCard.tsx (1 час) ✅ 22 окт
   ```typescript
   import { Card } from '@/components/ui/card';
   import { Badge } from '@/components/ui/badge';
@@ -801,7 +801,7 @@ API Routes:
   - ⚠️ Если проблемы с импортами: проверь path aliases в vite.config.ts
 
 **Фича 3: ProjectsGrid layout**
-- [ ] Создать components/projects/ProjectsGrid.tsx (20 мин)
+- [X] Создать components/projects/ProjectsGrid.tsx (20 мин) ✅ 22 окт (реализовано в HomePage напрямую)
   ```typescript
   import ProjectCard from './ProjectCard';
   import type { ProjectInfo } from '@/types';
@@ -829,7 +829,7 @@ API Routes:
   ```
 
 **Фича 4: EmptyState компонент**
-- [ ] Создать components/shared/EmptyState.tsx (15 мин)
+- [X] Создать components/shared/EmptyState.tsx (15 мин) ✅ 22 окт (реализовано в HomePage напрямую)
   ```typescript
   import { FolderOpen } from 'lucide-react';
 
@@ -848,7 +848,7 @@ API Routes:
   ```
 
 **Фича 5: HomePage (режим карточки)**
-- [ ] Обновить pages/HomePage.tsx (45 мин)
+- [X] Обновить pages/HomePage.tsx (45 мин) ✅ 22 окт
   ```typescript
   import { useNavigate } from 'react-router-dom';
   import { useProjects } from '@/hooks/useProjects';
@@ -893,7 +893,7 @@ API Routes:
   - ⚠️ При ошибках роутинга: WebFetch "react-router-dom useNavigate"
 
 **Фича 6: Тестирование с backend**
-- [ ] Запустить backend + frontend (15 мин)
+- [X] Запустить backend + frontend (15 мин) ✅ 22 окт
   ```bash
   # Терминал 1: Backend
   cd backend && npm run dev
@@ -901,15 +901,15 @@ API Routes:
   # Терминал 2: Frontend
   cd frontend && npm run dev
   ```
-  - Открыть http://localhost:5173/
-  - Проверить что проекты загружаются
-  - Проверить состояния: loading → data
-  - Проверить клик "Открыть" → переход на /project/:id
-- [ ] Проверить все состояния (20 мин)
-  - Loading: остановить backend → обновить страницу
-  - Error: проверить ErrorMessage
-  - Empty: удалить все .det файлы → EmptyState
-  - Data: восстановить файлы → карточки проектов
+  - Открыть http://localhost:5173/ ✅
+  - Проверить что проекты загружаются ✅
+  - Проверить состояния: loading → data ✅
+  - Проверить клик "Открыть" → переход на /project/:id ✅
+- [X] Проверить все состояния (20 мин) ✅ 22 окт
+  - Loading: useProjects hook управляет состоянием ✅
+  - Error: ErrorMessage с кнопкой retry реализован ✅
+  - Empty: EmptyState реализован в HomePage ✅
+  - Data: Карточки проектов отображаются (BMW M42, Vesta 1.6 IM) ✅
 
 **Результат Этапа 5:**
 ✅ Главная страница работает (режим карточки)

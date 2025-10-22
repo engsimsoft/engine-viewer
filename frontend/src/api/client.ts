@@ -61,7 +61,7 @@ function handleApiError(error: unknown): never {
 export async function getProjects(): Promise<ProjectInfo[]> {
   try {
     const { data } = await api.get<ProjectsListResponse>('/projects');
-    return data.projects;
+    return data.data;
   } catch (error) {
     handleApiError(error);
   }

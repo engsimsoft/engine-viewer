@@ -113,7 +113,18 @@ export interface ProjectInfo {
  * Структура для API ответа со списком проектов
  */
 export interface ProjectsListResponse {
-  projects: ProjectInfo[];
+  success: boolean;
+  data: ProjectInfo[];
+  meta: {
+    total: number;
+    scannedAt: number;
+    scanDuration: number;
+    directory: {
+      path: string;
+      totalSize: number;
+      totalSizeFormatted: string;
+    };
+  };
 }
 
 /**
