@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 2 - Core UI Components (In Progress)
-- **Progress:** 28/84 tasks (33%)
-- **Next Task:** Phase 2 - Task 2.2.1 (Create Settings Popover)
+- **Progress:** 33/84 tasks (39%)
+- **Next Task:** Phase 2 - Task 2.3.1 (Restructure Left Panel)
 
 ---
 
@@ -434,14 +434,14 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/SettingsPopover.tsx`
 
 **Tasks:**
-- [ ] 2.2.1 Create popover component (1.5 hours)
+- [X] 2.2.1 Create popover component (1.5 hours)
   - Use Radix Popover primitive
   - Trigger: Settings icon in Header
   - Position: bottom-right
   - Width: 320px
   - Close on click outside, ESC key, or [×] button
 
-- [ ] 2.2.2 Add Units section (1 hour)
+- [X] 2.2.2 Add Units section (1 hour)
   ```tsx
   // 🌍 Units
   // Radio group with 3 options:
@@ -452,7 +452,7 @@ const CALCULATION_COLORS = [
   // Default: 'si'
   ```
 
-- [ ] 2.2.3 Add Theme section (30 min)
+- [X] 2.2.3 Add Theme section (30 min)
   ```tsx
   // 🎨 Theme
   // Radio group: ⦿ Light  ○ Dark
@@ -460,7 +460,7 @@ const CALCULATION_COLORS = [
   // Default: 'light'
   ```
 
-- [ ] 2.2.4 Add Chart section (1 hour)
+- [X] 2.2.4 Add Chart section (1 hour)
   ```tsx
   // 📊 Chart
   // Checkbox: ☑ Animation Enabled
@@ -469,7 +469,7 @@ const CALCULATION_COLORS = [
   // onChange: updateChartSettings(...)
   ```
 
-- [ ] 2.2.5 Implement instant apply (30 min)
+- [X] 2.2.5 Implement instant apply (30 min)
   - All changes immediately update store
   - NO "OK" or "Save" button needed
   - Settings persist to localStorage via Zustand middleware

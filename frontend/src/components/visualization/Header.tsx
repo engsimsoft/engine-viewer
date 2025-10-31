@@ -16,7 +16,7 @@
 import { ArrowLeft, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAppStore } from '@/stores/appStore';
+import { SettingsPopover } from './SettingsPopover';
 
 interface HeaderProps {
   /** Project name to display (e.g., "Vesta 1.6 IM") */
@@ -51,20 +51,12 @@ export function Header({
   calculationsCount,
 }: HeaderProps) {
   const navigate = useNavigate();
-  const toggleSettings = useAppStore((state) => state.toggleSettings);
 
   /**
    * Navigate back to projects list
    */
   const handleBackClick = () => {
     navigate('/');
-  };
-
-  /**
-   * Open Settings popover
-   */
-  const handleSettingsClick = () => {
-    toggleSettings();
   };
 
   return (
@@ -103,15 +95,16 @@ export function Header({
 
           {/* Right: Settings Button */}
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSettingsClick}
-              className="hover:bg-accent"
-              aria-label="Open settings"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+            <SettingsPopover>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-accent"
+                aria-label="Open settings"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </SettingsPopover>
           </div>
         </div>
       </div>
