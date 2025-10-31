@@ -196,10 +196,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
         },
       },
       legend: {
-        ...baseConfig.legend,
-        data: legendData,
-        top: 40,
-        type: 'scroll', // Scroll if many legends
+        show: false,
       },
       xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4'),

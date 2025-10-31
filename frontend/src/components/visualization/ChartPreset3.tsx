@@ -256,9 +256,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         },
       },
       legend: {
-        ...baseConfig.legend,
-        data: legendData,
-        top: 40,
+        show: false,
       },
       xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: createYAxis(`Temperature (${tempUnit})`, 'left', '#d62728'),

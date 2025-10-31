@@ -278,10 +278,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         },
       },
       legend: {
-        ...baseConfig.legend,
-        data: legendData,
-        top: 40,
-        type: 'scroll',
+        show: false,
       },
       xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: createYAxis(yAxisName, 'left', '#2ca02c'),

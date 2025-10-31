@@ -221,9 +221,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         },
       },
       legend: {
-        ...baseConfig.legend,
-        data: legendData,
-        top: 40,
+        show: false,
       },
       xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: [
