@@ -21,7 +21,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PresetSelector, type ChartPresetType } from './PresetSelector';
+import { PresetSelector } from './PresetSelector';
 import { PrimarySection } from './PrimarySection';
 import { cn } from '@/lib/utils';
 
@@ -50,20 +50,15 @@ function ComparisonSectionPlaceholder() {
 // Main Component
 // ====================================================================
 
-interface LeftPanelProps {
-  /** Active chart preset */
-  activePreset: ChartPresetType;
-  /** Callback when preset changes */
-  onPresetChange: (preset: ChartPresetType) => void;
-}
-
 /**
  * Left Panel - Main Control Panel for Visualization
  *
  * Contains three sections:
- * 1. Primary Calculation selector (to be implemented in Section 2.4)
- * 2. Chart Presets selector (existing component)
- * 3. Comparison calculations (to be implemented in Section 2.6)
+ * 1. Primary Calculation selector (Section 2.4 - PrimarySection)
+ * 2. Chart Presets selector (Section 2.5 - PresetSelector)
+ * 3. Comparison calculations (Section 2.6 - ComparisonSection)
+ *
+ * All sections connected to Zustand store - no props needed.
  *
  * Responsive behavior:
  * - Desktop (lg): Always visible, fixed 320px width
@@ -72,13 +67,10 @@ interface LeftPanelProps {
  *
  * @example
  * ```tsx
- * <LeftPanel
- *   activePreset={activePreset}
- *   onPresetChange={setActivePreset}
- * />
+ * <LeftPanel />
  * ```
  */
-export function LeftPanel({ activePreset, onPresetChange }: LeftPanelProps) {
+export function LeftPanel() {
   // State for tablet/mobile collapsed state
   const [isOpen, setIsOpen] = useState(false);
 
@@ -166,16 +158,7 @@ export function LeftPanel({ activePreset, onPresetChange }: LeftPanelProps) {
 
           {/* Section 2: Chart Presets */}
           <section aria-label="Chart presets selector">
-            <PresetSelector
-              activePreset={activePreset}
-              onPresetChange={(preset) => {
-                onPresetChange(preset);
-                // Auto-close on mobile after selection
-                if (window.innerWidth < 1024) {
-                  closePanel();
-                }
-              }}
-            />
+            <PresetSelector />
           </section>
 
           {/* Section 3: Comparison Calculations */}

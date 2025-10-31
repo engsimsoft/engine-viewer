@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 2 - Core UI Components (In Progress)
-- **Progress:** 39/84 tasks (46%)
-- **Next Task:** Phase 2 - Task 2.5.1 (Update Chart Presets Component)
+- **Progress:** 41/84 tasks (49%)
+- **Next Task:** Phase 2 - Task 2.6.1 (Create Comparison Section Component)
 
 ---
 
@@ -548,7 +548,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/PresetSelector.tsx`
 
 **Tasks:**
-- [ ] 2.5.1 Update styling to match spec (1 hour)
+- [X] 2.5.1 Update styling to match spec (1 hour)
   ```tsx
   // 💪 Chart Presets
   //
@@ -560,7 +560,7 @@ const CALCULATION_COLORS = [
   // Hover: Light blue bg
   ```
 
-- [ ] 2.5.2 Connect to Zustand store (30 min)
+- [X] 2.5.2 Connect to Zustand store (30 min)
   - Read: selectedPreset from store
   - Write: setSelectedPreset(preset)
 
@@ -1528,6 +1528,7 @@ const CALCULATION_COLORS = [
   - Section 2.2 - Create Settings Popover (5 tasks) ✅
   - Section 2.3 - Restructure Left Panel (2 tasks) ✅
   - Section 2.4 - Create Primary Section Component (4 tasks) ✅
+  - Section 2.5 - Update Chart Presets Component (2 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1535,8 +1536,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 39/84 tasks complete (46%)**
-- **Next: Section 2.5 - Update Chart Presets Component**
+- **Progress: 41/84 tasks complete (49%)**
+- **Next: Section 2.6 - Create Comparison Section Component**
 
 ---
 
