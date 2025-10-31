@@ -4,6 +4,7 @@ import { useSelectedCalculations } from '@/hooks/useSelectedCalculations';
 import { useAppStore } from '@/stores/appStore';
 import { Header } from '@/components/visualization/Header';
 import { LeftPanel } from '@/components/visualization/LeftPanel';
+import { PrimarySelectionModal } from '@/components/visualization/PrimarySelectionModal';
 import { ChartPreset1 } from '@/components/visualization/ChartPreset1';
 import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
 import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
@@ -150,6 +151,9 @@ export default function ProjectPage() {
           </div>
         </main>
       </div>
+
+      {/* Modals */}
+      <PrimarySelectionModal />
     </div>
   );
 }
