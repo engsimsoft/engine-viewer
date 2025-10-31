@@ -20,6 +20,7 @@ import {
   getTorqueUnit,
 } from '@/lib/unitsConversion';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
+import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -52,11 +53,17 @@ interface ChartPreset1Props {
  * ```
  */
 export function ChartPreset1({ calculations }: ChartPreset1Props) {
-  // Hook для экспорта графика
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('power-torque-chart');
-
   // Get units from store
   const units = useAppStore((state) => state.units);
+
+  // Generate dynamic filename for export
+  const exportFilename = useMemo(
+    () => generateChartFilename(calculations, 1),
+    [calculations]
+  );
+
+  // Hook для экспорта графика
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
 
   // Live cursor state
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);

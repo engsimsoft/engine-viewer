@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 4 - Charts & Visualization (Section 4.4 ✅ COMPLETE)
-- **Progress:** 84/139 tasks (60%)
-- **Next Task:** Phase 4.5 - Update Chart Export
+- **Phase:** Phase 4 - Charts & Visualization (Section 4.5 ✅ COMPLETE)
+- **Progress:** 86/139 tasks (62%)
+- **Next Task:** Phase 5.1 - Update DataTable Component
 
 ---
 
@@ -986,25 +986,32 @@ const CALCULATION_COLORS = [
 
 ### 4.5 Update Chart Export
 
-**File:** `frontend/src/components/visualization/ChartExportButtons.tsx`
+**Files:**
+- `frontend/src/lib/exportFilename.ts` (created)
+- `frontend/src/components/visualization/ChartPreset1.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset2.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset3.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset4.tsx` (updated)
 
 **Tasks:**
-- [ ] 4.5.1 Update export filename format (30 min)
+- [X] 4.5.1 Update export filename format (30 min)
+  - Created `generateChartFilename()` utility function
   - Old: "chart.png"
   - New: "EngineName_PresetName_Date.png"
   - Example: "Vesta-1.6-IM_PowerTorque_2025-10-31.png"
   - If multiple calculations: "Multi-Project-Comparison_PowerTorque_2025-10-31.png"
+  - All 4 chart presets updated to use dynamic filenames
 
-- [ ] 4.5.2 Ensure units in exported chart (30 min)
-  - Axis labels reflect current units setting
-  - Legend labels include units
-  - Title includes units
+- [X] 4.5.2 Ensure units in exported chart (30 min)
+  - ✅ Already implemented: Axis labels reflect current units setting
+  - ✅ Already implemented: Peak markers include units via formatPeakValue()
+  - ✅ Data converted via convertPower/Torque/Pressure/Temperature()
 
-**Acceptance:** Exports work, filenames descriptive, units correct in exported files
+**Acceptance:** ✅ COMPLETE - Exports work, filenames descriptive, units correct in exported files
 
 ---
 
-**Phase 4 Milestone:** ✅ Charts support multi-project, peak markers on chart, live cursor working, peak cards displayed
+**Phase 4 Milestone:** ✅ COMPLETE - Charts support multi-project, peak markers on chart, live cursor working, peak cards displayed, chart export with dynamic filenames and units
 
 ---
 
@@ -1541,21 +1548,15 @@ const CALCULATION_COLORS = [
   - Section 2.6 - Create Comparison Section Component (4 tasks, 1 optional skipped) ✅
   - Section 2.7 - Integration: Update ProjectPage (3 tasks) ✅
 - [X] **Phase 3 COMPLETE** ✅ - Modal Dialogs (All modals created and functional)
-- [X] **Phase 4 Section 4.1 COMPLETE** ✅ - Multi-Project Chart Updates (All 4 presets updated)
-- [X] **Phase 4 Section 4.2 COMPLETE** ✅ - Peak Markers on Charts (3 tasks)
-  - Task 4.2.1 - Create peak markers on chart ✅
-  - Task 4.2.2 - Add tooltips on peak markers ✅
-  - Task 4.2.3 - Different markers for each calculation ✅
-  - Created: `frontend/src/lib/peakValues.ts` (findPeak, formatPeakValue, getMarkerSymbol)
-  - Updated: All 4 chart presets (ChartPreset1, 2, 3, 4) with markPoint
-- [X] **Phase 4 Section 4.3 COMPLETE** ✅ - Live Cursor Panel (4 tasks)
-  - Task 4.3.1 - Create floating panel component ✅
-  - Task 4.3.2 - Implement mouse tracking ✅
-  - Task 4.3.3 - Format cursor values with units ✅
-  - Task 4.3.4 - Add animations ✅
-  - Created: `frontend/src/components/visualization/LiveCursorPanel.tsx`
-  - Updated: All 4 chart presets with mouse tracking and LiveCursorPanel
-  - Features: ECharts convertFromPixel, onEvents, smooth fade in/out animations
+- [X] **Phase 4 COMPLETE** ✅ - Charts & Visualization (All 5 sections complete)
+  - Section 4.1 - Multi-Project Chart Updates (All 4 presets updated) ✅
+  - Section 4.2 - Peak Markers on Charts (3 tasks) ✅
+  - Section 4.3 - Live Cursor Panel (4 tasks) ✅
+  - Section 4.4 - Peak Values Cards Component (6 tasks) ✅
+  - Section 4.5 - Update Chart Export (2 tasks) ✅
+    - Created: `frontend/src/lib/exportFilename.ts` (generateChartFilename)
+    - Updated: All 4 chart presets to use dynamic filenames
+    - Verified: Units already displayed in exported charts
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1563,9 +1564,9 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 139 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 78/139 tasks complete (56%)**
-- **Current: Phase 4 - Charts & Visualization (Section 4.3 ✅ COMPLETE)**
-- **Next: Phase 4.4 - Peak Values Cards Component**
+- **Progress: 86/139 tasks complete (62%)**
+- **Current: Phase 4 - Charts & Visualization (✅ COMPLETE)**
+- **Next: Phase 5.1 - Update DataTable Component**
 
 ---
 

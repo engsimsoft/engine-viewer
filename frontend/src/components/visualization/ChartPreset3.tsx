@@ -18,6 +18,7 @@ import {
   getTemperatureUnit,
 } from '@/lib/unitsConversion';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
+import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -59,11 +60,17 @@ interface ChartPreset3Props {
  * ```
  */
 export function ChartPreset3({ calculations }: ChartPreset3Props) {
-  // Hook для экспорта графика
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('cylinder-temperature-chart');
-
   // Get units from store
   const units = useAppStore((state) => state.units);
+
+  // Generate dynamic filename for export
+  const exportFilename = useMemo(
+    () => generateChartFilename(calculations, 3),
+    [calculations]
+  );
+
+  // Hook для экспорта графика
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
 
   // Live cursor state
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);

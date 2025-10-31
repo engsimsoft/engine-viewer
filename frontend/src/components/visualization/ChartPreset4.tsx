@@ -22,6 +22,7 @@ import {
   getTemperatureUnit,
 } from '@/lib/unitsConversion';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
+import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -92,11 +93,17 @@ const PARAMETER_OPTIONS: ParameterOption[] = [
  * ```
  */
 export function ChartPreset4({ calculations }: ChartPreset4Props) {
-  // Hook для экспорта графика
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('custom-params-chart');
-
   // Get units from store
   const units = useAppStore((state) => state.units);
+
+  // Generate dynamic filename for export
+  const exportFilename = useMemo(
+    () => generateChartFilename(calculations, 4),
+    [calculations]
+  );
+
+  // Hook для экспорта графика
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
 
   // Selected parameters state (default: P-Av and Torque)
   const [selectedParams, setSelectedParams] = useState<string[]>([
