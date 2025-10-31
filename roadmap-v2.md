@@ -1,0 +1,1576 @@
+# 🚀 Engine Viewer v2.0 - Complete Roadmap
+
+**Version:** 2.0
+**Created:** October 31, 2025
+**Status:** Ready to implement
+**Based on:** ENGINE-VIEWER-V2-SPEC.md
+
+---
+
+## 🎯 Project Goal
+
+Transform Engine Viewer into a **professional iPhone-quality application** with:
+- ✅ Cross-project calculation comparison (any calc from any project)
+- ✅ Peak values always visible (no need to hover)
+- ✅ RPM step display (instead of useless point count)
+- ✅ Live cursor tracking on charts
+- ✅ Settings with units conversion (SI/American/HP)
+- ✅ English UI (international application)
+- ✅ Smooth animations (300-500ms)
+- ✅ Professional empty states & error handling
+
+**CRITICAL:** NO simplified versions! Full architecture from Phase 1.
+
+---
+
+## 📊 Current Status
+
+- **Phase:** Not started (planning complete)
+- **Progress:** 0/84 tasks (0%)
+- **Next Task:** Phase 1 - Task 1.1
+
+---
+
+## 🏗️ Architecture Overview
+
+### New Data Structure (Phase 1)
+
+```typescript
+interface CalculationReference {
+  projectId: string;         // "vesta-16-im"
+  projectName: string;       // "Vesta 1.6 IM"
+  calculationId: string;     // "$1"
+  calculationName: string;   // "$1" or "$BMW M42 14 UpDate"
+  color: string;             // "#ff6b6b" (from palette)
+
+  metadata: {
+    rpmRange: [number, number];  // [2000, 7800]
+    avgStep: number;             // 200 (calculated)
+    pointsCount: number;         // 26 (for internal use)
+    engineType: string;          // "NATUR"
+    cylinders: number;           // 4
+  }
+
+  // Cached data (loaded on demand)
+  data?: CalculationData;
+}
+
+interface AppState {
+  // Visualization state
+  primaryCalculation: CalculationReference | null;
+  comparisonCalculations: CalculationReference[];  // max 4
+
+  // Settings
+  units: 'si' | 'american' | 'hp';
+  theme: 'light' | 'dark';
+  chartSettings: {
+    animation: boolean;
+    showGrid: boolean;
+    decimals: number;
+  };
+
+  // UI state
+  isSettingsOpen: boolean;
+  isPrimaryModalOpen: boolean;
+  isComparisonModalOpen: boolean;
+  selectedPreset: 1 | 2 | 3 | 4;
+}
+```
+
+### Color Palette
+
+```typescript
+const CALCULATION_COLORS = [
+  "#ff6b6b",  // red (primary always)
+  "#4ecdc4",  // cyan
+  "#45b7d1",  // blue
+  "#f9ca24",  // yellow
+  "#a29bfe",  // purple
+];
+```
+
+---
+
+## 🚀 Phase 1: Architecture & State (Week 1)
+
+**Goal:** Full type system + global state + utilities ready for implementation
+
+### 1.1 Create New Type Definitions
+
+**File:** `frontend/src/types/v2.ts`
+
+**Tasks:**
+- [ ] 1.1.1 Create `CalculationReference` interface (1 hour)
+  - Include all fields: projectId, projectName, calculationId, calculationName, color
+  - Include metadata object: rpmRange, avgStep, pointsCount, engineType, cylinders
+  - Include optional data field for cached CalculationData
+
+- [ ] 1.1.2 Create `AppState` interface (30 min)
+  - primaryCalculation: CalculationReference | null
+  - comparisonCalculations: CalculationReference[] (max 4)
+  - units: 'si' | 'american' | 'hp'
+  - theme: 'light' | 'dark'
+  - chartSettings: { animation, showGrid, decimals }
+  - UI flags: isSettingsOpen, isPrimaryModalOpen, isComparisonModalOpen, selectedPreset
+
+- [ ] 1.1.3 Create `PeakValue` interface (15 min)
+  - value: number
+  - rpm: number
+  - parameter: string
+  - displayLabel: string
+
+- [ ] 1.1.4 Export constants (15 min)
+  - CALCULATION_COLORS array (5 colors)
+  - MAX_COMPARISONS = 4
+  - DEFAULT_UNITS = 'si'
+  - DEFAULT_THEME = 'light'
+
+**Acceptance:** All types defined, no errors, exported from types/v2.ts
+
+---
+
+### 1.2 Setup Global State Management
+
+**File:** `frontend/src/stores/appStore.ts`
+
+**Tasks:**
+- [ ] 1.2.1 Install Zustand (5 min)
+  ```bash
+  npm install zustand
+  ```
+
+- [ ] 1.2.2 Create Zustand store with AppState (1.5 hours)
+  - State: primaryCalculation, comparisonCalculations, units, theme, chartSettings
+  - Actions:
+    - `setPrimaryCalculation(calc: CalculationReference)`
+    - `addComparison(calc: CalculationReference)` - assign next color
+    - `removeComparison(index: number)`
+    - `clearComparisons()`
+    - `setUnits(units: 'si' | 'american' | 'hp')`
+    - `setTheme(theme: 'light' | 'dark')`
+    - `updateChartSettings(settings: Partial<ChartSettings>)`
+    - `setSelectedPreset(preset: 1 | 2 | 3 | 4)`
+    - `toggleSettings()`, `togglePrimaryModal()`, `toggleComparisonModal()`
+
+- [ ] 1.2.3 Add persistence to localStorage (30 min)
+  - Persist: units, theme, chartSettings
+  - DO NOT persist: calculations (session-only)
+  - Use zustand/middleware persist
+  - Key: 'engine-viewer-settings'
+
+**Acceptance:** Store works, actions update state, settings persist across refresh
+
+---
+
+### 1.3 Units Conversion Utilities
+
+**File:** `frontend/src/lib/unitsConverter.ts`
+
+**Tasks:**
+- [ ] 1.3.1 Create conversion functions (2 hours)
+  ```typescript
+  // Power
+  function convertPower(kW: number, targetUnits: Units): number
+  // kW → bhp: kW × 1.341
+  // kW → PS: kW × 1.36
+
+  // Torque
+  function convertTorque(Nm: number, targetUnits: Units): number
+  // N·m → lb-ft: N·m × 0.7376
+
+  // Pressure
+  function convertPressure(bar: number, targetUnits: Units): number
+  // bar → psi: bar × 14.504
+
+  // Temperature
+  function convertTemperature(celsius: number, targetUnits: Units): number
+  // °C → °F: (°C × 9/5) + 32
+  ```
+
+- [ ] 1.3.2 Create unit label getters (1 hour)
+  ```typescript
+  function getPowerUnit(units: Units): string
+  // si: 'kW', american: 'bhp', hp: 'PS'
+
+  function getTorqueUnit(units: Units): string
+  // si: 'N·m', american: 'lb-ft', hp: 'N·m'
+
+  function getPressureUnit(units: Units): string
+  // si: 'bar', american: 'psi', hp: 'bar'
+
+  function getTemperatureUnit(units: Units): string
+  // si: '°C', american: '°F', hp: '°C'
+  ```
+
+- [ ] 1.3.3 Create formatValue helper (30 min)
+  ```typescript
+  function formatValue(
+    value: number,
+    parameter: string,
+    units: Units,
+    decimals: number
+  ): string
+  // Converts + formats with unit label
+  // Example: formatValue(92.5, 'PAv', 'american', 1) → "124.1 bhp"
+  ```
+
+**Acceptance:** All conversions work, tested with real values, accurate to 2 decimals
+
+---
+
+### 1.4 RPM Step Calculator
+
+**File:** `frontend/src/lib/rpmCalculator.ts`
+
+**Tasks:**
+- [ ] 1.4.1 Create calculateAverageStep function (1 hour)
+  ```typescript
+  function calculateAverageStep(dataPoints: DataPoint[]): number {
+    // Extract RPMs, sort ascending
+    // Calculate steps between consecutive points
+    // Average the steps
+    // Round to nearest 50 (50, 100, 150, 200, 250...)
+    // Return rounded average
+  }
+  ```
+
+- [ ] 1.4.2 Create formatRPMRange function (30 min)
+  ```typescript
+  function formatRPMRange(
+    rpmRange: [number, number],
+    avgStep: number
+  ): string {
+    // Returns: "2000-7800 RPM • ~200 RPM step"
+  }
+  ```
+
+- [ ] 1.4.3 Test with real data (30 min)
+  - Test with Vesta data (expected ~200 RPM step)
+  - Test with BMW data (expected ~200-220 RPM step)
+  - Verify rounding works correctly
+
+**Acceptance:** Correct step calculation, formatted output matches spec
+
+---
+
+### 1.5 Peak Values Finder
+
+**File:** `frontend/src/lib/peakFinder.ts`
+
+**Tasks:**
+- [ ] 1.5.1 Create findPeak function (1.5 hours)
+  ```typescript
+  function findPeak(
+    dataPoints: DataPoint[],
+    parameter: keyof DataPoint
+  ): PeakValue {
+    // Iterate through all points
+    // Find max value for parameter
+    // Record RPM at max
+    // Return { value, rpm, parameter, displayLabel }
+  }
+  ```
+
+- [ ] 1.5.2 Create findPeaksForPreset function (1 hour)
+  ```typescript
+  function findPeaksForPreset(
+    dataPoints: DataPoint[],
+    preset: 1 | 2 | 3 | 4,
+    customParams?: string[]
+  ): PeakValue[] {
+    // Preset 1: return [maxPAv, maxTorque]
+    // Preset 2: return [maxPCylMax1, maxPCylMax2, maxPCylMax3, maxPCylMax4]
+    // Preset 3: return [maxTCylMax, maxTUbMax, delta]
+    // Preset 4: return peaks for customParams
+  }
+  ```
+
+- [ ] 1.5.3 Create formatPeakValue function (30 min)
+  ```typescript
+  function formatPeakValue(
+    peak: PeakValue,
+    units: Units,
+    decimals: number
+  ): string {
+    // Returns: "92.5 kW at 6800 RPM"
+    // or: "124.1 bhp at 6800 RPM" (with conversion)
+  }
+  ```
+
+**Acceptance:** Correctly finds peaks, formats with units, works for all presets
+
+---
+
+### 1.6 Color Palette Manager
+
+**File:** `frontend/src/lib/colorManager.ts`
+
+**Tasks:**
+- [ ] 1.6.1 Create getNextColor function (30 min)
+  ```typescript
+  function getNextColor(usedColors: string[]): string {
+    // Return first color from CALCULATION_COLORS not in usedColors
+    // If all used (5 calcs), return first color (shouldn't happen, max 5)
+  }
+  ```
+
+- [ ] 1.6.2 Create assignColors function (30 min)
+  ```typescript
+  function assignColors(
+    primary: CalculationReference | null,
+    comparisons: CalculationReference[]
+  ): void {
+    // Primary always gets CALCULATION_COLORS[0]
+    // Comparisons get colors[1], colors[2], colors[3], colors[4]
+    // Mutate the references with assigned colors
+  }
+  ```
+
+**Acceptance:** Primary always red, comparisons get sequential colors
+
+---
+
+### 1.7 Multi-Project Data Fetching
+
+**File:** `frontend/src/hooks/useMultiProjectData.ts`
+
+**Tasks:**
+- [ ] 1.7.1 Create custom hook (2 hours)
+  ```typescript
+  export function useMultiProjectData(
+    calculations: CalculationReference[]
+  ) {
+    // For each calculation:
+    // - Check if data already cached in calculation.data
+    // - If not, fetch from API: GET /api/project/:projectId
+    // - Extract specific calculation data by calculationId
+    // - Cache in calculation.data
+    // - Return: { isLoading, error, calculations: CalculationReference[] }
+  }
+  ```
+
+- [ ] 1.7.2 Handle loading states (30 min)
+  - Show loading spinner while fetching
+  - Show error if any project fails to load
+  - Support refetch on error
+
+- [ ] 1.7.3 Optimize with React Query (optional, 1 hour)
+  - Install @tanstack/react-query
+  - Cache fetched projects
+  - Don't re-fetch if already loaded
+  - Stale time: 5 minutes
+
+**Acceptance:** Can fetch data from multiple projects, caches properly, handles errors
+
+---
+
+### 1.8 Update Routing (if needed)
+
+**File:** `frontend/src/App.tsx`
+
+**Tasks:**
+- [ ] 1.8.1 Check if route needs update (15 min)
+  - Current: `/project/:id`
+  - New: Keep same OR change to `/visualization` (no projectId)
+  - Decision: Keep `/project/:id` as entry point, then allow adding from other projects
+
+- [ ] 1.8.2 Update ProjectPage to accept projectId as initial context (30 min)
+  - On mount, if projectId in URL, show that project's calculations for primary selection
+  - User can still add comparisons from other projects via modal
+
+**Acceptance:** Routing works, can enter via project URL, can compare across projects
+
+---
+
+**Phase 1 Milestone:** ✅ All types defined, state ready, utilities working, multi-project fetch ready
+
+---
+
+## 🎨 Phase 2: Core UI Components (Week 2)
+
+**Goal:** Header, Settings, Left Panel restructured - NO simplified versions!
+
+### 2.1 Create Header Component
+
+**File:** `frontend/src/components/visualization/Header.tsx`
+
+**Tasks:**
+- [ ] 2.1.1 Create Header component layout (1 hour)
+  ```tsx
+  // Structure:
+  // [← Back to Projects]  [Project Name + Metadata]  [⚙️ Settings]
+  // Left: Back button with arrow icon
+  // Center: Project name (bold, large) + metadata line (smaller, gray)
+  // Right: Settings gear icon
+  ```
+
+- [ ] 2.1.2 Implement Back button (30 min)
+  - Icon: ArrowLeft from Radix Icons
+  - Text: "Back to Projects"
+  - onClick: navigate to '/'
+  - Hover effect
+
+- [ ] 2.1.3 Display project metadata (30 min)
+  - First line: "Vesta 1.6 IM.det" (project name)
+  - Second line: "NATUR • 4 cylinders • 17 calculations"
+  - Use bullets (•) between items
+  - Gray color for metadata
+
+- [ ] 2.1.4 Settings icon button (15 min)
+  - Icon: GearIcon from Radix Icons
+  - Size: 24x24px
+  - onClick: toggleSettings()
+  - Hover effect
+
+**Acceptance:** Header looks like spec, all elements clickable, responsive
+
+---
+
+### 2.2 Create Settings Popover
+
+**File:** `frontend/src/components/visualization/SettingsPopover.tsx`
+
+**Tasks:**
+- [ ] 2.2.1 Create popover component (1.5 hours)
+  - Use Radix Popover primitive
+  - Trigger: Settings icon in Header
+  - Position: bottom-right
+  - Width: 320px
+  - Close on click outside, ESC key, or [×] button
+
+- [ ] 2.2.2 Add Units section (1 hour)
+  ```tsx
+  // 🌍 Units
+  // Radio group with 3 options:
+  // ⦿ SI Units (kW • N·m • bar • °C)
+  // ○ American Units (bhp • lb-ft • psi • °F)
+  // ○ Power in HP (PS • N·m • bar • °C)
+  // onChange: setUnits(value)
+  // Default: 'si'
+  ```
+
+- [ ] 2.2.3 Add Theme section (30 min)
+  ```tsx
+  // 🎨 Theme
+  // Radio group: ⦿ Light  ○ Dark
+  // onChange: setTheme(value)
+  // Default: 'light'
+  ```
+
+- [ ] 2.2.4 Add Chart section (1 hour)
+  ```tsx
+  // 📊 Chart
+  // Checkbox: ☑ Animation Enabled
+  // Checkbox: ☑ Show Grid
+  // Select: Decimals [2 ▼] (options: 0, 1, 2, 3)
+  // onChange: updateChartSettings(...)
+  ```
+
+- [ ] 2.2.5 Implement instant apply (30 min)
+  - All changes immediately update store
+  - NO "OK" or "Save" button needed
+  - Settings persist to localStorage via Zustand middleware
+
+**Acceptance:** Settings popover opens, all options work, instant apply, persists
+
+---
+
+### 2.3 Restructure Left Panel
+
+**File:** `frontend/src/components/visualization/LeftPanel.tsx`
+
+**Tasks:**
+- [ ] 2.3.1 Create new LeftPanel structure (1.5 hours)
+  ```tsx
+  // Layout:
+  // ┌─────────────────────┐
+  // │ Primary Calculation │ <-- PrimarySection component
+  // ├─────────────────────┤
+  // │ Chart Presets       │ <-- PresetSelector (existing, update)
+  // ├─────────────────────┤
+  // │ Compare With (X/4)  │ <-- ComparisonSection component
+  // └─────────────────────┘
+  ```
+
+- [ ] 2.3.2 Create responsive behavior (30 min)
+  - Desktop (>1024px): Fixed width 320px
+  - Tablet (768-1024px): Collapsible (hamburger menu)
+  - Mobile (<768px): Full-screen overlay
+
+**Acceptance:** Left panel has 3 sections, responsive, clean layout
+
+---
+
+### 2.4 Create Primary Section Component
+
+**File:** `frontend/src/components/visualization/PrimarySection.tsx`
+
+**Tasks:**
+- [ ] 2.4.1 Create empty state (1 hour)
+  ```tsx
+  // When primaryCalculation === null:
+  // ┌─────────────────────┐
+  // │ 📊 Primary Calculation │
+  // │                        │
+  // │ [Select calculation...] │ <-- Button opens modal
+  // └─────────────────────┘
+  ```
+
+- [ ] 2.4.2 Create selected state (1.5 hours)
+  ```tsx
+  // When primaryCalculation !== null:
+  // ┌─────────────────────┐
+  // │ 📊 Primary Calculation    ⚫ │ <-- Color indicator
+  // │ Vesta 1.6 IM → $1      [↻] │ <-- Change button
+  // │ 2000-7800 RPM • ~200 RPM   │ <-- Metadata
+  // └─────────────────────┘
+  ```
+
+- [ ] 2.4.3 Implement change button (30 min)
+  - [↻] icon button
+  - onClick: togglePrimaryModal()
+  - Opens Primary Selection Modal
+
+- [ ] 2.4.4 Format calculation label (30 min)
+  - Use formatRPMRange from Phase 1
+  - Show projectName → calculationName
+  - Color indicator matches calculation.color
+
+**Acceptance:** Primary section shows empty/selected states, change button works
+
+---
+
+### 2.5 Update Chart Presets Component
+
+**File:** `frontend/src/components/visualization/PresetSelector.tsx`
+
+**Tasks:**
+- [ ] 2.5.1 Update styling to match spec (1 hour)
+  ```tsx
+  // 💪 Chart Presets
+  //
+  // [Power & Torque] [Pressure]
+  // [Temperature]    [Custom]
+  //
+  // Active: Blue bg, white text
+  // Inactive: White bg, gray text
+  // Hover: Light blue bg
+  ```
+
+- [ ] 2.5.2 Connect to Zustand store (30 min)
+  - Read: selectedPreset from store
+  - Write: setSelectedPreset(preset)
+
+**Acceptance:** Presets look like spec, active state visible, switches charts
+
+---
+
+### 2.6 Create Comparison Section Component
+
+**File:** `frontend/src/components/visualization/ComparisonSection.tsx`
+
+**Tasks:**
+- [ ] 2.6.1 Create empty state (1 hour)
+  ```tsx
+  // When comparisonCalculations.length === 0:
+  // ┌─────────────────────┐
+  // │ ⚖️ Compare With  (0/4) │
+  // │                        │
+  // │ [+ Add Calculation]    │
+  // └─────────────────────┘
+  ```
+
+- [ ] 2.6.2 Create comparison cards (2 hours)
+  ```tsx
+  // When comparisonCalculations.length > 0:
+  // ┌─────────────────────┐
+  // │ ⚖️ Compare With  (2/4) │
+  // ├─────────────────────┤
+  // │ ⚪ BMW M42 → $5  [×] │
+  // │    2000-8000 RPM • ~200 RPM │
+  // │                        │
+  // │ 🟡 Vesta → $3    [×] │
+  // │    2000-7800 RPM • ~200 RPM │
+  // │                        │
+  // │ [+ Add Calculation (2 more)] │
+  // └─────────────────────┘
+  ```
+
+- [ ] 2.6.3 Implement remove button (30 min)
+  - [×] icon button on each card
+  - onClick: removeComparison(index)
+  - Smooth fade-out animation
+
+- [ ] 2.6.4 Implement add button (30 min)
+  - Shows remaining slots: "(2 more)"
+  - Disabled when comparisonCalculations.length === 4
+  - onClick: toggleComparisonModal()
+
+- [ ] 2.6.5 Card click to highlight (optional, 30 min)
+  - Click on card → briefly highlight corresponding line on chart
+  - Visual feedback
+
+**Acceptance:** Comparison section shows empty/filled states, add/remove works, counter correct
+
+---
+
+**Phase 2 Milestone:** ✅ Header done, Settings working, Left Panel restructured with Primary + Comparison sections
+
+---
+
+## 🔮 Phase 3: Modal Dialogs (Week 2)
+
+**Goal:** Primary Selection Modal + 2-Step Comparison Modal - FULL implementation!
+
+### 3.1 Create Primary Selection Modal
+
+**File:** `frontend/src/components/visualization/PrimarySelectionModal.tsx`
+
+**Tasks:**
+- [ ] 3.1.1 Create modal component (2 hours)
+  ```tsx
+  // Use Radix Dialog primitive
+  // Trigger: isPrimaryModalOpen from store
+  // On close: togglePrimaryModal()
+  //
+  // Layout:
+  // ┌────────────────────────────┐
+  // │ Select Primary Calculation  [×] │
+  // ├────────────────────────────┤
+  // │ Project: Vesta 1.6 IM          │
+  // │                                │
+  // │ [🔍 Search calculation...]     │
+  // │                                │
+  // │ ┌──────────────────────────┐  │
+  // │ │ ⚫ $1                →    │  │
+  // │ │   2000-7800 RPM • ~200   │  │
+  // │ ├──────────────────────────┤  │
+  // │ │ ⚪ $2                →    │  │
+  // │ │   2000-7800 RPM • ~200   │  │
+  // │ └──────────────────────────┘  │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 3.1.2 Implement search functionality (1 hour)
+  - Text input with 🔍 icon
+  - Real-time filter of calculation list
+  - Search by calculationName (case-insensitive)
+  - Clear button (×) when text present
+
+- [ ] 3.1.3 Create scrollable calculation list (1.5 hours)
+  - Fetch project data (from URL projectId)
+  - Map calculations to rows
+  - Each row: 60-80px height (tappable)
+  - Show metadata: formatRPMRange(rpmRange, avgStep)
+  - Selected indicator: ⚫ (filled) vs ⚪ (empty)
+
+- [ ] 3.1.4 Implement selection logic (1 hour)
+  - Click on row → select calculation
+  - Build CalculationReference object with:
+    - projectId, projectName, calculationId, calculationName
+    - metadata (rpmRange, avgStep, pointsCount, engineType, cylinders)
+    - color = CALCULATION_COLORS[0] (primary always red)
+  - Call setPrimaryCalculation(calc)
+  - Close modal
+
+- [ ] 3.1.5 Add animations (1 hour)
+  - Open: backdrop fade in 200ms, modal slide up + fade in 300ms
+  - Close: modal fade out 200ms, backdrop fade out 200ms
+  - Starting position: translateY(20px), opacity 0
+  - Ending position: translateY(0), opacity 1
+
+**Acceptance:** Modal opens, search works, selection assigns primary, animations smooth
+
+---
+
+### 3.2 Create Comparison Selection Modal - Step 1 (Project List)
+
+**File:** `frontend/src/components/visualization/ComparisonModal/ProjectListStep.tsx`
+
+**Tasks:**
+- [ ] 3.2.1 Create Step 1 layout (2 hours)
+  ```tsx
+  // ┌────────────────────────────┐
+  // │ ← Cancel  Add for Comparison │
+  // ├────────────────────────────┤
+  // │ Step 1 of 2: Select Project    │
+  // │                                │
+  // │ [🔍 Search projects...]         │
+  // │                                │
+  // │ ┌──────────────────────────┐  │
+  // │ │ 📂 BMW M42          →    │  │
+  // │ │   30 calcs • TURBO • 4 cyl │  │
+  // │ │   Last: Oct 26, 2024      │  │
+  // │ ├──────────────────────────┤  │
+  // │ │ 📂 Vesta 1.6 IM     →    │  │
+  // │ │   17 calcs • NATUR • 4 cyl │  │
+  // │ │   Last: Nov 01, 2024      │  │
+  // │ └──────────────────────────┘  │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 3.2.2 Fetch projects list (30 min)
+  - Use existing useProjects hook
+  - Display all available projects
+  - Show metadata: calculations count, engine type, cylinders, last modified
+
+- [ ] 3.2.3 Implement search (1 hour)
+  - Filter projects by name (case-insensitive)
+  - Clear button when text present
+
+- [ ] 3.2.4 Handle project selection (30 min)
+  - Click on project card → store selectedProject
+  - Transition to Step 2 (smooth slide)
+
+**Acceptance:** Step 1 shows projects, search works, click advances to Step 2
+
+---
+
+### 3.3 Create Comparison Selection Modal - Step 2 (Calculation List)
+
+**File:** `frontend/src/components/visualization/ComparisonModal/CalculationListStep.tsx`
+
+**Tasks:**
+- [ ] 3.3.1 Create Step 2 layout (2 hours)
+  ```tsx
+  // ┌────────────────────────────┐
+  // │ ← BMW M42  Add for Comparison │
+  // ├────────────────────────────┤
+  // │ Step 2 of 2: Select Calculation │
+  // │                                │
+  // │ [🔍 Search calculation...]      │
+  // │                                │
+  // │ ┌──────────────────────────┐  │
+  // │ │ ⚪ $1                     │  │
+  // │ │   2000-8000 RPM • ~200   │  │
+  // │ ├──────────────────────────┤  │
+  // │ │ ⚪ $5                     │  │
+  // │ │   2000-8000 RPM • ~200   │  │
+  // │ └──────────────────────────┘  │
+  // │                                │
+  // │     [Add Calculation]          │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 3.3.2 Fetch selected project data (30 min)
+  - Fetch GET /api/project/:selectedProjectId
+  - Extract calculations list
+  - Display each calculation with metadata
+
+- [ ] 3.3.3 Implement calculation selection (1 hour)
+  - Click on row → select calculation (single select)
+  - Show selected indicator: ⚫
+  - Enable [Add Calculation] button only when selected
+
+- [ ] 3.3.4 Implement Add button (1 hour)
+  - Build CalculationReference object
+  - Assign next available color: getNextColor([primary.color, ...comparisons.map(c => c.color)])
+  - Call addComparison(calc)
+  - Close modal
+  - Show toast: "Calculation added" ✅
+
+- [ ] 3.3.5 Add back navigation (30 min)
+  - Click "← BMW M42" → back to Step 1
+  - Smooth slide transition
+
+- [ ] 3.3.6 Implement search (1 hour)
+  - Filter calculations by name
+  - Clear button
+
+**Acceptance:** Step 2 shows calculations, selection works, Add button adds to comparison, back works
+
+---
+
+### 3.4 Create Comparison Modal Wrapper
+
+**File:** `frontend/src/components/visualization/ComparisonModal/index.tsx`
+
+**Tasks:**
+- [ ] 3.4.1 Create modal wrapper component (1.5 hours)
+  - Use Radix Dialog primitive
+  - Trigger: isComparisonModalOpen from store
+  - Manage step state: 1 or 2
+  - Render ProjectListStep or CalculationListStep based on step
+  - Handle transitions between steps
+
+- [ ] 3.4.2 Add animations (1 hour)
+  - Modal open/close: same as Primary Modal
+  - Step transition: slide left/right 300ms
+  - Smooth, no flicker
+
+- [ ] 3.4.3 Handle edge cases (30 min)
+  - If max comparisons reached (4), disable modal open
+  - Show toast: "Maximum 5 calculations (1 primary + 4 comparisons)" ℹ️
+
+**Acceptance:** 2-step flow works, animations smooth, edge cases handled
+
+---
+
+**Phase 3 Milestone:** ✅ Primary Modal done, 2-Step Comparison Modal done, all animations working
+
+---
+
+## 📊 Phase 4: Charts & Visualization (Week 3)
+
+**Goal:** Charts support multi-project data, peak markers, live cursor, peak values cards
+
+### 4.1 Update Chart Components for Multi-Project Data
+
+**File:** `frontend/src/components/visualization/ChartPreset1.tsx` (and 2, 3, 4)
+
+**Tasks:**
+- [ ] 4.1.1 Update ChartPreset1 (Power & Torque) (2 hours)
+  - Accept: calculations: CalculationReference[] (not just selectedIds)
+  - For each calculation:
+    - Fetch data via useMultiProjectData
+    - Create series for P-Av and Torque
+    - Use calculation.color for line color
+    - Label: `${calc.projectName} → ${calc.calculationName} - P-Av`
+  - Apply units conversion to all values
+  - Update axis labels based on units
+
+- [ ] 4.1.2 Update ChartPreset2 (Cylinder Pressure) (2 hours)
+  - Same approach: calculations: CalculationReference[]
+  - For each calculation, create 4 series (PCylMax1-4)
+  - Use calculation.color with variations for 4 cylinders
+  - Apply units conversion
+
+- [ ] 4.1.3 Update ChartPreset3 (Temperature) (2 hours)
+  - Same approach
+  - Average TCylMax and TUbMax across cylinders
+  - Apply units conversion (°C or °F)
+
+- [ ] 4.1.4 Update ChartPreset4 (Custom) (2 hours)
+  - Same approach
+  - User-selected parameters from all calculations
+  - Dynamic series creation
+
+**Acceptance:** All 4 presets work with multi-project data, colors correct, units applied
+
+---
+
+### 4.2 Add Peak Markers to Charts
+
+**File:** `frontend/src/components/visualization/ChartWithPeaks.tsx` (wrapper)
+
+**Tasks:**
+- [ ] 4.2.1 Create peak markers on chart (2 hours)
+  ```typescript
+  // For each calculation:
+  // - Find peak for P-Av: maxPower = findPeak(calc.data, 'PAv')
+  // - Find peak for Torque: maxTorque = findPeak(calc.data, 'Torque')
+  // - Add ECharts markPoint to series:
+  //   {
+  //     symbol: 'star',
+  //     symbolSize: 20,
+  //     data: [{ coord: [maxPower.rpm, maxPower.value] }]
+  //   }
+  ```
+
+- [ ] 4.2.2 Add tooltips on peak markers (1 hour)
+  - Hover on ⭐ → show tooltip
+  - Format: "Max P-Av: 92.5 kW at 6800 RPM"
+  - Apply units conversion
+
+- [ ] 4.2.3 Different markers for each calculation (1 hour)
+  - Primary: star ⭐
+  - Comparison 1: circle ⭕
+  - Comparison 2: diamond 🔷
+  - Comparison 3: triangle 🔺
+  - Comparison 4: square ⬜
+
+**Acceptance:** Peak markers visible on chart, tooltips work, different shapes per calc
+
+---
+
+### 4.3 Create Live Cursor Panel
+
+**File:** `frontend/src/components/visualization/LiveCursorPanel.tsx`
+
+**Tasks:**
+- [ ] 4.3.1 Create floating panel component (2 hours)
+  ```tsx
+  // ┌────────────────────────────┐
+  // │ Live Cursor (3400 RPM)     │
+  // │ ⚫ Vesta → $1:  78.5 kW • 165.2 N·m │
+  // │ ⚪ BMW → $5:    95.3 kW • 178.6 N·m │
+  // └────────────────────────────┘
+  //
+  // Position: Above chart, follows mouse
+  // Only visible on chart hover
+  ```
+
+- [ ] 4.3.2 Implement mouse tracking (2 hours)
+  - Listen to ECharts mousemove event
+  - Extract RPM from mouse position
+  - Snap to nearest data point
+  - For each calculation, find value at that RPM
+
+- [ ] 4.3.3 Format cursor values (1 hour)
+  - Apply units conversion to all values
+  - Format: "${projectName} → ${calcName}: ${value1} ${unit1} • ${value2} ${unit2}"
+  - Show current RPM in header
+
+- [ ] 4.3.4 Add animations (30 min)
+  - Panel fade in when mouse enters chart
+  - Panel fade out when mouse leaves chart
+  - Smooth position updates (no jumps)
+
+**Acceptance:** Live cursor follows mouse, shows all calculations' values, smooth animations
+
+---
+
+### 4.4 Create Peak Values Cards Component
+
+**File:** `frontend/src/components/visualization/PeakValuesCards.tsx`
+
+**Tasks:**
+- [ ] 4.4.1 Create cards layout (2 hours)
+  ```tsx
+  // For each calculation:
+  // ⚫ Vesta 1.6 IM → $1
+  // ┌─────────────────┐  ┌─────────────────┐
+  // │ 🏆 Max Power    │  │ 🏆 Max Torque   │
+  // │ 92.5 kW         │  │ 178.3 N·m       │
+  // │ at 6800 RPM     │  │ at 4200 RPM     │
+  // └─────────────────┘  └─────────────────┘
+  //
+  // Responsive grid:
+  // Desktop: 2 columns
+  // Mobile: 1 column
+  ```
+
+- [ ] 4.4.2 Implement dynamic cards for Preset 1 (1 hour)
+  - Use findPeaksForPreset(calc.data, 1)
+  - Returns: [maxPAv, maxTorque]
+  - Create 2 cards per calculation
+  - Apply units conversion
+  - Trophy icon 🏆
+
+- [ ] 4.4.3 Implement dynamic cards for Preset 2 (1 hour)
+  - findPeaksForPreset(calc.data, 2)
+  - Returns: [maxPCylMax1, maxPCylMax2, maxPCylMax3, maxPCylMax4]
+  - Create 4 cards per calculation
+  - Label: "Max PCylMax(1)", "Max PCylMax(2)", etc.
+
+- [ ] 4.4.4 Implement dynamic cards for Preset 3 (1 hour)
+  - findPeaksForPreset(calc.data, 3)
+  - Returns: [maxTCylMax, maxTUbMax]
+  - Create 2 cards per calculation
+  - Apply temperature units conversion
+
+- [ ] 4.4.5 Implement dynamic cards for Preset 4 (1 hour)
+  - findPeaksForPreset(calc.data, 4, customParams)
+  - Create cards for each custom parameter
+  - Dynamic labels
+
+- [ ] 4.4.6 Add color indicators (30 min)
+  - Each calculation section has color indicator
+  - Matches calculation.color from chart
+
+**Acceptance:** Peak cards show for all calculations, correct values, units applied, responsive
+
+---
+
+### 4.5 Update Chart Export
+
+**File:** `frontend/src/components/visualization/ChartExportButtons.tsx`
+
+**Tasks:**
+- [ ] 4.5.1 Update export filename format (30 min)
+  - Old: "chart.png"
+  - New: "EngineName_PresetName_Date.png"
+  - Example: "Vesta-1.6-IM_PowerTorque_2025-10-31.png"
+  - If multiple calculations: "Multi-Project-Comparison_PowerTorque_2025-10-31.png"
+
+- [ ] 4.5.2 Ensure units in exported chart (30 min)
+  - Axis labels reflect current units setting
+  - Legend labels include units
+  - Title includes units
+
+**Acceptance:** Exports work, filenames descriptive, units correct in exported files
+
+---
+
+**Phase 4 Milestone:** ✅ Charts support multi-project, peak markers on chart, live cursor working, peak cards displayed
+
+---
+
+## 📋 Phase 5: Data Table Updates (Week 3)
+
+**Goal:** Table shows multi-project data with units conversion
+
+### 5.1 Update DataTable Component
+
+**File:** `frontend/src/components/visualization/DataTable.tsx`
+
+**Tasks:**
+- [ ] 5.1.1 Add calculation source column (1 hour)
+  ```tsx
+  // New column: "Source"
+  // Value: "Vesta 1.6 IM → $1"
+  // With color indicator dot: ⚫ (matches calc.color)
+  ```
+
+- [ ] 5.1.2 Update headers based on units (1 hour)
+  ```typescript
+  // Dynamic headers:
+  // SI: "P-Av (kW)", "Torque (N·m)", "PCylMax (bar)", "TCylMax (°C)"
+  // American: "P-Av (bhp)", "Torque (lb-ft)", "PCylMax (psi)", "TCylMax (°F)"
+  // HP: "P-Av (PS)", "Torque (N·m)", "PCylMax (bar)", "TCylMax (°C)"
+  ```
+
+- [ ] 5.1.3 Apply units conversion to values (1.5 hours)
+  - For each row, convert all values based on units setting
+  - Use convertValue from Phase 1
+  - Format with decimals setting
+
+- [ ] 5.1.4 Add calculation filter dropdown (1 hour)
+  ```tsx
+  // Above table:
+  // "Show: [All calculations ▼]"
+  // Options:
+  // - All calculations
+  // - Vesta 1.6 IM → $1
+  // - BMW M42 → $5
+  // - etc.
+  // Filter table rows by selected calculation
+  ```
+
+- [ ] 5.1.5 Update export (CSV/Excel) (1 hour)
+  - Include "Source" column in exports
+  - Apply units conversion to exported values
+  - Include units in column headers
+
+**Acceptance:** Table shows all calculations, source column with color, units applied, filter works, exports correct
+
+---
+
+**Phase 5 Milestone:** ✅ Table updated for multi-project data with units conversion
+
+---
+
+## ✨ Phase 6: Polish & Details (Week 4)
+
+**Goal:** Animations, English UI, empty states, error handling, responsive, accessibility
+
+### 6.1 Translate All UI to English
+
+**Files:** All components in `frontend/src/components/` and `frontend/src/pages/`
+
+**Tasks:**
+- [ ] 6.1.1 Create translation map (1 hour)
+  ```typescript
+  // File: frontend/src/i18n/en.ts
+  // Map all Russian text to English:
+  // "Выбрать расчёт" → "Select Calculation"
+  // "Добавить" → "Add"
+  // "Сравнить" → "Compare"
+  // "Настройки" → "Settings"
+  // etc.
+  ```
+
+- [ ] 6.1.2 Update all components (3 hours)
+  - Search for all Russian text in .tsx files
+  - Replace with English equivalents
+  - Check buttons, labels, tooltips, messages
+  - Verify no Cyrillic characters in UI
+
+- [ ] 6.1.3 Update error messages (1 hour)
+  - All error messages in English
+  - "Failed to load project" instead of "Не удалось загрузить проект"
+
+- [ ] 6.1.4 Update toast messages (30 min)
+  - "Calculation added" ✅
+  - "Failed to load data" ❌
+  - "Maximum 5 calculations" ℹ️
+
+**Acceptance:** ALL UI text in English, no Russian visible, messages clear
+
+---
+
+### 6.2 Implement All Animations
+
+**Files:** Various components
+
+**Tasks:**
+- [ ] 6.2.1 Modal animations (1 hour)
+  ```css
+  /* Open: */
+  /* - Backdrop: fade in 200ms */
+  /* - Modal: slide up (translateY 20px → 0) + fade in 300ms */
+
+  /* Close: */
+  /* - Modal: fade out 200ms */
+  /* - Backdrop: fade out 200ms */
+  ```
+
+- [ ] 6.2.2 Chart transition animations (1 hour)
+  ```css
+  /* Preset change: */
+  /* - Cross-fade 400ms */
+  /* - Old chart opacity 1 → 0, new chart opacity 0 → 1 */
+
+  /* Add/remove calculation: */
+  /* - Line fade in/out 300ms */
+  ```
+
+- [ ] 6.2.3 Panel animations (1 hour)
+  ```css
+  /* Left panel expand/collapse: */
+  /* - Width change: 300ms ease-out */
+  /* - Content fade: 200ms */
+
+  /* Cards appear: */
+  /* - Stagger: 50ms between each */
+  /* - Slide down + fade in */
+  ```
+
+- [ ] 6.2.4 Hover effects (1 hour)
+  - All buttons: scale 1.02 on hover
+  - Cards: shadow on hover
+  - List items: background color change
+  - Smooth transitions: 150-200ms
+
+**Acceptance:** All animations smooth, no jank, 60fps, matches spec timings
+
+---
+
+### 6.3 Create All Empty States
+
+**Files:** Various components
+
+**Tasks:**
+- [ ] 6.3.1 No primary calculation (1 hour)
+  ```tsx
+  // MainArea when primaryCalculation === null:
+  // ┌────────────────────────────┐
+  // │           📊               │
+  // │   Select Primary Calculation │
+  // │   to start visualization     │
+  // │                              │
+  // │   [Select Calculation]       │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 6.3.2 No comparisons (30 min)
+  ```tsx
+  // ComparisonSection when empty:
+  // ┌────────────────────────────┐
+  // │           ⚖️                │
+  // │     No Comparisons Yet      │
+  // │ Add calculations to compare │
+  // │  [+ Add First Calculation]  │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 6.3.3 No projects available (30 min)
+  ```tsx
+  // HomePage when no projects:
+  // ┌────────────────────────────┐
+  // │           📂               │
+  // │     No Projects Found       │
+  // │  Place .det files in        │
+  // │  test-data/ folder          │
+  // └────────────────────────────┘
+  ```
+
+**Acceptance:** All empty states friendly, clear instructions, icons
+
+---
+
+### 6.4 Implement Error Handling
+
+**Files:** Various components
+
+**Tasks:**
+- [ ] 6.4.1 Failed to load project modal (1 hour)
+  ```tsx
+  // ┌────────────────────────────┐
+  // │           ⚠️                │
+  // │   Failed to Load Project    │
+  // │   File "Vesta 1.6 IM.det"  │
+  // │   not found or corrupted    │
+  // │  [Try Again]  [Cancel]     │
+  // └────────────────────────────┘
+  ```
+
+- [ ] 6.4.2 Toast notifications (1 hour)
+  - Use Sonner (already in dependencies)
+  - Success: green, checkmark icon, 3s duration
+  - Error: red, X icon, 5s duration
+  - Info: blue, info icon, 3s duration
+  - Position: bottom-right
+
+- [ ] 6.4.3 API error handling (1 hour)
+  - Wrap all API calls in try-catch
+  - Show toast on error
+  - Log errors to console
+  - Graceful degradation (show cached data if available)
+
+- [ ] 6.4.4 Boundary errors (1 hour)
+  - Create ErrorBoundary component
+  - Catch React errors
+  - Show friendly error page
+  - "Something went wrong" message with reload button
+
+**Acceptance:** All errors handled gracefully, user always informed, no crashes
+
+---
+
+### 6.5 Implement Responsive Design
+
+**Files:** All layout components
+
+**Tasks:**
+- [ ] 6.5.1 Desktop layout (>1024px) (1 hour)
+  - Left panel: 320px fixed width
+  - Main area: flex-grow
+  - Peak cards: 2 columns
+  - Header: full layout
+
+- [ ] 6.5.2 Tablet layout (768-1024px) (2 hours)
+  - Left panel: collapsible (hamburger menu)
+  - Main area: full width when panel collapsed
+  - Peak cards: 2 columns
+  - Header: condensed
+
+- [ ] 6.5.3 Mobile layout (<768px) (2 hours)
+  - Left panel: full-screen overlay
+  - Charts: full width, scrollable
+  - Peak cards: 1 column
+  - Header: compact, stacked
+  - Modal: full-screen on mobile
+
+- [ ] 6.5.4 Touch interactions (1 hour)
+  - All buttons: min 44x44px (tappable)
+  - Swipe to open/close left panel
+  - Pinch to zoom on charts
+
+**Acceptance:** Responsive on all screen sizes, tested on iPhone/iPad/Mac
+
+---
+
+### 6.6 Implement Accessibility
+
+**Files:** All interactive components
+
+**Tasks:**
+- [ ] 6.6.1 Keyboard navigation (2 hours)
+  - All buttons: focusable with Tab
+  - Modals: trap focus inside
+  - ESC to close modals
+  - Enter to submit/select
+  - Arrow keys in lists
+
+- [ ] 6.6.2 Focus indicators (1 hour)
+  - All interactive elements: visible focus ring
+  - Color: blue, 2px offset
+  - Don't remove outline
+
+- [ ] 6.6.3 ARIA labels (1.5 hours)
+  - All buttons: aria-label
+  - All inputs: aria-label or associated <label>
+  - Modals: aria-modal="true", role="dialog"
+  - Lists: role="list", role="listitem"
+
+- [ ] 6.6.4 Screen reader support (1 hour)
+  - Test with VoiceOver (macOS)
+  - Announce modal open/close
+  - Announce selection changes
+  - Live regions for dynamic content (aria-live)
+
+- [ ] 6.6.5 Color contrast (1 hour)
+  - Check all text: min 4.5:1 contrast ratio
+  - Use contrast checker tool
+  - Fix any failing colors
+
+**Acceptance:** Fully keyboard navigable, screen reader friendly, WCAG 2.1 AA compliant
+
+---
+
+**Phase 6 Milestone:** ✅ English UI, all animations, empty states, error handling, responsive, accessible
+
+---
+
+## 🧪 Phase 7: Testing & Documentation (Week 4)
+
+**Goal:** Comprehensive testing, update docs, final polish
+
+### 7.1 Functional Testing
+
+**Tasks:**
+- [ ] 7.1.1 Test cross-project comparison (2 hours)
+  - Load Vesta 1.6 IM as primary
+  - Add BMW M42 calculation as comparison
+  - Verify both show on chart with correct colors
+  - Verify peak values cards show both
+  - Verify live cursor shows both
+
+- [ ] 7.1.2 Test all 4 presets (1 hour)
+  - Switch between all presets
+  - Verify charts update correctly
+  - Verify peak cards change based on preset
+  - Test with multiple calculations
+
+- [ ] 7.1.3 Test units conversion (1.5 hours)
+  - Switch to American units
+  - Verify all values converted (charts, peak cards, table)
+  - Switch to HP units
+  - Verify hybrid conversion (PS for power, N·m for torque)
+  - Switch back to SI
+
+- [ ] 7.1.4 Test peak values calculation (1 hour)
+  - Verify max power correct (compare with manual check)
+  - Verify max torque correct
+  - Verify RPM at peak correct
+  - Test with multiple calculations
+
+- [ ] 7.1.5 Test RPM step calculation (30 min)
+  - Verify Vesta shows ~200 RPM step
+  - Verify BMW shows ~200-220 RPM step
+  - Check rounding to nearest 50
+
+- [ ] 7.1.6 Test edge cases (2 hours)
+  - Add 5 calculations (1 primary + 4 comparisons) - should block 5th comparison
+  - Remove all calculations - should show empty states
+  - Load project with 1 calculation only
+  - Load project with missing data points
+
+**Acceptance:** All features work correctly, edge cases handled
+
+---
+
+### 7.2 UI/UX Testing
+
+**Tasks:**
+- [ ] 7.2.1 Test on different browsers (1 hour)
+  - Chrome (primary)
+  - Safari
+  - Firefox
+  - Edge (if available)
+
+- [ ] 7.2.2 Test on different devices (1.5 hours)
+  - MacBook Pro (desktop)
+  - iPad (tablet)
+  - iPhone (mobile)
+
+- [ ] 7.2.3 Test animations (30 min)
+  - All modals open/close smoothly
+  - Chart transitions smooth (no jank)
+  - Hover effects work
+  - No layout shifts
+
+- [ ] 7.2.4 Test empty states (30 min)
+  - All empty states display correctly
+  - Messages clear and helpful
+
+- [ ] 7.2.5 Test error handling (1 hour)
+  - Simulate API failure (disconnect backend)
+  - Verify error messages shown
+  - Verify app doesn't crash
+  - Test error boundary (throw error in component)
+
+**Acceptance:** UI smooth on all browsers/devices, no visual bugs
+
+---
+
+### 7.3 Performance Testing
+
+**Tasks:**
+- [ ] 7.3.1 Test chart rendering performance (1 hour)
+  - Load calculation with 50+ data points
+  - Verify smooth rendering
+  - Check for re-render issues (React DevTools)
+  - Optimize if needed (React.memo, useMemo)
+
+- [ ] 7.3.2 Test with multiple calculations (30 min)
+  - Load 5 calculations simultaneously
+  - Verify charts render smoothly
+  - Check memory usage (Chrome DevTools)
+
+- [ ] 7.3.3 Optimize bundle size (1 hour)
+  - Check bundle size: npm run build
+  - Analyze with Vite rollup visualizer
+  - Lazy load heavy components if needed
+  - Target: <1MB total
+
+**Acceptance:** Fast loading, smooth interactions, acceptable bundle size
+
+---
+
+### 7.4 Update Documentation
+
+**Files:** Various markdown files
+
+**Tasks:**
+- [ ] 7.4.1 Update README.md (1 hour)
+  - Add v2.0 features section
+  - Update screenshots (if available)
+  - Add "What's New in v2.0" section
+
+- [ ] 7.4.2 Update CHANGELOG.md (1 hour)
+  ```markdown
+  ## [2.0.0] - 2025-11-XX
+
+  ### Added
+  - Cross-project calculation comparison
+  - Peak values cards (always visible)
+  - RPM step display in metadata
+  - Live cursor tracking panel
+  - Settings popover with units conversion (SI/American/HP)
+  - English UI (international)
+  - Smooth animations (300-500ms)
+  - Empty states for all sections
+  - Error handling with toast notifications
+  - Responsive design (mobile/tablet/desktop)
+  - Accessibility improvements (keyboard, screen reader)
+
+  ### Changed
+  - Complete UI redesign (iPhone-quality)
+  - New modal dialogs for calculation selection
+  - Restructured left panel (Primary + Comparison sections)
+  - Updated all 4 chart presets for multi-project data
+
+  ### Fixed
+  - Point count replaced with useful RPM step
+  - Peak values now always visible (not just on hover)
+  ```
+
+- [ ] 7.4.3 Update docs/architecture.md (1 hour)
+  - Document new state structure (CalculationReference)
+  - Document Zustand store
+  - Document data flow for multi-project comparison
+
+- [ ] 7.4.4 Create docs/v2-migration-guide.md (1 hour)
+  - Explain changes from v1 to v2
+  - Breaking changes (if any)
+  - How to use new features
+
+**Acceptance:** All docs updated, accurate, reflect v2.0 state
+
+---
+
+### 7.5 Final Polish
+
+**Tasks:**
+- [ ] 7.5.1 Remove console logs (30 min)
+  - Search for console.log in all files
+  - Remove or replace with proper logging
+
+- [ ] 7.5.2 Clean up comments (30 min)
+  - Remove TODO comments (should be in roadmap instead)
+  - Remove commented-out code
+  - Ensure comments are helpful
+
+- [ ] 7.5.3 Code style consistency (1 hour)
+  - Run Prettier on all files
+  - Check ESLint warnings
+  - Fix any style inconsistencies
+
+- [ ] 7.5.4 Final visual review (1 hour)
+  - Go through entire app flow
+  - Check spacing, alignment, colors
+  - Verify all text readable
+  - Check all icons loaded
+
+**Acceptance:** Code clean, consistent, production-ready
+
+---
+
+### 7.6 Create Demo Materials (Optional)
+
+**Tasks:**
+- [ ] 7.6.1 Take screenshots (30 min)
+  - Homepage
+  - Visualization page with primary
+  - Visualization with multiple comparisons
+  - Settings popover
+  - Primary selection modal
+  - Comparison selection modal
+  - Peak values cards
+
+- [ ] 7.6.2 Record demo video (1 hour)
+  - Show cross-project comparison flow
+  - Show units conversion
+  - Show all 4 presets
+  - Show responsive design
+
+**Acceptance:** Screenshots and video ready for documentation/presentation
+
+---
+
+**Phase 7 Milestone:** ✅ All testing complete, docs updated, code polished, v2.0 ready! 🎉
+
+---
+
+## 📝 Current Session
+
+**Session Date:** 2025-10-31
+
+### Activities:
+- [X] Researched current project structure (Plan agent)
+- [X] Created complete roadmap-v2.md (this file)
+- [ ] Ready to start Phase 1
+
+### Notes:
+- Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
+- NO simplified versions - full implementation from Phase 1
+- Each task is specific with file paths and functions
+- 84 total tasks across 7 phases
+- Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
+
+---
+
+## ✅ Success Criteria
+
+**v2.0 is complete when:**
+
+1. ✅ Can select primary calculation from any project
+2. ✅ Can add up to 4 comparisons from ANY projects (cross-project)
+3. ✅ Peak values visible for all calculations (cards below charts)
+4. ✅ RPM step shown in metadata (not point count)
+5. ✅ Live cursor panel follows mouse on chart
+6. ✅ All UI text in English
+7. ✅ Units conversion works (SI/American/HP - 3 systems)
+8. ✅ Settings accessible via ⚙️ icon
+9. ✅ All animations smooth (300-500ms, no jank)
+10. ✅ Empty states friendly and helpful
+11. ✅ Errors handled gracefully (toasts, modals)
+12. ✅ Responsive on all screen sizes (mobile/tablet/desktop)
+13. ✅ All 4 presets work with multi-project data
+14. ✅ Export functions work (PNG/SVG with correct filenames)
+15. ✅ Accessible (keyboard, screen readers, WCAG 2.1 AA)
+
+---
+
+## 🎯 Next Steps
+
+**To start Phase 1:**
+
+1. Read this roadmap completely
+2. Understand the architecture (CalculationReference structure)
+3. Start with Task 1.1.1: Create `frontend/src/types/v2.ts`
+4. Work through tasks sequentially
+5. Update this roadmap: mark tasks [X] as completed
+6. Update "Current Session" after each session
+
+**Working with Claude Code:**
+
+Follow the workflow from CLAUDE.md:
+1. Look at roadmap for next task
+2. Give specific task to Claude Code (with file paths)
+3. Claude Code implements
+4. Test the result
+5. Mark task [X] in roadmap
+6. Move to next task
+
+**Remember:**
+- Work on 1-3 hour tasks only
+- Never skip ahead
+- Always update roadmap after completing a task
+- Follow CLAUDE.md instructions (no parameter name translation, use official docs)
+
+---
+
+**Let's build something amazing! 🚀**
