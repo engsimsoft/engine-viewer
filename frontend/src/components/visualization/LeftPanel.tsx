@@ -22,28 +22,12 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PresetSelector, type ChartPresetType } from './PresetSelector';
+import { PrimarySection } from './PrimarySection';
 import { cn } from '@/lib/utils';
 
 // ====================================================================
 // Placeholder Components (will be implemented in later sections)
 // ====================================================================
-
-/**
- * Primary Section Placeholder
- * TODO: Implement in Section 2.4
- */
-function PrimarySectionPlaceholder() {
-  return (
-    <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/30">
-      <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-        Primary Calculation
-      </h3>
-      <p className="text-xs text-muted-foreground">
-        Will be implemented in Section 2.4
-      </p>
-    </div>
-  );
-}
 
 /**
  * Comparison Section Placeholder
@@ -177,7 +161,7 @@ export function LeftPanel({ activePreset, onPresetChange }: LeftPanelProps) {
         <div className="flex-1 flex flex-col gap-4 p-4">
           {/* Section 1: Primary Calculation */}
           <section aria-label="Primary calculation selector">
-            <PrimarySectionPlaceholder />
+            <PrimarySection />
           </section>
 
           {/* Section 2: Chart Presets */}

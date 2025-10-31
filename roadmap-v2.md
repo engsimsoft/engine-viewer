@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 2 - Core UI Components (In Progress)
-- **Progress:** 35/84 tasks (42%)
-- **Next Task:** Phase 2 - Task 2.4.1 (Create Primary Section Component)
+- **Progress:** 39/84 tasks (46%)
+- **Next Task:** Phase 2 - Task 2.5.1 (Update Chart Presets Component)
 
 ---
 
@@ -509,7 +509,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/PrimarySection.tsx`
 
 **Tasks:**
-- [ ] 2.4.1 Create empty state (1 hour)
+- [X] 2.4.1 Create empty state (1 hour)
   ```tsx
   // When primaryCalculation === null:
   // ┌─────────────────────┐
@@ -519,7 +519,7 @@ const CALCULATION_COLORS = [
   // └─────────────────────┘
   ```
 
-- [ ] 2.4.2 Create selected state (1.5 hours)
+- [X] 2.4.2 Create selected state (1.5 hours)
   ```tsx
   // When primaryCalculation !== null:
   // ┌─────────────────────┐
@@ -529,12 +529,12 @@ const CALCULATION_COLORS = [
   // └─────────────────────┘
   ```
 
-- [ ] 2.4.3 Implement change button (30 min)
+- [X] 2.4.3 Implement change button (30 min)
   - [↻] icon button
   - onClick: togglePrimaryModal()
   - Opens Primary Selection Modal
 
-- [ ] 2.4.4 Format calculation label (30 min)
+- [X] 2.4.4 Format calculation label (30 min)
   - Use formatRPMRange from Phase 1
   - Show projectName → calculationName
   - Color indicator matches calculation.color
@@ -1527,6 +1527,7 @@ const CALCULATION_COLORS = [
   - Section 2.1 - Create Header Component (4 tasks) ✅
   - Section 2.2 - Create Settings Popover (5 tasks) ✅
   - Section 2.3 - Restructure Left Panel (2 tasks) ✅
+  - Section 2.4 - Create Primary Section Component (4 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1534,8 +1535,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 35/84 tasks complete (42%)**
-- **Next: Section 2.4 - Create Primary Section Component**
+- **Progress: 39/84 tasks complete (46%)**
+- **Next: Section 2.5 - Update Chart Presets Component**
 
 ---
 
