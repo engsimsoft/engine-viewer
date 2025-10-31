@@ -17,6 +17,7 @@ import {
   getPowerUnit,
   getTorqueUnit,
 } from '@/lib/unitsConversion';
+import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -81,12 +82,19 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
-    readyCalculations.forEach((calc) => {
+    readyCalculations.forEach((calc, calcIndex) => {
       const color = calc.color;
       const label = `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
+
+      // Find peak values
+      const powerPeak = findPeak(calc.data, 'P-Av');
+      const torquePeak = findPeak(calc.data, 'Torque');
+
+      // Get marker symbol for this calculation
+      const markerSymbol = getMarkerSymbol(calcIndex);
 
       // Prepare power data with units conversion
       const powerData = calc.data.map((point) => ({
@@ -117,6 +125,23 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         emphasis: {
           focus: 'series',
         },
+        // Peak marker
+        markPoint: powerPeak ? {
+          symbol: markerSymbol,
+          symbolSize: 20,
+          itemStyle: {
+            color: color,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false, // Hide default label, use tooltip instead
+          },
+          data: [{
+            coord: [powerPeak.rpm, convertPower(powerPeak.value, units)],
+            value: formatPeakValue(powerPeak, 'P-Av', units),
+          }],
+        } : undefined,
       });
 
       // Torque series (right Y axis)
@@ -139,6 +164,23 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         emphasis: {
           focus: 'series',
         },
+        // Peak marker
+        markPoint: torquePeak ? {
+          symbol: markerSymbol,
+          symbolSize: 20,
+          itemStyle: {
+            color: color,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false, // Hide default label, use tooltip instead
+          },
+          data: [{
+            coord: [torquePeak.rpm, convertTorque(torquePeak.value, units)],
+            value: formatPeakValue(torquePeak, 'Torque', units),
+          }],
+        } : undefined,
       });
 
       // Add to legend

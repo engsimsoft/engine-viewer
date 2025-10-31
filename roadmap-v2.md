@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 4 - Charts & Visualization (Section 4.1 ✅ COMPLETE)
-- **Progress:** 71/139 tasks (51%)
-- **Next Task:** Phase 4.2 - Peak Markers on Charts
+- **Phase:** Phase 4 - Charts & Visualization (Section 4.2 ✅ COMPLETE)
+- **Progress:** 74/139 tasks (53%)
+- **Next Task:** Phase 4.3 - Live Cursor Panel
 
 ---
 
@@ -857,35 +857,36 @@ const CALCULATION_COLORS = [
 
 ### 4.2 Add Peak Markers to Charts
 
-**File:** `frontend/src/components/visualization/ChartWithPeaks.tsx` (wrapper)
+**Files:**
+- `frontend/src/lib/peakValues.ts` (utility functions)
+- `frontend/src/components/visualization/ChartPreset1.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset2.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset3.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset4.tsx` (updated)
 
 **Tasks:**
-- [ ] 4.2.1 Create peak markers on chart (2 hours)
+- [X] 4.2.1 Create peak markers on chart (2 hours)
   ```typescript
-  // For each calculation:
-  // - Find peak for P-Av: maxPower = findPeak(calc.data, 'PAv')
-  // - Find peak for Torque: maxTorque = findPeak(calc.data, 'Torque')
-  // - Add ECharts markPoint to series:
-  //   {
-  //     symbol: 'star',
-  //     symbolSize: 20,
-  //     data: [{ coord: [maxPower.rpm, maxPower.value] }]
-  //   }
+  // Implemented in all 4 presets:
+  // - Created findPeak() utility function
+  // - Added ECharts markPoint to each series
+  // - Applied proper units conversion
+  // - Special K → °C handling for temperature
   ```
 
-- [ ] 4.2.2 Add tooltips on peak markers (1 hour)
-  - Hover on ⭐ → show tooltip
+- [X] 4.2.2 Add tooltips on peak markers (1 hour)
+  - Hover on marker → show tooltip
   - Format: "Max P-Av: 92.5 kW at 6800 RPM"
-  - Apply units conversion
+  - Apply units conversion via formatPeakValue()
 
-- [ ] 4.2.3 Different markers for each calculation (1 hour)
-  - Primary: star ⭐
-  - Comparison 1: circle ⭕
-  - Comparison 2: diamond 🔷
-  - Comparison 3: triangle 🔺
-  - Comparison 4: square ⬜
+- [X] 4.2.3 Different markers for each calculation (1 hour)
+  - Calculation 0 (primary): pin 📍
+  - Calculation 1: circle ⭕
+  - Calculation 2: diamond 🔷
+  - Calculation 3: triangle 🔺
+  - Calculation 4: rect ⬜
 
-**Acceptance:** Peak markers visible on chart, tooltips work, different shapes per calc
+**Acceptance:** ✅ COMPLETE - Peak markers visible on all charts, tooltips work, different shapes per calc
 
 ---
 
@@ -1534,6 +1535,14 @@ const CALCULATION_COLORS = [
   - Section 2.5 - Update Chart Presets Component (2 tasks) ✅
   - Section 2.6 - Create Comparison Section Component (4 tasks, 1 optional skipped) ✅
   - Section 2.7 - Integration: Update ProjectPage (3 tasks) ✅
+- [X] **Phase 3 COMPLETE** ✅ - Modal Dialogs (All modals created and functional)
+- [X] **Phase 4 Section 4.1 COMPLETE** ✅ - Multi-Project Chart Updates (All 4 presets updated)
+- [X] **Phase 4 Section 4.2 COMPLETE** ✅ - Peak Markers on Charts (3 tasks)
+  - Task 4.2.1 - Create peak markers on chart ✅
+  - Task 4.2.2 - Add tooltips on peak markers ✅
+  - Task 4.2.3 - Different markers for each calculation ✅
+  - Created: `frontend/src/lib/peakValues.ts` (findPeak, formatPeakValue, getMarkerSymbol)
+  - Updated: All 4 chart presets (ChartPreset1, 2, 3, 4) with markPoint
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1541,8 +1550,9 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 139 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 48/139 tasks complete (35%)**
-- **Current: Phase 3 - Modal Dialogs**
+- **Progress: 74/139 tasks complete (53%)**
+- **Current: Phase 4 - Charts & Visualization (Section 4.2 ✅ COMPLETE)**
+- **Next: Phase 4.3 - Live Cursor Panel**
 
 ---
 

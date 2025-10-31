@@ -15,6 +15,7 @@ import {
   convertPressure,
   getPressureUnit,
 } from '@/lib/unitsConversion';
+import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -84,7 +85,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
-    readyCalculations.forEach((calc) => {
+    readyCalculations.forEach((calc, calcIndex) => {
       const color = calc.color;
       const label = `${calc.projectName} → ${calc.calculationName}`;
 
@@ -93,6 +94,12 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
 
       // Get number of cylinders from metadata
       const numCylinders = calc.metadata.cylinders;
+
+      // Find peak pressure (maximum across all cylinders)
+      const pressurePeak = findPeak(calc.data, 'PCylMax');
+
+      // Get marker symbol for this calculation
+      const markerSymbol = getMarkerSymbol(calcIndex);
 
       // Create series for each cylinder
       for (let cylIndex = 0; cylIndex < numCylinders; cylIndex++) {
@@ -133,6 +140,24 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
           emphasis: {
             focus: 'series',
           },
+          // Add peak marker only to the first cylinder series
+          // (represents the maximum pressure across all cylinders)
+          markPoint: cylIndex === 0 && pressurePeak ? {
+            symbol: markerSymbol,
+            symbolSize: 20,
+            itemStyle: {
+              color: color,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
+            label: {
+              show: false, // Hide default label, use tooltip instead
+            },
+            data: [{
+              coord: [pressurePeak.rpm, convertPressure(pressurePeak.value, units)],
+              value: formatPeakValue(pressurePeak, 'PCylMax', units),
+            }],
+          } : undefined,
         });
 
         // Add to legend

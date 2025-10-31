@@ -19,6 +19,7 @@ import {
   getPressureUnit,
   getTemperatureUnit,
 } from '@/lib/unitsConversion';
+import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -127,16 +128,22 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
-    readyCalculations.forEach((calc) => {
+    readyCalculations.forEach((calc, calcIndex) => {
       const color = calc.color;
       const label = `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
 
+      // Get marker symbol for this calculation
+      const markerSymbol = getMarkerSymbol(calcIndex);
+
       selectedParams.forEach((paramId, paramIndex) => {
         const paramOption = PARAMETER_OPTIONS.find((p) => p.id === paramId);
         if (!paramOption) return;
+
+        // Find peak value for this parameter
+        const peak = findPeak(calc.data!, paramId);
 
         // Prepare data for parameter with units conversion
         const paramData = calc.data!.map((point) => {
@@ -167,6 +174,41 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         // Line style: alternate solid and dashed
         const lineStyle = paramIndex % 2 === 0 ? 'solid' : 'dashed';
 
+        // Prepare peak marker data with proper units conversion
+        let peakMarkPoint = undefined;
+        if (peak) {
+          let peakValue = peak.value;
+
+          // Temperature conversion: K → °C first for peak value
+          if (paramId === 'TCylMax' || paramId === 'TUbMax') {
+            peakValue = peakValue - 273.15; // K → °C
+          }
+
+          // Apply units conversion to peak value
+          const convertedPeakValue = convertValue(peakValue, paramId, units);
+
+          peakMarkPoint = {
+            symbol: markerSymbol,
+            symbolSize: 20,
+            itemStyle: {
+              color: color,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
+            label: {
+              show: false, // Hide default label, use tooltip instead
+            },
+            data: [{
+              coord: [peak.rpm, convertedPeakValue],
+              value: formatPeakValue(
+                { ...peak, value: peakValue },
+                paramId,
+                units
+              ),
+            }],
+          };
+        }
+
         // Series for parameter
         series.push({
           name: `${label} - ${paramOption.label}`,
@@ -187,6 +229,8 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
           emphasis: {
             focus: 'series',
           },
+          // Peak marker
+          markPoint: peakMarkPoint,
         });
 
         // Add to legend

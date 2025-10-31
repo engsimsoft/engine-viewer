@@ -15,6 +15,7 @@ import {
   convertTemperature,
   getTemperatureUnit,
 } from '@/lib/unitsConversion';
+import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -88,12 +89,19 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
-    readyCalculations.forEach((calc) => {
+    readyCalculations.forEach((calc, calcIndex) => {
       const color = calc.color;
       const label = `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
+
+      // Find peak temperatures
+      const tCylMaxPeak = findPeak(calc.data, 'TCylMax');
+      const tUbMaxPeak = findPeak(calc.data, 'TUbMax');
+
+      // Get marker symbol for this calculation
+      const markerSymbol = getMarkerSymbol(calcIndex);
 
       // Prepare TCylMax data (average cylinder temperature)
       // IMPORTANT: Convert K → °C first, then apply units conversion
@@ -139,6 +147,30 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         emphasis: {
           focus: 'series',
         },
+        // Peak marker (K → °C conversion for peak value)
+        markPoint: tCylMaxPeak ? {
+          symbol: markerSymbol,
+          symbolSize: 20,
+          itemStyle: {
+            color: color,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false, // Hide default label, use tooltip instead
+          },
+          data: [{
+            coord: [
+              tCylMaxPeak.rpm,
+              convertTemperature(tCylMaxPeak.value - 273.15, units)
+            ],
+            value: formatPeakValue(
+              { ...tCylMaxPeak, value: tCylMaxPeak.value - 273.15 },
+              'TCylMax',
+              units
+            ),
+          }],
+        } : undefined,
       });
 
       // TUbMax series (exhaust temperature) - dashed line
@@ -161,6 +193,30 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         emphasis: {
           focus: 'series',
         },
+        // Peak marker (K → °C conversion for peak value)
+        markPoint: tUbMaxPeak ? {
+          symbol: markerSymbol,
+          symbolSize: 20,
+          itemStyle: {
+            color: color,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false, // Hide default label, use tooltip instead
+          },
+          data: [{
+            coord: [
+              tUbMaxPeak.rpm,
+              convertTemperature(tUbMaxPeak.value - 273.15, units)
+            ],
+            value: formatPeakValue(
+              { ...tUbMaxPeak, value: tUbMaxPeak.value - 273.15 },
+              'TUbMax',
+              units
+            ),
+          }],
+        } : undefined,
       });
 
       // Add to legend
