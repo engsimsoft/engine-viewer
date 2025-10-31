@@ -23,28 +23,8 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PresetSelector } from './PresetSelector';
 import { PrimarySection } from './PrimarySection';
+import { ComparisonSection } from './ComparisonSection';
 import { cn } from '@/lib/utils';
-
-// ====================================================================
-// Placeholder Components (will be implemented in later sections)
-// ====================================================================
-
-/**
- * Comparison Section Placeholder
- * TODO: Implement in Section 2.6
- */
-function ComparisonSectionPlaceholder() {
-  return (
-    <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/30">
-      <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-        Compare With (0/4)
-      </h3>
-      <p className="text-xs text-muted-foreground">
-        Will be implemented in Section 2.6
-      </p>
-    </div>
-  );
-}
 
 // ====================================================================
 // Main Component
@@ -163,7 +143,7 @@ export function LeftPanel() {
 
           {/* Section 3: Comparison Calculations */}
           <section aria-label="Comparison calculations">
-            <ComparisonSectionPlaceholder />
+            <ComparisonSection />
           </section>
         </div>
       </aside>
