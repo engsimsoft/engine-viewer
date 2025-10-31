@@ -20,6 +20,16 @@ import { Separator } from '@/components/ui/separator';
 /**
  * Страница визуализации проекта
  *
+ * ВАЖНО (v2.0 Architecture):
+ * - projectId из URL (:id) используется как INITIAL CONTEXT для визуализации
+ * - Это НЕ ограничение - пользователь может сравнивать расчёты из ЛЮБЫХ проектов
+ * - В Phase 2: projectId определяет какой проект показать в Primary Selection Modal по умолчанию
+ * - Cross-project comparison полностью поддерживается через useMultiProjectData hook
+ *
+ * Текущая версия (Phase 1):
+ * - Загружает данные одного проекта (старая архитектура)
+ * - В Phase 2 будет обновлена для работы с Zustand store + multi-project data
+ *
  * Отображает:
  * - Информацию о проекте
  * - Селектор расчётов (макс 5)
@@ -28,6 +38,7 @@ import { Separator } from '@/components/ui/separator';
  * - Таблицу данных с экспортом (CSV, Excel)
  */
 export default function ProjectPage() {
+  // projectId из URL - initial context для Phase 2
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

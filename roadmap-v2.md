@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 1 - Architecture & State (In Progress)
-- **Progress:** 21/84 tasks (25%)
-- **Next Task:** Phase 1 - Task 1.8.1 (Update Routing)
+- **Phase:** Phase 1 - Architecture & State ✅ COMPLETE
+- **Progress:** 24/84 tasks (29%)
+- **Next Task:** Phase 2 - Task 2.1.1 (Create Header Component)
 
 ---
 
@@ -370,14 +370,16 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/App.tsx`
 
 **Tasks:**
-- [ ] 1.8.1 Check if route needs update (15 min)
+- [X] 1.8.1 Check if route needs update (15 min)
   - Current: `/project/:id`
   - New: Keep same OR change to `/visualization` (no projectId)
-  - Decision: Keep `/project/:id` as entry point, then allow adding from other projects
+  - Decision: ✅ Keep `/project/:id` as entry point, then allow adding from other projects
 
-- [ ] 1.8.2 Update ProjectPage to accept projectId as initial context (30 min)
+- [X] 1.8.2 Update ProjectPage to accept projectId as initial context (30 min)
   - On mount, if projectId in URL, show that project's calculations for primary selection
   - User can still add comparisons from other projects via modal
+  - Added comprehensive documentation in docs/routing.md
+  - Added comments in App.tsx and ProjectPage.tsx explaining initial context
 
 **Acceptance:** Routing works, can enter via project URL, can compare across projects
 
@@ -1519,6 +1521,8 @@ const CALCULATION_COLORS = [
 - [X] Phase 1 Section 1.5 - Peak Values Finder (3 tasks) ✅
 - [X] Phase 1 Section 1.6 - Color Palette Manager (2 tasks) ✅
 - [X] Phase 1 Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
+- [X] Phase 1 Section 1.8 - Update Routing (2 tasks) ✅
+- [X] **🎉 PHASE 1 COMPLETE!** All 8 sections done (24/24 tasks)
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1526,8 +1530,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 21/84 tasks complete (25%)**
-- **Next: Section 1.8 - Update Routing**
+- **Progress: 24/84 tasks complete (29%)**
+- **🚀 Phase 1 Complete - Ready for Phase 2 (Core UI Components)**
 
 ---
 
