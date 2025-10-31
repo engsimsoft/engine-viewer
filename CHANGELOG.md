@@ -9,6 +9,14 @@
 
 ## [Unreleased]
 
+### Changed
+- **Оптимизация UI графиков** (2025-11-01):
+  - Удалён компонент LiveCursorPanel из всех 4 chart presets
+  - Причина: дублировал функциональность встроенного ECharts tooltip ("масло масляное")
+  - Удалено 190 строк кода (cursor state, event handlers, JSX)
+  - Теперь используется только компактный встроенный tooltip ECharts
+  - Commit: 4823fc3
+
 ### Planned
 - Режим "Список" для HomePage
 - Поиск и фильтры проектов
