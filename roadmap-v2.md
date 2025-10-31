@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 2 - Core UI Components ✅ COMPLETE
-- **Progress:** 48/139 tasks (35%)
-- **Next Task:** Phase 3 - Task 3.1.1 (Create Primary Selection Modal)
+- **Phase:** Phase 3 - Modal Dialogs (In Progress)
+- **Progress:** 53/139 tasks (38%)
+- **Next Task:** Phase 3 - Section 3.2 (Create Comparison Selection Modal)
 
 ---
 
@@ -630,7 +630,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/PrimarySelectionModal.tsx`
 
 **Tasks:**
-- [ ] 3.1.1 Create modal component (2 hours)
+- [X] 3.1.1 Create modal component (2 hours)
   ```tsx
   // Use Radix Dialog primitive
   // Trigger: isPrimaryModalOpen from store
@@ -654,20 +654,20 @@ const CALCULATION_COLORS = [
   // └────────────────────────────┘
   ```
 
-- [ ] 3.1.2 Implement search functionality (1 hour)
+- [X] 3.1.2 Implement search functionality (1 hour)
   - Text input with 🔍 icon
   - Real-time filter of calculation list
   - Search by calculationName (case-insensitive)
   - Clear button (×) when text present
 
-- [ ] 3.1.3 Create scrollable calculation list (1.5 hours)
+- [X] 3.1.3 Create scrollable calculation list (1.5 hours)
   - Fetch project data (from URL projectId)
   - Map calculations to rows
   - Each row: 60-80px height (tappable)
   - Show metadata: formatRPMRange(rpmRange, avgStep)
   - Selected indicator: ⚫ (filled) vs ⚪ (empty)
 
-- [ ] 3.1.4 Implement selection logic (1 hour)
+- [X] 3.1.4 Implement selection logic (1 hour)
   - Click on row → select calculation
   - Build CalculationReference object with:
     - projectId, projectName, calculationId, calculationName
@@ -676,7 +676,7 @@ const CALCULATION_COLORS = [
   - Call setPrimaryCalculation(calc)
   - Close modal
 
-- [ ] 3.1.5 Add animations (1 hour)
+- [X] 3.1.5 Add animations (1 hour)
   - Open: backdrop fade in 200ms, modal slide up + fade in 300ms
   - Close: modal fade out 200ms, backdrop fade out 200ms
   - Starting position: translateY(20px), opacity 0
