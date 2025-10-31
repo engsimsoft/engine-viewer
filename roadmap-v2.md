@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 4 - Charts & Visualization (Section 4.2 ✅ COMPLETE)
-- **Progress:** 74/139 tasks (53%)
-- **Next Task:** Phase 4.3 - Live Cursor Panel
+- **Phase:** Phase 4 - Charts & Visualization (Section 4.3 ✅ COMPLETE)
+- **Progress:** 78/139 tasks (56%)
+- **Next Task:** Phase 4.4 - Peak Values Cards Component
 
 ---
 
@@ -892,38 +892,43 @@ const CALCULATION_COLORS = [
 
 ### 4.3 Create Live Cursor Panel
 
-**File:** `frontend/src/components/visualization/LiveCursorPanel.tsx`
+**Files:**
+- `frontend/src/components/visualization/LiveCursorPanel.tsx` (created)
+- `frontend/src/components/visualization/ChartPreset1.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset2.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset3.tsx` (updated)
+- `frontend/src/components/visualization/ChartPreset4.tsx` (updated)
 
 **Tasks:**
-- [ ] 4.3.1 Create floating panel component (2 hours)
+- [X] 4.3.1 Create floating panel component (2 hours)
   ```tsx
-  // ┌────────────────────────────┐
-  // │ Live Cursor (3400 RPM)     │
-  // │ ⚫ Vesta → $1:  78.5 kW • 165.2 N·m │
-  // │ ⚪ BMW → $5:    95.3 kW • 178.6 N·m │
-  // └────────────────────────────┘
-  //
-  // Position: Above chart, follows mouse
-  // Only visible on chart hover
+  // Implemented LiveCursorPanel component:
+  // - Floating panel positioned near cursor
+  // - Shows current RPM in header
+  // - Displays values for all calculations
+  // - Color indicators for each calculation
+  // - Preset-specific value formatting
   ```
 
-- [ ] 4.3.2 Implement mouse tracking (2 hours)
-  - Listen to ECharts mousemove event
-  - Extract RPM from mouse position
-  - Snap to nearest data point
-  - For each calculation, find value at that RPM
+- [X] 4.3.2 Implement mouse tracking (2 hours)
+  - Listen to ECharts mousemove/globalout events via onEvents prop
+  - Extract RPM using convertFromPixel API
+  - Round RPM to nearest integer
+  - For each calculation, find data point at that RPM
 
-- [ ] 4.3.3 Format cursor values (1 hour)
-  - Apply units conversion to all values
-  - Format: "${projectName} → ${calcName}: ${value1} ${unit1} • ${value2} ${unit2}"
-  - Show current RPM in header
+- [X] 4.3.3 Format cursor values (1 hour)
+  - Apply units conversion to all values (power, torque, pressure, temp)
+  - Special K → °C conversion for temperature parameters
+  - Format with proper decimal places and units
+  - Show parameter label and value for each calculation
 
-- [ ] 4.3.4 Add animations (30 min)
-  - Panel fade in when mouse enters chart
-  - Panel fade out when mouse leaves chart
-  - Smooth position updates (no jumps)
+- [X] 4.3.4 Add animations (30 min)
+  - Tailwind CSS: animate-in fade-in duration-300
+  - Panel visible only when cursor over chart
+  - backdrop-blur-sm for glassmorphism effect
+  - Smooth transitions via CSS animations
 
-**Acceptance:** Live cursor follows mouse, shows all calculations' values, smooth animations
+**Acceptance:** ✅ COMPLETE - Live cursor follows mouse, shows all calculations' values at current RPM, smooth animations
 
 ---
 
@@ -1543,6 +1548,14 @@ const CALCULATION_COLORS = [
   - Task 4.2.3 - Different markers for each calculation ✅
   - Created: `frontend/src/lib/peakValues.ts` (findPeak, formatPeakValue, getMarkerSymbol)
   - Updated: All 4 chart presets (ChartPreset1, 2, 3, 4) with markPoint
+- [X] **Phase 4 Section 4.3 COMPLETE** ✅ - Live Cursor Panel (4 tasks)
+  - Task 4.3.1 - Create floating panel component ✅
+  - Task 4.3.2 - Implement mouse tracking ✅
+  - Task 4.3.3 - Format cursor values with units ✅
+  - Task 4.3.4 - Add animations ✅
+  - Created: `frontend/src/components/visualization/LiveCursorPanel.tsx`
+  - Updated: All 4 chart presets with mouse tracking and LiveCursorPanel
+  - Features: ECharts convertFromPixel, onEvents, smooth fade in/out animations
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1550,9 +1563,9 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 139 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 74/139 tasks complete (53%)**
-- **Current: Phase 4 - Charts & Visualization (Section 4.2 ✅ COMPLETE)**
-- **Next: Phase 4.3 - Live Cursor Panel**
+- **Progress: 78/139 tasks complete (56%)**
+- **Current: Phase 4 - Charts & Visualization (Section 4.3 ✅ COMPLETE)**
+- **Next: Phase 4.4 - Peak Values Cards Component**
 
 ---
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
@@ -9,6 +9,7 @@ import {
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
+import { LiveCursorPanel } from './LiveCursorPanel';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -58,6 +59,11 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
 
   // Get units from store
   const units = useAppStore((state) => state.units);
+
+  // Live cursor state
+  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
+  const [cursorRpm, setCursorRpm] = useState<number | null>(null);
+  const [isCursorVisible, setIsCursorVisible] = useState(false);
 
   // Load cross-project data
   const {
@@ -191,6 +197,34 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
     };
   }, [readyCalculations, units]);
 
+  // Mouse event handlers for live cursor
+  const handleMouseMove = useCallback((params: any) => {
+    const chartInstance = chartRef.current?.getEchartsInstance();
+    if (!chartInstance || !params.event) return;
+
+    const event = params.event.event;
+    setCursorPosition({ x: event.clientX, y: event.clientY });
+
+    const pointInGrid = [params.event.offsetX, params.event.offsetY];
+    const rpm = chartInstance.convertFromPixel({ seriesIndex: 0 }, pointInGrid)?.[0];
+
+    if (rpm && typeof rpm === 'number') {
+      setCursorRpm(Math.round(rpm));
+      setIsCursorVisible(true);
+    }
+  }, [chartRef]);
+
+  const handleMouseOut = useCallback(() => {
+    setIsCursorVisible(false);
+    setCursorPosition(null);
+    setCursorRpm(null);
+  }, []);
+
+  const onEvents = useMemo(() => ({
+    'mousemove': handleMouseMove,
+    'globalout': handleMouseOut,
+  }), [handleMouseMove, handleMouseOut]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -250,15 +284,27 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
         disabled={readyCalculations.length === 0}
       />
 
-      {/* Chart */}
-      <ReactECharts
-        ref={chartRef}
-        option={chartOption}
-        style={{ height: '600px', width: '100%' }}
-        notMerge={true}
-        lazyUpdate={true}
-        theme="light"
-      />
+      {/* Chart with live cursor */}
+      <div className="relative">
+        <ReactECharts
+          ref={chartRef}
+          option={chartOption}
+          style={{ height: '600px', width: '100%' }}
+          notMerge={true}
+          lazyUpdate={true}
+          theme="light"
+          onEvents={onEvents}
+        />
+
+        {/* Live Cursor Panel */}
+        <LiveCursorPanel
+          calculations={readyCalculations}
+          currentRpm={cursorRpm}
+          isVisible={isCursorVisible}
+          position={cursorPosition}
+          preset={2}
+        />
+      </div>
     </div>
   );
 }
