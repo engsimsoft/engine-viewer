@@ -5,6 +5,7 @@ import { useAppStore } from '@/stores/appStore';
 import { Header } from '@/components/visualization/Header';
 import { LeftPanel } from '@/components/visualization/LeftPanel';
 import { PrimarySelectionModal } from '@/components/visualization/PrimarySelectionModal';
+import { ComparisonModal } from '@/components/visualization/ComparisonModal';
 import { ChartPreset1 } from '@/components/visualization/ChartPreset1';
 import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
 import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
@@ -154,6 +155,7 @@ export default function ProjectPage() {
 
       {/* Modals */}
       <PrimarySelectionModal />
+      <ComparisonModal />
     </div>
   );
 }
