@@ -1,95 +1,127 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import type { Calculation } from '@/types';
+import type { CalculationReference } from '@/types/v2';
 import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
-  getCalculationColor,
-  calculateRpmRange,
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
+import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
+import { useAppStore } from '@/stores/appStore';
+import {
+  convertTemperature,
+  getTemperatureUnit,
+} from '@/lib/unitsConversion';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface ChartPreset3Props {
-  calculations: Calculation[];
-  selectedIds: string[];
+  /** Array of CalculationReference from Zustand store (primary + comparisons) */
+  calculations: CalculationReference[];
 }
 
 /**
- * Пресет 3: Temperature (TCylMax & TUbMax)
+ * Chart Preset 3: Temperature (v2.0 - Multi-Project Support)
  *
- * График с одной осью Y:
- * - Ось Y: Temperature (K)
- * - Ось X: RPM
- * - Две линии для каждого расчёта:
- *   1. TCylMax (средняя по всем цилиндрам) - сплошная линия
- *   2. TUbMax (средняя по всем цилиндрам) - пунктирная линия
+ * Single-axis chart:
+ * - Y axis: Temperature (TCylMax & TUbMax)
+ * - X axis: RPM
+ * - Two lines per calculation:
+ *   1. TCylMax (average across cylinders) - solid line
+ *   2. TUbMax (average across cylinders) - dashed line
  *
- * Пример: Если выбрано 2 расчёта ($1, $2), то на графике будет 4 линии:
- * - $1 - TCylMax
- * - $1 - TUbMax
- * - $2 - TCylMax
- * - $2 - TUbMax
+ * Example: If 2 calculations are selected, chart shows 4 lines:
+ * - ProjectA → $1 - TCylMax
+ * - ProjectA → $1 - TUbMax
+ * - ProjectB → $2 - TCylMax
+ * - ProjectB → $2 - TUbMax
+ *
+ * Features:
+ * - Cross-project comparison support
+ * - Units conversion (°C/°F)
+ * - Kelvin → Celsius conversion from database
+ * - Color-coded calculations
+ * - Loading/error states
  *
  * @example
  * ```tsx
- * <ChartPreset3
- *   calculations={project.calculations}
- *   selectedIds={['$1', '$2']}
- * />
+ * const primary = useAppStore(state => state.primaryCalculation);
+ * const comparisons = useAppStore(state => state.comparisonCalculations);
+ * const allCalcs = [primary, ...comparisons].filter(Boolean);
+ *
+ * <ChartPreset3 calculations={allCalcs} />
  * ```
  */
-export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
+export function ChartPreset3({ calculations }: ChartPreset3Props) {
   // Hook для экспорта графика
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('cylinder-temperature-chart');
 
-  // Фильтруем только выбранные расчёты
-  const selectedCalculations = useMemo(() => {
-    return calculations.filter((calc) => selectedIds.includes(calc.id));
-  }, [calculations, selectedIds]);
+  // Get units from store
+  const units = useAppStore((state) => state.units);
 
-  // Генерируем конфигурацию ECharts
+  // Load cross-project data
+  const {
+    calculations: loadedCalculations,
+    isLoading,
+    error,
+    refetch
+  } = useMultiProjectData(calculations);
+
+  // Filter calculations with loaded data
+  const readyCalculations = useMemo(() => {
+    return getLoadedCalculations(loadedCalculations);
+  }, [loadedCalculations]);
+
+  // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
     const baseConfig = getBaseChartConfig();
 
-    // Автоматически определяем диапазон RPM
-    const rpmRange = calculateRpmRange(selectedCalculations);
+    // Calculate RPM range from metadata
+    const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
+    const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
+    const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
-    // Создаём серии данных для каждого выбранного расчёта
+    // Create series for each calculation
     const series: any[] = [];
     const legendData: string[] = [];
 
-    selectedCalculations.forEach((calc, calcIndex) => {
-      const color = getCalculationColor(calcIndex);
-      const calculationName = calc.name;
+    readyCalculations.forEach((calc) => {
+      const color = calc.color;
+      const label = `${calc.projectName} → ${calc.calculationName}`;
 
-      // Подготовка данных для TCylMax (средняя температура в цилиндре)
-      const tCylMaxData = calc.dataPoints.map((point) => {
-        const avgTemp =
+      // Ensure data is loaded
+      if (!calc.data || calc.data.length === 0) return;
+
+      // Prepare TCylMax data (average cylinder temperature)
+      // IMPORTANT: Convert K → °C first, then apply units conversion
+      const tCylMaxData = calc.data.map((point) => {
+        const avgTempK =
           point.TCylMax.reduce((sum, temp) => sum + temp, 0) /
           point.TCylMax.length;
+        const celsius = avgTempK - 273.15; // K → °C
         return {
-          value: [point.RPM, avgTemp],
-          unit: 'K',
+          value: [point.RPM, convertTemperature(celsius, units)],
         };
       });
 
-      // Подготовка данных для TUbMax (средняя температура выпускных газов)
-      const tUbMaxData = calc.dataPoints.map((point) => {
-        const avgTemp =
+      // Prepare TUbMax data (average exhaust temperature)
+      // IMPORTANT: Convert K → °C first, then apply units conversion
+      const tUbMaxData = calc.data.map((point) => {
+        const avgTempK =
           point.TUbMax.reduce((sum, temp) => sum + temp, 0) /
           point.TUbMax.length;
+        const celsius = avgTempK - 273.15; // K → °C
         return {
-          value: [point.RPM, avgTemp],
-          unit: 'K',
+          value: [point.RPM, convertTemperature(celsius, units)],
         };
       });
 
-      // Серия для TCylMax (температура в цилиндре) - сплошная линия
+      // TCylMax series (cylinder temperature) - solid line
       series.push({
-        name: `${calculationName} - TCylMax`,
+        name: `${label} - TCylMax`,
         type: 'line',
         yAxisIndex: 0,
         data: tCylMaxData,
@@ -109,9 +141,9 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
         },
       });
 
-      // Серия для TUbMax (температура выпускных газов) - пунктирная линия
+      // TUbMax series (exhaust temperature) - dashed line
       series.push({
-        name: `${calculationName} - TUbMax`,
+        name: `${label} - TUbMax`,
         type: 'line',
         yAxisIndex: 0,
         data: tUbMaxData,
@@ -131,10 +163,13 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
         },
       });
 
-      // Добавляем в легенду
-      legendData.push(`${calculationName} - TCylMax`);
-      legendData.push(`${calculationName} - TUbMax`);
+      // Add to legend
+      legendData.push(`${label} - TCylMax`);
+      legendData.push(`${label} - TUbMax`);
     });
+
+    // Get unit label
+    const tempUnit = getTemperatureUnit(units);
 
     return {
       ...baseConfig,
@@ -152,14 +187,32 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
         data: legendData,
         top: 40,
       },
-      xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
-      yAxis: createYAxis('Temperature (K)', 'left', '#d62728'),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax),
+      yAxis: createYAxis(`Temperature (${tempUnit})`, 'left', '#d62728'),
       series,
     };
-  }, [selectedCalculations]);
+  }, [readyCalculations, units]);
 
-  // If no calculations selected, show placeholder
-  if (selectedCalculations.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <ErrorMessage message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  // Empty state - no calculations selected
+  if (calculations.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
@@ -174,16 +227,32 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
     );
   }
 
+  // Empty state - calculations selected but no data loaded
+  if (readyCalculations.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-muted-foreground">
+            No data available
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Failed to load calculation data
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
-      {/* Кнопки экспорта */}
+      {/* Export buttons */}
       <ChartExportButtons
         onExportPNG={handleExportPNG}
         onExportSVG={handleExportSVG}
-        disabled={selectedCalculations.length === 0}
+        disabled={readyCalculations.length === 0}
       />
 
-      {/* График */}
+      {/* Chart */}
       <ReactECharts
         ref={chartRef}
         option={chartOption}

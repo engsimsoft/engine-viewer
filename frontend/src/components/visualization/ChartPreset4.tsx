@@ -1,119 +1,175 @@
 import { useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import type { Calculation } from '@/types';
+import type { CalculationReference } from '@/types/v2';
 import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
-  getCalculationColor,
-  calculateRpmRange,
 } from '@/lib/chartConfig';
 import { cn } from '@/lib/utils';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
+import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
+import { useAppStore } from '@/stores/appStore';
+import {
+  convertValue,
+  getPowerUnit,
+  getTorqueUnit,
+  getPressureUnit,
+  getTemperatureUnit,
+} from '@/lib/unitsConversion';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface ChartPreset4Props {
-  calculations: Calculation[];
-  selectedIds: string[];
+  /** Array of CalculationReference from Zustand store (primary + comparisons) */
+  calculations: CalculationReference[];
 }
 
 /**
- * Доступные параметры для визуализации
+ * Available parameters for visualization
  */
 interface ParameterOption {
   id: string;
   label: string;
-  unit: string;
-  isArray: boolean; // true если это массив (по цилиндрам)
+  getUnit: (units: 'si' | 'american' | 'hp') => string; // Dynamic unit based on settings
+  isArray: boolean; // true if this is a per-cylinder array
 }
 
+/**
+ * Get dynamic unit label for a parameter
+ */
+const getParameterUnit = (paramId: string, units: 'si' | 'american' | 'hp'): string => {
+  switch (paramId) {
+    case 'P-Av': return getPowerUnit(units);
+    case 'Torque': return getTorqueUnit(units);
+    case 'PCylMax': return getPressureUnit(units);
+    case 'TCylMax':
+    case 'TUbMax': return getTemperatureUnit(units);
+    case 'PurCyl':
+    case 'Deto':
+    case 'Convergence': return '';
+    default: return '';
+  }
+};
+
 const PARAMETER_OPTIONS: ParameterOption[] = [
-  { id: 'P-Av', label: 'P-Av', unit: 'kW', isArray: false },
-  { id: 'Torque', label: 'Torque', unit: 'N·m', isArray: false },
-  { id: 'PCylMax', label: 'PCylMax', unit: 'bar', isArray: true },
-  { id: 'TCylMax', label: 'TCylMax', unit: 'K', isArray: true },
-  { id: 'TUbMax', label: 'TUbMax', unit: 'K', isArray: true },
-  { id: 'PurCyl', label: 'PurCyl', unit: '', isArray: true },
-  { id: 'Deto', label: 'Deto', unit: '', isArray: true },
-  { id: 'Convergence', label: 'Convergence', unit: '', isArray: false },
+  { id: 'P-Av', label: 'P-Av', getUnit: (u) => getPowerUnit(u), isArray: false },
+  { id: 'Torque', label: 'Torque', getUnit: (u) => getTorqueUnit(u), isArray: false },
+  { id: 'PCylMax', label: 'PCylMax', getUnit: (u) => getPressureUnit(u), isArray: true },
+  { id: 'TCylMax', label: 'TCylMax', getUnit: (u) => getTemperatureUnit(u), isArray: true },
+  { id: 'TUbMax', label: 'TUbMax', getUnit: (u) => getTemperatureUnit(u), isArray: true },
+  { id: 'PurCyl', label: 'PurCyl', getUnit: () => '', isArray: true },
+  { id: 'Deto', label: 'Deto', getUnit: () => '', isArray: true },
+  { id: 'Convergence', label: 'Convergence', getUnit: () => '', isArray: false },
 ];
 
 /**
- * Пресет 4: Custom Chart
+ * Chart Preset 4: Custom Chart (v2.0 - Multi-Project Support)
  *
- * Позволяет пользователю выбрать любые параметры для отображения.
- * Можно выбрать несколько параметров одновременно.
+ * Allows user to select any parameters for visualization.
+ * Multiple parameters can be selected simultaneously.
  *
- * Для массивов (параметры по цилиндрам) отображается среднее значение.
+ * For array parameters (per-cylinder data), shows average value.
+ *
+ * Features:
+ * - Cross-project comparison support
+ * - Units conversion for all parameters
+ * - Dynamic parameter selection
+ * - Loading/error states
  *
  * @example
  * ```tsx
- * <ChartPreset4
- *   calculations={project.calculations}
- *   selectedIds={['$1', '$2']}
- * />
+ * const primary = useAppStore(state => state.primaryCalculation);
+ * const comparisons = useAppStore(state => state.comparisonCalculations);
+ * const allCalcs = [primary, ...comparisons].filter(Boolean);
+ *
+ * <ChartPreset4 calculations={allCalcs} />
  * ```
  */
-export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
+export function ChartPreset4({ calculations }: ChartPreset4Props) {
   // Hook для экспорта графика
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('custom-params-chart');
 
-  // Состояние выбранных параметров (по умолчанию P-Av и Torque)
+  // Get units from store
+  const units = useAppStore((state) => state.units);
+
+  // Selected parameters state (default: P-Av and Torque)
   const [selectedParams, setSelectedParams] = useState<string[]>([
     'P-Av',
     'Torque',
   ]);
 
-  // Фильтруем только выбранные расчёты
-  const selectedCalculations = useMemo(() => {
-    return calculations.filter((calc) => selectedIds.includes(calc.id));
-  }, [calculations, selectedIds]);
+  // Load cross-project data
+  const {
+    calculations: loadedCalculations,
+    isLoading,
+    error,
+    refetch
+  } = useMultiProjectData(calculations);
 
-  // Генерируем конфигурацию ECharts
+  // Filter calculations with loaded data
+  const readyCalculations = useMemo(() => {
+    return getLoadedCalculations(loadedCalculations);
+  }, [loadedCalculations]);
+
+  // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
     const baseConfig = getBaseChartConfig();
 
-    // Автоматически определяем диапазон RPM
-    const rpmRange = calculateRpmRange(selectedCalculations);
+    // Calculate RPM range from metadata
+    const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
+    const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
+    const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
-    // Создаём серии данных для каждого выбранного расчёта и параметра
+    // Create series for each calculation and parameter
     const series: any[] = [];
     const legendData: string[] = [];
 
-    selectedCalculations.forEach((calc, calcIndex) => {
-      const color = getCalculationColor(calcIndex);
-      const calculationName = calc.name;
+    readyCalculations.forEach((calc) => {
+      const color = calc.color;
+      const label = `${calc.projectName} → ${calc.calculationName}`;
+
+      // Ensure data is loaded
+      if (!calc.data || calc.data.length === 0) return;
 
       selectedParams.forEach((paramId, paramIndex) => {
         const paramOption = PARAMETER_OPTIONS.find((p) => p.id === paramId);
         if (!paramOption) return;
 
-        // Подготовка данных для параметра
-        const paramData = calc.dataPoints.map((point) => {
-          let value: number;
+        // Prepare data for parameter with units conversion
+        const paramData = calc.data!.map((point) => {
+          let rawValue: number;
 
           if (paramOption.isArray) {
-            // Для массивов вычисляем среднее
+            // For arrays, calculate average
             const arrayValue = (point as any)[paramId] as number[];
-            value = arrayValue.reduce((sum, val) => sum + val, 0) / arrayValue.length;
+            rawValue = arrayValue.reduce((sum, val) => sum + val, 0) / arrayValue.length;
           } else {
-            // Для скалярных значений берём напрямую
-            value = (point as any)[paramId] as number;
+            // For scalar values, use directly
+            rawValue = (point as any)[paramId] as number;
           }
 
+          // Temperature conversion: K → °C first, then apply units
+          if (paramId === 'TCylMax' || paramId === 'TUbMax') {
+            rawValue = rawValue - 273.15; // K → °C
+          }
+
+          // Apply units conversion
+          const convertedValue = convertValue(rawValue, paramId, units);
+
           return {
-            value: [point.RPM, value],
-            unit: paramOption.unit,
+            value: [point.RPM, convertedValue],
           };
         });
 
-        // Стиль линии: чередуем solid и dashed
+        // Line style: alternate solid and dashed
         const lineStyle = paramIndex % 2 === 0 ? 'solid' : 'dashed';
 
-        // Серия для параметра
+        // Series for parameter
         series.push({
-          name: `${calculationName} - ${paramOption.label}`,
+          name: `${label} - ${paramOption.label}`,
           type: 'line',
           yAxisIndex: 0,
           data: paramData,
@@ -133,17 +189,18 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
           },
         });
 
-        // Добавляем в легенду
-        legendData.push(`${calculationName} - ${paramOption.label}`);
+        // Add to legend
+        legendData.push(`${label} - ${paramOption.label}`);
       });
     });
 
-    // Определяем название оси Y и единицы измерения
+    // Determine Y axis name and units
     let yAxisName = 'Value';
     if (selectedParams.length === 1) {
       const param = PARAMETER_OPTIONS.find((p) => p.id === selectedParams[0]);
       if (param) {
-        yAxisName = `${param.label} (${param.unit})`;
+        const unit = param.getUnit(units);
+        yAxisName = unit ? `${param.label} (${unit})` : param.label;
       }
     } else if (selectedParams.length > 1) {
       yAxisName = 'Value (mixed units)';
@@ -166,27 +223,45 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
         top: 40,
         type: 'scroll',
       },
-      xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: createYAxis(yAxisName, 'left', '#2ca02c'),
       series,
     };
-  }, [selectedCalculations, selectedParams]);
+  }, [readyCalculations, selectedParams, units]);
 
-  // Обработчик переключения параметра
+  // Parameter toggle handler
   const handleToggleParam = (paramId: string) => {
     setSelectedParams((prev) => {
       if (prev.includes(paramId)) {
-        // Убираем параметр (минимум 1 должен остаться)
+        // Remove parameter (minimum 1 must remain)
         return prev.length > 1 ? prev.filter((id) => id !== paramId) : prev;
       } else {
-        // Добавляем параметр
+        // Add parameter
         return [...prev, paramId];
       }
     });
   };
 
-  // If no calculations selected, show placeholder
-  if (selectedCalculations.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <ErrorMessage message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  // Empty state - no calculations selected
+  if (calculations.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
@@ -201,23 +276,40 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
     );
   }
 
+  // Empty state - calculations selected but no data loaded
+  if (readyCalculations.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-muted-foreground">
+            No data available
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Failed to load calculation data
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
-      {/* Кнопки экспорта */}
+      {/* Export buttons */}
       <ChartExportButtons
         onExportPNG={handleExportPNG}
         onExportSVG={handleExportSVG}
-        disabled={selectedCalculations.length === 0}
+        disabled={readyCalculations.length === 0}
       />
 
-      {/* Селектор параметров */}
+      {/* Parameter selector */}
       <div className="p-4 bg-muted/30 rounded-lg border">
         <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
-          Выберите параметры для отображения
+          Select parameters to display
         </h4>
         <div className="flex flex-wrap gap-2">
           {PARAMETER_OPTIONS.map((param) => {
             const isSelected = selectedParams.includes(param.id);
+            const unit = param.getUnit(units);
             return (
               <button
                 key={param.id}
@@ -231,7 +323,7 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
                 )}
               >
                 {param.label}
-                {param.unit && ` (${param.unit})`}
+                {unit && ` (${unit})`}
                 {param.isArray && ' (avg)'}
               </button>
             );
@@ -239,13 +331,13 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
         </div>
         {selectedParams.length > 1 && (
           <p className="text-xs text-muted-foreground mt-3">
-            ⚠️ Выбрано несколько параметров с разными единицами измерения.
-            Убедитесь, что их масштабы сопоставимы для корректного отображения.
+            ⚠️ Multiple parameters with different units selected.
+            Ensure their scales are comparable for correct display.
           </p>
         )}
       </div>
 
-      {/* График */}
+      {/* Chart */}
       <ReactECharts
         ref={chartRef}
         option={chartOption}

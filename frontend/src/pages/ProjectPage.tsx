@@ -43,7 +43,7 @@ export default function ProjectPage() {
   const { project, loading, error, refetch } = useProjectData(id);
 
   // Old architecture (Phase 1) - selected calculations
-  // TODO: Phase 3 will replace with Zustand store + modals
+  // TODO: Phase 4 onwards will fully remove this
   const {
     selectedIds,
     toggleCalculation,
@@ -54,6 +54,16 @@ export default function ProjectPage() {
 
   // Get selected preset from Zustand store (Phase 2)
   const selectedPreset = useAppStore((state) => state.selectedPreset);
+
+  // Get calculations from Zustand store (Phase 4)
+  const primaryCalculation = useAppStore((state) => state.primaryCalculation);
+  const comparisonCalculations = useAppStore((state) => state.comparisonCalculations);
+
+  // Combine primary + comparisons for v2 charts
+  const allCalculations = [
+    primaryCalculation,
+    ...comparisonCalculations,
+  ].filter(Boolean) as import('@/types/v2').CalculationReference[];
 
   // Loading state
   if (loading) {
@@ -120,26 +130,22 @@ export default function ProjectPage() {
               {/* Render chart based on selected preset */}
               {selectedPreset === 1 && (
                 <ChartPreset1
-                  calculations={project.calculations}
-                  selectedIds={selectedIds}
+                  calculations={allCalculations}
                 />
               )}
               {selectedPreset === 2 && (
                 <ChartPreset2
-                  calculations={project.calculations}
-                  selectedIds={selectedIds}
+                  calculations={allCalculations}
                 />
               )}
               {selectedPreset === 3 && (
                 <ChartPreset3
-                  calculations={project.calculations}
-                  selectedIds={selectedIds}
+                  calculations={allCalculations}
                 />
               )}
               {selectedPreset === 4 && (
                 <ChartPreset4
-                  calculations={project.calculations}
-                  selectedIds={selectedIds}
+                  calculations={allCalculations}
                 />
               )}
             </div>

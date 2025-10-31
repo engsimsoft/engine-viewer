@@ -1,81 +1,109 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import type { Calculation } from '@/types';
+import type { CalculationReference } from '@/types/v2';
 import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
-  getCalculationColor,
-  calculateRpmRange,
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
+import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
+import { useAppStore } from '@/stores/appStore';
+import {
+  convertPressure,
+  getPressureUnit,
+} from '@/lib/unitsConversion';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface ChartPreset2Props {
-  calculations: Calculation[];
-  selectedIds: string[];
+  /** Array of CalculationReference from Zustand store (primary + comparisons) */
+  calculations: CalculationReference[];
 }
 
 /**
- * Пресет 2: PCylMax (Cylinder Pressure)
+ * Chart Preset 2: Cylinder Pressure (v2.0 - Multi-Project Support)
  *
- * График с одной осью Y:
- * - Ось Y: PCylMax (бар)
- * - Ось X: RPM
- * - Отдельные линии для каждого цилиндра каждого расчёта
+ * Single-axis chart:
+ * - Y axis: PCylMax (Cylinder Pressure)
+ * - X axis: RPM
+ * - Separate lines for each cylinder of each calculation
  *
- * Пример: Если выбрано 2 расчёта ($1, $2) и двигатель 4-цилиндровый,
- * то на графике будет 8 линий:
- * - $1 - Cyl 1, $1 - Cyl 2, $1 - Cyl 3, $1 - Cyl 4
- * - $2 - Cyl 1, $2 - Cyl 2, $2 - Cyl 3, $2 - Cyl 4
+ * Example: If 2 calculations are selected and engine has 4 cylinders,
+ * the chart will show 8 lines:
+ * - ProjectA → $1 - Cyl 1, ProjectA → $1 - Cyl 2, ProjectA → $1 - Cyl 3, ProjectA → $1 - Cyl 4
+ * - ProjectB → $2 - Cyl 1, ProjectB → $2 - Cyl 2, ProjectB → $2 - Cyl 3, ProjectB → $2 - Cyl 4
+ *
+ * Features:
+ * - Cross-project comparison support
+ * - Units conversion (bar/psi)
+ * - Color-coded calculations with different line styles per cylinder
+ * - Loading/error states
  *
  * @example
  * ```tsx
- * <ChartPreset2
- *   calculations={project.calculations}
- *   selectedIds={['$1', '$2']}
- * />
+ * const primary = useAppStore(state => state.primaryCalculation);
+ * const comparisons = useAppStore(state => state.comparisonCalculations);
+ * const allCalcs = [primary, ...comparisons].filter(Boolean);
+ *
+ * <ChartPreset2 calculations={allCalcs} />
  * ```
  */
-export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
+export function ChartPreset2({ calculations }: ChartPreset2Props) {
   // Hook для экспорта графика
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('cylinder-pressure-chart');
 
-  // Фильтруем только выбранные расчёты
-  const selectedCalculations = useMemo(() => {
-    return calculations.filter((calc) => selectedIds.includes(calc.id));
-  }, [calculations, selectedIds]);
+  // Get units from store
+  const units = useAppStore((state) => state.units);
 
-  // Генерируем конфигурацию ECharts
+  // Load cross-project data
+  const {
+    calculations: loadedCalculations,
+    isLoading,
+    error,
+    refetch
+  } = useMultiProjectData(calculations);
+
+  // Filter calculations with loaded data
+  const readyCalculations = useMemo(() => {
+    return getLoadedCalculations(loadedCalculations);
+  }, [loadedCalculations]);
+
+  // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
     const baseConfig = getBaseChartConfig();
 
-    // Автоматически определяем диапазон RPM
-    const rpmRange = calculateRpmRange(selectedCalculations);
+    // Calculate RPM range from metadata
+    const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
+    const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
+    const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
-    // Создаём серии данных для каждого выбранного расчёта
+    // Create series for each calculation
     const series: any[] = [];
     const legendData: string[] = [];
 
-    selectedCalculations.forEach((calc, calcIndex) => {
-      const color = getCalculationColor(calcIndex);
-      const calculationName = calc.name;
+    readyCalculations.forEach((calc) => {
+      const color = calc.color;
+      const label = `${calc.projectName} → ${calc.calculationName}`;
 
-      // Определяем количество цилиндров из первой точки данных
-      const numCylinders = calc.dataPoints[0]?.PCylMax?.length || 0;
+      // Ensure data is loaded
+      if (!calc.data || calc.data.length === 0) return;
 
-      // Создаём серию для каждого цилиндра
+      // Get number of cylinders from metadata
+      const numCylinders = calc.metadata.cylinders;
+
+      // Create series for each cylinder
       for (let cylIndex = 0; cylIndex < numCylinders; cylIndex++) {
         const cylinderNumber = cylIndex + 1;
 
-        // Подготовка данных для PCylMax конкретного цилиндра
-        const pressureData = calc.dataPoints.map((point) => ({
-          value: [point.RPM, point.PCylMax[cylIndex]],
-          unit: 'bar',
+        // Prepare pressure data with units conversion
+        const pressureData = calc.data.map((point) => ({
+          value: [point.RPM, convertPressure(point.PCylMax[cylIndex], units)],
         }));
 
-        // Стиль линии: сплошная для цилиндра 1, разные пунктиры для остальных
+        // Line style: solid for cylinder 1, different dashes for others
         const lineStyle =
           cylIndex === 0
             ? 'solid'
@@ -85,9 +113,9 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
             ? 'dotted'
             : 'solid';
 
-        // Серия для давления в цилиндре
+        // Cylinder pressure series
         series.push({
-          name: `${calculationName} - Cyl ${cylinderNumber}`,
+          name: `${label} - Cyl ${cylinderNumber}`,
           type: 'line',
           yAxisIndex: 0,
           data: pressureData,
@@ -107,10 +135,13 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
           },
         });
 
-        // Добавляем в легенду
-        legendData.push(`${calculationName} - Cyl ${cylinderNumber}`);
+        // Add to legend
+        legendData.push(`${label} - Cyl ${cylinderNumber}`);
       }
     });
+
+    // Get unit label
+    const pressureUnit = getPressureUnit(units);
 
     return {
       ...baseConfig,
@@ -127,16 +158,34 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
         ...baseConfig.legend,
         data: legendData,
         top: 40,
-        type: 'scroll', // Скролл если много легенд
+        type: 'scroll', // Scroll if many legends
       },
-      xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
-      yAxis: createYAxis('PCylMax (bar)', 'left', '#1f77b4'),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax),
+      yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4'),
       series,
     };
-  }, [selectedCalculations]);
+  }, [readyCalculations, units]);
 
-  // If no calculations selected, show placeholder
-  if (selectedCalculations.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <ErrorMessage message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  // Empty state - no calculations selected
+  if (calculations.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
@@ -151,16 +200,32 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
     );
   }
 
+  // Empty state - calculations selected but no data loaded
+  if (readyCalculations.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-muted-foreground">
+            No data available
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Failed to load calculation data
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
-      {/* Кнопки экспорта */}
+      {/* Export buttons */}
       <ChartExportButtons
         onExportPNG={handleExportPNG}
         onExportSVG={handleExportSVG}
-        disabled={selectedCalculations.length === 0}
+        disabled={readyCalculations.length === 0}
       />
 
-      {/* График */}
+      {/* Chart */}
       <ReactECharts
         ref={chartRef}
         option={chartOption}

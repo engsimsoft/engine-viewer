@@ -1,79 +1,108 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import type { Calculation } from '@/types';
+import type { CalculationReference } from '@/types/v2';
 import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
-  getCalculationColor,
-  calculateRpmRange,
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
+import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
+import { useAppStore } from '@/stores/appStore';
+import {
+  convertPower,
+  convertTorque,
+  getPowerUnit,
+  getTorqueUnit,
+} from '@/lib/unitsConversion';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface ChartPreset1Props {
-  calculations: Calculation[];
-  selectedIds: string[];
+  /** Array of CalculationReference from Zustand store (primary + comparisons) */
+  calculations: CalculationReference[];
 }
 
 /**
- * Пресет 1: Мощность и крутящий момент
+ * Chart Preset 1: Power & Torque (v2.0 - Multi-Project Support)
  *
- * График с двумя осями Y:
- * - Левая ось: P-Av (Средняя мощность, кВт)
- * - Правая ось: Torque (Крутящий момент, Н·м)
- * - Ось X: RPM (обороты)
+ * Dual-axis chart:
+ * - Left axis: P-Av (Average Power)
+ * - Right axis: Torque
+ * - X axis: RPM
+ *
+ * Features:
+ * - Cross-project comparison support
+ * - Units conversion (SI/American/HP)
+ * - Color-coded calculations
+ * - Loading/error states
  *
  * @example
  * ```tsx
- * <ChartPreset1
- *   calculations={project.calculations}
- *   selectedIds={['$1', '$2']}
- * />
+ * const primary = useAppStore(state => state.primaryCalculation);
+ * const comparisons = useAppStore(state => state.comparisonCalculations);
+ * const allCalcs = [primary, ...comparisons].filter(Boolean);
+ *
+ * <ChartPreset1 calculations={allCalcs} />
  * ```
  */
-export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
+export function ChartPreset1({ calculations }: ChartPreset1Props) {
   // Hook для экспорта графика
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('power-torque-chart');
 
-  // Фильтруем только выбранные расчёты
-  const selectedCalculations = useMemo(() => {
-    return calculations.filter((calc) => selectedIds.includes(calc.id));
-  }, [calculations, selectedIds]);
+  // Get units from store
+  const units = useAppStore((state) => state.units);
 
-  // Генерируем конфигурацию ECharts
+  // Load cross-project data
+  const {
+    calculations: loadedCalculations,
+    isLoading,
+    error,
+    refetch
+  } = useMultiProjectData(calculations);
+
+  // Filter calculations with loaded data
+  const readyCalculations = useMemo(() => {
+    return getLoadedCalculations(loadedCalculations);
+  }, [loadedCalculations]);
+
+  // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
     const baseConfig = getBaseChartConfig();
 
-    // Автоматически определяем диапазон RPM
-    const rpmRange = calculateRpmRange(selectedCalculations);
+    // Calculate RPM range from metadata
+    const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
+    const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
+    const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
-    // Создаём серии данных для каждого выбранного расчёта
+    // Create series for each calculation
     const series: any[] = [];
     const legendData: string[] = [];
 
-    selectedCalculations.forEach((calc, index) => {
-      const color = getCalculationColor(index);
-      const calculationName = calc.name;
+    readyCalculations.forEach((calc) => {
+      const color = calc.color;
+      const label = `${calc.projectName} → ${calc.calculationName}`;
 
-      // Подготовка данных для P-Av (мощность)
-      const powerData = calc.dataPoints.map((point) => ({
-        value: [point.RPM, point['P-Av']],
-        unit: 'kW',
+      // Ensure data is loaded
+      if (!calc.data || calc.data.length === 0) return;
+
+      // Prepare power data with units conversion
+      const powerData = calc.data.map((point) => ({
+        value: [point.RPM, convertPower(point['P-Av'], units)],
       }));
 
-      // Подготовка данных для Torque (момент)
-      const torqueData = calc.dataPoints.map((point) => ({
-        value: [point.RPM, point.Torque],
-        unit: 'N·m',
+      // Prepare torque data with units conversion
+      const torqueData = calc.data.map((point) => ({
+        value: [point.RPM, convertTorque(point.Torque, units)],
       }));
 
-      // Серия для мощности (левая ось Y)
+      // Power series (left Y axis)
       series.push({
-        name: `${calculationName} - P-Av`,
+        name: `${label} - P-Av`,
         type: 'line',
-        yAxisIndex: 0, // Левая ось
+        yAxisIndex: 0, // Left axis
         data: powerData,
         itemStyle: {
           color,
@@ -90,11 +119,11 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
         },
       });
 
-      // Серия для момента (правая ось Y)
+      // Torque series (right Y axis)
       series.push({
-        name: `${calculationName} - Torque`,
+        name: `${label} - Torque`,
         type: 'line',
-        yAxisIndex: 1, // Правая ось
+        yAxisIndex: 1, // Right axis
         data: torqueData,
         itemStyle: {
           color,
@@ -102,7 +131,7 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
         lineStyle: {
           color,
           width: 2,
-          type: 'dashed', // Пунктирная линия для момента
+          type: 'dashed', // Dashed line for torque
         },
         symbol: 'diamond',
         symbolSize: 6,
@@ -112,10 +141,14 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
         },
       });
 
-      // Добавляем в легенду
-      legendData.push(`${calculationName} - P-Av`);
-      legendData.push(`${calculationName} - Torque`);
+      // Add to legend
+      legendData.push(`${label} - P-Av`);
+      legendData.push(`${label} - Torque`);
     });
+
+    // Get unit labels
+    const powerUnit = getPowerUnit(units);
+    const torqueUnit = getTorqueUnit(units);
 
     return {
       ...baseConfig,
@@ -133,17 +166,35 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
         data: legendData,
         top: 40,
       },
-      xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax),
       yAxis: [
-        createYAxis('P-Av (kW)', 'left', '#1f77b4'),
-        createYAxis('Torque (N·m)', 'right', '#ff7f0e'),
+        createYAxis(`P-Av (${powerUnit})`, 'left', '#1f77b4'),
+        createYAxis(`Torque (${torqueUnit})`, 'right', '#ff7f0e'),
       ] as any,
       series,
     };
-  }, [selectedCalculations]);
+  }, [readyCalculations, units]);
 
-  // If no calculations selected, show placeholder
-  if (selectedCalculations.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border">
+        <ErrorMessage message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  // Empty state - no calculations selected
+  if (calculations.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
@@ -158,16 +209,32 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
     );
   }
 
+  // Empty state - calculations selected but no data loaded
+  if (readyCalculations.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-muted-foreground">
+            No data available
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Failed to load calculation data
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4">
-      {/* Кнопки экспорта */}
+      {/* Export buttons */}
       <ChartExportButtons
         onExportPNG={handleExportPNG}
         onExportSVG={handleExportSVG}
-        disabled={selectedCalculations.length === 0}
+        disabled={readyCalculations.length === 0}
       />
 
-      {/* График */}
+      {/* Chart */}
       <ReactECharts
         ref={chartRef}
         option={chartOption}

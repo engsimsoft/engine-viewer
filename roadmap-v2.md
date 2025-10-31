@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 3 - Modal Dialogs ✅ COMPLETE
-- **Progress:** 64/139 tasks (46%)
-- **Next Task:** Phase 4 - Charts & Visualization
+- **Phase:** Phase 4 - Charts & Visualization (Section 4.1 ✅ COMPLETE)
+- **Progress:** 71/139 tasks (51%)
+- **Next Task:** Phase 4.2 - Peak Markers on Charts
 
 ---
 
@@ -822,7 +822,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/ChartPreset1.tsx` (and 2, 3, 4)
 
 **Tasks:**
-- [ ] 4.1.1 Update ChartPreset1 (Power & Torque) (2 hours)
+- [X] 4.1.1 Update ChartPreset1 (Power & Torque) (2 hours) ✅
   - Accept: calculations: CalculationReference[] (not just selectedIds)
   - For each calculation:
     - Fetch data via useMultiProjectData
@@ -832,23 +832,26 @@ const CALCULATION_COLORS = [
   - Apply units conversion to all values
   - Update axis labels based on units
 
-- [ ] 4.1.2 Update ChartPreset2 (Cylinder Pressure) (2 hours)
+- [X] 4.1.2 Update ChartPreset2 (Cylinder Pressure) (2 hours) ✅
   - Same approach: calculations: CalculationReference[]
   - For each calculation, create 4 series (PCylMax1-4)
   - Use calculation.color with variations for 4 cylinders
   - Apply units conversion
 
-- [ ] 4.1.3 Update ChartPreset3 (Temperature) (2 hours)
+- [X] 4.1.3 Update ChartPreset3 (Temperature) (2 hours) ✅
   - Same approach
   - Average TCylMax and TUbMax across cylinders
   - Apply units conversion (°C or °F)
+  - K → °C conversion from database
 
-- [ ] 4.1.4 Update ChartPreset4 (Custom) (2 hours)
+- [X] 4.1.4 Update ChartPreset4 (Custom) (2 hours) ✅
   - Same approach
   - User-selected parameters from all calculations
   - Dynamic series creation
+  - Dynamic units labels based on settings
+  - English UI text
 
-**Acceptance:** All 4 presets work with multi-project data, colors correct, units applied
+**Acceptance:** ✅ COMPLETE - All 4 presets work with multi-project data, colors correct, units applied
 
 ---
 
