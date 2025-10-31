@@ -22,6 +22,7 @@ import { useAppStore } from '@/stores/appStore';
 import { formatRPMRange } from '@/lib/rpmCalculator';
 import { MAX_COMPARISONS } from '@/types/v2';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 /**
  * Comparison Section Component
@@ -50,6 +51,20 @@ export function ComparisonSection() {
   const remaining = MAX_COMPARISONS - count;
   const isFull = count >= MAX_COMPARISONS;
 
+  /**
+   * Handle Add Calculation button click
+   * Shows toast if max comparisons reached, otherwise opens modal
+   */
+  const handleAddClick = () => {
+    if (isFull) {
+      toast.info('Maximum comparisons reached', {
+        description: 'You can compare up to 4 calculations (1 primary + 4 comparisons)',
+      });
+      return;
+    }
+    toggleComparisonModal();
+  };
+
   // ====================================================================
   // Empty State - No Comparisons
   // ====================================================================
@@ -68,7 +83,7 @@ export function ComparisonSection() {
 
         {/* Add Button */}
         <Button
-          onClick={toggleComparisonModal}
+          onClick={handleAddClick}
           variant="outline"
           className="w-full justify-center gap-2"
         >
@@ -153,10 +168,9 @@ export function ComparisonSection() {
       {/* Add Button (show if not full) */}
       {!isFull && (
         <Button
-          onClick={toggleComparisonModal}
+          onClick={handleAddClick}
           variant="outline"
           className="w-full justify-center gap-2 text-xs"
-          disabled={isFull}
         >
           <Plus className="h-3 w-3" />
           Add Calculation {remaining > 0 && `(${remaining} more)`}
