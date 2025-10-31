@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 2 - Core UI Components (In Progress)
-- **Progress:** 33/84 tasks (39%)
-- **Next Task:** Phase 2 - Task 2.3.1 (Restructure Left Panel)
+- **Progress:** 35/84 tasks (42%)
+- **Next Task:** Phase 2 - Task 2.4.1 (Create Primary Section Component)
 
 ---
 
@@ -483,7 +483,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/LeftPanel.tsx`
 
 **Tasks:**
-- [ ] 2.3.1 Create new LeftPanel structure (1.5 hours)
+- [X] 2.3.1 Create new LeftPanel structure (1.5 hours)
   ```tsx
   // Layout:
   // ┌─────────────────────┐
@@ -495,7 +495,7 @@ const CALCULATION_COLORS = [
   // └─────────────────────┘
   ```
 
-- [ ] 2.3.2 Create responsive behavior (30 min)
+- [X] 2.3.2 Create responsive behavior (30 min)
   - Desktop (>1024px): Fixed width 320px
   - Tablet (768-1024px): Collapsible (hamburger menu)
   - Mobile (<768px): Full-screen overlay
@@ -1525,6 +1525,8 @@ const CALCULATION_COLORS = [
   - Section 1.8 - Update Routing (2 tasks) ✅
 - [X] **Phase 2 In Progress** - Core UI Components
   - Section 2.1 - Create Header Component (4 tasks) ✅
+  - Section 2.2 - Create Settings Popover (5 tasks) ✅
+  - Section 2.3 - Restructure Left Panel (2 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1532,8 +1534,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 28/84 tasks complete (33%)**
-- **Next: Section 2.2 - Create Settings Popover**
+- **Progress: 35/84 tasks complete (42%)**
+- **Next: Section 2.4 - Create Primary Section Component**
 
 ---
 
