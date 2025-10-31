@@ -1,10 +1,9 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Info } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useSelectedCalculations } from '@/hooks/useSelectedCalculations';
-import { useChartPreset } from '@/hooks/useChartPreset';
-import { CalculationSelector } from '@/components/visualization/CalculationSelector';
-import { PresetSelector } from '@/components/visualization/PresetSelector';
+import { useAppStore } from '@/stores/appStore';
+import { Header } from '@/components/visualization/Header';
+import { LeftPanel } from '@/components/visualization/LeftPanel';
 import { ChartPreset1 } from '@/components/visualization/ChartPreset1';
 import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
 import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
@@ -12,40 +11,37 @@ import { ChartPreset4 } from '@/components/visualization/ChartPreset4';
 import { DataTable } from '@/components/visualization/DataTable';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 /**
- * Страница визуализации проекта
+ * Project Visualization Page (Phase 2 - Integrated)
  *
- * ВАЖНО (v2.0 Architecture):
- * - projectId из URL (:id) используется как INITIAL CONTEXT для визуализации
- * - Это НЕ ограничение - пользователь может сравнивать расчёты из ЛЮБЫХ проектов
- * - В Phase 2: projectId определяет какой проект показать в Primary Selection Modal по умолчанию
- * - Cross-project comparison полностью поддерживается через useMultiProjectData hook
+ * IMPORTANT (v2.0 Architecture):
+ * - projectId from URL (:id) is used as INITIAL CONTEXT for visualization
+ * - This is NOT a limitation - user can compare calculations from ANY projects
+ * - In Phase 2: projectId determines which project to show in Primary Selection Modal by default
+ * - Cross-project comparison fully supported through useMultiProjectData hook
  *
- * Текущая версия (Phase 1):
- * - Загружает данные одного проекта (старая архитектура)
- * - В Phase 2 будет обновлена для работы с Zustand store + multi-project data
+ * Phase 2 Updates:
+ * - Uses new Header component (English UI, with settings)
+ * - Uses new LeftPanel component (responsive, 3 sections)
+ * - All UI text in English
+ * - Connected to Zustand store
  *
- * Отображает:
- * - Информацию о проекте
- * - Селектор расчётов (макс 5)
- * - Переключатель пресетов графиков
- * - График выбранного пресета (1-4)
- * - Таблицу данных с экспортом (CSV, Excel)
+ * Displays:
+ * - Project header with back button and settings
+ * - Left panel: Primary selector + Presets + Comparisons
+ * - Chart area: Selected preset visualization
+ * - Data table with export (CSV, Excel)
  */
 export default function ProjectPage() {
-  // projectId из URL - initial context для Phase 2
+  // projectId from URL - initial context for Phase 2
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
-  // Загружаем данные проекта
+  // Load project data
   const { project, loading, error, refetch } = useProjectData(id);
 
-  // Управление выбранными расчётами
+  // Old architecture (Phase 1) - selected calculations
+  // TODO: Phase 3 will replace with Zustand store + modals
   const {
     selectedIds,
     toggleCalculation,
@@ -54,57 +50,36 @@ export default function ProjectPage() {
     count,
   } = useSelectedCalculations();
 
-  // Управление выбором пресета графиков
-  const [activePreset, setActivePreset] = useChartPreset();
+  // Get selected preset from Zustand store (Phase 2)
+  const selectedPreset = useAppStore((state) => state.selectedPreset);
 
-  // Обработчик возврата на главную
-  const handleGoBack = () => {
-    navigate('/');
-  };
-
-  // Состояние загрузки
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
   }
 
-  // Состояние ошибки
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          <Button
-            variant="ghost"
-            onClick={handleGoBack}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к проектам
-          </Button>
           <ErrorMessage message={error} onRetry={refetch} />
         </div>
       </div>
     );
   }
 
-  // Проект не найден
+  // Project not found
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          <Button
-            variant="ghost"
-            onClick={handleGoBack}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к проектам
-          </Button>
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">Проект не найден</p>
+            <p className="text-lg text-muted-foreground">Project not found</p>
           </div>
         </div>
       </div>
@@ -112,118 +87,68 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header с кнопкой "Назад" */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={handleGoBack}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к проектам
-          </Button>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header Component (Phase 2) */}
+      <Header
+        projectName={project.fileName}
+        engineType={project.metadata.engineType}
+        cylinders={project.metadata.numCylinders}
+        calculationsCount={project.calculations.length}
+      />
 
-          {/* Информация о проекте */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-2xl">{project.fileName}</CardTitle>
-                  <CardDescription className="mt-2">
-                    {project.metadata.engineType} • {project.metadata.numCylinders} цилиндров
-                  </CardDescription>
-                </div>
-                <Badge variant="secondary" className="ml-4">
-                  {project.calculations.length} расчётов
-                </Badge>
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel (Phase 2) - Responsive, 3 sections */}
+        <LeftPanel />
+
+        {/* Main Chart & Table Area */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Chart Area */}
+            <div className="bg-card rounded-lg border p-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold">Visualization</h2>
+                <p className="text-sm text-muted-foreground">
+                  {count > 0
+                    ? `Showing ${count} calculation${count === 1 ? '' : 's'}`
+                    : 'Select calculations to display'}
+                </p>
               </div>
-            </CardHeader>
-          </Card>
-        </div>
 
-        {/* Основной контент */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Левая колонка: Селектор расчётов */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5" />
-                  Расчёты
-                </CardTitle>
-                <CardDescription>
-                  Выберите до {maxCount} расчётов для сравнения
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CalculationSelector
+              {/* Render chart based on selected preset */}
+              {selectedPreset === 1 && (
+                <ChartPreset1
                   calculations={project.calculations}
                   selectedIds={selectedIds}
-                  onToggle={toggleCalculation}
-                  isMaxReached={isMaxReached}
-                  maxCount={maxCount}
                 />
-              </CardContent>
-            </Card>
-          </div>
+              )}
+              {selectedPreset === 2 && (
+                <ChartPreset2
+                  calculations={project.calculations}
+                  selectedIds={selectedIds}
+                />
+              )}
+              {selectedPreset === 3 && (
+                <ChartPreset3
+                  calculations={project.calculations}
+                  selectedIds={selectedIds}
+                />
+              )}
+              {selectedPreset === 4 && (
+                <ChartPreset4
+                  calculations={project.calculations}
+                  selectedIds={selectedIds}
+                />
+              )}
+            </div>
 
-          {/* Правая колонка: График */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Селектор пресетов */}
-            <PresetSelector
-              activePreset={activePreset}
-              onPresetChange={setActivePreset}
-            />
-
-            {/* График */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Визуализация</CardTitle>
-                <CardDescription>
-                  {count > 0
-                    ? `Отображено ${count} расчёт${count === 1 ? '' : count < 5 ? 'а' : 'ов'}`
-                    : 'Выберите расчёты для отображения'}
-                </CardDescription>
-              </CardHeader>
-              <Separator />
-              <CardContent className="pt-6">
-                {/* Рендерим график в зависимости от выбранного пресета */}
-                {activePreset === 'preset1' && (
-                  <ChartPreset1
-                    calculations={project.calculations}
-                    selectedIds={selectedIds}
-                  />
-                )}
-                {activePreset === 'preset2' && (
-                  <ChartPreset2
-                    calculations={project.calculations}
-                    selectedIds={selectedIds}
-                  />
-                )}
-                {activePreset === 'preset3' && (
-                  <ChartPreset3
-                    calculations={project.calculations}
-                    selectedIds={selectedIds}
-                  />
-                )}
-                {activePreset === 'preset4' && (
-                  <ChartPreset4
-                    calculations={project.calculations}
-                    selectedIds={selectedIds}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Таблица данных */}
+            {/* Data Table */}
             <DataTable
               calculations={project.calculations}
               selectedIds={selectedIds}
             />
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

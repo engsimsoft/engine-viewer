@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 2 - Core UI Components ✅ COMPLETE
+- **Phase:** Phase 2 - Core UI Components (In Progress - Integration needed)
 - **Progress:** 45/139 tasks (32%)
-- **Next Task:** Phase 3 - Task 3.1.1 (Create Primary Selection Modal)
+- **Next Task:** Phase 2 - Integration: Update ProjectPage with new components
 
 ---
 
@@ -1523,13 +1523,14 @@ const CALCULATION_COLORS = [
   - Section 1.6 - Color Palette Manager (2 tasks) ✅
   - Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
   - Section 1.8 - Update Routing (2 tasks) ✅
-- [X] **Phase 2 COMPLETE** - Core UI Components ✅
+- [ ] **Phase 2 In Progress** - Core UI Components (Components ready, integration needed)
   - Section 2.1 - Create Header Component (4 tasks) ✅
   - Section 2.2 - Create Settings Popover (5 tasks) ✅
   - Section 2.3 - Restructure Left Panel (2 tasks) ✅
   - Section 2.4 - Create Primary Section Component (4 tasks) ✅
   - Section 2.5 - Update Chart Presets Component (2 tasks) ✅
   - Section 2.6 - Create Comparison Section Component (4 tasks, 1 optional skipped) ✅
+  - Section 2.7 - Integration: Update ProjectPage (0/3 tasks) ⏳ CURRENT
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
