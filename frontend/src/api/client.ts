@@ -9,7 +9,6 @@ import type {
   EngineProject,
   ProjectMetadata,
   ProjectsListResponse,
-  ProjectDetailsResponse,
 } from '@/types';
 
 // Создаём axios instance с базовой конфигурацией

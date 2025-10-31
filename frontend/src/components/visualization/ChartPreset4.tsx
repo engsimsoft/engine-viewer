@@ -9,6 +9,8 @@ import {
   getCalculationColor,
 } from '@/lib/chartConfig';
 import { cn } from '@/lib/utils';
+import { useChartExport } from '@/hooks/useChartExport';
+import { ChartExportButtons } from './ChartExportButtons';
 
 interface ChartPreset4Props {
   calculations: Calculation[];
@@ -53,6 +55,9 @@ const PARAMETER_OPTIONS: ParameterOption[] = [
  * ```
  */
 export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
+  // Hook для экспорта графика
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('custom-params-chart');
+
   // Состояние выбранных параметров (по умолчанию P-Av и Torque)
   const [selectedParams, setSelectedParams] = useState<string[]>([
     'P-Av',
@@ -194,6 +199,13 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
 
   return (
     <div className="w-full space-y-4">
+      {/* Кнопки экспорта */}
+      <ChartExportButtons
+        onExportPNG={handleExportPNG}
+        onExportSVG={handleExportSVG}
+        disabled={selectedCalculations.length === 0}
+      />
+
       {/* Селектор параметров */}
       <div className="p-4 bg-muted/30 rounded-lg border">
         <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
@@ -231,6 +243,7 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
 
       {/* График */}
       <ReactECharts
+        ref={chartRef}
         option={chartOption}
         style={{ height: '600px', width: '100%' }}
         notMerge={true}

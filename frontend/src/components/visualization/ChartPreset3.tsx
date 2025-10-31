@@ -8,6 +8,8 @@ import {
   createYAxis,
   getCalculationColor,
 } from '@/lib/chartConfig';
+import { useChartExport } from '@/hooks/useChartExport';
+import { ChartExportButtons } from './ChartExportButtons';
 
 interface ChartPreset3Props {
   calculations: Calculation[];
@@ -39,6 +41,9 @@ interface ChartPreset3Props {
  * ```
  */
 export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
+  // Hook для экспорта графика
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport('cylinder-temperature-chart');
+
   // Фильтруем только выбранные расчёты
   const selectedCalculations = useMemo(() => {
     return calculations.filter((calc) => selectedIds.includes(calc.id));
@@ -166,8 +171,17 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      {/* Кнопки экспорта */}
+      <ChartExportButtons
+        onExportPNG={handleExportPNG}
+        onExportSVG={handleExportSVG}
+        disabled={selectedCalculations.length === 0}
+      />
+
+      {/* График */}
       <ReactECharts
+        ref={chartRef}
         option={chartOption}
         style={{ height: '600px', width: '100%' }}
         notMerge={true}

@@ -9,6 +9,7 @@ import { ChartPreset1 } from '@/components/visualization/ChartPreset1';
 import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
 import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
 import { ChartPreset4 } from '@/components/visualization/ChartPreset4';
+import { DataTable } from '@/components/visualization/DataTable';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ import { Separator } from '@/components/ui/separator';
  * - Селектор расчётов (макс 5)
  * - Переключатель пресетов графиков
  * - График выбранного пресета (1-4)
+ * - Таблицу данных с экспортом (CSV, Excel)
  */
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
@@ -203,6 +205,12 @@ export default function ProjectPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Таблица данных */}
+            <DataTable
+              calculations={project.calculations}
+              selectedIds={selectedIds}
+            />
           </div>
         </div>
       </div>
