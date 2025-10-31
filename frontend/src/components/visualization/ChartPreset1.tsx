@@ -53,8 +53,9 @@ interface ChartPreset1Props {
  * ```
  */
 export function ChartPreset1({ calculations }: ChartPreset1Props) {
-  // Get units from store
+  // Get units and decimals from store
   const units = useAppStore((state) => state.units);
+  const decimals = useAppStore((state) => state.chartSettings.decimals);
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -110,14 +111,16 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
       // Get marker symbol for this calculation
       const markerSymbol = getMarkerSymbol(calcIndex);
 
-      // Prepare power data with units conversion
+      // Prepare power data with units conversion and decimals
       const powerData = calc.data.map((point) => ({
         value: [point.RPM, convertPower(point['P-Av'], units)],
+        decimals: decimals,
       }));
 
-      // Prepare torque data with units conversion
+      // Prepare torque data with units conversion and decimals
       const torqueData = calc.data.map((point) => ({
         value: [point.RPM, convertTorque(point.Torque, units)],
+        decimals: decimals,
       }));
 
       // Power series (left Y axis)
@@ -229,7 +232,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
       ] as any,
       series,
     };
-  }, [readyCalculations, units]);
+  }, [readyCalculations, units, decimals]);
 
   // Mouse event handlers for live cursor
   const handleMouseMove = useCallback((params: any) => {

@@ -109,14 +109,27 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
         params.forEach((param: any) => {
           const marker = param.marker;
           const seriesName = param.seriesName;
-          const value = param.value;
-          const unit = param.data?.unit || '';
+
+          // Extract value from array [rpm, value] format
+          // ECharts data format: { value: [x, y] } where x=RPM, y=actual value
+          let displayValue = param.value;
+          if (Array.isArray(param.value) && param.value.length >= 2) {
+            displayValue = param.value[1]; // Get Y value (second element)
+          }
+
+          // Get decimals from data or use default
+          const decimals = param.data?.decimals !== undefined ? param.data.decimals : 1;
+
+          // Format number with decimals
+          const formattedValue = typeof displayValue === 'number'
+            ? displayValue.toFixed(decimals)
+            : displayValue;
 
           result += `
             <div style="margin: 4px 0;">
               ${marker}
-              <span style="display: inline-block; width: 150px;">${seriesName}:</span>
-              <span style="font-weight: bold;">${value} ${unit}</span>
+              <span style="display: inline-block; min-width: 200px;">${seriesName}:</span>
+              <span style="font-weight: bold;">${formattedValue}</span>
             </div>
           `;
         });

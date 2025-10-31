@@ -93,8 +93,9 @@ const PARAMETER_OPTIONS: ParameterOption[] = [
  * ```
  */
 export function ChartPreset4({ calculations }: ChartPreset4Props) {
-  // Get units from store
+  // Get units and decimals from store
   const units = useAppStore((state) => state.units);
+  const decimals = useAppStore((state) => state.chartSettings.decimals);
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -182,6 +183,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
           return {
             value: [point.RPM, convertedValue],
+            decimals: decimals,
           };
         });
 
@@ -285,7 +287,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       yAxis: createYAxis(yAxisName, 'left', '#2ca02c'),
       series,
     };
-  }, [readyCalculations, selectedParams, units]);
+  }, [readyCalculations, selectedParams, units, decimals]);
 
   // Parameter toggle handler
   const handleToggleParam = (paramId: string) => {

@@ -60,8 +60,9 @@ interface ChartPreset3Props {
  * ```
  */
 export function ChartPreset3({ calculations }: ChartPreset3Props) {
-  // Get units from store
+  // Get units and decimals from store
   const units = useAppStore((state) => state.units);
+  const decimals = useAppStore((state) => state.chartSettings.decimals);
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -126,6 +127,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         const celsius = avgTempK - 273.15; // K → °C
         return {
           value: [point.RPM, convertTemperature(celsius, units)],
+          decimals: decimals,
         };
       });
 
@@ -138,6 +140,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         const celsius = avgTempK - 273.15; // K → °C
         return {
           value: [point.RPM, convertTemperature(celsius, units)],
+          decimals: decimals,
         };
       });
 
@@ -261,7 +264,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       yAxis: createYAxis(`Temperature (${tempUnit})`, 'left', '#d62728'),
       series,
     };
-  }, [readyCalculations, units]);
+  }, [readyCalculations, units, decimals]);
 
   // Mouse event handlers for live cursor
   const handleMouseMove = useCallback((params: any) => {

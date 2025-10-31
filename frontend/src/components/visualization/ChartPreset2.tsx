@@ -56,8 +56,9 @@ interface ChartPreset2Props {
  * ```
  */
 export function ChartPreset2({ calculations }: ChartPreset2Props) {
-  // Get units from store
+  // Get units and decimals from store
   const units = useAppStore((state) => state.units);
+  const decimals = useAppStore((state) => state.chartSettings.decimals);
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -119,9 +120,10 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
       for (let cylIndex = 0; cylIndex < numCylinders; cylIndex++) {
         const cylinderNumber = cylIndex + 1;
 
-        // Prepare pressure data with units conversion
+        // Prepare pressure data with units conversion and decimals
         const pressureData = calc.data.map((point) => ({
           value: [point.RPM, convertPressure(point.PCylMax[cylIndex], units)],
+          decimals: decimals,
         }));
 
         // Line style: solid for cylinder 1, different dashes for others
@@ -203,7 +205,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
       yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4'),
       series,
     };
-  }, [readyCalculations, units]);
+  }, [readyCalculations, units, decimals]);
 
   // Mouse event handlers for live cursor
   const handleMouseMove = useCallback((params: any) => {
