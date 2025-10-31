@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
@@ -9,7 +9,6 @@ import {
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
-import { LiveCursorPanel } from './LiveCursorPanel';
 import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
@@ -72,11 +71,6 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
 
   // Hook для экспорта графика
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
-
-  // Live cursor state
-  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
-  const [cursorRpm, setCursorRpm] = useState<number | null>(null);
-  const [isCursorVisible, setIsCursorVisible] = useState(false);
 
   // Load cross-project data
   const {
@@ -264,34 +258,6 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
     };
   }, [readyCalculations, units, decimals]);
 
-  // Mouse event handlers for live cursor
-  const handleMouseMove = useCallback((params: any) => {
-    const chartInstance = chartRef.current?.getEchartsInstance();
-    if (!chartInstance || !params.event) return;
-
-    const event = params.event.event;
-    setCursorPosition({ x: event.clientX, y: event.clientY });
-
-    const pointInGrid = [params.event.offsetX, params.event.offsetY];
-    const rpm = chartInstance.convertFromPixel({ seriesIndex: 0 }, pointInGrid)?.[0];
-
-    if (rpm && typeof rpm === 'number') {
-      setCursorRpm(Math.round(rpm));
-      setIsCursorVisible(true);
-    }
-  }, [chartRef]);
-
-  const handleMouseOut = useCallback(() => {
-    setIsCursorVisible(false);
-    setCursorPosition(null);
-    setCursorRpm(null);
-  }, []);
-
-  const onEvents = useMemo(() => ({
-    'mousemove': handleMouseMove,
-    'globalout': handleMouseOut,
-  }), [handleMouseMove, handleMouseOut]);
-
   // Loading state
   if (isLoading) {
     return (
@@ -351,7 +317,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         disabled={readyCalculations.length === 0}
       />
 
-      {/* Chart with live cursor */}
+      {/* Chart */}
       <div className="relative">
         <ReactECharts
           ref={chartRef}
@@ -360,16 +326,6 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
           notMerge={true}
           lazyUpdate={true}
           theme="light"
-          onEvents={onEvents}
-        />
-
-        {/* Live Cursor Panel */}
-        <LiveCursorPanel
-          calculations={readyCalculations}
-          currentRpm={cursorRpm}
-          isVisible={isCursorVisible}
-          position={cursorPosition}
-          preset={3}
         />
       </div>
 
