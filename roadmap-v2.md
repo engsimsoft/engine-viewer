@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Not started (planning complete)
-- **Progress:** 0/84 tasks (0%)
-- **Next Task:** Phase 1 - Task 1.1
+- **Phase:** Phase 1 - Architecture & State (In Progress)
+- **Progress:** 13/84 tasks (15%)
+- **Next Task:** Phase 1 - Task 1.5.1 (Peak Values Finder)
 
 ---
 
@@ -223,7 +223,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/lib/rpmCalculator.ts`
 
 **Tasks:**
-- [ ] 1.4.1 Create calculateAverageStep function (1 hour)
+- [X] 1.4.1 Create calculateAverageStep function (1 hour)
   ```typescript
   function calculateAverageStep(dataPoints: DataPoint[]): number {
     // Extract RPMs, sort ascending
@@ -234,7 +234,7 @@ const CALCULATION_COLORS = [
   }
   ```
 
-- [ ] 1.4.2 Create formatRPMRange function (30 min)
+- [X] 1.4.2 Create formatRPMRange function (30 min)
   ```typescript
   function formatRPMRange(
     rpmRange: [number, number],
@@ -244,7 +244,7 @@ const CALCULATION_COLORS = [
   }
   ```
 
-- [ ] 1.4.3 Test with real data (30 min)
+- [X] 1.4.3 Test with real data (30 min)
   - Test with Vesta data (expected ~200 RPM step)
   - Test with BMW data (expected ~200-220 RPM step)
   - Verify rounding works correctly
@@ -1511,7 +1511,10 @@ const CALCULATION_COLORS = [
 ### Activities:
 - [X] Researched current project structure (Plan agent)
 - [X] Created complete roadmap-v2.md (this file)
-- [ ] Ready to start Phase 1
+- [X] Phase 1 Section 1.1 - Type Definitions (4 tasks) ✅
+- [X] Phase 1 Section 1.2 - Global State Management (3 tasks) ✅
+- [X] Phase 1 Section 1.3 - Units Conversion Utilities (3 tasks) ✅
+- [X] Phase 1 Section 1.4 - RPM Step Calculator (3 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1519,6 +1522,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
+- **Progress: 13/84 tasks complete (15%)**
+- **Next: Section 1.5 - Peak Values Finder**
 
 ---
 
