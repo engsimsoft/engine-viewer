@@ -10,6 +10,7 @@ import {
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
 import { LiveCursorPanel } from './LiveCursorPanel';
+import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -363,6 +364,12 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
           preset={3}
         />
       </div>
+
+      {/* Peak Values Cards */}
+      <PeakValuesCards
+        calculations={readyCalculations}
+        preset={3}
+      />
     </div>
   );
 }

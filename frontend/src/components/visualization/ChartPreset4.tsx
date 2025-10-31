@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
 import { LiveCursorPanel } from './LiveCursorPanel';
+import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -436,6 +437,13 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
           preset={4}
         />
       </div>
+
+      {/* Peak Values Cards */}
+      <PeakValuesCards
+        calculations={readyCalculations}
+        preset={4}
+        selectedParams={selectedParams}
+      />
     </div>
   );
 }

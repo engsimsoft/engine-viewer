@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 4 - Charts & Visualization (Section 4.3 ✅ COMPLETE)
-- **Progress:** 78/139 tasks (56%)
-- **Next Task:** Phase 4.4 - Peak Values Cards Component
+- **Phase:** Phase 4 - Charts & Visualization (Section 4.4 ✅ COMPLETE)
+- **Progress:** 84/139 tasks (60%)
+- **Next Task:** Phase 4.5 - Update Chart Export
 
 ---
 
@@ -937,7 +937,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/PeakValuesCards.tsx`
 
 **Tasks:**
-- [ ] 4.4.1 Create cards layout (2 hours)
+- [X] 4.4.1 Create cards layout (2 hours)
   ```tsx
   // For each calculation:
   // ⚫ Vesta 1.6 IM → $1
@@ -952,35 +952,35 @@ const CALCULATION_COLORS = [
   // Mobile: 1 column
   ```
 
-- [ ] 4.4.2 Implement dynamic cards for Preset 1 (1 hour)
+- [X] 4.4.2 Implement dynamic cards for Preset 1 (1 hour)
   - Use findPeaksForPreset(calc.data, 1)
   - Returns: [maxPAv, maxTorque]
   - Create 2 cards per calculation
   - Apply units conversion
   - Trophy icon 🏆
 
-- [ ] 4.4.3 Implement dynamic cards for Preset 2 (1 hour)
+- [X] 4.4.3 Implement dynamic cards for Preset 2 (1 hour)
   - findPeaksForPreset(calc.data, 2)
   - Returns: [maxPCylMax1, maxPCylMax2, maxPCylMax3, maxPCylMax4]
   - Create 4 cards per calculation
   - Label: "Max PCylMax(1)", "Max PCylMax(2)", etc.
 
-- [ ] 4.4.4 Implement dynamic cards for Preset 3 (1 hour)
+- [X] 4.4.4 Implement dynamic cards for Preset 3 (1 hour)
   - findPeaksForPreset(calc.data, 3)
   - Returns: [maxTCylMax, maxTUbMax]
   - Create 2 cards per calculation
   - Apply temperature units conversion
 
-- [ ] 4.4.5 Implement dynamic cards for Preset 4 (1 hour)
+- [X] 4.4.5 Implement dynamic cards for Preset 4 (1 hour)
   - findPeaksForPreset(calc.data, 4, customParams)
   - Create cards for each custom parameter
   - Dynamic labels
 
-- [ ] 4.4.6 Add color indicators (30 min)
+- [X] 4.4.6 Add color indicators (30 min)
   - Each calculation section has color indicator
   - Matches calculation.color from chart
 
-**Acceptance:** Peak cards show for all calculations, correct values, units applied, responsive
+**Acceptance:** ✅ COMPLETE - Peak cards show for all calculations, correct values, units applied, responsive
 
 ---
 
