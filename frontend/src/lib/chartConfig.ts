@@ -151,45 +151,16 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       icon: 'roundRect',
     },
 
-    // Toolbox - restore button
-    toolbox: {
-      show: true,
-      feature: {
-        restore: {
-          title: 'Reset Zoom (or Double-Click)'
-        },
-      },
-      right: 20,
-      top: 10,
-      itemSize: 18,
-      itemGap: 12,
-      iconStyle: {
-        borderColor: '#666',
-      },
-      emphasis: {
-        iconStyle: {
-          borderColor: '#3b82f6',
-        },
-      },
-    },
-
-    // DataZoom - Shift+Drag to zoom, mouse wheel, double-click to restore
+    // DataZoom - масштабирование (базовое)
     dataZoom: [
       {
         type: 'inside',
         xAxisIndex: [0],
         start: 0,
         end: 100,
-        zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
+        zoomOnMouseWheel: false,
+        moveOnMouseMove: false,
         moveOnMouseWheel: false,
-        // Shift + Drag = brush select to zoom
-        brushSelect: true,
-        brushStyle: {
-          borderWidth: 2,
-          borderColor: '#3b82f6',
-          color: 'rgba(59, 130, 246, 0.15)',
-        },
       },
     ],
 
