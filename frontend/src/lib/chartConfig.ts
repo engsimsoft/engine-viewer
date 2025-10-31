@@ -78,7 +78,7 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       left: '60px',
       right: '60px',
       top: '80px',
-      bottom: '100px',
+      bottom: '60px', // Reduced from 100px (removed slider)
       containLabel: true,
     },
 
@@ -151,25 +151,37 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       icon: 'roundRect',
     },
 
-    // DataZoom - масштабирование и панорамирование
-    dataZoom: [
-      {
-        type: 'slider',
-        show: true,
-        xAxisIndex: [0],
-        start: 0,
-        end: 100,
-        bottom: 20,
-        height: 20,
-        handleSize: '110%',
-        handleStyle: {
-          color: '#3b82f6',
+    // Toolbox - drag-to-zoom and restore
+    toolbox: {
+      show: true,
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none', // Zoom only on X axis (RPM)
+          title: {
+            zoom: 'Zoom',
+            back: 'Reset Zoom'
+          },
         },
-        textStyle: {
-          color: '#666',
+        restore: {
+          title: 'Restore'
         },
-        borderColor: '#ddd',
       },
+      right: 20,
+      top: 10,
+      itemSize: 18,
+      itemGap: 12,
+      iconStyle: {
+        borderColor: '#666',
+      },
+      emphasis: {
+        iconStyle: {
+          borderColor: '#3b82f6',
+        },
+      },
+    },
+
+    // DataZoom - масштабирование колёсиком мыши
+    dataZoom: [
       {
         type: 'inside',
         xAxisIndex: [0],
