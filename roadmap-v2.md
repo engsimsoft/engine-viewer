@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 1 - Architecture & State ✅ COMPLETE
-- **Progress:** 24/84 tasks (29%)
-- **Next Task:** Phase 2 - Task 2.1.1 (Create Header Component)
+- **Phase:** Phase 2 - Core UI Components (In Progress)
+- **Progress:** 28/84 tasks (33%)
+- **Next Task:** Phase 2 - Task 2.2.1 (Create Settings Popover)
 
 ---
 
@@ -398,7 +398,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/Header.tsx`
 
 **Tasks:**
-- [ ] 2.1.1 Create Header component layout (1 hour)
+- [X] 2.1.1 Create Header component layout (1 hour)
   ```tsx
   // Structure:
   // [← Back to Projects]  [Project Name + Metadata]  [⚙️ Settings]
@@ -407,21 +407,21 @@ const CALCULATION_COLORS = [
   // Right: Settings gear icon
   ```
 
-- [ ] 2.1.2 Implement Back button (30 min)
-  - Icon: ArrowLeft from Radix Icons
+- [X] 2.1.2 Implement Back button (30 min)
+  - Icon: ArrowLeft from lucide-react
   - Text: "Back to Projects"
   - onClick: navigate to '/'
   - Hover effect
 
-- [ ] 2.1.3 Display project metadata (30 min)
+- [X] 2.1.3 Display project metadata (30 min)
   - First line: "Vesta 1.6 IM.det" (project name)
   - Second line: "NATUR • 4 cylinders • 17 calculations"
   - Use bullets (•) between items
   - Gray color for metadata
 
-- [ ] 2.1.4 Settings icon button (15 min)
-  - Icon: GearIcon from Radix Icons
-  - Size: 24x24px
+- [X] 2.1.4 Settings icon button (15 min)
+  - Icon: Settings from lucide-react
+  - Size: 24x24px (5x5 in Tailwind)
   - onClick: toggleSettings()
   - Hover effect
 
@@ -1514,15 +1514,17 @@ const CALCULATION_COLORS = [
 ### Activities:
 - [X] Researched current project structure (Plan agent)
 - [X] Created complete roadmap-v2.md (this file)
-- [X] Phase 1 Section 1.1 - Type Definitions (4 tasks) ✅
-- [X] Phase 1 Section 1.2 - Global State Management (3 tasks) ✅
-- [X] Phase 1 Section 1.3 - Units Conversion Utilities (3 tasks) ✅
-- [X] Phase 1 Section 1.4 - RPM Step Calculator (3 tasks) ✅
-- [X] Phase 1 Section 1.5 - Peak Values Finder (3 tasks) ✅
-- [X] Phase 1 Section 1.6 - Color Palette Manager (2 tasks) ✅
-- [X] Phase 1 Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
-- [X] Phase 1 Section 1.8 - Update Routing (2 tasks) ✅
-- [X] **🎉 PHASE 1 COMPLETE!** All 8 sections done (24/24 tasks)
+- [X] **Phase 1 COMPLETE** - Architecture & State (24/24 tasks) ✅
+  - Section 1.1 - Type Definitions (4 tasks) ✅
+  - Section 1.2 - Global State Management (3 tasks) ✅
+  - Section 1.3 - Units Conversion Utilities (3 tasks) ✅
+  - Section 1.4 - RPM Step Calculator (3 tasks) ✅
+  - Section 1.5 - Peak Values Finder (3 tasks) ✅
+  - Section 1.6 - Color Palette Manager (2 tasks) ✅
+  - Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
+  - Section 1.8 - Update Routing (2 tasks) ✅
+- [X] **Phase 2 In Progress** - Core UI Components
+  - Section 2.1 - Create Header Component (4 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1530,8 +1532,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 24/84 tasks complete (29%)**
-- **🚀 Phase 1 Complete - Ready for Phase 2 (Core UI Components)**
+- **Progress: 28/84 tasks complete (33%)**
+- **Next: Section 2.2 - Create Settings Popover**
 
 ---
 
