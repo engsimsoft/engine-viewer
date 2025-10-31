@@ -72,7 +72,7 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
         // Подготовка данных для PCylMax конкретного цилиндра
         const pressureData = calc.dataPoints.map((point) => ({
           value: [point.RPM, point.PCylMax[cylIndex]],
-          unit: 'бар',
+          unit: 'bar',
         }));
 
         // Стиль линии: сплошная для цилиндра 1, разные пунктиры для остальных
@@ -130,7 +130,7 @@ export function ChartPreset2({ calculations, selectedIds }: ChartPreset2Props) {
         type: 'scroll', // Скролл если много легенд
       },
       xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
-      yAxis: createYAxis('PCylMax (бар)', 'left', '#1f77b4'),
+      yAxis: createYAxis('PCylMax (bar)', 'left', '#1f77b4'),
       series,
     };
   }, [selectedCalculations]);

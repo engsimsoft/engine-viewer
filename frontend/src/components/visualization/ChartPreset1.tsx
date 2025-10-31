@@ -60,13 +60,13 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
       // Подготовка данных для P-Av (мощность)
       const powerData = calc.dataPoints.map((point) => ({
         value: [point.RPM, point['P-Av']],
-        unit: 'кВт',
+        unit: 'kW',
       }));
 
       // Подготовка данных для Torque (момент)
       const torqueData = calc.dataPoints.map((point) => ({
         value: [point.RPM, point.Torque],
-        unit: 'Н·м',
+        unit: 'N·m',
       }));
 
       // Серия для мощности (левая ось Y)
@@ -135,8 +135,8 @@ export function ChartPreset1({ calculations, selectedIds }: ChartPreset1Props) {
       },
       xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
       yAxis: [
-        createYAxis('P-Av (кВт)', 'left', '#1f77b4'),
-        createYAxis('Torque (Н·м)', 'right', '#ff7f0e'),
+        createYAxis('P-Av (kW)', 'left', '#1f77b4'),
+        createYAxis('Torque (N·m)', 'right', '#ff7f0e'),
       ] as any,
       series,
     };

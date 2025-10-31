@@ -29,9 +29,9 @@ interface ParameterOption {
 }
 
 const PARAMETER_OPTIONS: ParameterOption[] = [
-  { id: 'P-Av', label: 'P-Av', unit: 'кВт', isArray: false },
-  { id: 'Torque', label: 'Torque', unit: 'Н·м', isArray: false },
-  { id: 'PCylMax', label: 'PCylMax', unit: 'бар', isArray: true },
+  { id: 'P-Av', label: 'P-Av', unit: 'kW', isArray: false },
+  { id: 'Torque', label: 'Torque', unit: 'N·m', isArray: false },
+  { id: 'PCylMax', label: 'PCylMax', unit: 'bar', isArray: true },
   { id: 'TCylMax', label: 'TCylMax', unit: 'K', isArray: true },
   { id: 'TUbMax', label: 'TUbMax', unit: 'K', isArray: true },
   { id: 'PurCyl', label: 'PurCyl', unit: '', isArray: true },
@@ -139,14 +139,14 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
     });
 
     // Определяем название оси Y и единицы измерения
-    let yAxisName = 'Значение';
+    let yAxisName = 'Value';
     if (selectedParams.length === 1) {
       const param = PARAMETER_OPTIONS.find((p) => p.id === selectedParams[0]);
       if (param) {
         yAxisName = `${param.label} (${param.unit})`;
       }
     } else if (selectedParams.length > 1) {
-      yAxisName = 'Значение (разные единицы)';
+      yAxisName = 'Value (mixed units)';
     }
 
     return {
@@ -232,7 +232,7 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
               >
                 {param.label}
                 {param.unit && ` (${param.unit})`}
-                {param.isArray && ' (средн.)'}
+                {param.isArray && ' (avg)'}
               </button>
             );
           })}
