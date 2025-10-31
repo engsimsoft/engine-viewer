@@ -25,9 +25,9 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 2 - Core UI Components (In Progress - Integration needed)
-- **Progress:** 45/139 tasks (32%)
-- **Next Task:** Phase 2 - Integration: Update ProjectPage with new components
+- **Phase:** Phase 2 - Core UI Components ✅ COMPLETE
+- **Progress:** 48/139 tasks (35%)
+- **Next Task:** Phase 3 - Task 3.1.1 (Create Primary Selection Modal)
 
 ---
 
@@ -617,7 +617,7 @@ const CALCULATION_COLORS = [
 
 ---
 
-**Phase 2 Milestone:** ✅ Header done, Settings working, Left Panel restructured with Primary + Comparison sections
+**Phase 2 Milestone:** ✅ COMPLETE - Header done, Settings working, Left Panel restructured with Primary + Comparison sections, **integrated into ProjectPage with English UI**
 
 ---
 
@@ -1523,14 +1523,14 @@ const CALCULATION_COLORS = [
   - Section 1.6 - Color Palette Manager (2 tasks) ✅
   - Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
   - Section 1.8 - Update Routing (2 tasks) ✅
-- [ ] **Phase 2 In Progress** - Core UI Components (Components ready, integration needed)
+- [X] **Phase 2 COMPLETE** ✅ - Core UI Components (All components created and integrated)
   - Section 2.1 - Create Header Component (4 tasks) ✅
   - Section 2.2 - Create Settings Popover (5 tasks) ✅
   - Section 2.3 - Restructure Left Panel (2 tasks) ✅
   - Section 2.4 - Create Primary Section Component (4 tasks) ✅
   - Section 2.5 - Update Chart Presets Component (2 tasks) ✅
   - Section 2.6 - Create Comparison Section Component (4 tasks, 1 optional skipped) ✅
-  - Section 2.7 - Integration: Update ProjectPage (0/3 tasks) ⏳ CURRENT
+  - Section 2.7 - Integration: Update ProjectPage (3 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1538,8 +1538,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 139 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 45/139 tasks complete (32%)**
-- **Next: Phase 3 - Modal Dialogs**
+- **Progress: 48/139 tasks complete (35%)**
+- **Current: Phase 3 - Modal Dialogs**
 
 ---
 
