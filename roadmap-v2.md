@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 3 - Modal Dialogs (In Progress)
-- **Progress:** 53/139 tasks (38%)
-- **Next Task:** Phase 3 - Section 3.2 (Create Comparison Selection Modal)
+- **Progress:** 63/139 tasks (45%)
+- **Next Task:** Phase 3 - Section 3.4.3 (Handle edge cases) or Phase 4
 
 ---
 
@@ -691,7 +691,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/ComparisonModal/ProjectListStep.tsx`
 
 **Tasks:**
-- [ ] 3.2.1 Create Step 1 layout (2 hours)
+- [X] 3.2.1 Create Step 1 layout (2 hours)
   ```tsx
   // ┌────────────────────────────┐
   // │ ← Cancel  Add for Comparison │
@@ -712,16 +712,16 @@ const CALCULATION_COLORS = [
   // └────────────────────────────┘
   ```
 
-- [ ] 3.2.2 Fetch projects list (30 min)
+- [X] 3.2.2 Fetch projects list (30 min)
   - Use existing useProjects hook
   - Display all available projects
   - Show metadata: calculations count, engine type, cylinders, last modified
 
-- [ ] 3.2.3 Implement search (1 hour)
+- [X] 3.2.3 Implement search (1 hour)
   - Filter projects by name (case-insensitive)
   - Clear button when text present
 
-- [ ] 3.2.4 Handle project selection (30 min)
+- [X] 3.2.4 Handle project selection (30 min)
   - Click on project card → store selectedProject
   - Transition to Step 2 (smooth slide)
 
@@ -734,7 +734,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/ComparisonModal/CalculationListStep.tsx`
 
 **Tasks:**
-- [ ] 3.3.1 Create Step 2 layout (2 hours)
+- [X] 3.3.1 Create Step 2 layout (2 hours)
   ```tsx
   // ┌────────────────────────────┐
   // │ ← BMW M42  Add for Comparison │
@@ -755,28 +755,28 @@ const CALCULATION_COLORS = [
   // └────────────────────────────┘
   ```
 
-- [ ] 3.3.2 Fetch selected project data (30 min)
+- [X] 3.3.2 Fetch selected project data (30 min)
   - Fetch GET /api/project/:selectedProjectId
   - Extract calculations list
   - Display each calculation with metadata
 
-- [ ] 3.3.3 Implement calculation selection (1 hour)
+- [X] 3.3.3 Implement calculation selection (1 hour)
   - Click on row → select calculation (single select)
   - Show selected indicator: ⚫
   - Enable [Add Calculation] button only when selected
 
-- [ ] 3.3.4 Implement Add button (1 hour)
+- [X] 3.3.4 Implement Add button (1 hour)
   - Build CalculationReference object
   - Assign next available color: getNextColor([primary.color, ...comparisons.map(c => c.color)])
   - Call addComparison(calc)
   - Close modal
   - Show toast: "Calculation added" ✅
 
-- [ ] 3.3.5 Add back navigation (30 min)
+- [X] 3.3.5 Add back navigation (30 min)
   - Click "← BMW M42" → back to Step 1
   - Smooth slide transition
 
-- [ ] 3.3.6 Implement search (1 hour)
+- [X] 3.3.6 Implement search (1 hour)
   - Filter calculations by name
   - Clear button
 
@@ -789,14 +789,14 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/ComparisonModal/index.tsx`
 
 **Tasks:**
-- [ ] 3.4.1 Create modal wrapper component (1.5 hours)
+- [X] 3.4.1 Create modal wrapper component (1.5 hours)
   - Use Radix Dialog primitive
   - Trigger: isComparisonModalOpen from store
   - Manage step state: 1 or 2
   - Render ProjectListStep or CalculationListStep based on step
   - Handle transitions between steps
 
-- [ ] 3.4.2 Add animations (1 hour)
+- [X] 3.4.2 Add animations (1 hour)
   - Modal open/close: same as Primary Modal
   - Step transition: slide left/right 300ms
   - Smooth, no flicker
