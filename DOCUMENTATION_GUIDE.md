@@ -45,7 +45,7 @@
 - ✅ Правильно: Написать в `engine-viewer-tech-spec.md` (ТЗ), остальные ссылаются на спеку
 
 ### 2. README = Точка входа
-- **Размер:** 80-120 строк (не больше!)
+- **Размер:** 50-150 строк (оптимально ~120)
 - **Содержание:** Только быстрый старт
 - **Детали:** Ссылки на docs/ для подробностей
 - **Назначение:** Дать понять что это за проект и как быстро запустить
@@ -67,11 +67,16 @@
 ```
 engine-viewer/
 │
-├── README.md ──────────────────────► ТОЧКА ВХОДА (80-120 строк)
+├── README.md ──────────────────────► ТОЧКА ВХОДА (50-150 строк, оптимально ~120)
 │                                     • Что это (2-3 предложения)
-│                                     • Быстрый старт (npm install, npm start)
+│                                     • Быстрый старт (используя скрипты)
 │                                     • Ссылки на docs/
 │                                     • Технологии (React, Express, ECharts)
+│
+├── Claude.md ──────────────────────► ИНСТРУКЦИИ ДЛЯ CLAUDE CODE
+│                                     • Как работать с проектом
+│                                     • Важные правила (перевод параметров, документация)
+│                                     • Структура документации
 │
 ├── engine-viewer-tech-spec.md ────► ТЕХНИЧЕСКОЕ ЗАДАНИЕ (ИСТОЧНИК ИСТИНЫ)
 │                                     • Требования (.det файлы, графики)
@@ -93,24 +98,30 @@ engine-viewer/
 │                                     • Что изменили (Changed)
 │                                     • Что починили (Fixed)
 │
-├── CLAUDE.md ──────────────────────► ИНСТРУКЦИИ ДЛЯ CLAUDE CODE
-│                                     • Как работать с проектом
-│                                     • Важные правила
-│                                     • Структура документации
-│
-├── DOCUMENTATION_GUIDE.md ─────────► ЭТОТ ФАЙЛ (правила!)
-│                                     • Как вести документацию
+├── DOCUMENTATION_GUIDE.md ─────────► ЭТОТ ФАЙЛ (правила документации!)
 │                                     • Принципы SSOT
-│                                     • Чек-листы
+│                                     • Чек-листы при изменениях
+│                                     • Шаблоны файлов
 │
 ├── config.yaml ────────────────────► КОНФИГУРАЦИЯ ПРИЛОЖЕНИЯ
 │                                     • server.port
 │                                     • files.path (путь к .det файлам)
+│                                     • files.extensions (поддерживаемые форматы)
 │
 ├── .gitignore ─────────────────────► ЧТО НЕ КОММИТИТЬ
 │                                     • node_modules/, dist/, logs/
 │
 ├── package.json ───────────────────► NPM ЗАВИСИМОСТИ
+│
+├── scripts/ ───────────────────────► SHELL СКРИПТЫ УПРАВЛЕНИЯ
+│   ├── start.sh                    • Запуск Backend + Frontend
+│   ├── stop.sh                     • Остановка всех процессов
+│   ├── restart.sh                  • Перезапуск проекта
+│   ├── status.sh                   • Проверка статуса
+│   └── README.md                   • Документация по скриптам
+│
+├── _personal/ ─────────────────────► ЛИЧНЫЕ ЗАМЕТКИ (игнорируется Claude)
+│   └── ...                         • Твои заметки, шпаргалки, курсы
 │
 ├── backend/ ───────────────────────► BACKEND (EXPRESS)
 │   ├── package.json                • Backend dependencies
@@ -119,30 +130,45 @@ engine-viewer/
 │   │   ├── config.js               • Загрузка config.yaml
 │   │   ├── services/
 │   │   │   ├── fileParser.js       • Парсер .det файлов
-│   │   │   └── fileScanner.js      • Сканирование папки
+│   │   │   ├── fileScanner.js      • Сканирование папки
+│   │   │   ├── metadataService.js  • Управление метаданными проектов
+│   │   │   └── parsers/            • Парсеры для будущих форматов (опционально)
+│   │   │       └── xyzParser.js    • Пример парсера нового формата
 │   │   ├── routes/
 │   │   │   ├── projects.js         • GET /api/projects
-│   │   │   └── data.js             • GET /api/project/:id
+│   │   │   ├── data.js             • GET /api/project/:id
+│   │   │   └── metadata.js         • GET/POST /api/project/:id/metadata
 │   │   └── types/
 │   │       └── engineData.ts       • TypeScript интерфейсы
-│   │
-│   └── test-parser.js              • Тестовый скрипт парсера
 │
 ├── frontend/ ──────────────────────► FRONTEND (REACT + VITE)
 │   ├── package.json                • Frontend dependencies
 │   ├── index.html                  • HTML разметка
-│   ├── vite.config.js              • Vite конфигурация
+│   ├── vite.config.ts              • Vite конфигурация
 │   ├── tailwind.config.js          • TailwindCSS конфигурация
 │   └── src/
 │       ├── App.tsx                 • Main React компонент
-│       ├── components/             • React компоненты
+│       ├── pages/
+│       │   ├── HomePage.tsx        • Главная страница (список проектов)
+│       │   └── ProjectPage.tsx     • Страница проекта (графики + таблица)
+│       ├── components/
 │       │   ├── ProjectList.tsx     • Список проектов
-│       │   ├── ChartPresets.tsx    • Пресеты графиков
-│       │   └── DataTable.tsx       • Таблица данных
-│       ├── services/               • API calls
-│       │   └── api.ts              • Axios API client
-│       └── types/                  • TypeScript интерфейсы
-│           └── engineData.ts
+│       │   └── visualization/      • Компоненты визуализации
+│       │       ├── ChartPreset1.tsx • График P-Av & Torque
+│       │       ├── ChartPreset2.tsx • График PCylMax
+│       │       ├── ChartPreset3.tsx • График TCylMax
+│       │       ├── ChartPreset4.tsx • График Deto
+│       │       ├── DataTable.tsx    • Таблица данных
+│       │       └── ChartExportButtons.tsx • Кнопки экспорта
+│       ├── hooks/
+│       │   └── useChartExport.ts   • Hook для экспорта графиков
+│       ├── api/
+│       │   └── client.ts           • Axios API client
+│       ├── utils/
+│       │   ├── chartUtils.ts       • Утилиты для графиков
+│       │   └── tableUtils.ts       • Утилиты для таблиц
+│       └── types/
+│           └── engineData.ts       • TypeScript интерфейсы
 │
 ├── test-data/ ─────────────────────► ТЕСТОВЫЕ .DET ФАЙЛЫ
 │   ├── Vesta 1.6 IM.det            • Тестовый файл 1
@@ -153,7 +179,7 @@ engine-viewer/
     ├── setup.md ───────────────────► ДЕТАЛЬНАЯ УСТАНОВКА
     │                                 • Prerequisites (Node.js 18+)
     │                                 • Installation (npm install)
-    │                                 • Running (backend + frontend)
+    │                                 • Running (используя scripts/)
     │                                 • Проверка работы
     │
     ├── architecture.md ────────────► АРХИТЕКТУРА СИСТЕМЫ
@@ -165,6 +191,7 @@ engine-viewer/
     ├── api.md ─────────────────────► API ДОКУМЕНТАЦИЯ
     │                                 • GET /api/projects
     │                                 • GET /api/project/:id
+    │                                 • GET/POST /api/project/:id/metadata
     │                                 • Query parameters
     │                                 • Response formats
     │
@@ -174,17 +201,33 @@ engine-viewer/
     │                                 • Parsing errors
     │                                 • Performance problems
     │
-    └── decisions/ ─────────────────► ADR (Architecture Decision Records)
-        ├── 001-why-echarts.md      • Почему ECharts вместо Chart.js
-        ├── 002-file-format.md      • Формат .det файлов
-        └── template.md             • Шаблон для новых ADR
+    ├── parsers-guide.md ───────────► РУКОВОДСТВО ПО ДОБАВЛЕНИЮ ПАРСЕРОВ
+    │                                 ⚠️ КРИТИЧЕСКИ ВАЖНО для будущих форматов!
+    │                                 • Как изучить формат файла
+    │                                 • Как создать ADR
+    │                                 • Как написать парсер
+    │                                 • Как интегрировать в систему
+    │                                 • Как тестировать
+    │                                 • Checklist добавления формата
+    │
+    ├── decisions/ ─────────────────► ADR (Architecture Decision Records)
+    │   │                             ⚠️ КРИТИЧЕСКИ ВАЖНО: Документируй ПОЧЕМУ!
+    │   │                             ADR помогают вспомнить причины решений
+    │   ├── template.md             • Шаблон для новых ADR
+    │   └── 001-det-file-format.md  • Парсинг .det файлов (решения и проблемы)
+    │
+    └── file-formats/ ──────────────► ОПИСАНИЯ ФОРМАТОВ ФАЙЛОВ
+        ├── README.md               • Обзор всех поддерживаемых форматов
+        ├── det-format.md           • Детальное описание .det формата
+        └── examples/               • Примеры файлов для каждого формата
+            └── sample.det          • Образец .det файла
 ```
 
 ---
 
 ## 📝 Шаблоны файлов
 
-### README.md (80-120 строк)
+### README.md (50-150 строк, оптимально ~120)
 
 ```markdown
 # Engine Results Viewer
@@ -200,20 +243,16 @@ engine-viewer/
 ### Требования
 - Node.js 18+
 - npm
-- macOS/Linux/Windows
+- macOS/Linux (Windows - с адаптацией скриптов)
 
 ### Установка
 
-**Backend:**
 ```bash
-cd backend
-npm install
-```
+# Backend
+cd backend && npm install
 
-**Frontend:**
-```bash
-cd frontend
-npm install
+# Frontend
+cd frontend && npm install
 ```
 
 ### Конфигурация
@@ -227,28 +266,44 @@ files:
   path: ./test-data
   extensions:
     - .det
+  maxSize: 10485760  # 10 MB
 ```
 
 ### Запуск
 
-**Backend (терминал 1):**
+**Используй shell скрипты для управления проектом:**
+
 ```bash
-cd backend
-npm run dev
+# Запуск Backend + Frontend
+./scripts/start.sh
+
+# Проверка статуса
+./scripts/status.sh
+
+# Остановка
+./scripts/stop.sh
+
+# Перезапуск
+./scripts/restart.sh
 ```
 
-**Frontend (терминал 2):**
+**Или вручную (2 терминала):**
 ```bash
-cd frontend
-npm run dev
+# Терминал 1: Backend
+cd backend && npm run dev
+
+# Терминал 2: Frontend
+cd frontend && npm run dev
 ```
 
-- Backend: http://localhost:3000
+**URLs:**
+- Backend API: http://localhost:3000
 - Frontend: http://localhost:5173
 
 ## Документация
 
 - [Детальная установка](docs/setup.md)
+- [Управление проектом (скрипты)](scripts/README.md)
 - [Архитектура](docs/architecture.md)
 - [API документация](docs/api.md)
 - [Troubleshooting](docs/troubleshooting.md)
@@ -264,6 +319,7 @@ npm run dev
 - Vite 5.0+
 - ECharts 5.5+
 - TailwindCSS 3.4+
+- Tanstack Table 8.11+
 
 **Парсинг:**
 - Custom .det file parser
@@ -439,7 +495,21 @@ MIT
 - [ ] Обнови docs/architecture.md (если меняет архитектуру)
 - [ ] Добавь комментарии в код (JSDoc формат)
 - [ ] Опиши в README.md (если важная фича)
-- [ ] Создай ADR если принял важное техническое решение
+- [ ] **Создай ADR** если принял важное техническое решение
+  * ⚠️ ADR КРИТИЧЕСКИ ВАЖНЫ для запоминания причин решений!
+  * Используй [docs/decisions/template.md](decisions/template.md)
+  * Документируй ПОЧЕМУ, а не ЧТО
+
+**2a. Добавил новый формат файлов (.xyz)?**
+- [ ] ⚠️ **Следуй [docs/parsers-guide.md](parsers-guide.md)** - это обязательно!
+- [ ] Создай ADR в `docs/decisions/00X-xyz-file-format.md`
+- [ ] Создай описание в `docs/file-formats/xyz-format.md`
+- [ ] Обнови `docs/file-formats/README.md` (добавь строку в таблицу)
+- [ ] Создай парсер в `backend/src/services/parsers/xyzParser.js`
+- [ ] Обнови `config.yaml` (добавь .xyz в extensions)
+- [ ] Интегрируй парсер в routes или создай parserFactory
+- [ ] Протестируй на реальных файлах
+- [ ] Проверь performance (время парсинга)
 
 **3. Завершил этап (например, Этап 2)?**
 - [ ] Отметь "✅ ЗАВЕРШЕН" в заголовке этапа в roadmap.md
@@ -487,8 +557,9 @@ MIT
 ❌ **НЕ создавай дублирующие файлы:**
 - Нет QUICKSTART.md (если есть README)
 - Нет PROJECT_SUMMARY.md (если есть README + tech spec)
-- Нет README в подпапках (backend/README.md)
+- Нет README в подпапках (backend/README.md, frontend/README.md)
 - Нет дублирующих конфигураций
+- ⚠️ Исключение: scripts/README.md - разрешён (документация скриптов)
 
 ❌ **НЕ копируй информацию:**
 - Вместо копирования делай ссылку
@@ -539,7 +610,10 @@ MIT
 - **Как устроена система?** → docs/architecture.md
 - **API endpoints?** → docs/api.md
 - **Что-то не работает?** → docs/troubleshooting.md
-- **Важное техническое решение?** → docs/decisions/NNN-название.md
+- **Управление проектом (скрипты)?** → scripts/README.md
+- **Добавляю новый формат файла?** → docs/parsers-guide.md (ОБЯЗАТЕЛЬНО!)
+- **Описание формата файла?** → docs/file-formats/format-name.md
+- **Важное техническое решение?** → docs/decisions/NNN-название.md (ADR)
 - **История изменений?** → CHANGELOG.md
 - **План разработки?** → roadmap.md
 - **Прогресс задач?** → roadmap.md (отметь [X])
@@ -642,6 +716,16 @@ npm run dev
 - **engine-viewer-tech-spec.md** - НЕ ИЗМЕНЯТЬ (источник требований)
 - **roadmap.md** - обновлять после КАЖДОЙ задачи
 - **CHANGELOG.md** - обновлять после каждого значимого изменения
-- **Парсер .det файлов** - core функционал, тщательно документировать
+- **docs/parsers-guide.md** - ОБЯЗАТЕЛЬНО следовать при добавлении форматов
+- **docs/decisions/** (ADR) - КРИТИЧЕСКИ ВАЖНО документировать решения
+  * ADR помогают вспомнить ПОЧЕМУ было принято решение через месяцы
+  * Разработчик всегда один (User + Claude Code)
+  * ADR заменяют вопросы "Почему мы это сделали так?"
+- **Названия параметров** - НИКОГДА не переводить на русский!
+
+**Разработчик: User + Claude Code (всегда вдвоём)**
+- Нет multi-developer setup
+- Нет CONTRIBUTING.md
+- ADR критичны для запоминания (Claude может забыть контекст)
 
 **Этот файл - твой гайд. Обращайся к нему при любых изменениях документации!**

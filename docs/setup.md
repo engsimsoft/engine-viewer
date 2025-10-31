@@ -383,7 +383,7 @@ npm run preview
 # Превью production сборки
 ```
 
-**Деплой:** См. [docs/deployment.md](deployment.md) (будет создан позже)
+**Деплой:** См. deployment guide (будет создан позже)
 
 ---
 
