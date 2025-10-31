@@ -151,19 +151,12 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       icon: 'roundRect',
     },
 
-    // Toolbox - drag-to-zoom and restore
+    // Toolbox - restore button
     toolbox: {
       show: true,
       feature: {
-        dataZoom: {
-          yAxisIndex: 'none', // Zoom only on X axis (RPM)
-          title: {
-            zoom: 'Zoom',
-            back: 'Reset Zoom'
-          },
-        },
         restore: {
-          title: 'Restore'
+          title: 'Reset Zoom (or Double-Click)'
         },
       },
       right: 20,
@@ -180,7 +173,7 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       },
     },
 
-    // DataZoom - масштабирование колёсиком мыши
+    // DataZoom - Shift+Drag to zoom, mouse wheel, double-click to restore
     dataZoom: [
       {
         type: 'inside',
@@ -190,6 +183,13 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
         zoomOnMouseWheel: true,
         moveOnMouseMove: true,
         moveOnMouseWheel: false,
+        // Shift + Drag = brush select to zoom
+        brushSelect: true,
+        brushStyle: {
+          borderWidth: 2,
+          borderColor: '#3b82f6',
+          color: 'rgba(59, 130, 246, 0.15)',
+        },
       },
     ],
 
