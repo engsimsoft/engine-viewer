@@ -185,16 +185,16 @@ export function ChartPreset4({ calculations, selectedIds }: ChartPreset4Props) {
     });
   };
 
-  // Если нет выбранных расчётов, показываем placeholder
+  // If no calculations selected, show placeholder
   if (selectedCalculations.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
           <p className="text-lg font-medium text-muted-foreground">
-            Выберите расчёты для отображения графика
+            Select calculations to display chart
           </p>
           <p className="text-sm text-muted-foreground">
-            Используйте чекбоксы слева для выбора расчётов
+            Use the left panel to select calculations
           </p>
         </div>
       </div>

@@ -253,13 +253,13 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
     exportToExcel(data, filename);
   };
 
-  // Если нет выбранных расчётов
+  // If no calculations selected
   if (selectedCalculations.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Таблица данных</CardTitle>
-          <CardDescription>Выберите расчёты для отображения данных</CardDescription>
+          <CardTitle>Data Table</CardTitle>
+          <CardDescription>Select calculations to display data</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -270,10 +270,9 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle>Таблица данных</CardTitle>
+            <CardTitle>Data Table</CardTitle>
             <CardDescription>
-              {tableData.length} строк • {selectedCalculations.length} расчёт
-              {selectedCalculations.length === 1 ? '' : selectedCalculations.length < 5 ? 'а' : 'ов'}
+              {tableData.length} rows • {selectedCalculations.length} calculation{selectedCalculations.length === 1 ? '' : 's'}
             </CardDescription>
           </div>
           <div className="flex gap-2">
