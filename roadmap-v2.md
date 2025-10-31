@@ -167,7 +167,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/lib/unitsConverter.ts`
 
 **Tasks:**
-- [ ] 1.3.1 Create conversion functions (2 hours)
+- [X] 1.3.1 Create conversion functions (2 hours)
   ```typescript
   // Power
   function convertPower(kW: number, targetUnits: Units): number
@@ -187,7 +187,7 @@ const CALCULATION_COLORS = [
   // °C → °F: (°C × 9/5) + 32
   ```
 
-- [ ] 1.3.2 Create unit label getters (1 hour)
+- [X] 1.3.2 Create unit label getters (1 hour)
   ```typescript
   function getPowerUnit(units: Units): string
   // si: 'kW', american: 'bhp', hp: 'PS'
@@ -202,7 +202,7 @@ const CALCULATION_COLORS = [
   // si: '°C', american: '°F', hp: '°C'
   ```
 
-- [ ] 1.3.3 Create formatValue helper (30 min)
+- [X] 1.3.3 Create formatValue helper (30 min)
   ```typescript
   function formatValue(
     value: number,

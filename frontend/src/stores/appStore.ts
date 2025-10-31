@@ -12,10 +12,12 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import {
+import type {
   AppState,
   CalculationReference,
   ChartSettings,
+} from '../types/v2';
+import {
   CALCULATION_COLORS,
   MAX_COMPARISONS,
   DEFAULT_UNITS,
@@ -129,7 +131,7 @@ function getNextColor(usedColors: string[]): string {
  */
 export const useAppStore = create<AppStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
   // ============================================================
   // Initial State
   // ============================================================
