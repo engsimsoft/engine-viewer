@@ -29,7 +29,7 @@ export function ChartExportButtons({
         size="sm"
         onClick={onExportPNG}
         disabled={disabled}
-        title="Экспорт в PNG (растровый формат для презентаций)"
+        title="Export to PNG (raster format for presentations)"
       >
         <Download className="mr-2 h-4 w-4" />
         PNG
@@ -39,7 +39,7 @@ export function ChartExportButtons({
         size="sm"
         onClick={onExportSVG}
         disabled={disabled}
-        title="Экспорт в SVG (векторный формат для публикаций)"
+        title="Export to SVG (vector format for publications)"
       >
         <FileImage className="mr-2 h-4 w-4" />
         SVG
