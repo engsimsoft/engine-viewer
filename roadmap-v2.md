@@ -26,8 +26,8 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 ## 📊 Current Status
 
 - **Phase:** Phase 1 - Architecture & State (In Progress)
-- **Progress:** 18/84 tasks (21%)
-- **Next Task:** Phase 1 - Task 1.7.1 (Multi-Project Data Fetching)
+- **Progress:** 21/84 tasks (25%)
+- **Next Task:** Phase 1 - Task 1.8.1 (Update Routing)
 
 ---
 
@@ -335,7 +335,7 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/hooks/useMultiProjectData.ts`
 
 **Tasks:**
-- [ ] 1.7.1 Create custom hook (2 hours)
+- [X] 1.7.1 Create custom hook (2 hours)
   ```typescript
   export function useMultiProjectData(
     calculations: CalculationReference[]
@@ -349,16 +349,17 @@ const CALCULATION_COLORS = [
   }
   ```
 
-- [ ] 1.7.2 Handle loading states (30 min)
+- [X] 1.7.2 Handle loading states (30 min)
   - Show loading spinner while fetching
   - Show error if any project fails to load
   - Support refetch on error
 
-- [ ] 1.7.3 Optimize with React Query (optional, 1 hour)
+- [X] 1.7.3 Optimize with React Query (optional, 1 hour)
   - Install @tanstack/react-query
   - Cache fetched projects
   - Don't re-fetch if already loaded
   - Stale time: 5 minutes
+  - NOTE: Skipped React Query, using built-in Map cache instead
 
 **Acceptance:** Can fetch data from multiple projects, caches properly, handles errors
 
@@ -1517,6 +1518,7 @@ const CALCULATION_COLORS = [
 - [X] Phase 1 Section 1.4 - RPM Step Calculator (3 tasks) ✅
 - [X] Phase 1 Section 1.5 - Peak Values Finder (3 tasks) ✅
 - [X] Phase 1 Section 1.6 - Color Palette Manager (2 tasks) ✅
+- [X] Phase 1 Section 1.7 - Multi-Project Data Fetching (3 tasks) ✅
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1524,8 +1526,8 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 84 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 18/84 tasks complete (21%)**
-- **Next: Section 1.7 - Multi-Project Data Fetching**
+- **Progress: 21/84 tasks complete (25%)**
+- **Next: Section 1.8 - Update Routing**
 
 ---
 
