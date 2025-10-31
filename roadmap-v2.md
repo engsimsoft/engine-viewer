@@ -100,12 +100,12 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/types/v2.ts`
 
 **Tasks:**
-- [ ] 1.1.1 Create `CalculationReference` interface (1 hour)
+- [X] 1.1.1 Create `CalculationReference` interface (1 hour)
   - Include all fields: projectId, projectName, calculationId, calculationName, color
   - Include metadata object: rpmRange, avgStep, pointsCount, engineType, cylinders
   - Include optional data field for cached CalculationData
 
-- [ ] 1.1.2 Create `AppState` interface (30 min)
+- [X] 1.1.2 Create `AppState` interface (30 min)
   - primaryCalculation: CalculationReference | null
   - comparisonCalculations: CalculationReference[] (max 4)
   - units: 'si' | 'american' | 'hp'
@@ -113,13 +113,13 @@ const CALCULATION_COLORS = [
   - chartSettings: { animation, showGrid, decimals }
   - UI flags: isSettingsOpen, isPrimaryModalOpen, isComparisonModalOpen, selectedPreset
 
-- [ ] 1.1.3 Create `PeakValue` interface (15 min)
+- [X] 1.1.3 Create `PeakValue` interface (15 min)
   - value: number
   - rpm: number
   - parameter: string
   - displayLabel: string
 
-- [ ] 1.1.4 Export constants (15 min)
+- [X] 1.1.4 Export constants (15 min)
   - CALCULATION_COLORS array (5 colors)
   - MAX_COMPARISONS = 4
   - DEFAULT_UNITS = 'si'
@@ -134,12 +134,12 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/stores/appStore.ts`
 
 **Tasks:**
-- [ ] 1.2.1 Install Zustand (5 min)
+- [X] 1.2.1 Install Zustand (5 min)
   ```bash
   npm install zustand
   ```
 
-- [ ] 1.2.2 Create Zustand store with AppState (1.5 hours)
+- [X] 1.2.2 Create Zustand store with AppState (1.5 hours)
   - State: primaryCalculation, comparisonCalculations, units, theme, chartSettings
   - Actions:
     - `setPrimaryCalculation(calc: CalculationReference)`
@@ -152,7 +152,7 @@ const CALCULATION_COLORS = [
     - `setSelectedPreset(preset: 1 | 2 | 3 | 4)`
     - `toggleSettings()`, `togglePrimaryModal()`, `toggleComparisonModal()`
 
-- [ ] 1.2.3 Add persistence to localStorage (30 min)
+- [X] 1.2.3 Add persistence to localStorage (30 min)
   - Persist: units, theme, chartSettings
   - DO NOT persist: calculations (session-only)
   - Use zustand/middleware persist
