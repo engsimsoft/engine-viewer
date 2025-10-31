@@ -7,6 +7,7 @@ import {
   createXAxis,
   createYAxis,
   getCalculationColor,
+  calculateRpmRange,
 } from '@/lib/chartConfig';
 import { useChartExport } from '@/hooks/useChartExport';
 import { ChartExportButtons } from './ChartExportButtons';
@@ -52,6 +53,9 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
   // Генерируем конфигурацию ECharts
   const chartOption = useMemo((): EChartsOption => {
     const baseConfig = getBaseChartConfig();
+
+    // Автоматически определяем диапазон RPM
+    const rpmRange = calculateRpmRange(selectedCalculations);
 
     // Создаём серии данных для каждого выбранного расчёта
     const series: any[] = [];
@@ -148,7 +152,7 @@ export function ChartPreset3({ calculations, selectedIds }: ChartPreset3Props) {
         data: legendData,
         top: 40,
       },
-      xAxis: createXAxis('RPM'),
+      xAxis: createXAxis('RPM', rpmRange.min, rpmRange.max),
       yAxis: createYAxis('Temperature (K)', 'left', '#d62728'),
       series,
     };

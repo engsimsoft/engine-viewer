@@ -1,4 +1,5 @@
 import type { EChartsOption } from 'echarts';
+import type { Calculation } from '@/types';
 
 // Цвета для расчётов (из config.yaml)
 export const CALCULATION_COLORS = [
@@ -14,6 +15,56 @@ export const CALCULATION_COLORS = [
  */
 export function getCalculationColor(index: number): string {
   return CALCULATION_COLORS[index % CALCULATION_COLORS.length];
+}
+
+/**
+ * Автоматически определить диапазон RPM для оси X
+ *
+ * Алгоритм:
+ * 1. Находит min/max RPM из всех выбранных расчётов
+ * 2. Определяет шаг округления в зависимости от диапазона:
+ *    - Диапазон > 5000 → округление до 1000 (2000, 3000, 4000...)
+ *    - Диапазон 2000-5000 → округление до 500 (1500, 2000, 2500...)
+ *    - Диапазон < 2000 → округление до 200 (1000, 1200, 1400...)
+ * 3. Округляет границы до "красивых" чисел
+ *
+ * @param calculations - Массив расчётов для анализа
+ * @returns Объект с min и max значениями RPM
+ *
+ * @example
+ * // Данные: 2600 - 7800 RPM
+ * calculateRpmRange(calculations) // { min: 2000, max: 8000 }
+ */
+export function calculateRpmRange(calculations: Calculation[]): { min: number; max: number } {
+  if (calculations.length === 0) {
+    return { min: 0, max: 8000 }; // Значения по умолчанию
+  }
+
+  let minRpm = Infinity;
+  let maxRpm = -Infinity;
+
+  // Найти min/max RPM из всех расчётов
+  calculations.forEach((calc) => {
+    calc.dataPoints.forEach((point) => {
+      minRpm = Math.min(minRpm, point.RPM);
+      maxRpm = Math.max(maxRpm, point.RPM);
+    });
+  });
+
+  // Если не нашли данных
+  if (minRpm === Infinity || maxRpm === -Infinity) {
+    return { min: 0, max: 8000 };
+  }
+
+  // Определить шаг округления на основе диапазона
+  const range = maxRpm - minRpm;
+  const roundStep = range > 5000 ? 1000 : range > 2000 ? 500 : 200;
+
+  // Округлить границы до "красивых" чисел
+  const min = Math.floor(minRpm / roundStep) * roundStep;
+  const max = Math.ceil(maxRpm / roundStep) * roundStep;
+
+  return { min, max };
 }
 
 /**
@@ -126,8 +177,16 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
 
 /**
  * Создать конфигурацию оси X (RPM)
+ *
+ * @param name - Название оси (по умолчанию 'RPM')
+ * @param min - Минимальное значение оси (опционально, для автоматического масштабирования)
+ * @param max - Максимальное значение оси (опционально, для автоматического масштабирования)
  */
-export function createXAxis(name: string = 'RPM'): EChartsOption['xAxis'] {
+export function createXAxis(
+  name: string = 'RPM',
+  min?: number,
+  max?: number
+): EChartsOption['xAxis'] {
   return {
     type: 'value',
     name,
@@ -137,6 +196,8 @@ export function createXAxis(name: string = 'RPM'): EChartsOption['xAxis'] {
       fontSize: 14,
       fontWeight: 'bold',
     },
+    min, // Автоматическое масштабирование если задано
+    max, // Автоматическое масштабирование если задано
     axisLine: {
       lineStyle: {
         color: '#666',

@@ -230,7 +230,7 @@ router.get('/:id', async (req, res, next) => {
     // Calculate metadata for each calculation
     const calculationsWithMetadata = projectData.calculations.map(calc => ({
       id: calc.id,
-      marker: calc.marker,
+      name: calc.name,  // Название расчёта без $ (например "14 UpDate")
       dataPoints: calc.dataPoints,
       metadata: generateCalculationMetadata(calc.dataPoints)
     }));

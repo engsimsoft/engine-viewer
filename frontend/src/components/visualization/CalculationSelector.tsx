@@ -109,16 +109,11 @@ export function CalculationSelector({
               <Label
                 htmlFor={`calc-${calculation.id}`}
                 className={`
-                  flex-1 cursor-pointer select-none
+                  flex-1 cursor-pointer select-none font-medium
                   ${disabled ? 'cursor-not-allowed' : ''}
                 `}
               >
-                <div className="flex flex-col">
-                  <span className="font-medium">{calculation.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {calculation.dataPoints.length} точек данных
-                  </span>
-                </div>
+                {calculation.name}
               </Label>
 
               {/* Бейдж для выбранного расчёта */}
