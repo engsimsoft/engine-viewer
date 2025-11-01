@@ -33,6 +33,8 @@ import ErrorMessage from '@/components/shared/ErrorMessage';
 interface DataTableProps {
   /** Array of CalculationReference from Zustand store (primary + comparisons) */
   calculations: CalculationReference[];
+  /** Selected preset (1-4) to filter displayed columns */
+  selectedPreset: 1 | 2 | 3 | 4;
 }
 
 /**
@@ -56,8 +58,10 @@ interface TableRow {
   torqueNm: number;
   /** Average cylinder pressure in original SI units (bar) */
   pressureBar: number;
-  /** Average cylinder temperature in original SI units (°C) */
-  temperatureC: number;
+  /** Average cylinder temperature (TCylMax) in original SI units (°C) */
+  temperatureCylC: number;
+  /** Average exhaust temperature (TUbMax) in original SI units (°C) */
+  temperatureExhC: number;
   /** Convergence value */
   convergence: number;
 }
@@ -73,7 +77,7 @@ interface TableRow {
  * - Export to CSV/Excel with units
  * - Sorting and pagination
  */
-export function DataTable({ calculations }: DataTableProps) {
+export function DataTable({ calculations, selectedPreset }: DataTableProps) {
   // Get units and chart settings from store
   const units = useAppStore((state) => state.units);
   const chartSettings = useAppStore((state) => state.chartSettings);
@@ -115,7 +119,8 @@ export function DataTable({ calculations }: DataTableProps) {
       calc.data.forEach((point) => {
         // Calculate averages for cylinder-specific parameters
         const avgPressure = point.PCylMax.reduce((sum, val) => sum + val, 0) / point.PCylMax.length;
-        const avgTemperature = point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length;
+        const avgTCylMax = point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length;
+        const avgTUbMax = point.TUbMax.reduce((sum, val) => sum + val, 0) / point.TUbMax.length;
 
         rows.push({
           id: `${calc.calculationId}-${point.RPM}`,
@@ -126,7 +131,8 @@ export function DataTable({ calculations }: DataTableProps) {
           powerKW: point['P-Av'],
           torqueNm: point.Torque,
           pressureBar: avgPressure,
-          temperatureC: avgTemperature,
+          temperatureCylC: avgTCylMax,
+          temperatureExhC: avgTUbMax,
           convergence: point.Convergence,
         });
       });
@@ -148,6 +154,22 @@ export function DataTable({ calculations }: DataTableProps) {
   const torqueUnit = getTorqueUnit(units);
   const pressureUnit = getPressureUnit(units);
   const temperatureUnit = getTemperatureUnit(units);
+
+  // Get preset name for CardDescription
+  const getPresetName = (preset: 1 | 2 | 3 | 4): string => {
+    switch (preset) {
+      case 1:
+        return 'Power & Torque Data';
+      case 2:
+        return 'Pressure Data';
+      case 3:
+        return 'Temperature Data';
+      case 4:
+        return 'Complete Data';
+      default:
+        return 'Data Table';
+    }
+  };
 
   // Create table columns
   const columns = useMemo<ColumnDef<TableRow, any>[]>(() => {
@@ -212,9 +234,20 @@ export function DataTable({ calculations }: DataTableProps) {
         sortingFn: 'basic',
       }) as ColumnDef<TableRow, any>,
 
-      // TCylMax column with units conversion (average)
-      columnHelper.accessor('temperatureC', {
+      // TCylMax column with units conversion (average cylinder temperature)
+      columnHelper.accessor('temperatureCylC', {
         header: `TCylMax (${temperatureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          const converted = convertTemperature(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // TUbMax column with units conversion (average exhaust temperature)
+      columnHelper.accessor('temperatureExhC', {
+        header: `TUbMax (${temperatureUnit})`,
         cell: (info) => {
           const value = info.getValue();
           const converted = convertTemperature(value, units);
@@ -234,8 +267,31 @@ export function DataTable({ calculations }: DataTableProps) {
       }) as ColumnDef<TableRow, any>,
     ];
 
-    return cols;
-  }, [units, decimals, powerUnit, torqueUnit, pressureUnit, temperatureUnit]);
+    // Filter columns based on selected preset
+    const filteredCols: ColumnDef<TableRow, any>[] = [];
+
+    // SOURCE and RPM are always visible
+    filteredCols.push(cols[0]); // Source
+    filteredCols.push(cols[1]); // RPM
+
+    if (selectedPreset === 1) {
+      // Preset 1: Power & Torque
+      filteredCols.push(cols[2]); // P-Av
+      filteredCols.push(cols[3]); // Torque
+    } else if (selectedPreset === 2) {
+      // Preset 2: Pressure & Temperature
+      filteredCols.push(cols[4]); // PCylMax
+    } else if (selectedPreset === 3) {
+      // Preset 3: Temperature Analysis
+      filteredCols.push(cols[5]); // TCylMax
+      filteredCols.push(cols[6]); // TUbMax
+    } else if (selectedPreset === 4) {
+      // Preset 4: All parameters
+      filteredCols.push(...cols.slice(2)); // All data columns
+    }
+
+    return filteredCols;
+  }, [units, decimals, powerUnit, torqueUnit, pressureUnit, temperatureUnit, selectedPreset]);
 
   // Create table instance with filtered data
   const table = useReactTable({
@@ -253,17 +309,37 @@ export function DataTable({ calculations }: DataTableProps) {
   });
 
   // Export handlers with units conversion
+  // Exports only the columns visible in current preset
   const handleExportCSV = () => {
     const data = filteredTableData.map((row) => {
-      return {
+      const exportRow: Record<string, string> = {
         'Source': row.source,
         'RPM': row.rpm.toFixed(0),
-        [`P-Av (${powerUnit})`]: convertPower(row.powerKW, units).toFixed(decimals),
-        [`Torque (${torqueUnit})`]: convertTorque(row.torqueNm, units).toFixed(decimals),
-        [`PCylMax (${pressureUnit})`]: convertPressure(row.pressureBar, units).toFixed(decimals),
-        [`TCylMax (${temperatureUnit})`]: convertTemperature(row.temperatureC, units).toFixed(decimals),
-        'Convergence': row.convergence.toFixed(4),
       };
+
+      // Add columns based on selected preset
+      if (selectedPreset === 1) {
+        // Preset 1: Power & Torque
+        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+      } else if (selectedPreset === 2) {
+        // Preset 2: Pressure
+        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+      } else if (selectedPreset === 3) {
+        // Preset 3: Temperature
+        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+      } else if (selectedPreset === 4) {
+        // Preset 4: All parameters
+        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+        exportRow['Convergence'] = row.convergence.toFixed(4);
+      }
+
+      return exportRow;
     });
 
     const filename = `data-${readyCalculations.map(c => c.calculationId).join('-')}.csv`;
@@ -272,15 +348,34 @@ export function DataTable({ calculations }: DataTableProps) {
 
   const handleExportExcel = () => {
     const data = filteredTableData.map((row) => {
-      return {
+      const exportRow: Record<string, string> = {
         'Source': row.source,
         'RPM': row.rpm.toFixed(0),
-        [`P-Av (${powerUnit})`]: convertPower(row.powerKW, units).toFixed(decimals),
-        [`Torque (${torqueUnit})`]: convertTorque(row.torqueNm, units).toFixed(decimals),
-        [`PCylMax (${pressureUnit})`]: convertPressure(row.pressureBar, units).toFixed(decimals),
-        [`TCylMax (${temperatureUnit})`]: convertTemperature(row.temperatureC, units).toFixed(decimals),
-        'Convergence': row.convergence.toFixed(4),
       };
+
+      // Add columns based on selected preset
+      if (selectedPreset === 1) {
+        // Preset 1: Power & Torque
+        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+      } else if (selectedPreset === 2) {
+        // Preset 2: Pressure
+        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+      } else if (selectedPreset === 3) {
+        // Preset 3: Temperature
+        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+      } else if (selectedPreset === 4) {
+        // Preset 4: All parameters
+        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+        exportRow['Convergence'] = row.convergence.toFixed(4);
+      }
+
+      return exportRow;
     });
 
     const filename = `data-${readyCalculations.map(c => c.calculationId).join('-')}.xlsx`;
@@ -352,7 +447,7 @@ export function DataTable({ calculations }: DataTableProps) {
           <div>
             <CardTitle>Data Table</CardTitle>
             <CardDescription>
-              {filteredTableData.length} rows • {readyCalculations.length} calculation{readyCalculations.length === 1 ? '' : 's'}
+              {getPresetName(selectedPreset)} • {filteredTableData.length} rows • {readyCalculations.length} calculation{readyCalculations.length === 1 ? '' : 's'}
               {selectedCalculationFilter !== 'all' && ' (filtered)'}
             </CardDescription>
           </div>

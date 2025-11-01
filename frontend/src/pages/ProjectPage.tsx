@@ -156,6 +156,7 @@ export default function ProjectPage() {
               {/* Data Table (v2.0 - Multi-Project Support) */}
               <DataTable
                 calculations={allCalculations}
+                selectedPreset={selectedPreset}
               />
             </div>
           </main>
