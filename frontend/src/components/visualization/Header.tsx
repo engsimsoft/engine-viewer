@@ -82,7 +82,7 @@ export function Header({
           <div className="flex-1 text-center px-4">
             {/* Project Name */}
             <h1 className="text-xl font-bold text-foreground">
-              {projectName}.det
+              {projectName}
             </h1>
 
             {/* Metadata Line */}
