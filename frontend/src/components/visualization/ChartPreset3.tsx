@@ -268,8 +268,70 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       legend: {
         show: false,
       },
+      // Line style legend at the top center
+      graphic: [
+        {
+          type: 'group',
+          left: 'center',
+          top: 10,
+          children: [
+            // TCylMax solid line symbol
+            {
+              type: 'line',
+              shape: {
+                x1: 0,
+                y1: 0,
+                x2: 20,
+                y2: 0,
+              },
+              style: {
+                stroke: '#6b7280',
+                lineWidth: 2,
+              },
+            },
+            // TCylMax label
+            {
+              type: 'text',
+              left: 25,
+              top: -8,
+              style: {
+                text: 'TCylMax',
+                fontSize: 12,
+                fill: '#6b7280',
+              },
+            },
+            // TUbMax dashed line symbol
+            {
+              type: 'line',
+              left: 85,
+              shape: {
+                x1: 0,
+                y1: 0,
+                x2: 20,
+                y2: 0,
+              },
+              style: {
+                stroke: '#6b7280',
+                lineWidth: 2,
+                lineDash: [5, 5],
+              },
+            },
+            // TUbMax label
+            {
+              type: 'text',
+              left: 110,
+              top: -8,
+              style: {
+                text: 'TUbMax',
+                fontSize: 12,
+                fill: '#6b7280',
+              },
+            },
+          ],
+        },
+      ],
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(`Temperature (${tempUnit})`, 'left', '#d62728', showGrid),
+      yAxis: createYAxis(tempUnit, 'left', '#d62728', showGrid),  // Only unit label
       series,
     };
   }, [readyCalculations, units, animation, showGrid, decimals]);

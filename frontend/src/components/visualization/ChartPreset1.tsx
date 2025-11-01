@@ -233,10 +233,72 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
       legend: {
         show: false,
       },
+      // Line style legend at the top center
+      graphic: [
+        {
+          type: 'group',
+          left: 'center',
+          top: 10,
+          children: [
+            // P-Av solid line symbol
+            {
+              type: 'line',
+              shape: {
+                x1: 0,
+                y1: 0,
+                x2: 20,
+                y2: 0,
+              },
+              style: {
+                stroke: '#6b7280',
+                lineWidth: 2,
+              },
+            },
+            // P-Av label
+            {
+              type: 'text',
+              left: 25,
+              top: -8,
+              style: {
+                text: 'P-Av',
+                fontSize: 12,
+                fill: '#6b7280',
+              },
+            },
+            // Torque dashed line symbol
+            {
+              type: 'line',
+              left: 70,
+              shape: {
+                x1: 0,
+                y1: 0,
+                x2: 20,
+                y2: 0,
+              },
+              style: {
+                stroke: '#6b7280',
+                lineWidth: 2,
+                lineDash: [5, 5],
+              },
+            },
+            // Torque label
+            {
+              type: 'text',
+              left: 95,
+              top: -8,
+              style: {
+                text: 'Torque',
+                fontSize: 12,
+                fill: '#6b7280',
+              },
+            },
+          ],
+        },
+      ],
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
       yAxis: [
-        createYAxis(`P-Av (${powerUnit})`, 'left', '#1f77b4', showGrid),
-        createYAxis(`Torque (${torqueUnit})`, 'right', '#ff7f0e', showGrid),
+        createYAxis(powerUnit, 'left', '#1f77b4', showGrid),  // Only unit label
+        createYAxis(torqueUnit, 'right', '#ff7f0e', showGrid),  // Only unit label
       ] as any,
       series,
     };

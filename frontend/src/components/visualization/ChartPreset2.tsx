@@ -208,7 +208,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
         show: false,
       },
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4', showGrid),
+      yAxis: createYAxis(pressureUnit, 'left', '#1f77b4', showGrid),  // Only unit label
       series,
     };
   }, [readyCalculations, units, animation, showGrid, decimals]);

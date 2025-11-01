@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
@@ -244,40 +244,94 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       });
     });
 
-    // Determine Y axis name and units
+    // Determine Y axis name (only units)
     let yAxisName = 'Value';
     if (selectedParams.length === 1) {
       const param = PARAMETER_OPTIONS.find((p) => p.id === selectedParams[0]);
       if (param) {
         const unit = param.getUnit(units);
-        yAxisName = unit ? `${param.label} (${unit})` : param.label;
+        yAxisName = unit || 'Value';  // Only unit, no parameter name
       }
     } else if (selectedParams.length > 1) {
       yAxisName = 'Value (mixed units)';
     }
+
+    // Create dynamic line style legend based on selected parameters
+    const legendChildren: any[] = [];
+    let xOffset = 0;
+
+    selectedParams.forEach((paramId, index) => {
+      const param = PARAMETER_OPTIONS.find((p) => p.id === paramId);
+      if (!param) return;
+
+      const lineStyle = index % 2 === 0 ? 'solid' : 'dashed';
+      const lineLength = 20;
+      const labelOffset = 25;
+      const spacing = param.label.length * 7 + 50; // Dynamic spacing based on label length
+
+      // Line symbol
+      legendChildren.push({
+        type: 'line',
+        left: xOffset,
+        shape: {
+          x1: 0,
+          y1: 0,
+          x2: lineLength,
+          y2: 0,
+        },
+        style: {
+          stroke: '#6b7280',
+          lineWidth: 2,
+          lineDash: lineStyle === 'dashed' ? [5, 5] : undefined,
+        },
+      });
+
+      // Label
+      legendChildren.push({
+        type: 'text',
+        left: xOffset + labelOffset,
+        top: -8,
+        style: {
+          text: param.label,
+          fontSize: 12,
+          fill: '#6b7280',
+        },
+      });
+
+      xOffset += spacing;
+    });
 
     return {
       ...baseConfig,
       legend: {
         show: false,
       },
+      // Dynamic line style legend (only if multiple parameters selected)
+      graphic: selectedParams.length > 1 ? [
+        {
+          type: 'group',
+          left: 'center',
+          top: 10,
+          children: legendChildren,
+        },
+      ] : undefined,
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(yAxisName, 'left', '#2ca02c', showGrid),
+      yAxis: createYAxis(yAxisName, 'left', '#2ca02c', showGrid),  // Only unit label
       series,
     };
   }, [readyCalculations, selectedParams, units, animation, showGrid, decimals]);
 
   // Parameter toggle handler
   const handleToggleParam = (paramId: string) => {
-    setSelectedParams((prev) => {
-      if (prev.includes(paramId)) {
-        // Remove parameter (minimum 1 must remain)
-        return prev.length > 1 ? prev.filter((id) => id !== paramId) : prev;
-      } else {
-        // Add parameter
-        return [...prev, paramId];
+    if (selectedParams.includes(paramId)) {
+      // Remove parameter (minimum 1 must remain)
+      if (selectedParams.length > 1) {
+        setSelectedParams(selectedParams.filter((id) => id !== paramId));
       }
-    });
+    } else {
+      // Add parameter
+      setSelectedParams([...selectedParams, paramId]);
+    }
   };
 
   // Loading state

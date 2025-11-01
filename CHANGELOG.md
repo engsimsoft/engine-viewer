@@ -94,6 +94,17 @@
   - Commits: e3adb81, 6b3270f, 935b9b5
 
 ### Changed
+- **Chart Axis Labels Simplification & Line Style Legend** (2025-11-01):
+  - ✅ Simplified Y-axis labels - removed parameter names, kept only units (e.g., "kW" instead of "P-Av (kW)")
+  - ✅ Added line style legend at top center of charts showing parameter-to-line style mapping
+  - ✅ Preset 1 (Power & Torque): "—— P-Av    - - - Torque" legend with solid/dashed line symbols
+  - ✅ Preset 2 (Pressure): Only unit label (bar/psi), no legend needed (all solid lines)
+  - ✅ Preset 3 (Temperature): "—— TCylMax    - - - TUbMax" legend with solid/dashed line symbols
+  - ✅ Preset 4 (Custom): Dynamic legend showing selected parameters with alternating solid/dashed styles
+  - ✅ Cleaner visual hierarchy - no parameter name duplication between axes and legend
+  - ✅ Better UX for multi-calculation comparison mode
+  - Files: ChartPreset1.tsx, ChartPreset2.tsx, ChartPreset3.tsx, ChartPreset4.tsx
+
 - **Color Palette Order Optimization** (2025-11-01):
   - ✅ Swapped comparison color order for better visual hierarchy
   - ✅ Comparison 1: Blue (#3498db) - clearer contrast as first comparison
