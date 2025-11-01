@@ -6,6 +6,7 @@ import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
+  PARAMETER_COLORS,
 } from '@/lib/chartConfig';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
@@ -113,9 +114,18 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
+    // Determine if we should use parameter colors (single calculation mode)
+    const isSingleCalculation = readyCalculations.length === 1;
+
     readyCalculations.forEach((calc, calcIndex) => {
-      const color = calc.color;
-      const label = `${calc.projectName} → ${calc.calculationName}`;
+      // Use parameter colors for single calculation, source colors for comparison
+      const tCylMaxColor = isSingleCalculation ? PARAMETER_COLORS.temperatureCyl : calc.color;
+      const tUbMaxColor = isSingleCalculation ? PARAMETER_COLORS.temperatureExh : calc.color;
+
+      // Label: show project name only in comparison mode
+      const label = isSingleCalculation
+        ? calc.calculationName
+        : `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
@@ -160,10 +170,10 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         yAxisIndex: 0,
         data: tCylMaxData,
         itemStyle: {
-          color,
+          color: tCylMaxColor,
         },
         lineStyle: {
-          color,
+          color: tCylMaxColor,
           width: 2,
           type: 'solid',
         },
@@ -178,7 +188,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
           symbol: markerSymbol,
           symbolSize: 20,
           itemStyle: {
-            color: color,
+            color: tCylMaxColor,
             borderColor: '#fff',
             borderWidth: 2,
           },
@@ -206,10 +216,10 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         yAxisIndex: 0,
         data: tUbMaxData,
         itemStyle: {
-          color,
+          color: tUbMaxColor,
         },
         lineStyle: {
-          color,
+          color: tUbMaxColor,
           width: 2,
           type: 'dashed',
         },
@@ -224,7 +234,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
           symbol: markerSymbol,
           symbolSize: 20,
           itemStyle: {
-            color: color,
+            color: tUbMaxColor,
             borderColor: '#fff',
             borderWidth: 2,
           },

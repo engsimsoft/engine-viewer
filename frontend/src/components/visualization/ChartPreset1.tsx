@@ -6,6 +6,7 @@ import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
+  PARAMETER_COLORS,
 } from '@/lib/chartConfig';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
@@ -106,9 +107,18 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
+    // Determine if we should use parameter colors (single calculation mode)
+    const isSingleCalculation = readyCalculations.length === 1;
+
     readyCalculations.forEach((calc, calcIndex) => {
-      const color = calc.color;
-      const label = `${calc.projectName} → ${calc.calculationName}`;
+      // Use parameter colors for single calculation, source colors for comparison
+      const powerColor = isSingleCalculation ? PARAMETER_COLORS.power : calc.color;
+      const torqueColor = isSingleCalculation ? PARAMETER_COLORS.torque : calc.color;
+
+      // Label: show project name only in comparison mode
+      const label = isSingleCalculation
+        ? calc.calculationName
+        : `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
@@ -139,10 +149,10 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         yAxisIndex: 0, // Left axis
         data: powerData,
         itemStyle: {
-          color,
+          color: powerColor,
         },
         lineStyle: {
-          color,
+          color: powerColor,
           width: 2,
         },
         symbol: 'circle',
@@ -156,7 +166,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
           symbol: markerSymbol,
           symbolSize: 20,
           itemStyle: {
-            color: color,
+            color: powerColor,
             borderColor: '#fff',
             borderWidth: 2,
           },
@@ -177,10 +187,10 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         yAxisIndex: 1, // Right axis
         data: torqueData,
         itemStyle: {
-          color,
+          color: torqueColor,
         },
         lineStyle: {
-          color,
+          color: torqueColor,
           width: 2,
           type: 'dashed', // Dashed line for torque
         },
@@ -195,7 +205,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
           symbol: markerSymbol,
           symbolSize: 20,
           itemStyle: {
-            color: color,
+            color: torqueColor,
             borderColor: '#fff',
             borderWidth: 2,
           },

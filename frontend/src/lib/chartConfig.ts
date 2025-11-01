@@ -1,7 +1,7 @@
 import type { EChartsOption } from 'echarts';
 import type { Calculation } from '@/types';
 
-// Цвета для расчётов (из config.yaml)
+// Цвета для расчётов (из config.yaml) - используются для сравнения (multiple calculations)
 export const CALCULATION_COLORS = [
   '#ff6b6b', // Красный
   '#4ecdc4', // Бирюзовый
@@ -9,6 +9,23 @@ export const CALCULATION_COLORS = [
   '#f9ca24', // Жёлтый
   '#a29bfe', // Фиолетовый
 ];
+
+/**
+ * Parameter colors - используются когда только 1 calculation (single calculation mode)
+ * Цвета соответствуют цветам осей для интуитивного понимания
+ */
+export const PARAMETER_COLORS = {
+  // Preset 1: Power & Torque
+  power: '#1f77b4',    // Синий (соответствует left axis)
+  torque: '#ff7f0e',   // Оранжевый (соответствует right axis)
+
+  // Preset 2: Pressure
+  pressure: '#1f77b4', // Синий (соответствует left axis)
+
+  // Preset 3: Temperature
+  temperatureCyl: '#1f77b4',  // Синий TCylMax (соответствует left axis)
+  temperatureExh: '#ff7f0e',  // Оранжевый TUbMax (соответствует right axis)
+} as const;
 
 /**
  * Получить цвет для расчёта по индексу

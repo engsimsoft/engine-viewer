@@ -219,7 +219,7 @@ function getPeakValuesForCalculation(
 
 /**
  * Format peak values for inline display
- * Example: "🏆 215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM"
+ * Example: "215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM"
  *
  * Responsive:
  * - Desktop: Inline with bullet separators
@@ -230,10 +230,8 @@ function formatInlinePeaks(peaks: PeakValueItem[]): React.ReactNode {
 
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm leading-5">
-      <span className="text-base hidden md:inline">🏆</span>
       {peaks.map((peak, index) => (
         <span key={index} className="flex items-center gap-2">
-          {index === 0 && <span className="text-base md:hidden">🏆</span>}
           <span className="text-gray-900 dark:text-gray-100">
             <span className="font-semibold">{peak.value}</span>
             {' '}
@@ -272,19 +270,15 @@ export function PeakValuesCards({
             key={index}
             className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out flex flex-col gap-3"
           >
-            {/* Line 1: Calculation Name with Color Dot */}
+            {/* Line 1: Calculation Name */}
             <div className="flex items-center gap-3">
-              <div
-                className="w-3 h-3 rounded-full flex-shrink-0"
-                style={{ backgroundColor: calc.color }}
-              />
               <span className="text-base font-medium text-gray-900 dark:text-gray-100 leading-5">
                 {calc.projectName} → {calc.calculationName}
               </span>
             </div>
 
             {/* Line 2: Peak Values (Inline) */}
-            <div className="pl-6">
+            <div>
               {formatInlinePeaks(peaks)}
             </div>
           </div>

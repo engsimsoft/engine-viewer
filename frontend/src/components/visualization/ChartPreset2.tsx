@@ -6,6 +6,7 @@ import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
+  PARAMETER_COLORS,
 } from '@/lib/chartConfig';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
@@ -109,9 +110,17 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
     const series: any[] = [];
     const legendData: string[] = [];
 
+    // Determine if we should use parameter colors (single calculation mode)
+    const isSingleCalculation = readyCalculations.length === 1;
+
     readyCalculations.forEach((calc, calcIndex) => {
-      const color = calc.color;
-      const label = `${calc.projectName} → ${calc.calculationName}`;
+      // Use parameter color for single calculation, source color for comparison
+      const color = isSingleCalculation ? PARAMETER_COLORS.pressure : calc.color;
+
+      // Label: show project name only in comparison mode
+      const label = isSingleCalculation
+        ? calc.calculationName
+        : `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
