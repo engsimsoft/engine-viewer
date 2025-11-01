@@ -31,6 +31,15 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ### 🎉 Recent Achievements (November 1, 2025)
 
+**✅ Color Palette & Comparison Mode - Bug Fixes & UX Enhancements** (COMPLETE):
+- Fixed similar color issue in comparison mode (cyan/blue → green/blue for maximum contrast)
+- Updated CALCULATION_COLORS in types/v2.ts (Single Source of Truth architecture)
+- New Engineering Style palette: Red (#e74c3c) → Green (#2ecc71) → Blue (#3498db) → Orange (#f39c12) → Purple (#9b59b6)
+- Restored color dots in PeakValuesCards for comparison mode (≥2 calculations)
+- Conditional rendering: dots only shown when needed, hidden in single calculation mode
+- All colors easily distinguishable on charts and in cards
+- Improved visual clarity for multi-project comparison
+
 **✅ Phase 7.4 & 7.5 - Documentation & Polish** (COMPLETE):
 - Updated README.md: Added v2.0 features section with emojis, "What's New in v2.0"
 - Updated CHANGELOG.md: Created [2.0.0] release entry with comprehensive changelog

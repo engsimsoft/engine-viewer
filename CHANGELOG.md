@@ -62,6 +62,16 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Color Palette & Comparison Mode Indicators** (2025-11-01):
+  - ✅ Updated CALCULATION_COLORS with high-contrast Engineering Style palette
+  - ✅ Fixed similar color issue: replaced cyan (#4ecdc4) and blue (#45b7d1) with distinct green (#2ecc71) and blue (#3498db)
+  - ✅ Restored color dots in PeakValuesCards for comparison mode (≥2 calculations)
+  - ✅ Color dots shown only when needed (hidden in single calculation mode for cleaner UI)
+  - ✅ Fixed architecture: types/v2.ts is Single Source of Truth for CALCULATION_COLORS
+  - ✅ New colors easily distinguishable on charts: Red → Green → Blue → Orange → Purple
+  - Commit: [current]
+
 ### Changed
 - **Accessibility Implemented (Phase 6.6)** (2025-11-01):
   - ✅ Keyboard navigation: ProjectCard enhanced with Enter/Space support, role="button", aria-label
