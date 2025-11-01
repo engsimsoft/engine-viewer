@@ -127,10 +127,12 @@ export function mergeDetPouData(pouProject, detProject) {
         continue;
       }
 
-      // MERGE: Add TCylMax and Convergence from .det to .pou data
+      // MERGE: Add TCylMax, PCylMax, Deto, and Convergence from .det to .pou data
       const mergedPoint = {
         ...pouPoint,                       // All 71 .pou parameters
         TCylMax: detPoint.TCylMax,         // Add from .det (per-cylinder array)
+        PCylMax: detPoint.PCylMax,         // Add from .det (per-cylinder array)
+        Deto: detPoint.Deto,               // Add from .det (per-cylinder array)
         Convergence: detPoint.Convergence  // Add from .det (single value)
       };
 

@@ -11,17 +11,19 @@
 
 ### Fixed
 - **CRITICAL: Fixed .det + .pou file merge** (2025-11-02):
-  - ✅ Fixed incorrect merge logic that was losing TCylMax and Convergence parameters
+  - ✅ Fixed incorrect merge logic that was losing critical parameters
   - ✅ Created proper `fileMerger.js` service with `mergeDetPouData()` function
   - ✅ Merge now adds ALL missing parameters from .det to .pou:
-    - TCylMax (max cylinder temperature) - critical for engine safety analysis
-    - Convergence (calculation quality indicator)
-  - ✅ New format type: 'pou-merged' (73 parameters = 71 from .pou + 2 from .det)
+    - **TCylMax** (max cylinder temperature) - critical for engine safety analysis
+    - **PCylMax** (max cylinder pressure) - critical for engine safety analysis
+    - **Deto** (detonation indicator) - critical for engine safety analysis
+    - **Convergence** (calculation quality indicator) - calculation validation
+  - ✅ New format type: 'pou-merged' (75 parameters = 71 from .pou + 4 from .det)
   - ✅ Improved deduplication logic in fileScanner.js with format priority:
-    - pou-merged (73 params) > pou (71 params) > det (24 params)
+    - pou-merged (75 params) > pou (71 params) > det (24 params)
   - ✅ Updated TypeScript types to support 'pou-merged' format
   - ✅ Proper merge logging for debugging
-  - **Result**: When both files exist (.det + .pou), users get complete 73-parameter dataset automatically
+  - **Result**: When both files exist (.det + .pou), users get complete 75-parameter dataset automatically
 
 - **TypeError in Chart Presets with optional parameters** (2025-11-02):
   - ✅ Fixed TypeError "Cannot read properties of undefined (reading 'reduce')" in Custom Chart
