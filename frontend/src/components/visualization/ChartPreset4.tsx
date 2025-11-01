@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
@@ -8,8 +8,8 @@ import {
   createYAxis,
 } from '@/lib/chartConfig';
 import { cn } from '@/lib/utils';
-import { useChartExport } from '@/hooks/useChartExport';
-import { ChartExportButtons } from './ChartExportButtons';
+import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
+import { useChartExport } from '@/contexts/ChartExportContext';
 import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
@@ -39,23 +39,6 @@ interface ParameterOption {
   getUnit: (units: 'si' | 'american' | 'hp') => string; // Dynamic unit based on settings
   isArray: boolean; // true if this is a per-cylinder array
 }
-
-/**
- * Get dynamic unit label for a parameter
- */
-const getParameterUnit = (paramId: string, units: 'si' | 'american' | 'hp'): string => {
-  switch (paramId) {
-    case 'P-Av': return getPowerUnit(units);
-    case 'Torque': return getTorqueUnit(units);
-    case 'PCylMax': return getPressureUnit(units);
-    case 'TCylMax':
-    case 'TUbMax': return getTemperatureUnit(units);
-    case 'PurCyl':
-    case 'Deto':
-    case 'Convergence': return '';
-    default: return '';
-  }
-};
 
 const PARAMETER_OPTIONS: ParameterOption[] = [
   { id: 'P-Av', label: 'P-Av', getUnit: (u) => getPowerUnit(u), isArray: false },
@@ -92,9 +75,10 @@ const PARAMETER_OPTIONS: ParameterOption[] = [
  * ```
  */
 export function ChartPreset4({ calculations }: ChartPreset4Props) {
-  // Get units and decimals from store
+  // Get units and chart settings from store
   const units = useAppStore((state) => state.units);
-  const decimals = useAppStore((state) => state.chartSettings.decimals);
+  const chartSettings = useAppStore((state) => state.chartSettings);
+  const { animation, showGrid, decimals } = chartSettings;
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -102,8 +86,22 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
     [calculations]
   );
 
-  // Hook для экспорта графика
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
+  // Hook для экспорта графика (local)
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
+
+  // Register export handlers in context (for Header buttons)
+  const { registerExportHandlers, unregisterExportHandlers } = useChartExport();
+
+  useEffect(() => {
+    registerExportHandlers({
+      exportPNG: handleExportPNG,
+      exportSVG: handleExportSVG,
+    });
+
+    return () => {
+      unregisterExportHandlers();
+    };
+  }, [handleExportPNG, handleExportSVG, registerExportHandlers, unregisterExportHandlers]);
 
   // Selected parameters state (default: P-Av and Torque)
   const [selectedParams, setSelectedParams] = useState<string[]>([
@@ -126,7 +124,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
-    const baseConfig = getBaseChartConfig();
+    const baseConfig = getBaseChartConfig(animation);
 
     // Calculate RPM range from metadata
     const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
@@ -262,23 +260,14 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
     return {
       ...baseConfig,
-      title: {
-        text: 'Custom Chart',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold',
-        },
-      },
       legend: {
         show: false,
       },
-      xAxis: createXAxis('RPM', rpmMin, rpmMax),
-      yAxis: createYAxis(yAxisName, 'left', '#2ca02c'),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
+      yAxis: createYAxis(yAxisName, 'left', '#2ca02c', showGrid),
       series,
     };
-  }, [readyCalculations, selectedParams, units, decimals]);
+  }, [readyCalculations, selectedParams, units, animation, showGrid, decimals]);
 
   // Parameter toggle handler
   const handleToggleParam = (paramId: string) => {
@@ -345,13 +334,6 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   return (
     <div className="w-full space-y-4">
-      {/* Export buttons */}
-      <ChartExportButtons
-        onExportPNG={handleExportPNG}
-        onExportSVG={handleExportSVG}
-        disabled={readyCalculations.length === 0}
-      />
-
       {/* Parameter selector */}
       <div className="p-4 bg-muted/30 rounded-lg border">
         <h4 className="text-sm font-semibold mb-3 text-muted-foreground">

@@ -34,14 +34,14 @@ import { Button } from '@/components/ui/button';
 import { TagInput } from '@/components/shared/TagInput';
 import type { ProjectInfo } from '@/types';
 
-// Zod схема валидации
+// Zod validation schema
 const metadataFormSchema = z.object({
-  description: z.string().max(500, 'Описание не должно превышать 500 символов'),
-  client: z.string().max(200, 'Название клиента не должно превышать 200 символов'),
+  description: z.string().max(500, 'Description must not exceed 500 characters'),
+  client: z.string().max(200, 'Client name must not exceed 200 characters'),
   tags: z.array(z.string()),
   status: z.enum(['active', 'completed', 'archived']),
   notes: z.string(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Неверный формат цвета (должен быть HEX)'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (must be HEX)'),
 });
 
 type MetadataFormValues = z.infer<typeof metadataFormSchema>;
@@ -97,33 +97,33 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
     if (!project) return;
 
     try {
-      // Отправка на Backend API
+      // Send to Backend API
       await axios.post(`/api/projects/${project.id}/metadata`, values);
 
-      // Успех
-      toast.success('Метаданные проекта сохранены');
+      // Success
+      toast.success('Project metadata saved');
       onOpenChange(false);
 
-      // Вызов callback для обновления данных
+      // Call callback to update data
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      // Ошибка
+      // Error
       console.error('Failed to save metadata:', error);
-      toast.error('Не удалось сохранить метаданные');
+      toast.error('Failed to save metadata');
     }
   };
 
-  // Цвета для выбора
+  // Color options
   const colorOptions = [
-    { value: '#3b82f6', label: 'Синий' },
-    { value: '#10b981', label: 'Зелёный' },
-    { value: '#f59e0b', label: 'Оранжевый' },
-    { value: '#ef4444', label: 'Красный' },
-    { value: '#8b5cf6', label: 'Фиолетовый' },
-    { value: '#ec4899', label: 'Розовый' },
-    { value: '#64748b', label: 'Серый' },
+    { value: '#3b82f6', label: 'Blue' },
+    { value: '#10b981', label: 'Green' },
+    { value: '#f59e0b', label: 'Orange' },
+    { value: '#ef4444', label: 'Red' },
+    { value: '#8b5cf6', label: 'Purple' },
+    { value: '#ec4899', label: 'Pink' },
+    { value: '#64748b', label: 'Gray' },
   ];
 
   return (
@@ -131,57 +131,57 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {project?.metadata ? 'Редактировать метаданные' : 'Добавить метаданные'}
+            {project?.metadata ? 'Edit Metadata' : 'Add Metadata'}
           </DialogTitle>
           <DialogDescription>
-            Проект: <span className="font-medium">{project?.fileName}</span>
+            Project: <span className="font-medium">{project?.fileName}</span>
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Описание */}
+            {/* Description */}
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Описание</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Краткое описание проекта" {...field} />
+                    <Input placeholder="Brief project description" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Клиент */}
+            {/* Client */}
             <FormField
               control={form.control}
               name="client"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Клиент</FormLabel>
+                  <FormLabel>Client</FormLabel>
                   <FormControl>
-                    <Input placeholder="Название клиента или компании" {...field} />
+                    <Input placeholder="Client or company name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Теги */}
+            {/* Tags */}
             <FormField
               control={form.control}
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Теги</FormLabel>
+                  <FormLabel>Tags</FormLabel>
                   <FormControl>
                     <TagInput
                       tags={field.value}
                       onChange={field.onChange}
-                      placeholder="Добавить тег..."
+                      placeholder="Add tag..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -189,23 +189,23 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
               )}
             />
 
-            {/* Статус */}
+            {/* Status */}
             <FormField
               control={form.control}
               name="status"
-              render={({ field }) => (
+              render={({ field}) => (
                 <FormItem>
-                  <FormLabel>Статус</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите статус" />
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="active">Активный</SelectItem>
-                      <SelectItem value="completed">Завершённый</SelectItem>
-                      <SelectItem value="archived">Архивный</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -213,13 +213,13 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
               )}
             />
 
-            {/* Цвет метки */}
+            {/* Label Color */}
             <FormField
               control={form.control}
               name="color"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Цвет метки</FormLabel>
+                  <FormLabel>Label Color</FormLabel>
                   <div className="flex gap-2 items-center">
                     <FormControl>
                       <Input type="color" className="w-16 h-10" {...field} />
@@ -242,16 +242,16 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
               )}
             />
 
-            {/* Заметки */}
+            {/* Notes */}
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Заметки</FormLabel>
+                  <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Детальные заметки о проекте..."
+                      placeholder="Detailed project notes..."
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -261,13 +261,13 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
               )}
             />
 
-            {/* Кнопки */}
+            {/* Buttons */}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Отмена
+                Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Сохранение...' : 'Сохранить'}
+                {form.formState.isSubmitting ? 'Saving...' : 'Save'}
               </Button>
             </DialogFooter>
           </form>

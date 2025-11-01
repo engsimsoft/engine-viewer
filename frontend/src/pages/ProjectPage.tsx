@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
-import { useSelectedCalculations } from '@/hooks/useSelectedCalculations';
 import { useAppStore } from '@/stores/appStore';
 import { ChartExportProvider } from '@/contexts/ChartExportContext';
 import { Header } from '@/components/visualization/Header';

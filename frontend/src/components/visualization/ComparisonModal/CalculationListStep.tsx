@@ -24,7 +24,6 @@ import { useAppStore } from '@/stores/appStore';
 import { formatRPMRange, calculateAverageStep } from '@/lib/rpmCalculator';
 import { getNextColor } from '@/lib/colorManager';
 import type { ProjectInfo } from '@/types';
-import type { Calculation } from '@/types';
 import type { CalculationReference } from '@/types/v2';
 import { cn } from '@/lib/utils';
 

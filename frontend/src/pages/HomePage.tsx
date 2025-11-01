@@ -52,21 +52,21 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Engine Results Viewer</h1>
           <p className="text-muted-foreground">
-            Просмотр и анализ результатов расчётов двигателей внутреннего сгорания
+            View and analyze internal combustion engine calculation results
           </p>
         </div>
 
         {/* Projects Count */}
         <div className="mb-6">
           <p className="text-lg">
-            Найдено проектов: <span className="font-semibold">{projects.length}</span>
+            Projects found: <span className="font-semibold">{projects.length}</span>
           </p>
         </div>
 
         {/* Projects Grid */}
         {projects.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Проекты не найдены</p>
+            <p className="text-muted-foreground">No projects found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

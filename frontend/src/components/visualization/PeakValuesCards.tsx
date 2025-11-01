@@ -1,15 +1,15 @@
 /**
- * Peak Values Cards Component
+ * Peak Values Cards Component (v2.0 - Full-Width Layout)
  *
- * Displays peak values for each calculation in a card grid layout.
- * Different peak values are shown based on the selected preset.
+ * Displays peak values for each calculation in a full-width card layout.
+ * Each card shows the calculation name and inline peak values.
  *
- * Features:
- * - Responsive grid layout (2 columns on desktop, 1 on mobile)
- * - Color indicators matching calculation colors
- * - Trophy icon for peak values
- * - Units conversion applied
- * - Different layouts per preset
+ * Addendum v2.0.1 Changes:
+ * - Replaced 2-column grid with full-width cards
+ * - Inline peak values format: "🏆 215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM"
+ * - Height: 68px per card
+ * - Gap: 12px between cards
+ * - Hover effect: shadow + translateY(-2px)
  *
  * @example
  * ```tsx
@@ -105,7 +105,7 @@ function getPeakValuesForCalculation(
           });
 
           peaks.push({
-            label: `PCylMax Cyl ${cylIndex + 1}`,
+            label: `Cyl ${cylIndex + 1}`,
             value: `${convertPressure(maxPressure, units).toFixed(1)} ${getPressureUnit(units)}`,
             rpm: maxRpm,
           });
@@ -217,6 +217,37 @@ function getPeakValuesForCalculation(
   return peaks;
 }
 
+/**
+ * Format peak values for inline display
+ * Example: "🏆 215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM"
+ *
+ * Responsive:
+ * - Desktop: Inline with bullet separators
+ * - Mobile (<768px): Stacked vertically
+ */
+function formatInlinePeaks(peaks: PeakValueItem[]): React.ReactNode {
+  if (peaks.length === 0) return null;
+
+  return (
+    <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm leading-5">
+      <span className="text-base hidden md:inline">🏆</span>
+      {peaks.map((peak, index) => (
+        <span key={index} className="flex items-center gap-2">
+          {index === 0 && <span className="text-base md:hidden">🏆</span>}
+          <span className="text-gray-900 dark:text-gray-100">
+            <span className="font-semibold">{peak.value}</span>
+            {' '}
+            <span className="text-gray-600 dark:text-gray-400">at {peak.rpm} RPM</span>
+          </span>
+          {index < peaks.length - 1 && (
+            <span className="text-gray-400 dark:text-gray-600 hidden md:inline">•</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function PeakValuesCards({
   calculations,
   preset,
@@ -230,64 +261,35 @@ export function PeakValuesCards({
   }
 
   return (
-    <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">
-        Peak Values
-      </h3>
+    <div className="w-full flex flex-col gap-3">
+      {calculations.map((calc, index) => {
+        const peaks = getPeakValuesForCalculation(calc, preset, units, selectedParams);
 
-      {/* Grid layout: 2 columns on desktop, 1 on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {calculations.map((calc, index) => {
-          const peaks = getPeakValuesForCalculation(calc, preset, units, selectedParams);
+        if (peaks.length === 0) return null;
 
-          if (peaks.length === 0) return null;
-
-          return (
-            <div
-              key={index}
-              className="bg-muted/30 rounded-lg border-2 border-border p-4"
-            >
-              {/* Header with color indicator and calculation label */}
-              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
-                <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: calc.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-foreground truncate">
-                    {calc.projectName} → {calc.calculationName}
-                  </h4>
-                </div>
-              </div>
-
-              {/* Peak values list */}
-              <div className="space-y-2">
-                {peaks.map((peak, peakIndex) => (
-                  <div
-                    key={peakIndex}
-                    className="flex items-start justify-between gap-3 py-2 px-3 bg-background/50 rounded-md"
-                  >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="text-lg">🏆</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          {peak.label}
-                        </div>
-                        <div className="text-xs text-muted-foreground/70">
-                          at {peak.rpm} RPM
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-sm font-bold text-foreground whitespace-nowrap">
-                      {peak.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
+        return (
+          <div
+            key={index}
+            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out flex flex-col gap-3"
+          >
+            {/* Line 1: Calculation Name with Color Dot */}
+            <div className="flex items-center gap-3">
+              <div
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: calc.color }}
+              />
+              <span className="text-base font-medium text-gray-900 dark:text-gray-100 leading-5">
+                {calc.projectName} → {calc.calculationName}
+              </span>
             </div>
-          );
-        })}
-      </div>
+
+            {/* Line 2: Peak Values (Inline) */}
+            <div className="pl-6">
+              {formatInlinePeaks(peaks)}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

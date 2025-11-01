@@ -18,7 +18,6 @@ import { BarChart3, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { formatRPMRange } from '@/lib/rpmCalculator';
-import { cn } from '@/lib/utils';
 
 /**
  * Primary Section Component

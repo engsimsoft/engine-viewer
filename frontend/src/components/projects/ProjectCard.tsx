@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Wrench, CheckCircle, Archive, Calendar, Cpu, FileText, Edit } from 'lucide-react';
 import type { ProjectInfo } from '@/types';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface ProjectCardProps {
   project: ProjectInfo;
@@ -19,17 +19,17 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
   const statusConfig = {
     active: {
       icon: <Wrench className="w-4 h-4" />,
-      label: 'В работе',
+      label: 'In Progress',
       color: 'bg-blue-500',
     },
     completed: {
       icon: <CheckCircle className="w-4 h-4" />,
-      label: 'Завершён',
+      label: 'Completed',
       color: 'bg-green-500',
     },
     archived: {
       icon: <Archive className="w-4 h-4" />,
-      label: 'Архив',
+      label: 'Archived',
       color: 'bg-gray-500',
     },
   };
@@ -65,7 +65,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         {metadata?.client && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <FileText className="w-4 h-4" />
-            <span>Клиент: {metadata.client}</span>
+            <span>Client: {metadata.client}</span>
           </div>
         )}
 
@@ -76,9 +76,9 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
             <span>{project.engineType}</span>
           </div>
           <span className="text-muted-foreground">•</span>
-          <span>{project.numCylinders} цил.</span>
+          <span>{project.numCylinders} cyl.</span>
           <span className="text-muted-foreground">•</span>
-          <span>{project.calculationsCount} расчётов</span>
+          <span>{project.calculationsCount} calculations</span>
         </div>
 
         {/* Tags */}
@@ -96,7 +96,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
           <Calendar className="w-3 h-3" />
           <span>
-            Изменён: {format(new Date(project.lastModified), 'dd MMM yyyy', { locale: ru })}
+            Modified: {format(new Date(project.lastModified), 'dd MMM yyyy', { locale: enUS })}
           </span>
         </div>
       </CardContent>
@@ -121,7 +121,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
             onOpen(project.id);
           }}
         >
-          Открыть проект
+          Open Project
         </Button>
       </CardFooter>
     </Card>

@@ -19,7 +19,7 @@ export interface TagInputProps {
  * - Удаление тегов по клику на X
  * - Controlled component (управляется через props)
  */
-export function TagInput({ tags, onChange, placeholder = 'Добавить тег...', className }: TagInputProps) {
+export function TagInput({ tags, onChange, placeholder = 'Add tag...', className }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
 
   // Добавление нового тега
@@ -65,7 +65,7 @@ export function TagInput({ tags, onChange, placeholder = 'Добавить те�
                 className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <X className="h-3 w-3" />
-                <span className="sr-only">Удалить тег {tag}</span>
+                <span className="sr-only">Remove tag {tag}</span>
               </button>
             </Badge>
           ))}
@@ -89,7 +89,7 @@ export function TagInput({ tags, onChange, placeholder = 'Добавить те�
 
       {/* Подсказка */}
       <p className="text-xs text-muted-foreground">
-        Нажмите Enter или запятую для добавления тега
+        Press Enter or comma to add tag
       </p>
     </div>
   );

@@ -15,7 +15,7 @@ export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
       </div>
       {onRetry && (
         <Button onClick={onRetry} variant="outline">
-          Попробовать снова
+          Try Again
         </Button>
       )}
     </div>

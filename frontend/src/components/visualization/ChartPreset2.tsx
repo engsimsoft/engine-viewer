@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
@@ -7,8 +7,8 @@ import {
   createXAxis,
   createYAxis,
 } from '@/lib/chartConfig';
-import { useChartExport } from '@/hooks/useChartExport';
-import { ChartExportButtons } from './ChartExportButtons';
+import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
+import { useChartExport } from '@/contexts/ChartExportContext';
 import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
@@ -55,9 +55,10 @@ interface ChartPreset2Props {
  * ```
  */
 export function ChartPreset2({ calculations }: ChartPreset2Props) {
-  // Get units and decimals from store
+  // Get units and chart settings from store
   const units = useAppStore((state) => state.units);
-  const decimals = useAppStore((state) => state.chartSettings.decimals);
+  const chartSettings = useAppStore((state) => state.chartSettings);
+  const { animation, showGrid, decimals } = chartSettings;
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -65,8 +66,22 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
     [calculations]
   );
 
-  // Hook для экспорта графика
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExport(exportFilename);
+  // Hook для экспорта графика (local)
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
+
+  // Register export handlers in context (for Header buttons)
+  const { registerExportHandlers, unregisterExportHandlers } = useChartExport();
+
+  useEffect(() => {
+    registerExportHandlers({
+      exportPNG: handleExportPNG,
+      exportSVG: handleExportSVG,
+    });
+
+    return () => {
+      unregisterExportHandlers();
+    };
+  }, [handleExportPNG, handleExportSVG, registerExportHandlers, unregisterExportHandlers]);
 
   // Load cross-project data
   const {
@@ -83,7 +98,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
 
   // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
-    const baseConfig = getBaseChartConfig();
+    const baseConfig = getBaseChartConfig(animation);
 
     // Calculate RPM range from metadata
     const allRpmRanges = readyCalculations.map((calc) => calc.metadata.rpmRange);
@@ -180,23 +195,14 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
 
     return {
       ...baseConfig,
-      title: {
-        text: 'PCylMax (Cylinder Pressure)',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 18,
-          fontWeight: 'bold',
-        },
-      },
       legend: {
         show: false,
       },
-      xAxis: createXAxis('RPM', rpmMin, rpmMax),
-      yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4'),
+      xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
+      yAxis: createYAxis(`PCylMax (${pressureUnit})`, 'left', '#1f77b4', showGrid),
       series,
     };
-  }, [readyCalculations, units, decimals]);
+  }, [readyCalculations, units, animation, showGrid, decimals]);
 
   // Loading state
   if (isLoading) {
@@ -250,13 +256,6 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
 
   return (
     <div className="w-full space-y-4">
-      {/* Export buttons */}
-      <ChartExportButtons
-        onExportPNG={handleExportPNG}
-        onExportSVG={handleExportSVG}
-        disabled={readyCalculations.length === 0}
-      />
-
       {/* Chart */}
       <div className="relative">
         <ReactECharts

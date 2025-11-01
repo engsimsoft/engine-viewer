@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import type ReactECharts from 'echarts-for-react';
 import { exportChartToPNG, exportChartToSVG } from '@/utils/export';
 
@@ -26,19 +26,19 @@ import { exportChartToPNG, exportChartToSVG } from '@/utils/export';
 export function useChartExport(baseFilename: string) {
   const chartRef = useRef<ReactECharts>(null);
 
-  const handleExportPNG = () => {
+  const handleExportPNG = useCallback(() => {
     const chartInstance = chartRef.current?.getEchartsInstance();
     if (chartInstance) {
       exportChartToPNG(chartInstance, `${baseFilename}.png`);
     }
-  };
+  }, [baseFilename]);
 
-  const handleExportSVG = () => {
+  const handleExportSVG = useCallback(() => {
     const chartInstance = chartRef.current?.getEchartsInstance();
     if (chartInstance) {
       exportChartToSVG(chartInstance, `${baseFilename}.svg`);
     }
-  };
+  }, [baseFilename]);
 
   return {
     chartRef,

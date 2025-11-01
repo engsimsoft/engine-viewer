@@ -70,8 +70,10 @@ export function calculateRpmRange(calculations: Calculation[]): { min: number; m
 /**
  * Базовая конфигурация ECharts для всех графиков
  * Включает grid, tooltip, legend, dataZoom
+ *
+ * @param animation - Enable/disable chart animation (from store)
  */
-export function getBaseChartConfig(): Partial<EChartsOption> {
+export function getBaseChartConfig(animation = true): Partial<EChartsOption> {
   return {
     // Grid - отступы графика
     grid: {
@@ -164,9 +166,9 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
       },
     ],
 
-    // Анимация
-    animation: true,
-    animationDuration: 300,
+    // Анимация (from settings)
+    animation: animation,
+    animationDuration: animation ? 300 : 0,
     animationEasing: 'cubicOut',
   };
 }
@@ -177,11 +179,13 @@ export function getBaseChartConfig(): Partial<EChartsOption> {
  * @param name - Название оси (по умолчанию 'RPM')
  * @param min - Минимальное значение оси (опционально, для автоматического масштабирования)
  * @param max - Максимальное значение оси (опционально, для автоматического масштабирования)
+ * @param showGrid - Show/hide grid lines (from settings)
  */
 export function createXAxis(
   name: string = 'RPM',
   min?: number,
-  max?: number
+  max?: number,
+  showGrid = true
 ): EChartsOption['xAxis'] {
   return {
     type: 'value',
@@ -204,7 +208,7 @@ export function createXAxis(
       color: '#666',
     },
     splitLine: {
-      show: true,
+      show: showGrid,
       lineStyle: {
         color: '#e5e7eb',
         type: 'dashed',
@@ -215,11 +219,17 @@ export function createXAxis(
 
 /**
  * Создать конфигурацию оси Y
+ *
+ * @param name - Название оси
+ * @param position - Позиция оси (left/right)
+ * @param color - Цвет оси
+ * @param showGrid - Show/hide grid lines (from settings, only for left axis)
  */
 export function createYAxis(
   name: string,
   position: 'left' | 'right' = 'left',
-  color?: string
+  color?: string,
+  showGrid = true
 ): EChartsOption['yAxis'] {
   return {
     type: 'value',
@@ -241,7 +251,7 @@ export function createYAxis(
       color: color || '#666',
     },
     splitLine: {
-      show: position === 'left',
+      show: position === 'left' && showGrid,
       lineStyle: {
         color: '#e5e7eb',
         type: 'dashed',

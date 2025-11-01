@@ -13,10 +13,11 @@
  * - Responsive layout
  */
 
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, Download, FileImage } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
+import { useChartExport } from '@/contexts/ChartExportContext';
 
 interface HeaderProps {
   /** Project name to display (e.g., "Vesta 1.6 IM") */
@@ -51,6 +52,7 @@ export function Header({
   calculationsCount,
 }: HeaderProps) {
   const navigate = useNavigate();
+  const { exportPNG, exportSVG, isExportAvailable } = useChartExport();
 
   /**
    * Navigate back to projects list
@@ -93,8 +95,35 @@ export function Header({
             </div>
           </div>
 
-          {/* Right: Settings Button */}
-          <div className="flex items-center">
+          {/* Right: Export Buttons + Settings */}
+          <div className="flex items-center gap-2">
+            {/* PNG Export Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportPNG}
+              disabled={!isExportAvailable}
+              title="Export to PNG (raster format for presentations)"
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>PNG</span>
+            </Button>
+
+            {/* SVG Export Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportSVG}
+              disabled={!isExportAvailable}
+              title="Export to SVG (vector format for publications)"
+              className="gap-2"
+            >
+              <FileImage className="h-4 w-4" />
+              <span>SVG</span>
+            </Button>
+
+            {/* Settings Button */}
             <SettingsPopover>
               <Button
                 variant="ghost"

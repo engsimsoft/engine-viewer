@@ -60,7 +60,7 @@ export function CalculationSelector({
       {/* Заголовок */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
-          Выберите расчёты
+          Select Calculations
         </h3>
         <Badge variant="secondary">
           {selectedIds.length} / {maxCount}
@@ -102,7 +102,7 @@ export function CalculationSelector({
               <div
                 className="w-4 h-4 rounded-full flex-shrink-0"
                 style={{ backgroundColor: color }}
-                title={`Цвет: ${color}`}
+                title={`Color: ${color}`}
               />
 
               {/* Label с названием расчёта */}
@@ -119,7 +119,7 @@ export function CalculationSelector({
               {/* Бейдж для выбранного расчёта */}
               {selected && (
                 <Badge variant="default" className="ml-auto">
-                  Выбран
+                  Selected
                 </Badge>
               )}
             </div>
@@ -130,14 +130,14 @@ export function CalculationSelector({
       {/* Подсказка когда достигнут лимит */}
       {isMaxReached && (
         <p className="text-sm text-muted-foreground">
-          Достигнут максимум выбранных расчётов ({maxCount}). Отмените выбор для добавления других.
+          Maximum calculations selected ({maxCount}). Deselect to add others.
         </p>
       )}
 
       {/* Подсказка когда ничего не выбрано */}
       {selectedIds.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Выберите расчёты для отображения на графике
+          Select calculations to display on chart
         </p>
       )}
     </div>

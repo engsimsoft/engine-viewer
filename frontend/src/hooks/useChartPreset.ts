@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { ChartPresetType } from '@/components/visualization/PresetSelector';
 
 const STORAGE_KEY = 'engine-viewer-chart-preset';
+
+// Preset types (1 | 2 | 3 | 4)
+type ChartPresetType = 1 | 2 | 3 | 4;
 
 /**
  * Hook для управления выбором пресета графиков
@@ -29,23 +31,23 @@ export function useChartPreset(): [
   ChartPresetType,
   (preset: ChartPresetType) => void
 ] {
-  // Загружаем сохранённый пресет из localStorage или используем preset1 по умолчанию
+  // Загружаем сохранённый пресет из localStorage или используем 1 по умолчанию
   const [activePreset, setActivePresetState] = useState<ChartPresetType>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && isValidPreset(saved)) {
-        return saved as ChartPresetType;
+        return parseInt(saved) as ChartPresetType;
       }
     } catch (error) {
       console.warn('Failed to load preset from localStorage:', error);
     }
-    return 'preset1';
+    return 1;
   });
 
   // Сохраняем изменения в localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, activePreset);
+      localStorage.setItem(STORAGE_KEY, String(activePreset));
     } catch (error) {
       console.warn('Failed to save preset to localStorage:', error);
     }
@@ -58,5 +60,5 @@ export function useChartPreset(): [
  * Проверка валидности пресета
  */
 function isValidPreset(value: string): boolean {
-  return ['preset1', 'preset2', 'preset3', 'preset4'].includes(value);
+  return ['1', '2', '3', '4'].includes(value);
 }

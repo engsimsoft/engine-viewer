@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import ProjectPage from '@/pages/ProjectPage';
 import { Toaster } from '@/components/ui/sonner';
+import { useAppStore } from '@/stores/appStore';
 import './App.css';
 
 /**
@@ -20,6 +22,19 @@ import './App.css';
  * Phase 2: ProjectPage will be updated to use Zustand store + useMultiProjectData
  */
 function App() {
+  // Apply theme to document root
+  const theme = useAppStore((state) => state.theme);
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Remove both classes first
+    root.classList.remove('light', 'dark');
+
+    // Add current theme class
+    root.classList.add(theme);
+  }, [theme]);
+
   return (
     <BrowserRouter>
       <Routes>

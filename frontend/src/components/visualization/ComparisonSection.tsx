@@ -21,7 +21,6 @@ import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import { formatRPMRange } from '@/lib/rpmCalculator';
 import { MAX_COMPARISONS } from '@/types/v2';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 /**

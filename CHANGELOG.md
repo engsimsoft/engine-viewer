@@ -9,6 +9,20 @@
 
 ## [Unreleased]
 
+### Changed
+- **UI Translated to English (Phase 6.1)** (2025-11-01):
+  - ✅ All UI text translated from Russian to English
+  - ✅ HomePage: "Projects found", "No projects found"
+  - ✅ ProjectCard: Status labels, "Open Project", "Client:", "Modified:"
+  - ✅ MetadataDialog: Form labels, placeholders, validation messages, toast messages
+  - ✅ TagInput: "Add tag...", "Remove tag", hint text
+  - ✅ ErrorMessage: "Try Again" button
+  - ✅ CalculationSelector: All labels and messages
+  - ✅ Changed date-fns locale from ru to enUS
+  - ✅ Fixed TypeScript errors (unused imports, type issues)
+  - Note: Comments remain in Russian (acceptable per CLAUDE.md)
+  - Commit: [current]
+
 ### Added
 - **Chart Export в Header** (2025-11-01):
   - Кнопки PNG/SVG перенесены из области графика в Header рядом с Settings
