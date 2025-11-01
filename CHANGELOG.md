@@ -63,6 +63,14 @@
 ## [Unreleased]
 
 ### Fixed
+- **Cross-Project Comparison Functionality** (2025-11-01):
+  - ✅ Restored cross-project comparison feature (was broken by commit 067c2dc)
+  - ✅ Removed erroneous comparison clearing logic that prevented adding comparisons from other projects
+  - ✅ Only primary calculation is now cleared when switching projects (correct behavior)
+  - ✅ Cross-project comparison is a KEY FEATURE - comparisons persist across project URL switches
+  - ✅ Users can now compare calculations from ANY projects without issues
+  - Commit: cf0c9bd
+
 - **Color Palette & Comparison Mode Indicators** (2025-11-01):
   - ✅ Updated CALCULATION_COLORS with high-contrast Engineering Style palette
   - ✅ Fixed similar color issue: replaced cyan (#4ecdc4) and blue (#45b7d1) with distinct green (#2ecc71) and blue (#3498db)
@@ -70,7 +78,7 @@
   - ✅ Color dots shown only when needed (hidden in single calculation mode for cleaner UI)
   - ✅ Fixed architecture: types/v2.ts is Single Source of Truth for CALCULATION_COLORS
   - ✅ New colors easily distinguishable on charts: Red → Green → Blue → Orange → Purple
-  - Commit: [current]
+  - Commits: e3adb81, 6b3270f, 935b9b5
 
 ### Changed
 - **Accessibility Implemented (Phase 6.6)** (2025-11-01):
