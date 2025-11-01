@@ -94,6 +94,14 @@
   - Commits: e3adb81, 6b3270f, 935b9b5
 
 ### Changed
+- **Color Palette Order Optimization** (2025-11-01):
+  - ✅ Swapped comparison color order for better visual hierarchy
+  - ✅ Comparison 1: Blue (#3498db) - clearer contrast as first comparison
+  - ✅ Comparison 2: Green (#2ecc71) - distinct from blue
+  - ✅ New order: Red (primary) → Blue → Green → Orange → Purple
+  - ✅ Previous order: Red (primary) → Green → Blue → Orange → Purple
+  - ✅ Improved color perception in multi-calculation comparison charts
+
 - **Accessibility Implemented (Phase 6.6)** (2025-11-01):
   - ✅ Keyboard navigation: ProjectCard enhanced with Enter/Space support, role="button", aria-label
   - ✅ Focus indicators: button.tsx has focus-visible:ring-[3px], ProjectCard has ring-2 with offset

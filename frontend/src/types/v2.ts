@@ -199,15 +199,15 @@ export type Units = 'si' | 'american' | 'hp';
  *
  * Цвета назначаются в следующем порядке:
  * 1. Primary calculation - ВСЕГДА первый цвет (red)
- * 2. Comparison 1 - второй цвет (green) - яркий контраст
- * 3. Comparison 2 - третий цвет (blue) - чистый синий
+ * 2. Comparison 1 - второй цвет (blue) - чистый синий
+ * 3. Comparison 2 - третий цвет (green) - яркий зеленый
  * 4. Comparison 3 - четвёртый цвет (orange) - яркий оранжевый
  * 5. Comparison 4 - пятый цвет (purple) - уникальный фиолетовый
  */
 export const CALCULATION_COLORS = [
   "#e74c3c",  // red (primary) - bright red with good contrast
-  "#2ecc71",  // green - vibrant green, easily distinguishable from all others
-  "#3498db",  // blue - clear blue, distinct from green
+  "#3498db",  // blue - clear blue, better contrast as first comparison
+  "#2ecc71",  // green - vibrant green, easily distinguishable
   "#f39c12",  // orange - bright orange for high visibility
   "#9b59b6",  // purple - distinct purple
 ] as const;
