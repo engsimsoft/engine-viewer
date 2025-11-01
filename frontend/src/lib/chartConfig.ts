@@ -1,15 +1,6 @@
 import type { EChartsOption } from 'echarts';
 import type { Calculation } from '@/types';
-
-// Цвета для расчётов (из config.yaml) - используются для сравнения (multiple calculations)
-// v2.1: Updated palette with maximum contrast (Engineering Style)
-export const CALCULATION_COLORS = [
-  '#e74c3c', // Красный (primary) - bright red with good contrast
-  '#2ecc71', // Зелёный (яркий контраст) - vibrant green, easily distinguishable
-  '#3498db', // Синий (чистый) - clear blue, distinct from green
-  '#f39c12', // Оранжевый (яркий) - bright orange for high visibility
-  '#9b59b6', // Фиолетовый (уникальный) - distinct purple
-];
+import { CALCULATION_COLORS } from '@/types/v2';
 
 /**
  * Parameter colors - используются когда только 1 calculation (single calculation mode)
@@ -34,6 +25,9 @@ export const PARAMETER_COLORS = {
 export function getCalculationColor(index: number): string {
   return CALCULATION_COLORS[index % CALCULATION_COLORS.length];
 }
+
+// Re-export CALCULATION_COLORS for backward compatibility
+export { CALCULATION_COLORS };
 
 /**
  * Автоматически определить диапазон RPM для оси X
