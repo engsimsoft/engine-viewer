@@ -63,6 +63,14 @@
 ## [Unreleased]
 
 ### Fixed
+- **DataTable Sync with Custom Chart Parameter Selection** (2025-11-01):
+  - ✅ Fixed DataTable showing ALL parameters in Custom Chart (Preset 4) instead of only selected ones
+  - ✅ Added selectedCustomParams to Zustand store for synchronization between ChartPreset4 and DataTable
+  - ✅ DataTable now filters columns based on which parameters are selected on Custom Chart
+  - ✅ CSV/Excel export also respects selected parameters for Preset 4
+  - ✅ Presets 1, 2, 3 continue to work correctly with their fixed parameter sets
+  - Commit: 68ac256
+
 - **Duplicate File Extension in Header** (2025-11-01):
   - ✅ Fixed duplicate .det extension in project header (e.g., "TM Soft ShortCut.det.det" → "TM Soft ShortCut.det")
   - ✅ Backend fileName already includes extension, removed redundant .det suffix in Header component
