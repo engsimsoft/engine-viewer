@@ -264,7 +264,7 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-2">
       {/* Chart */}
       <div className="relative">
         <ReactECharts

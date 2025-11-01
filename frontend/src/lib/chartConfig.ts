@@ -92,7 +92,7 @@ export function getBaseChartConfig(animation = true): Partial<EChartsOption> {
       left: '60px',
       right: '60px',
       top: '50px', // Reduced from 80px to show more content below
-      bottom: '60px', // Reduced from 100px (removed slider)
+      bottom: '40px', // Reduced from 60px for tighter spacing with cards
       containLabel: true,
     },
 

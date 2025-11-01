@@ -386,7 +386,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-2">
       {/* Parameter selector */}
       <div className="p-4 bg-muted/30 rounded-lg border">
         <h4 className="text-sm font-semibold mb-3 text-muted-foreground">

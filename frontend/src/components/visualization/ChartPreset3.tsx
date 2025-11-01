@@ -389,7 +389,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-2">
       {/* Chart */}
       <div className="relative">
         <ReactECharts
