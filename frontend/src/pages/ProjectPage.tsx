@@ -50,25 +50,16 @@ export default function ProjectPage() {
   const primaryCalculation = useAppStore((state) => state.primaryCalculation);
   const comparisonCalculations = useAppStore((state) => state.comparisonCalculations);
   const clearPrimaryCalculation = useAppStore((state) => state.clearPrimaryCalculation);
-  const clearComparisons = useAppStore((state) => state.clearComparisons);
 
-  // Reset calculations when switching to a different project
+  // Reset primary calculation when switching to a different project
+  // NOTE: Comparisons are NOT cleared - cross-project comparison is a key feature!
   useEffect(() => {
     // If primary calculation exists and belongs to a different project, clear it
     if (primaryCalculation && primaryCalculation.projectId !== id) {
       clearPrimaryCalculation();
     }
-
-    // Clear comparison calculations from other projects
-    if (comparisonCalculations.length > 0) {
-      const hasOtherProjectCalculations = comparisonCalculations.some(
-        (calc) => calc.projectId !== id
-      );
-      if (hasOtherProjectCalculations) {
-        clearComparisons();
-      }
-    }
-  }, [id, primaryCalculation, comparisonCalculations, clearPrimaryCalculation, clearComparisons]);
+    // DO NOT clear comparisons - cross-project comparison is intentional!
+  }, [id, primaryCalculation, clearPrimaryCalculation]);
 
   // Combine primary + comparisons for v2 charts
   const allCalculations = [
