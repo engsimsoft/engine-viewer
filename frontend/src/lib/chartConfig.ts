@@ -89,8 +89,8 @@ export function getBaseChartConfig(animation = true): Partial<EChartsOption> {
   return {
     // Grid - отступы графика
     grid: {
-      left: '60px',
-      right: '60px',
+      left: '30px',
+      right: '30px',
       top: '50px', // Reduced from 80px to show more content below
       bottom: '40px', // Reduced from 60px for tighter spacing with cards
       containLabel: true,
