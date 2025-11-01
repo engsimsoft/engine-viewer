@@ -43,6 +43,7 @@
   - ✅ Increased line symbol length from 20px to 25px for better visibility
   - ✅ Applied unified professional style across all chart presets (Preset 1, 3, 4)
   - ✅ Reduced chart top spacing (grid.top: 50px) - more space for peak values cards
+  - ✅ Reduced chart bottom spacing (grid.bottom: 40px) - tighter gap with cards (space-y-2: 8px)
   - ✅ macOS/iPhone quality design - clean, unified visual hierarchy
 - **New modal dialogs**: PrimarySelectionModal and ComparisonModal for calculation selection
 - **Restructured left panel**: Three sections (Primary + Presets + Comparison)
