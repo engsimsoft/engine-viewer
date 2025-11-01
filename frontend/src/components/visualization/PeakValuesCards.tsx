@@ -270,8 +270,15 @@ export function PeakValuesCards({
             key={index}
             className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out flex flex-col gap-3"
           >
-            {/* Line 1: Calculation Name */}
+            {/* Line 1: Calculation Name with Color Dot (comparison mode only) */}
             <div className="flex items-center gap-3">
+              {/* Show color dot only in comparison mode (≥2 calculations) */}
+              {calculations.length > 1 && (
+                <div
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: calc.color }}
+                />
+              )}
               <span className="text-base font-medium text-gray-900 dark:text-gray-100 leading-5">
                 {calc.projectName} → {calc.calculationName}
               </span>

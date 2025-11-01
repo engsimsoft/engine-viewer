@@ -2,12 +2,13 @@ import type { EChartsOption } from 'echarts';
 import type { Calculation } from '@/types';
 
 // Цвета для расчётов (из config.yaml) - используются для сравнения (multiple calculations)
+// v2.1: Updated palette with maximum contrast (Engineering Style)
 export const CALCULATION_COLORS = [
-  '#ff6b6b', // Красный
-  '#4ecdc4', // Бирюзовый
-  '#45b7d1', // Синий
-  '#f9ca24', // Жёлтый
-  '#a29bfe', // Фиолетовый
+  '#e74c3c', // Красный (primary) - bright red with good contrast
+  '#2ecc71', // Зелёный (яркий контраст) - vibrant green, easily distinguishable
+  '#3498db', // Синий (чистый) - clear blue, distinct from green
+  '#f39c12', // Оранжевый (яркий) - bright orange for high visibility
+  '#9b59b6', // Фиолетовый (уникальный) - distinct purple
 ];
 
 /**
