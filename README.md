@@ -41,17 +41,32 @@ cd frontend && npm install && npm run dev
 
 ## Функциональность
 
-✅ **Текущая версия (v1.0.0):**
-- Парсинг .det файлов (результаты расчётов ДВС)
-- REST API для работы с данными
-- Интерактивные графики (ECharts): 4 пресета
-- Таблица данных с сортировкой и пагинацией
-- Экспорт графиков (PNG, SVG)
-- Экспорт данных (CSV, Excel)
-- Управление метаданными проектов
-- Выбор расчётов для сравнения (до 5)
+✅ **Текущая версия (v2.0.0):**
+- 🌍 **English UI** - international application
+- 🔄 **Cross-project comparison** - compare calculations from different projects (1 primary + 4 comparisons)
+- 📊 **Peak values always visible** - power, torque, RPM at peak displayed on cards (no hover needed)
+- 🎯 **RPM step display** - shows actual data density instead of point count
+- ⚙️ **Units conversion** - switch between SI/American/HP units (live conversion)
+- 🎨 **Professional UI** - iPhone-quality design with smooth animations
+- ♿ **Accessibility** - keyboard navigation, screen reader support, WCAG 2.1 AA compliant
+- 📱 **Responsive design** - optimized for mobile, tablet, and desktop
+- 🎭 **Empty states** - friendly messages and clear instructions
+- ⚠️ **Error handling** - comprehensive error boundaries and user feedback
+- 📈 **4 chart presets** - Power/Torque, Pressure/Temperature, Efficiency, Custom
+- 📤 **Export** - PNG/SVG charts, CSV/Excel data tables
+- 🏷️ **Project metadata** - descriptions, tags, client info, custom colors
 
-**Детали:** См. [CHANGELOG.md](CHANGELOG.md)
+**What's New in v2.0:**
+- Complete redesign with modern, professional interface
+- Cross-project calculation comparison (mix calculations from any projects)
+- Always-visible peak values cards with hover effects
+- Settings popover with units conversion and theme switching
+- New modal dialogs for calculation selection (Primary + Comparison)
+- Restructured left panel with three sections
+- Enhanced responsive design for all screen sizes
+- Full accessibility implementation
+
+**Details:** See [CHANGELOG.md](CHANGELOG.md)
 
 ---
 

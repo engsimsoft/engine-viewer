@@ -7,6 +7,59 @@
 
 ---
 
+## [2.0.0] - 2025-11-01
+
+### Added
+- **Cross-project calculation comparison**: Compare calculations from different projects (1 primary + up to 4 comparisons)
+- **Peak values cards**: Always visible cards showing power, torque, and RPM at peak (no hover needed)
+- **RPM step display**: Shows actual data density (e.g., "200 RPM step") instead of useless point count
+- **Units conversion system**: Switch between SI/American/HP units with live conversion (Settings popover)
+- **Settings popover**: Theme switching (Light/Dark), units conversion, animation toggle, grid toggle
+- **English UI**: Complete translation for international users
+- **Smooth animations**: 300-500ms transitions on modals, buttons, panels (Phase 6.2)
+- **Empty states**: Friendly messages with clear instructions for PrimarySection, ComparisonSection, HomePage
+- **Error handling**:
+  - ErrorBoundary component for React errors
+  - Toast notifications via Sonner
+  - API error handling with try-catch
+  - User-friendly error messages with retry functionality
+- **Responsive design**:
+  - Desktop (>1024px): LeftPanel 320px fixed, full header
+  - Tablet (768-1024px): LeftPanel collapsible with hamburger menu
+  - Mobile (<768px): LeftPanel full-screen overlay, compact header, touch-friendly buttons (44x44px)
+- **Accessibility (WCAG 2.1 AA)**:
+  - Keyboard navigation (Tab, Enter, Space, ESC)
+  - Focus indicators with ring-2 offset
+  - ARIA labels on all interactive elements
+  - Screen reader support via Radix UI
+  - Color contrast compliance
+
+### Changed
+- **Complete UI redesign**: iPhone-quality professional interface
+- **New modal dialogs**: PrimarySelectionModal and ComparisonModal for calculation selection
+- **Restructured left panel**: Three sections (Primary + Presets + Comparison)
+- **Updated all 4 chart presets**: Support for multi-project data display
+- **Enhanced chart export**: PNG/SVG buttons in Header (Phase 5)
+- **Optimized layout**: Full-width peak values cards, inline format (Addendum v2.0.1)
+- **Data table updates**: Source column with color indicators, dynamic headers with units, calculation filter
+- **Zustand store**: New state management with CalculationReference structure
+
+### Fixed
+- Point count replaced with useful RPM step calculation
+- Peak values now always visible (not just on hover)
+- Removed LiveCursorPanel from charts (replaced with inline peak values)
+- Removed zoom UI elements (replaced with Shift+Drag zoom interaction)
+- All error messages translated to English
+
+### Technical
+- **Architecture**: Implemented Phase 1-6 from roadmap-v2.md
+- **Components**: Created 20+ new components (modals, sections, cards, popovers)
+- **Hooks**: useMultiProjectData for cross-project comparison, useChartPreset for preset management
+- **Contexts**: ChartExportContext for export handler management
+- **Build**: Vite + TypeScript + React 18 + TailwindCSS + Radix UI + ECharts
+
+---
+
 ## [Unreleased]
 
 ### Changed

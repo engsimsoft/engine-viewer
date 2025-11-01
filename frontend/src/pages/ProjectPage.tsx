@@ -42,17 +42,7 @@ export default function ProjectPage() {
   // Load project data
   const { project, loading, error, refetch } = useProjectData(id);
 
-  // Old architecture (Phase 1) - selected calculations
-  // TODO: Phase 4 onwards will fully remove this
-  // const {
-  //   selectedIds,
-  //   toggleCalculation,
-  //   isMaxReached,
-  //   maxCount,
-  //   count,
-  // } = useSelectedCalculations();
-
-  // Get selected preset from Zustand store (Phase 2)
+  // Get selected preset from Zustand store
   const selectedPreset = useAppStore((state) => state.selectedPreset);
 
   // Get calculations from Zustand store (Phase 4)
