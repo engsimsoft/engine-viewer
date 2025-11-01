@@ -9,13 +9,55 @@
 
 ## [Unreleased]
 
+### Added
+- **Chart Export в Header** (2025-11-01):
+  - Кнопки PNG/SVG перенесены из области графика в Header рядом с Settings
+  - Создан ChartExportContext для управления export handlers между компонентами
+  - Освобождено ~60px вертикального пространства для графика
+  - Commit: [current]
+
 ### Changed
+- **DataTable обновлён для multi-project support (Phase 5)** (2025-11-01):
+  - Обновлён интерфейс: `calculations: CalculationReference[]` вместо старой структуры
+  - ✅ Добавлена колонка "Source" с color indicators для идентификации проектов
+  - ✅ Динамические headers с units labels (SI/American/HP)
+  - ✅ Units conversion применена ко всем значениям (power, torque, pressure, temperature)
+  - ✅ Фильтр расчётов: dropdown "Show: [All calculations ▼]"
+  - ✅ CSV/Excel export с units conversion и Source column
+  - ✅ Loading/error states (LoadingSpinner, ErrorMessage)
+  - Интегрирован useMultiProjectData hook для cross-project data loading
+  - Обновлён ProjectPage для передачи allCalculations вместо project.calculations
+  - Commit: [current]
+
+
+- **UI Layout Optimization - Addendum v2.0.1** (2025-11-01):
+  - ❌ Удалены redundant headers: "Visualization", preset names, "Peak Values"
+  - ✅ Заменены Grid Cards (2 колонки) на Full-Width Cards (одна карточка на строку)
+  - Inline формат peak values: "🏆 215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM"
+  - Hover эффекты: shadow + translateY(-2px)
+  - Responsive: стакается вертикально на mobile (<768px)
+  - **Результат:** График получает 76% viewport (было 50%), всё помещается без scroll
+  - Commit: [current]
+
+- **Settings теперь работают** (2025-11-01):
+  - ✅ Theme (Light/Dark) - применяется к document root через useEffect в App.tsx
+  - ✅ Animation Enabled - применяется к getBaseChartConfig()
+  - ✅ Show Grid - применяется к createXAxis() и createYAxis()
+  - Все ChartPreset компоненты (1, 2, 3, 4) используют settings из Zustand store
+  - Commit: [current]
+
 - **Оптимизация UI графиков** (2025-11-01):
   - Удалён компонент LiveCursorPanel из всех 4 chart presets
   - Причина: дублировал функциональность встроенного ECharts tooltip ("масло масляное")
   - Удалено 190 строк кода (cursor state, event handlers, JSX)
   - Теперь используется только компактный встроенный tooltip ECharts
   - Commit: 4823fc3
+
+### Fixed
+- **Infinite loop в useChartExport** (2025-11-01):
+  - Обернул handleExportPNG и handleExportSVG в useCallback
+  - Исправлена ошибка "Maximum update depth exceeded"
+  - Commit: [current]
 
 ### Planned
 - Режим "Список" для HomePage

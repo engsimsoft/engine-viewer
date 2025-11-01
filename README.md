@@ -85,16 +85,25 @@ cd frontend && npm install && npm run dev
 
 ## Статус проекта
 
-**Версия:** v1.0.0
-**Статус:** Полнофункциональная версия ✅
+**Stable Version:** v1.0.0 ✅
+**Development Version:** v2.0.0 (65% complete) 🚧
 
-**Завершённые этапы:**
+**v1.0.0 (Stable):**
 - ✅ Backend (парсинг, REST API, метаданные)
 - ✅ Frontend (UI, графики, таблицы, экспорт)
 - ✅ Все 4 пресета графиков
 - ✅ Таблица данных с экспортом
 
-**Следующие этапы:** См. [roadmap.md](roadmap.md)
+**v2.0.0 (In Development):**
+- ✅ Cross-project calculation comparison
+- ✅ Multi-calculation visualization (1 primary + 4 comparisons)
+- ✅ Units conversion (SI/American/HP)
+- ✅ Peak values cards (always visible)
+- ✅ Settings popover (theme, animation, grid)
+- ✅ DataTable with multi-project support
+- 🚧 UI translations, polish, testing
+
+**Development Plan:** См. [roadmap-v2.md](roadmap-v2.md)
 
 ---
 

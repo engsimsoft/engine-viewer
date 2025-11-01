@@ -25,9 +25,35 @@ Transform Engine Viewer into a **professional iPhone-quality application** with:
 
 ## 📊 Current Status
 
-- **Phase:** Phase 4 - Charts & Visualization (Section 4.5 ✅ COMPLETE)
-- **Progress:** 86/139 tasks (62%)
-- **Next Task:** Phase 5.1 - Update DataTable Component
+- **Phase:** Phase 5 - Data Table Updates ✅ **COMPLETE**
+- **Progress:** 91/139 tasks (65%)
+- **Next Task:** Phase 6.1 - Translate All UI to English
+
+### 🎉 Recent Achievements (November 1, 2025)
+
+**✅ Phase 5 - Data Table Updates** (COMPLETE):
+- DataTable updated for multi-project comparison support
+- Added "Source" column with color indicators
+- Dynamic headers with units labels (SI/American/HP)
+- Units conversion applied to all cell values
+- Calculation filter dropdown for multi-calc tables
+- CSV/Excel export with units conversion
+
+**✅ Addendum v2.0.1 - UI Layout Optimization** ([ENGINE-VIEWER-V2-SPEC-ADDENDUM.md](ENGINE-VIEWER-V2-SPEC-ADDENDUM.md)):
+- Removed redundant headers from visualization page
+- Replaced 2-column grid cards with full-width cards
+- Inline peak values with hover effects
+- Chart now uses 76% of viewport (was 50%)
+
+**✅ Export Buttons in Header:**
+- PNG/SVG buttons moved to Header next to Settings
+- Created ChartExportContext for handler management
+- Saves additional ~60px vertical space
+
+**✅ Settings Functionality Fixed:**
+- Theme (Light/Dark) now applies to document root
+- Animation toggle works on all charts
+- Show Grid toggle controls axis grid lines
 
 ---
 
@@ -1024,14 +1050,14 @@ const CALCULATION_COLORS = [
 **File:** `frontend/src/components/visualization/DataTable.tsx`
 
 **Tasks:**
-- [ ] 5.1.1 Add calculation source column (1 hour)
+- [X] 5.1.1 Add calculation source column (1 hour) ✅
   ```tsx
   // New column: "Source"
   // Value: "Vesta 1.6 IM → $1"
   // With color indicator dot: ⚫ (matches calc.color)
   ```
 
-- [ ] 5.1.2 Update headers based on units (1 hour)
+- [X] 5.1.2 Update headers based on units (1 hour) ✅
   ```typescript
   // Dynamic headers:
   // SI: "P-Av (kW)", "Torque (N·m)", "PCylMax (bar)", "TCylMax (°C)"
@@ -1039,12 +1065,12 @@ const CALCULATION_COLORS = [
   // HP: "P-Av (PS)", "Torque (N·m)", "PCylMax (bar)", "TCylMax (°C)"
   ```
 
-- [ ] 5.1.3 Apply units conversion to values (1.5 hours)
+- [X] 5.1.3 Apply units conversion to values (1.5 hours) ✅
   - For each row, convert all values based on units setting
-  - Use convertValue from Phase 1
-  - Format with decimals setting
+  - Use convertPower, convertTorque, convertPressure, convertTemperature
+  - Format with decimals setting from chartSettings
 
-- [ ] 5.1.4 Add calculation filter dropdown (1 hour)
+- [X] 5.1.4 Add calculation filter dropdown (1 hour) ✅
   ```tsx
   // Above table:
   // "Show: [All calculations ▼]"
@@ -1056,12 +1082,12 @@ const CALCULATION_COLORS = [
   // Filter table rows by selected calculation
   ```
 
-- [ ] 5.1.5 Update export (CSV/Excel) (1 hour)
+- [X] 5.1.5 Update export (CSV/Excel) (1 hour) ✅
   - Include "Source" column in exports
   - Apply units conversion to exported values
   - Include units in column headers
 
-**Acceptance:** Table shows all calculations, source column with color, units applied, filter works, exports correct
+**Acceptance:** ✅ COMPLETE - Table shows all calculations, source column with color, units applied, filter works, exports correct
 
 ---
 
@@ -1525,7 +1551,7 @@ const CALCULATION_COLORS = [
 
 ## 📝 Current Session
 
-**Session Date:** 2025-10-31
+**Session Date:** 2025-11-01
 
 ### Activities:
 - [X] Researched current project structure (Plan agent)
@@ -1557,6 +1583,17 @@ const CALCULATION_COLORS = [
     - Created: `frontend/src/lib/exportFilename.ts` (generateChartFilename)
     - Updated: All 4 chart presets to use dynamic filenames
     - Verified: Units already displayed in exported charts
+- [X] **Phase 5 COMPLETE** ✅ - Data Table Updates (All 5 tasks complete)
+  - Section 5.1 - Update DataTable Component (5 tasks) ✅
+    - Updated component interface for v2.0 (CalculationReference[])
+    - Added "Source" column with color indicators
+    - Integrated useMultiProjectData hook for cross-project loading
+    - Dynamic headers with units labels (SI/American/HP)
+    - Units conversion applied to all cell values
+    - Calculation filter dropdown for multi-calc tables
+    - Updated CSV/Excel export with units conversion
+    - Loading/error states with LoadingSpinner and ErrorMessage
+    - Updated ProjectPage to use new DataTable interface
 
 ### Notes:
 - Roadmap covers ALL features from ENGINE-VIEWER-V2-SPEC.md
@@ -1564,9 +1601,9 @@ const CALCULATION_COLORS = [
 - Each task is specific with file paths and functions
 - 139 total tasks across 7 phases
 - Estimated timeline: 4 weeks (1 phase per week, overlap in weeks 2-3)
-- **Progress: 86/139 tasks complete (62%)**
-- **Current: Phase 4 - Charts & Visualization (✅ COMPLETE)**
-- **Next: Phase 5.1 - Update DataTable Component**
+- **Progress: 91/139 tasks complete (65%)**
+- **Current: Phase 5 - Data Table Updates (✅ COMPLETE)**
+- **Next: Phase 6.1 - Translate All UI to English**
 
 ---
 

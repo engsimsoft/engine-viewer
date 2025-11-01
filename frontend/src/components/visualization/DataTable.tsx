@@ -10,202 +10,236 @@ import {
   type ColumnDef,
 } from '@tanstack/react-table';
 import { ArrowUp, ArrowDown, ArrowUpDown, Download, FileSpreadsheet } from 'lucide-react';
-import type { Calculation, DataPoint } from '@/types';
+import type { CalculationReference } from '@/types/v2';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { exportToCSV, exportToExcel } from '@/utils/export';
+import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
+import { useAppStore } from '@/stores/appStore';
+import {
+  convertPower,
+  convertTorque,
+  convertPressure,
+  convertTemperature,
+  getPowerUnit,
+  getTorqueUnit,
+  getPressureUnit,
+  getTemperatureUnit,
+} from '@/lib/unitsConversion';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface DataTableProps {
-  /** Все расчёты проекта */
-  calculations: Calculation[];
-  /** ID выбранных расчётов */
-  selectedIds: string[];
+  /** Array of CalculationReference from Zustand store (primary + comparisons) */
+  calculations: CalculationReference[];
 }
 
 /**
- * Тип строки таблицы - комбинация данных из всех выбранных расчётов
- * Каждая строка представляет одно значение RPM
+ * Тип строки таблицы - одна строка = одна точка данных от одного расчёта
+ * Multi-project support: строки от всех calculations объединены в одну таблицу
  */
 interface TableRow {
-  /** Значение RPM (общее для всех расчётов в строке) */
+  /** Unique row ID (calculationId + RPM) */
+  id: string;
+  /** Source calculation label for display (e.g., "Vesta 1.6 IM → $1") */
+  source: string;
+  /** Color for source indicator */
+  sourceColor: string;
+  /** Calculation ID (for filtering) */
+  calculationId: string;
+  /** RPM value */
   rpm: number;
-  /** Данные по каждому расчёту: ключ - id расчёта, значение - DataPoint или undefined */
-  calculationData: Record<string, DataPoint | undefined>;
+  /** Power (P-Av) in original SI units (kW) */
+  powerKW: number;
+  /** Torque in original SI units (N·m) */
+  torqueNm: number;
+  /** Average cylinder pressure in original SI units (bar) */
+  pressureBar: number;
+  /** Average cylinder temperature in original SI units (°C) */
+  temperatureC: number;
+  /** Convergence value */
+  convergence: number;
 }
 
 /**
- * Компонент таблицы данных с сортировкой, пагинацией и экспортом
+ * Компонент таблицы данных с сортировкой, пагинацией и экспортом (v2.0)
  *
- * Особенности:
- * - Отображает данные выбранных расчётов в табличном виде
- * - Каждая строка = одно значение RPM
- * - Колонки: RPM, затем параметры для каждого выбранного расчёта
- * - Поддерживает сортировку по любой колонке
- * - Pagination для больших наборов данных
- * - Экспорт в CSV и Excel
+ * Features:
+ * - Multi-project calculation comparison
+ * - Source column with color indicator
+ * - Dynamic units conversion (SI/American/HP)
+ * - Calculation filter dropdown
+ * - Export to CSV/Excel with units
+ * - Sorting and pagination
  */
-export function DataTable({ calculations, selectedIds }: DataTableProps) {
+export function DataTable({ calculations }: DataTableProps) {
+  // Get units and chart settings from store
+  const units = useAppStore((state) => state.units);
+  const chartSettings = useAppStore((state) => state.chartSettings);
+  const { decimals } = chartSettings;
+
+  // State
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 25,
   });
+  const [selectedCalculationFilter, setSelectedCalculationFilter] = useState<string>('all');
 
-  // Фильтруем только выбранные расчёты
-  const selectedCalculations = useMemo(() => {
-    return calculations.filter((calc) => selectedIds.includes(calc.id));
-  }, [calculations, selectedIds]);
+  // Load cross-project data
+  const {
+    calculations: loadedCalculations,
+    isLoading,
+    error,
+    refetch
+  } = useMultiProjectData(calculations);
 
-  // Подготавливаем данные для таблицы
+  // Filter calculations with loaded data
+  const readyCalculations = useMemo(() => {
+    return getLoadedCalculations(loadedCalculations);
+  }, [loadedCalculations]);
+
+  // Prepare table data from all calculations
   const tableData = useMemo(() => {
-    if (selectedCalculations.length === 0) {
+    if (readyCalculations.length === 0) {
       return [];
     }
 
-    // Собираем все уникальные RPM значения из всех выбранных расчётов
-    const rpmSet = new Set<number>();
-    selectedCalculations.forEach((calc) => {
-      calc.dataPoints.forEach((point) => {
-        rpmSet.add(point.RPM);
+    const rows: TableRow[] = [];
+
+    // Create one row per data point from each calculation
+    readyCalculations.forEach((calc) => {
+      if (!calc.data || calc.data.length === 0) return;
+
+      calc.data.forEach((point) => {
+        // Calculate averages for cylinder-specific parameters
+        const avgPressure = point.PCylMax.reduce((sum, val) => sum + val, 0) / point.PCylMax.length;
+        const avgTemperature = point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length;
+
+        rows.push({
+          id: `${calc.calculationId}-${point.RPM}`,
+          source: `${calc.projectName} → ${calc.calculationName}`,
+          sourceColor: calc.color,
+          calculationId: calc.calculationId,
+          rpm: point.RPM,
+          powerKW: point['P-Av'],
+          torqueNm: point.Torque,
+          pressureBar: avgPressure,
+          temperatureC: avgTemperature,
+          convergence: point.Convergence,
+        });
       });
-    });
-
-    // Сортируем RPM по возрастанию
-    const sortedRpms = Array.from(rpmSet).sort((a, b) => a - b);
-
-    // Создаём строки таблицы
-    const rows: TableRow[] = sortedRpms.map((rpm) => {
-      const calculationData: Record<string, DataPoint | undefined> = {};
-
-      selectedCalculations.forEach((calc) => {
-        // Находим точку данных с соответствующим RPM
-        const dataPoint = calc.dataPoints.find((point) => point.RPM === rpm);
-        calculationData[calc.id] = dataPoint;
-      });
-
-      return {
-        rpm,
-        calculationData,
-      };
     });
 
     return rows;
-  }, [selectedCalculations]);
+  }, [readyCalculations]);
 
-  // Создаём колонки таблицы
+  // Apply calculation filter
+  const filteredTableData = useMemo(() => {
+    if (selectedCalculationFilter === 'all') {
+      return tableData;
+    }
+    return tableData.filter((row) => row.calculationId === selectedCalculationFilter);
+  }, [tableData, selectedCalculationFilter]);
+
+  // Get unit labels (dynamic based on current units setting)
+  const powerUnit = getPowerUnit(units);
+  const torqueUnit = getTorqueUnit(units);
+  const pressureUnit = getPressureUnit(units);
+  const temperatureUnit = getTemperatureUnit(units);
+
+  // Create table columns
   const columns = useMemo<ColumnDef<TableRow, any>[]>(() => {
     const columnHelper = createColumnHelper<TableRow>();
 
-    // Колонка RPM (всегда первая)
     const cols: ColumnDef<TableRow, any>[] = [
+      // Source column with color indicator
+      columnHelper.accessor('source', {
+        header: 'Source',
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: row.sourceColor }}
+              />
+              <span className="font-medium">{info.getValue()}</span>
+            </div>
+          );
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // RPM column
       columnHelper.accessor('rpm', {
         header: 'RPM',
         cell: (info) => info.getValue().toFixed(0),
         sortingFn: 'basic',
       }) as ColumnDef<TableRow, any>,
+
+      // P-Av column with units conversion
+      columnHelper.accessor('powerKW', {
+        header: `P-Av (${powerUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          const converted = convertPower(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Torque column with units conversion
+      columnHelper.accessor('torqueNm', {
+        header: `Torque (${torqueUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          const converted = convertTorque(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // PCylMax column with units conversion (average)
+      columnHelper.accessor('pressureBar', {
+        header: `PCylMax (${pressureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          const converted = convertPressure(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // TCylMax column with units conversion (average)
+      columnHelper.accessor('temperatureC', {
+        header: `TCylMax (${temperatureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          const converted = convertTemperature(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Convergence column (no units conversion)
+      columnHelper.accessor('convergence', {
+        header: 'Convergence',
+        cell: (info) => {
+          const value = info.getValue();
+          return value.toFixed(4);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
     ];
 
-    // Для каждого выбранного расчёта создаём колонки
-    selectedCalculations.forEach((calc) => {
-      // P-Av (мощность)
-      cols.push(
-        columnHelper.accessor(
-          (row) => row.calculationData[calc.id]?.['P-Av'] as number | undefined,
-          {
-            id: `${calc.id}-pav`,
-            header: `${calc.id} - P-Av (кВт)`,
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? value.toFixed(2) : '-';
-            },
-            sortingFn: 'basic',
-          }
-        ) as ColumnDef<TableRow, any>
-      );
-
-      // Torque (момент)
-      cols.push(
-        columnHelper.accessor(
-          (row) => row.calculationData[calc.id]?.Torque as number | undefined,
-          {
-            id: `${calc.id}-torque`,
-            header: `${calc.id} - Torque (Н·м)`,
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? value.toFixed(2) : '-';
-            },
-            sortingFn: 'basic',
-          }
-        ) as ColumnDef<TableRow, any>
-      );
-
-      // PCylMax (макс. давление в цилиндре) - среднее
-      cols.push(
-        columnHelper.accessor(
-          (row): number | undefined => {
-            const data = row.calculationData[calc.id];
-            if (!data) return undefined;
-            // Вычисляем среднее по всем цилиндрам
-            const avg = data.PCylMax.reduce((sum, val) => sum + val, 0) / data.PCylMax.length;
-            return avg;
-          },
-          {
-            id: `${calc.id}-pcylmax`,
-            header: `${calc.id} - PCylMax (бар)`,
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? value.toFixed(2) : '-';
-            },
-            sortingFn: 'basic',
-          }
-        ) as ColumnDef<TableRow, any>
-      );
-
-      // TCylMax (макс. температура в цилиндре) - среднее
-      cols.push(
-        columnHelper.accessor(
-          (row): number | undefined => {
-            const data = row.calculationData[calc.id];
-            if (!data) return undefined;
-            const avg = data.TCylMax.reduce((sum, val) => sum + val, 0) / data.TCylMax.length;
-            return avg;
-          },
-          {
-            id: `${calc.id}-tcylmax`,
-            header: `${calc.id} - TCylMax (°C)`,
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? value.toFixed(0) : '-';
-            },
-            sortingFn: 'basic',
-          }
-        ) as ColumnDef<TableRow, any>
-      );
-
-      // Convergence (сходимость)
-      cols.push(
-        columnHelper.accessor(
-          (row) => row.calculationData[calc.id]?.Convergence as number | undefined,
-          {
-            id: `${calc.id}-convergence`,
-            header: `${calc.id} - Convergence`,
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? value.toFixed(4) : '-';
-            },
-            sortingFn: 'basic',
-          }
-        ) as ColumnDef<TableRow, any>
-      );
-    });
-
     return cols;
-  }, [selectedCalculations]);
+  }, [units, decimals, powerUnit, torqueUnit, pressureUnit, temperatureUnit]);
 
-  // Создаём экземпляр таблицы
+  // Create table instance with filtered data
   const table = useReactTable({
-    data: tableData,
+    data: filteredTableData,
     columns,
     state: {
       sorting,
@@ -218,48 +252,94 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  // Обработчики экспорта
+  // Export handlers with units conversion
   const handleExportCSV = () => {
-    const data = table.getRowModel().rows.map((row) => {
-      const rowData: Record<string, string | number> = {};
-      row.getAllCells().forEach((cell) => {
-        const columnId = cell.column.id;
-        const header = typeof cell.column.columnDef.header === 'string'
-          ? cell.column.columnDef.header
-          : columnId;
-        rowData[header] = cell.getValue() as string | number;
-      });
-      return rowData;
+    const data = filteredTableData.map((row) => {
+      return {
+        'Source': row.source,
+        'RPM': row.rpm.toFixed(0),
+        [`P-Av (${powerUnit})`]: convertPower(row.powerKW, units).toFixed(decimals),
+        [`Torque (${torqueUnit})`]: convertTorque(row.torqueNm, units).toFixed(decimals),
+        [`PCylMax (${pressureUnit})`]: convertPressure(row.pressureBar, units).toFixed(decimals),
+        [`TCylMax (${temperatureUnit})`]: convertTemperature(row.temperatureC, units).toFixed(decimals),
+        'Convergence': row.convergence.toFixed(4),
+      };
     });
 
-    const filename = `data-${selectedCalculations.map(c => c.id).join('-')}.csv`;
+    const filename = `data-${readyCalculations.map(c => c.calculationId).join('-')}.csv`;
     exportToCSV(data, filename);
   };
 
   const handleExportExcel = () => {
-    const data = table.getRowModel().rows.map((row) => {
-      const rowData: Record<string, string | number> = {};
-      row.getAllCells().forEach((cell) => {
-        const columnId = cell.column.id;
-        const header = typeof cell.column.columnDef.header === 'string'
-          ? cell.column.columnDef.header
-          : columnId;
-        rowData[header] = cell.getValue() as string | number;
-      });
-      return rowData;
+    const data = filteredTableData.map((row) => {
+      return {
+        'Source': row.source,
+        'RPM': row.rpm.toFixed(0),
+        [`P-Av (${powerUnit})`]: convertPower(row.powerKW, units).toFixed(decimals),
+        [`Torque (${torqueUnit})`]: convertTorque(row.torqueNm, units).toFixed(decimals),
+        [`PCylMax (${pressureUnit})`]: convertPressure(row.pressureBar, units).toFixed(decimals),
+        [`TCylMax (${temperatureUnit})`]: convertTemperature(row.temperatureC, units).toFixed(decimals),
+        'Convergence': row.convergence.toFixed(4),
+      };
     });
 
-    const filename = `data-${selectedCalculations.map(c => c.id).join('-')}.xlsx`;
+    const filename = `data-${readyCalculations.map(c => c.calculationId).join('-')}.xlsx`;
     exportToExcel(data, filename);
   };
 
-  // If no calculations selected
-  if (selectedCalculations.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Table</CardTitle>
+          <CardDescription>Loading calculation data...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-[400px]">
+            <LoadingSpinner />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Table</CardTitle>
+          <CardDescription>Failed to load data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-[400px]">
+            <ErrorMessage message={error} onRetry={refetch} />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Empty state - no calculations selected
+  if (calculations.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Data Table</CardTitle>
           <CardDescription>Select calculations to display data</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  // Empty state - calculations selected but no data loaded
+  if (readyCalculations.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Table</CardTitle>
+          <CardDescription>No data available</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -272,7 +352,8 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
           <div>
             <CardTitle>Data Table</CardTitle>
             <CardDescription>
-              {tableData.length} rows • {selectedCalculations.length} calculation{selectedCalculations.length === 1 ? '' : 's'}
+              {filteredTableData.length} rows • {readyCalculations.length} calculation{readyCalculations.length === 1 ? '' : 's'}
+              {selectedCalculationFilter !== 'all' && ' (filtered)'}
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -280,7 +361,7 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
               variant="outline"
               size="sm"
               onClick={handleExportCSV}
-              disabled={tableData.length === 0}
+              disabled={filteredTableData.length === 0}
             >
               <Download className="mr-2 h-4 w-4" />
               CSV
@@ -289,13 +370,42 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
               variant="outline"
               size="sm"
               onClick={handleExportExcel}
-              disabled={tableData.length === 0}
+              disabled={filteredTableData.length === 0}
             >
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Excel
             </Button>
           </div>
         </div>
+
+        {/* Calculation Filter Dropdown */}
+        {readyCalculations.length > 1 && (
+          <div className="flex items-center gap-2 mt-4">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select
+              value={selectedCalculationFilter}
+              onValueChange={setSelectedCalculationFilter}
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All calculations</SelectItem>
+                {readyCalculations.map((calc) => (
+                  <SelectItem key={calc.calculationId} value={calc.calculationId}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: calc.color }}
+                      />
+                      <span>{calc.projectName} → {calc.calculationName}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {/* Таблица */}
@@ -359,7 +469,7 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              Строк на странице:
+              Rows per page:
             </span>
             <Select
               value={table.getState().pagination.pageSize.toString()}
@@ -380,7 +490,7 @@ export function DataTable({ calculations, selectedIds }: DataTableProps) {
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              Страница {table.getState().pagination.pageIndex + 1} из{' '}
+              Page {table.getState().pagination.pageIndex + 1} of{' '}
               {table.getPageCount()}
             </span>
             <div className="flex gap-1">

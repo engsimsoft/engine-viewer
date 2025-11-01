@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useSelectedCalculations } from '@/hooks/useSelectedCalculations';
 import { useAppStore } from '@/stores/appStore';
+import { ChartExportProvider } from '@/contexts/ChartExportContext';
 import { Header } from '@/components/visualization/Header';
 import { LeftPanel } from '@/components/visualization/LeftPanel';
 import { PrimarySelectionModal } from '@/components/visualization/PrimarySelectionModal';
@@ -44,13 +45,13 @@ export default function ProjectPage() {
 
   // Old architecture (Phase 1) - selected calculations
   // TODO: Phase 4 onwards will fully remove this
-  const {
-    selectedIds,
-    toggleCalculation,
-    isMaxReached,
-    maxCount,
-    count,
-  } = useSelectedCalculations();
+  // const {
+  //   selectedIds,
+  //   toggleCalculation,
+  //   isMaxReached,
+  //   maxCount,
+  //   count,
+  // } = useSelectedCalculations();
 
   // Get selected preset from Zustand store (Phase 2)
   const selectedPreset = useAppStore((state) => state.selectedPreset);
@@ -99,69 +100,61 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header Component (Phase 2) */}
-      <Header
-        projectName={project.fileName}
-        engineType={project.metadata.engineType}
-        cylinders={project.metadata.numCylinders}
-        calculationsCount={project.calculations.length}
-      />
+    <ChartExportProvider>
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header Component (Phase 2) */}
+        <Header
+          projectName={project.fileName}
+          engineType={project.metadata.engineType}
+          cylinders={project.metadata.numCylinders}
+          calculationsCount={project.calculations.length}
+        />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel (Phase 2) - Responsive, 3 sections */}
-        <LeftPanel />
+        {/* Main Content Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Panel (Phase 2) - Responsive, 3 sections */}
+          <LeftPanel />
 
-        {/* Main Chart & Table Area */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Chart Area */}
-            <div className="bg-card rounded-lg border p-6">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold">Visualization</h2>
-                <p className="text-sm text-muted-foreground">
-                  {count > 0
-                    ? `Showing ${count} calculation${count === 1 ? '' : 's'}`
-                    : 'Select calculations to display'}
-                </p>
+          {/* Main Chart & Table Area */}
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+              {/* Chart Area */}
+              <div className="bg-card rounded-lg border p-6">
+                {/* Render chart based on selected preset */}
+                {selectedPreset === 1 && (
+                  <ChartPreset1
+                    calculations={allCalculations}
+                  />
+                )}
+                {selectedPreset === 2 && (
+                  <ChartPreset2
+                    calculations={allCalculations}
+                  />
+                )}
+                {selectedPreset === 3 && (
+                  <ChartPreset3
+                    calculations={allCalculations}
+                  />
+                )}
+                {selectedPreset === 4 && (
+                  <ChartPreset4
+                    calculations={allCalculations}
+                  />
+                )}
               </div>
 
-              {/* Render chart based on selected preset */}
-              {selectedPreset === 1 && (
-                <ChartPreset1
-                  calculations={allCalculations}
-                />
-              )}
-              {selectedPreset === 2 && (
-                <ChartPreset2
-                  calculations={allCalculations}
-                />
-              )}
-              {selectedPreset === 3 && (
-                <ChartPreset3
-                  calculations={allCalculations}
-                />
-              )}
-              {selectedPreset === 4 && (
-                <ChartPreset4
-                  calculations={allCalculations}
-                />
-              )}
+              {/* Data Table (v2.0 - Multi-Project Support) */}
+              <DataTable
+                calculations={allCalculations}
+              />
             </div>
+          </main>
+        </div>
 
-            {/* Data Table */}
-            <DataTable
-              calculations={project.calculations}
-              selectedIds={selectedIds}
-            />
-          </div>
-        </main>
+        {/* Modals */}
+        <PrimarySelectionModal />
+        <ComparisonModal />
       </div>
-
-      {/* Modals */}
-      <PrimarySelectionModal />
-      <ComparisonModal />
-    </div>
+    </ChartExportProvider>
   );
 }
