@@ -102,6 +102,11 @@ interface AppStore extends AppState {
    * Установить выбранный preset графиков
    */
   setSelectedPreset: (preset: 1 | 2 | 3 | 4) => void;
+
+  /**
+   * Установить выбранные параметры для Custom Chart (Preset 4)
+   */
+  setSelectedCustomParams: (params: string[]) => void;
 }
 
 /**
@@ -159,6 +164,7 @@ export const useAppStore = create<AppStore>()(
   isPrimaryModalOpen: false,
   isComparisonModalOpen: false,
   selectedPreset: 1, // Power & Torque по умолчанию
+  selectedCustomParams: ['P-Av', 'Torque'], // Default parameters for Custom Chart (Preset 4)
 
   // ============================================================
   // Calculation Management Actions
@@ -265,6 +271,11 @@ export const useAppStore = create<AppStore>()(
   setSelectedPreset: (preset) =>
     set({
       selectedPreset: preset,
+    }),
+
+  setSelectedCustomParams: (params) =>
+    set({
+      selectedCustomParams: params,
     }),
     }),
     {

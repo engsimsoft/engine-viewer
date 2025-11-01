@@ -82,6 +82,8 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
   const units = useAppStore((state) => state.units);
   const chartSettings = useAppStore((state) => state.chartSettings);
   const { decimals } = chartSettings;
+  // Get selected custom parameters for Preset 4
+  const selectedCustomParams = useAppStore((state) => state.selectedCustomParams);
 
   // State
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -286,12 +288,28 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
       filteredCols.push(cols[5]); // TCylMax
       filteredCols.push(cols[6]); // TUbMax
     } else if (selectedPreset === 4) {
-      // Preset 4: All parameters
-      filteredCols.push(...cols.slice(2)); // All data columns
+      // Preset 4: Custom Chart - show only selected parameters
+      // Map parameter IDs to column indices
+      const paramToColIndex: Record<string, number> = {
+        'P-Av': 2,
+        'Torque': 3,
+        'PCylMax': 4,
+        'TCylMax': 5,
+        'TUbMax': 6,
+        'Convergence': 7,
+      };
+
+      // Add columns for selected parameters only
+      selectedCustomParams.forEach((paramId) => {
+        const colIndex = paramToColIndex[paramId];
+        if (colIndex !== undefined && cols[colIndex]) {
+          filteredCols.push(cols[colIndex]);
+        }
+      });
     }
 
     return filteredCols;
-  }, [units, decimals, powerUnit, torqueUnit, pressureUnit, temperatureUnit, selectedPreset]);
+  }, [units, decimals, powerUnit, torqueUnit, pressureUnit, temperatureUnit, selectedPreset, selectedCustomParams]);
 
   // Create table instance with filtered data
   const table = useReactTable({
@@ -330,13 +348,22 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
         exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
       } else if (selectedPreset === 4) {
-        // Preset 4: All parameters
-        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
-        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
-        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
-        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
-        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
-        exportRow['Convergence'] = row.convergence.toFixed(4);
+        // Preset 4: Custom Chart - export only selected parameters
+        selectedCustomParams.forEach((paramId) => {
+          if (paramId === 'P-Av') {
+            exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+          } else if (paramId === 'Torque') {
+            exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+          } else if (paramId === 'PCylMax') {
+            exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+          } else if (paramId === 'TCylMax') {
+            exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+          } else if (paramId === 'TUbMax') {
+            exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+          } else if (paramId === 'Convergence') {
+            exportRow['Convergence'] = row.convergence.toFixed(4);
+          }
+        });
       }
 
       return exportRow;
@@ -366,13 +393,22 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
         exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
       } else if (selectedPreset === 4) {
-        // Preset 4: All parameters
-        exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
-        exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
-        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
-        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
-        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
-        exportRow['Convergence'] = row.convergence.toFixed(4);
+        // Preset 4: Custom Chart - export only selected parameters
+        selectedCustomParams.forEach((paramId) => {
+          if (paramId === 'P-Av') {
+            exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
+          } else if (paramId === 'Torque') {
+            exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
+          } else if (paramId === 'PCylMax') {
+            exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+          } else if (paramId === 'TCylMax') {
+            exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+          } else if (paramId === 'TUbMax') {
+            exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+          } else if (paramId === 'Convergence') {
+            exportRow['Convergence'] = row.convergence.toFixed(4);
+          }
+        });
       }
 
       return exportRow;

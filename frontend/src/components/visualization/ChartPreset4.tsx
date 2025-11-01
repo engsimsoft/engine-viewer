@@ -103,11 +103,9 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
     };
   }, [handleExportPNG, handleExportSVG, registerExportHandlers, unregisterExportHandlers]);
 
-  // Selected parameters state (default: P-Av and Torque)
-  const [selectedParams, setSelectedParams] = useState<string[]>([
-    'P-Av',
-    'Torque',
-  ]);
+  // Selected parameters state from Zustand store (shared with DataTable)
+  const selectedParams = useAppStore((state) => state.selectedCustomParams);
+  const setSelectedParams = useAppStore((state) => state.setSelectedCustomParams);
 
   // Load cross-project data
   const {

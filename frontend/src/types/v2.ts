@@ -172,6 +172,13 @@ export interface AppState {
    * 4 = Custom
    */
   selectedPreset: 1 | 2 | 3 | 4;
+
+  /**
+   * Выбранные параметры для Custom Chart (Preset 4)
+   * Используется для синхронизации между ChartPreset4 и DataTable
+   * Default: ['P-Av', 'Torque']
+   */
+  selectedCustomParams: string[];
 }
 
 // ====================================================================
