@@ -16,6 +16,7 @@
 import { useState, useMemo } from 'react';
 import { Search, X, FolderOpen, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useProjects } from '@/hooks/useProjects';
 import type { ProjectInfo } from '@/types';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,8 @@ import { cn } from '@/lib/utils';
 interface ProjectListStepProps {
   /** Callback when project is selected */
   onSelectProject: (project: ProjectInfo) => void;
+  /** Current project ID - shown first in the list */
+  currentProjectId?: string;
 }
 
 /**
@@ -30,10 +33,15 @@ interface ProjectListStepProps {
  *
  * Step 1 of Comparison Selection Modal.
  * Displays list of all available projects with search functionality.
+ * Current project (if provided) is shown first in the list.
  *
  * @param onSelectProject - Callback when user clicks on a project card
+ * @param currentProjectId - ID of currently open project (prioritized in list)
  */
-export function ProjectListStep({ onSelectProject }: ProjectListStepProps) {
+export function ProjectListStep({
+  onSelectProject,
+  currentProjectId,
+}: ProjectListStepProps) {
   // Fetch projects list
   const { projects, loading, error } = useProjects();
 
@@ -41,16 +49,33 @@ export function ProjectListStep({ onSelectProject }: ProjectListStepProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   /**
-   * Filter projects by search query (case-insensitive)
+   * Filter and sort projects
+   * - Filter by search query (case-insensitive)
+   * - Sort: current project first, then alphabetically
    */
   const filteredProjects = useMemo(() => {
-    if (!searchQuery.trim()) return projects;
+    // Filter by search query
+    let filtered = projects;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = projects.filter((project) =>
+        project.name.toLowerCase().includes(query)
+      );
+    }
 
-    const query = searchQuery.toLowerCase();
-    return projects.filter((project) =>
-      project.name.toLowerCase().includes(query)
-    );
-  }, [projects, searchQuery]);
+    // Sort: current project first, then others
+    if (currentProjectId) {
+      return filtered.sort((a, b) => {
+        // Current project always first
+        if (a.id === currentProjectId) return -1;
+        if (b.id === currentProjectId) return 1;
+        // Others: alphabetically
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return filtered;
+  }, [projects, searchQuery, currentProjectId]);
 
   /**
    * Format last modified date to readable format
@@ -149,6 +174,11 @@ export function ProjectListStep({ onSelectProject }: ProjectListStepProps) {
                         <p className="font-semibold text-sm truncate">
                           {project.name}
                         </p>
+                        {project.id === currentProjectId && (
+                          <Badge variant="secondary" className="text-xs shrink-0">
+                            Current Project
+                          </Badge>
+                        )}
                         <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
                       </div>
 

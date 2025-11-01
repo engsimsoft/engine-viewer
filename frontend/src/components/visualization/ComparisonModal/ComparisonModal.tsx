@@ -32,6 +32,11 @@ import { ProjectListStep } from './ProjectListStep';
 import { CalculationListStep } from './CalculationListStep';
 import type { ProjectInfo } from '@/types';
 
+interface ComparisonModalProps {
+  /** Current project ID (from URL) - used to prioritize current project in list */
+  currentProjectId?: string;
+}
+
 /**
  * Comparison Selection Modal Component
  *
@@ -39,9 +44,9 @@ import type { ProjectInfo } from '@/types';
  * 1. Project selection (ProjectListStep)
  * 2. Calculation selection (CalculationListStep)
  *
- * No props needed - fully connected to Zustand store.
+ * @param currentProjectId - ID of currently open project (shown first in list)
  */
-export function ComparisonModal() {
+export function ComparisonModal({ currentProjectId }: ComparisonModalProps) {
   // Zustand store - modal open state
   const isComparisonModalOpen = useAppStore(
     (state) => state.isComparisonModalOpen
@@ -100,7 +105,12 @@ export function ComparisonModal() {
         </DialogHeader>
 
         {/* Step 1: Project List */}
-        {step === 1 && <ProjectListStep onSelectProject={handleSelectProject} />}
+        {step === 1 && (
+          <ProjectListStep
+            onSelectProject={handleSelectProject}
+            currentProjectId={currentProjectId}
+          />
+        )}
 
         {/* Step 2: Calculation List */}
         {step === 2 && selectedProject && (

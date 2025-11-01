@@ -142,7 +142,7 @@ export default function ProjectPage() {
 
         {/* Modals */}
         <PrimarySelectionModal />
-        <ComparisonModal />
+        <ComparisonModal currentProjectId={id} />
       </div>
     </ChartExportProvider>
   );
