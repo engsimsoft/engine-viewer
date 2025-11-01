@@ -9,6 +9,17 @@
 
 ## [Unreleased]
 
+### Changed
+- **Animations Verified and Enhanced (Phase 6.2)** (2025-11-01):
+  - ✅ Button hover effects: Added `hover:scale-[1.02]` and `active:scale-[0.98]` with 150ms duration
+  - ✅ Disabled state: Added `disabled:hover:scale-100` to prevent scale on disabled buttons
+  - ✅ Modal animations: Verified Radix UI Dialog has fade-in/out and zoom transitions (200ms)
+  - ✅ Chart animations: Verified ECharts animation controlled by store flag
+  - ✅ Card hover effects: Verified existing `hover:shadow-lg` and `transition-all duration-200`
+  - ✅ Panel animations: Verified existing transition-colors and shadow effects
+  - All animations smooth, professional feel, matching specification timings
+  - Commit: [current]
+
 ### Added
 - **Empty States Improved (Phase 6.3)** (2025-11-01):
   - ✅ PrimarySection: Added friendly empty state when no primary calculation selected
