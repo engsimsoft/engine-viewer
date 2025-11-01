@@ -39,6 +39,11 @@ interface AppStore extends AppState {
   setPrimaryCalculation: (calc: CalculationReference) => void;
 
   /**
+   * Очистить primary расчёт
+   */
+  clearPrimaryCalculation: () => void;
+
+  /**
    * Добавить расчёт для сравнения
    * Автоматически назначает следующий доступный цвет из палитры
    * Максимум 4 comparison расчёта
@@ -166,6 +171,11 @@ export const useAppStore = create<AppStore>()(
         // Primary расчёт ВСЕГДА получает первый цвет (красный)
         color: CALCULATION_COLORS[0],
       },
+    }),
+
+  clearPrimaryCalculation: () =>
+    set({
+      primaryCalculation: null,
     }),
 
   addComparison: (calc) =>

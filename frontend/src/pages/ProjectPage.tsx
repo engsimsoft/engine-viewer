@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useAppStore } from '@/stores/appStore';
@@ -48,6 +49,26 @@ export default function ProjectPage() {
   // Get calculations from Zustand store (Phase 4)
   const primaryCalculation = useAppStore((state) => state.primaryCalculation);
   const comparisonCalculations = useAppStore((state) => state.comparisonCalculations);
+  const clearPrimaryCalculation = useAppStore((state) => state.clearPrimaryCalculation);
+  const clearComparisons = useAppStore((state) => state.clearComparisons);
+
+  // Reset calculations when switching to a different project
+  useEffect(() => {
+    // If primary calculation exists and belongs to a different project, clear it
+    if (primaryCalculation && primaryCalculation.projectId !== id) {
+      clearPrimaryCalculation();
+    }
+
+    // Clear comparison calculations from other projects
+    if (comparisonCalculations.length > 0) {
+      const hasOtherProjectCalculations = comparisonCalculations.some(
+        (calc) => calc.projectId !== id
+      );
+      if (hasOtherProjectCalculations) {
+        clearComparisons();
+      }
+    }
+  }, [id, primaryCalculation, comparisonCalculations, clearPrimaryCalculation, clearComparisons]);
 
   // Combine primary + comparisons for v2 charts
   const allCalculations = [
