@@ -65,8 +65,18 @@ export default function HomePage() {
 
         {/* Projects Grid */}
         {projects.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No projects found</p>
+          <div className="text-center py-16">
+            <div className="space-y-4">
+              <div className="text-6xl">📂</div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium text-foreground">
+                  No Projects Found
+                </p>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Place .det files in the test-data/ folder to get started
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -9,6 +9,20 @@
 
 ## [Unreleased]
 
+### Added
+- **Empty States Improved (Phase 6.3)** (2025-11-01):
+  - ✅ PrimarySection: Added friendly empty state when no primary calculation selected
+    - 📊 icon, "Select Primary Calculation" heading, "to start visualization" subtitle
+    - "Select Calculation" button opens Primary Selection Modal
+  - ✅ ComparisonSection: Enhanced empty state when no comparisons added
+    - ⚖️ icon, "No Comparisons Yet" heading, "Add calculations to compare" subtitle
+    - "Add First Calculation" button opens Comparison Modal
+  - ✅ HomePage: Improved empty state when no projects found
+    - 📂 icon, "No Projects Found" heading
+    - Instructions: "Place .det files in the test-data/ folder to get started"
+  - All empty states follow consistent design: centered layout, large emoji icon, clear messaging, actionable CTAs
+  - Commit: [current]
+
 ### Changed
 - **UI Translated to English (Phase 6.1)** (2025-11-01):
   - ✅ All UI text translated from Russian to English

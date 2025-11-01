@@ -80,15 +80,26 @@ export function ComparisonSection() {
           <span className="text-xs text-muted-foreground">(0/{MAX_COMPARISONS})</span>
         </div>
 
-        {/* Add Button */}
-        <Button
-          onClick={handleAddClick}
-          variant="outline"
-          className="w-full justify-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Calculation
-        </Button>
+        {/* Empty State Content */}
+        <div className="text-center py-6 space-y-3">
+          <div className="text-4xl">⚖️</div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              No Comparisons Yet
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Add calculations to compare
+            </p>
+          </div>
+          <Button
+            onClick={handleAddClick}
+            variant="default"
+            className="mt-2 gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add First Calculation
+          </Button>
+        </div>
       </div>
     );
   }

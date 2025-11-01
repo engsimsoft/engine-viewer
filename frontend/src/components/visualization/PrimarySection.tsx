@@ -50,14 +50,25 @@ export function PrimarySection() {
           </h3>
         </div>
 
-        {/* Select Button */}
-        <Button
-          onClick={togglePrimaryModal}
-          variant="outline"
-          className="w-full justify-center"
-        >
-          Select calculation...
-        </Button>
+        {/* Empty State Content */}
+        <div className="text-center py-6 space-y-3">
+          <div className="text-4xl">📊</div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              Select Primary Calculation
+            </p>
+            <p className="text-xs text-muted-foreground">
+              to start visualization
+            </p>
+          </div>
+          <Button
+            onClick={togglePrimaryModal}
+            variant="default"
+            className="mt-2"
+          >
+            Select Calculation
+          </Button>
+        </div>
       </div>
     );
   }
