@@ -238,7 +238,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
         {
           type: 'group',
           left: 'center',
-          top: 45,
+          top: 15, // Adjusted for reduced grid.top (50px instead of 80px)
           children: [
             // P-Av solid line symbol
             {

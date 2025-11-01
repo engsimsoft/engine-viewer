@@ -273,7 +273,7 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         {
           type: 'group',
           left: 'center',
-          top: 45,
+          top: 15, // Adjusted for reduced grid.top (50px instead of 80px)
           children: [
             // TCylMax solid line symbol
             {

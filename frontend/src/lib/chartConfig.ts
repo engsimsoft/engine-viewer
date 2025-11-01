@@ -91,7 +91,7 @@ export function getBaseChartConfig(animation = true): Partial<EChartsOption> {
     grid: {
       left: '60px',
       right: '60px',
-      top: '80px',
+      top: '50px', // Reduced from 80px to show more content below
       bottom: '60px', // Reduced from 100px (removed slider)
       containLabel: true,
     },

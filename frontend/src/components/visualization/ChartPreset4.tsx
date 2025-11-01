@@ -312,7 +312,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         {
           type: 'group',
           left: 'center',
-          top: 45,
+          top: 15, // Adjusted for reduced grid.top (50px instead of 80px)
           children: legendChildren,
         },
       ] : undefined,
