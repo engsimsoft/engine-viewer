@@ -16,7 +16,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Search, X, ChevronLeft } from 'lucide-react';
+import { Search, X, ChevronLeft, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useProjectData } from '@/hooks/useProjectData';
@@ -61,24 +61,40 @@ export function CalculationListStep({
   );
   const addComparison = useAppStore((state) => state.addComparison);
 
-  // Local state - search and selected calculation
+  // Local state - search, sort order, and selected calculation
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest'); // Default: newest first
   const [selectedCalcId, setSelectedCalcId] = useState<string | null>(null);
 
   /**
-   * Filter calculations by search query (case-insensitive)
+   * Filter and sort calculations
+   * - Filter by search query (case-insensitive)
+   * - Sort by order: newest first (default) or oldest first
    */
   const filteredCalculations = useMemo(() => {
     if (!project) return [];
-    if (!searchQuery.trim()) return project.calculations;
 
-    const query = searchQuery.toLowerCase();
-    return project.calculations.filter(
-      (calc) =>
-        calc.id.toLowerCase().includes(query) ||
-        calc.name.toLowerCase().includes(query)
-    );
-  }, [project, searchQuery]);
+    // Filter by search query
+    let filtered = project.calculations;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = project.calculations.filter(
+        (calc) =>
+          calc.id.toLowerCase().includes(query) ||
+          calc.name.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by order
+    // Calculations are stored in chronological order (oldest first)
+    // So we reverse for newest first
+    const sorted = [...filtered];
+    if (sortOrder === 'newest') {
+      sorted.reverse(); // Last calculation first
+    }
+
+    return sorted;
+  }, [project, searchQuery, sortOrder]);
 
   /**
    * Get selected calculation object
@@ -151,26 +167,40 @@ export function CalculationListStep({
         <h2 className="text-lg font-semibold">Select Calculation</h2>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          type="text"
-          placeholder="Search calculation..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 pr-9"
-          autoFocus
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Clear search"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      {/* Search Input + Sort Toggle */}
+      <div className="flex gap-2">
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search calculation..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-9"
+            autoFocus
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Sort Order Toggle Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+          title={sortOrder === 'newest' ? 'Newest first (click for oldest first)' : 'Oldest first (click for newest first)'}
+          aria-label={`Sort order: ${sortOrder === 'newest' ? 'newest first' : 'oldest first'}`}
+        >
+          <ArrowUpDown className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Loading State */}
