@@ -63,6 +63,11 @@
 ## [Unreleased]
 
 ### Fixed
+- **Duplicate File Extension in Header** (2025-11-01):
+  - ✅ Fixed duplicate .det extension in project header (e.g., "TM Soft ShortCut.det.det" → "TM Soft ShortCut.det")
+  - ✅ Backend fileName already includes extension, removed redundant .det suffix in Header component
+  - Commit: 188472c
+
 - **Cross-Project Comparison Functionality** (2025-11-01):
   - ✅ Restored cross-project comparison feature (was broken by commit 067c2dc)
   - ✅ Removed erroneous comparison clearing logic that prevented adding comparisons from other projects
