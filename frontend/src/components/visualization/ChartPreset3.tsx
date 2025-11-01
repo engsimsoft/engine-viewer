@@ -131,7 +131,9 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       if (!calc.data || calc.data.length === 0) return;
 
       // Find peak temperatures
-      const tCylMaxPeak = findPeak(calc.data, 'TCylMax');
+      // TCylMax: ONLY available in .det format (not in .pou)
+      const hasTCylMax = calc.data[0]?.TCylMax !== undefined;
+      const tCylMaxPeak = hasTCylMax ? findPeak(calc.data, 'TCylMax') : null;
       const tUbMaxPeak = findPeak(calc.data, 'TUbMax');
 
       // Get marker symbol for this calculation
@@ -139,16 +141,19 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
 
       // Prepare TCylMax data (average cylinder temperature)
       // IMPORTANT: Convert K → °C first, then apply units conversion
-      const tCylMaxData = calc.data.map((point) => {
-        const avgTempK =
-          point.TCylMax.reduce((sum, temp) => sum + temp, 0) /
-          point.TCylMax.length;
-        const celsius = avgTempK - 273.15; // K → °C
-        return {
-          value: [point.RPM, convertTemperature(celsius, units)],
-          decimals: decimals,
-        };
-      });
+      // NOTE: TCylMax is ONLY available in .det format (not in .pou)
+      const tCylMaxData = hasTCylMax
+        ? calc.data.map((point) => {
+            const avgTempK =
+              point.TCylMax!.reduce((sum, temp) => sum + temp, 0) /
+              point.TCylMax!.length;
+            const celsius = avgTempK - 273.15; // K → °C
+            return {
+              value: [point.RPM, convertTemperature(celsius, units)],
+              decimals: decimals,
+            };
+          })
+        : [];
 
       // Prepare TUbMax data (average exhaust temperature)
       // IMPORTANT: Convert K → °C first, then apply units conversion
@@ -164,50 +169,53 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       });
 
       // TCylMax series (cylinder temperature) - solid line
-      series.push({
-        name: `${label} - TCylMax`,
-        type: 'line',
-        yAxisIndex: 0,
-        data: tCylMaxData,
-        itemStyle: {
-          color: tCylMaxColor,
-        },
-        lineStyle: {
-          color: tCylMaxColor,
-          width: 2,
-          type: 'solid',
-        },
-        symbol: 'circle',
-        symbolSize: 6,
-        smooth: false,
-        emphasis: {
-          focus: 'series',
-        },
-        // Peak marker (K → °C conversion for peak value)
-        markPoint: tCylMaxPeak ? {
-          symbol: markerSymbol,
-          symbolSize: 20,
+      // NOTE: Only add if TCylMax is available (.det format)
+      if (hasTCylMax) {
+        series.push({
+          name: `${label} - TCylMax`,
+          type: 'line',
+          yAxisIndex: 0,
+          data: tCylMaxData,
           itemStyle: {
             color: tCylMaxColor,
-            borderColor: '#fff',
-            borderWidth: 2,
           },
-          label: {
-            show: false, // Hide default label, use tooltip instead
+          lineStyle: {
+            color: tCylMaxColor,
+            width: 2,
+            type: 'solid',
           },
-          data: [{
-            coord: [
-              tCylMaxPeak.rpm,
-              convertTemperature(tCylMaxPeak.value - 273.15, units)
-            ],
-            value: formatPeakValue(
-              { ...tCylMaxPeak, value: tCylMaxPeak.value - 273.15 },
-              'TCylMax',
-              units
-            ),
-          }],
-        } : undefined,
-      });
+          symbol: 'circle',
+          symbolSize: 6,
+          smooth: false,
+          emphasis: {
+            focus: 'series',
+          },
+          // Peak marker (K → °C conversion for peak value)
+          markPoint: tCylMaxPeak ? {
+            symbol: markerSymbol,
+            symbolSize: 20,
+            itemStyle: {
+              color: tCylMaxColor,
+              borderColor: '#fff',
+              borderWidth: 2,
+            },
+            label: {
+              show: false, // Hide default label, use tooltip instead
+            },
+            data: [{
+              coord: [
+                tCylMaxPeak.rpm,
+                convertTemperature(tCylMaxPeak.value - 273.15, units)
+              ],
+              value: formatPeakValue(
+                { ...tCylMaxPeak, value: tCylMaxPeak.value - 273.15 },
+                'TCylMax',
+                units
+              ),
+            }],
+          } : undefined,
+        });
+      }
 
       // TUbMax series (exhaust temperature) - dashed line
       series.push({
@@ -255,8 +263,10 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
         } : undefined,
       });
 
-      // Add to legend
-      legendData.push(`${label} - TCylMax`);
+      // Add to legend (TCylMax only if available)
+      if (hasTCylMax) {
+        legendData.push(`${label} - TCylMax`);
+      }
       legendData.push(`${label} - TUbMax`);
     });
 

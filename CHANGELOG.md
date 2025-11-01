@@ -10,6 +10,22 @@
 ## [2.0.0] - 2025-11-01
 
 ### Added
+- **Multi-format file support** (2025-11-01):
+  - ✅ Added support for .pou files (71 parameters) in addition to .det files (24 parameters)
+  - ✅ Parser Registry architecture using Registry pattern for scalable format support
+  - ✅ Auto-detection of file format by extension (.det/.pou) and content (metadata field count)
+  - ✅ Unified parsing API (parseEngineFile) supporting both formats
+  - ✅ Format-specific parsers: detParser.js (24 params), pouParser.js (71 params)
+  - ✅ Common utilities: calculationMarker.js ($ marker parsing), formatDetector.js (format detection)
+  - ✅ TypeScript types: PouMetadata (5 fields), PouDataPoint (71 parameters)
+  - ✅ Updated fileScanner.js to scan both .det and .pou files
+  - ✅ Updated config.yaml with .pou extension
+  - ✅ Updated API routes to include format field in response
+  - ✅ Comprehensive documentation:
+    - [pou-format.md](docs/file-formats/pou-format.md) - complete .pou specification (71 parameters documented)
+    - [comparison.md](docs/file-formats/comparison.md) - detailed .det vs .pou comparison
+    - [parsers-guide.md](docs/parsers-guide.md) - complete rewrite with Registry pattern guide
+    - [sample.pou](docs/file-formats/examples/sample.pou) - annotated example file
 - **Cross-project calculation comparison**: Compare calculations from different projects (1 primary + up to 4 comparisons)
 - **Peak values cards**: Always visible cards showing power, torque, and RPM at peak (no hover needed)
 - **RPM step display**: Shows actual data density (e.g., "200 RPM step") instead of useless point count
@@ -70,6 +86,51 @@
 ---
 
 ## [Unreleased]
+
+### Added
+- **Phase 8: Parameter System Integration (Sections 8.1 & 8.2)** (2025-11-02):
+  - ✅ **Section 8.1 - Parameters Configuration**:
+    - Created `frontend/src/config/parameters.ts` - Single Source of Truth for all 73 engine parameters
+    - TypeScript types: `ParameterMetadata`, `ParameterCategory`, `ParameterFormat`, `ConversionType`
+    - Defined 29 unique parameter types (8 global, 17 per-cylinder, 4 Vibe model) = 73 values for 4-cylinder engine
+    - Helper functions: `getParameter()`, `getChartableParameters()`, `getParametersByCategory()`, `getParametersByFormat()`, `isParameterAvailable()`
+    - Full JSDoc documentation with usage examples
+  - ✅ **Section 8.2 - Units Conversion Integration**:
+    - Refactored `frontend/src/lib/unitsConversion.ts` to use PARAMETERS config
+    - Removed all pattern matching (`if (parameter.startsWith('P-'))...`) → config-based lookup
+    - Created `getParameterUnit()` function for dynamic unit label retrieval
+    - Replaced hardcoded conversion logic with `param.conversionType` from config
+    - Backward compatible: all existing functionality preserved
+  - ✅ **User Documentation**:
+    - Created `docs/PARAMETERS-REFERENCE.md` - comprehensive reference for all 73 parameters
+    - Technical format with ID, parameter name, unit, format availability, conversion type
+    - Organized by category: Global (8), Per-Cylinder (17 × 4 = 68), Vibe Model (4)
+    - Placeholder for expert descriptions (brief & detailed) to be filled by domain expert
+    - Updated `README.md` with link to new documentation
+
+### Changed
+- **UI Improvements** (2025-11-02):
+  - Removed file extension display from UI (`.det` no longer shown after project name)
+  - Updated `ProjectPage.tsx` and `PrimarySelectionModal.tsx` to use `project.name` instead of `project.fileName`
+  - Cleaner interface after .det + .pou merge implementation
+
+### Fixed
+- **Format Compatibility Checks** (2025-11-02):
+  - ⚠️ **TEMPORARY WORKAROUND**: Added null/undefined checks for TCylMax and Convergence parameters
+  - `frontend/src/lib/peakValues.ts`: Added checks before spread operator usage for TCylMax, PCylMax, TUbMax
+  - `frontend/src/components/visualization/DataTable.tsx`: Display '—' for undefined TCylMax/Convergence in .pou files
+  - **NOTE**: This is a stopgap solution. Real fix requires implementing .det + .pou data merge in backend
+  - **ISSUE**: TCylMax parameter (critical for analysis) currently lost when .pou file selected over .det
+- **Backend Deduplication** (2025-11-02):
+  - Updated `backend/src/services/fileScanner.js` with Map-based deduplication
+  - When both .det and .pou files exist with same base name, .pou format takes priority (71 params vs 24)
+  - Prevents duplicate project entries in project list
+  - **KNOWN ISSUE**: Deduplication currently discards .det-only parameters (TCylMax, Convergence)
+- **Test Data Fix** (2025-11-02):
+  - Fixed calculation names in `test-data/TM Soft ShortCut.det` to match .pou file
+  - Line 3: `$Ex 4-2-1` → `$Cal_1`
+  - Line 57: `$Ex DK ShrotCut` → `$Cal_3`
+  - Restored proper .det + .pou merge functionality for this project
 
 ### Fixed
 - **DataTable Sync with Custom Chart Parameter Selection** (2025-11-01):

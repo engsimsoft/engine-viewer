@@ -119,10 +119,17 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
       if (!calc.data || calc.data.length === 0) return;
 
       calc.data.forEach((point) => {
-        // Calculate averages for cylinder-specific parameters
-        const avgPressure = point.PCylMax.reduce((sum, val) => sum + val, 0) / point.PCylMax.length;
-        const avgTCylMax = point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length;
-        const avgTUbMax = point.TUbMax.reduce((sum, val) => sum + val, 0) / point.TUbMax.length;
+        // Calculate averages for cylinder-specific parameters (with format compatibility checks)
+        // PCylMax: available in .det and .pou-merged
+        const avgPressure = point.PCylMax?.reduce((sum, val) => sum + val, 0) / (point.PCylMax?.length || 1);
+
+        // TCylMax: ONLY in .det format (not available in .pou)
+        const avgTCylMax = point.TCylMax
+          ? point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length
+          : undefined;
+
+        // TUbMax: available in .det and .pou
+        const avgTUbMax = point.TUbMax?.reduce((sum, val) => sum + val, 0) / (point.TUbMax?.length || 1);
 
         rows.push({
           id: `${calc.calculationId}-${point.RPM}`,
@@ -133,9 +140,9 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
           powerKW: point['P-Av'],
           torqueNm: point.Torque,
           pressureBar: avgPressure,
-          temperatureCylC: avgTCylMax,
+          temperatureCylC: avgTCylMax, // undefined for .pou files
           temperatureExhC: avgTUbMax,
-          convergence: point.Convergence,
+          convergence: point.Convergence, // undefined for .pou files (but that's ok)
         });
       });
     });
@@ -241,6 +248,7 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         header: `TCylMax (${temperatureUnit})`,
         cell: (info) => {
           const value = info.getValue();
+          if (value === undefined) return '—'; // Not available in .pou format
           const converted = convertTemperature(value, units);
           return converted.toFixed(decimals);
         },
@@ -263,6 +271,7 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         header: 'Convergence',
         cell: (info) => {
           const value = info.getValue();
+          if (value === undefined) return '—'; // Not available in .pou format
           return value.toFixed(4);
         },
         sortingFn: 'basic',

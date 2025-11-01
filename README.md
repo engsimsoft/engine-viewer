@@ -59,6 +59,7 @@ cd frontend && npm install && npm run dev
 **What's New in v2.0:**
 - Complete redesign with modern, professional interface
 - Cross-project calculation comparison (mix calculations from any projects)
+- **Multi-format support**: .det (24 params) and .pou (71 params) files
 - Always-visible peak values cards with hover effects
 - Settings popover with units conversion and theme switching
 - New modal dialogs for calculation selection (Primary + Comparison)
@@ -85,6 +86,9 @@ cd frontend && npm install && npm run dev
 - **[scripts/README.md](scripts/README.md)** - скрипты управления проектом
 - **[docs/architecture.md](docs/architecture.md)** - архитектура проекта
 - **[docs/api.md](docs/api.md)** - API документация
+- **[docs/file-formats/README.md](docs/file-formats/README.md)** - форматы файлов (.det, .pou)
+- **[docs/PARAMETERS-REFERENCE.md](docs/PARAMETERS-REFERENCE.md)** - справочник всех 73 параметров двигателя
+- **[docs/parsers-guide.md](docs/parsers-guide.md)** - руководство по добавлению парсеров
 - **[docs/troubleshooting.md](docs/troubleshooting.md)** - решение проблем
 
 ### Для разработчиков

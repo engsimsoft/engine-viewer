@@ -105,7 +105,7 @@ export default function ProjectPage() {
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header Component (Phase 2) */}
         <Header
-          projectName={project.fileName}
+          projectName={project.name}
           engineType={project.metadata.engineType}
           cylinders={project.metadata.numCylinders}
           calculationsCount={project.calculations.length}

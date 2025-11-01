@@ -64,6 +64,7 @@ export interface Calculation {
  * Полный проект - все данные из одного .det файла
  */
 export interface EngineProject {
+  name: string;               // Имя проекта без расширения (например "Vesta 1.6 IM")
   fileName: string;           // Имя файла (например "Vesta 1.6 IM.det")
   metadata: EngineMetadata;   // Метаданные двигателя
   columnHeaders: string[];    // Заголовки колонок из строки 2

@@ -2,6 +2,7 @@
  * Units Conversion Utilities
  *
  * Phase 1 - Section 1.3 (retroactively created for Phase 4)
+ * Phase 8 - Section 8.2 - Refactored to use PARAMETERS config
  *
  * Supports 3 unit systems:
  * - SI: kW, N·m, bar, °C
@@ -16,6 +17,7 @@
  */
 
 import type { Units } from '@/types/v2';
+import { PARAMETERS } from '@/config/parameters';
 
 // ====================================================================
 // Conversion Functions
@@ -167,12 +169,57 @@ export function getTemperatureUnit(units: Units): string {
   }
 }
 
+/**
+ * Get unit label for a parameter based on unit system
+ *
+ * Uses PARAMETERS config to determine conversion type, then returns
+ * appropriate unit label for the target unit system.
+ *
+ * @param parameter - Parameter name (e.g., 'P-Av', 'Torque', 'PCylMax')
+ * @param units - Target unit system
+ * @returns Unit label string (e.g., "kW", "bhp", "bar", "psi")
+ *
+ * @example
+ * ```ts
+ * getParameterUnit('P-Av', 'si')       // "kW"
+ * getParameterUnit('P-Av', 'american') // "bhp"
+ * getParameterUnit('Torque', 'american') // "lb-ft"
+ * getParameterUnit('PCylMax', 'american') // "psi"
+ * getParameterUnit('RPM', 'si')        // "об/мин" (from config)
+ * ```
+ */
+export function getParameterUnit(parameter: string, units: Units): string {
+  const param = PARAMETERS[parameter];
+  if (!param) {
+    console.warn(`Unknown parameter: ${parameter}`);
+    return '';
+  }
+
+  // Use conversion type to determine unit
+  switch (param.conversionType) {
+    case 'power':
+      return getPowerUnit(units);
+    case 'torque':
+      return getTorqueUnit(units);
+    case 'pressure':
+      return getPressureUnit(units);
+    case 'temperature':
+      return getTemperatureUnit(units);
+    case 'none':
+    default:
+      // For parameters without conversion, return SI unit from config
+      return param.unit;
+  }
+}
+
 // ====================================================================
 // Format Value Helper
 // ====================================================================
 
 /**
  * Convert and format a value with its unit label
+ *
+ * Uses PARAMETERS config to determine conversion type (Phase 8).
  *
  * @param value - Raw value in SI units
  * @param parameter - Parameter name (P-Av, Torque, PCylMax, TCylMax, etc.)
@@ -194,35 +241,36 @@ export function formatValue(
   units: Units,
   decimals: number
 ): string {
-  // Determine parameter type and apply conversion
-  let convertedValue: number;
-  let unitLabel: string;
+  // Get parameter metadata from config
+  const param = PARAMETERS[parameter];
+  if (!param) {
+    console.warn(`Unknown parameter: ${parameter}`);
+    return value.toFixed(decimals); // No conversion for unknown parameters
+  }
 
-  // Power parameters: P-Av, P-Av-i, etc.
-  if (parameter.startsWith('P-') || parameter === 'PAv') {
-    convertedValue = convertPower(value, units);
-    unitLabel = getPowerUnit(units);
+  // Apply conversion based on parameter's conversion type
+  let convertedValue: number;
+  switch (param.conversionType) {
+    case 'power':
+      convertedValue = convertPower(value, units);
+      break;
+    case 'torque':
+      convertedValue = convertTorque(value, units);
+      break;
+    case 'pressure':
+      convertedValue = convertPressure(value, units);
+      break;
+    case 'temperature':
+      convertedValue = convertTemperature(value, units);
+      break;
+    case 'none':
+    default:
+      convertedValue = value; // No conversion needed
+      break;
   }
-  // Torque parameter
-  else if (parameter === 'Torque') {
-    convertedValue = convertTorque(value, units);
-    unitLabel = getTorqueUnit(units);
-  }
-  // Pressure parameters: PCylMax, PurCyl, etc.
-  else if (parameter.startsWith('P') && parameter.includes('Cyl')) {
-    convertedValue = convertPressure(value, units);
-    unitLabel = getPressureUnit(units);
-  }
-  // Temperature parameters: TCylMax, TUbMax, etc.
-  else if (parameter.startsWith('T') && (parameter.includes('Cyl') || parameter.includes('Ub'))) {
-    convertedValue = convertTemperature(value, units);
-    unitLabel = getTemperatureUnit(units);
-  }
-  // Unknown parameter - no conversion
-  else {
-    convertedValue = value;
-    unitLabel = '';
-  }
+
+  // Get unit label for this parameter and unit system
+  const unitLabel = getParameterUnit(parameter, units);
 
   // Format with specified decimal places
   const formattedValue = convertedValue.toFixed(decimals);
@@ -235,6 +283,8 @@ export function formatValue(
  * Convert a single value based on parameter type
  * (without formatting or unit label)
  *
+ * Uses PARAMETERS config to determine conversion type (Phase 8).
+ *
  * @param value - Raw value in SI units
  * @param parameter - Parameter name
  * @param units - Target unit system
@@ -245,22 +295,25 @@ export function convertValue(
   parameter: string,
   units: Units
 ): number {
-  // Power parameters
-  if (parameter.startsWith('P-') || parameter === 'PAv') {
-    return convertPower(value, units);
+  // Get parameter metadata from config
+  const param = PARAMETERS[parameter];
+  if (!param) {
+    console.warn(`Unknown parameter: ${parameter}`);
+    return value; // No conversion for unknown parameters
   }
-  // Torque parameter
-  else if (parameter === 'Torque') {
-    return convertTorque(value, units);
+
+  // Apply conversion based on parameter's conversion type
+  switch (param.conversionType) {
+    case 'power':
+      return convertPower(value, units);
+    case 'torque':
+      return convertTorque(value, units);
+    case 'pressure':
+      return convertPressure(value, units);
+    case 'temperature':
+      return convertTemperature(value, units);
+    case 'none':
+    default:
+      return value; // No conversion needed
   }
-  // Pressure parameters
-  else if (parameter.startsWith('P') && parameter.includes('Cyl')) {
-    return convertPressure(value, units);
-  }
-  // Temperature parameters
-  else if (parameter.startsWith('T') && (parameter.includes('Cyl') || parameter.includes('Ub'))) {
-    return convertTemperature(value, units);
-  }
-  // Unknown parameter - no conversion
-  return value;
 }

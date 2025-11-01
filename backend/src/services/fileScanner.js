@@ -1,8 +1,8 @@
 /**
- * Сканер .det файлов
+ * Сканер файлов двигателей (.det, .pou)
  *
  * Основные функции:
- * - Сканирование директории для поиска .det файлов
+ * - Сканирование директории для поиска файлов двигателей
  * - Получение метаданных файлов (размер, дата изменения)
  * - Отслеживание изменений файлов (file watching)
  * - Фильтрация по расширениям файлов
@@ -44,16 +44,17 @@ import { parseDetFile, getProjectSummary } from './fileParser.js';
  * Examples:
  * - "Vesta 1.6 IM.det" → "vesta-1-6-im"
  * - "BMW M42.det" → "bmw-m42"
+ * - "TM Soft ShortCut.pou" → "tm-soft-shortcut"
  *
  * @param {string} filename - Имя файла
  * @returns {string} Нормализованный ID
  */
 export function normalizeFilenameToId(filename) {
   return filename
-    .replace(/\.det$/i, '')  // Remove .det extension
-    .toLowerCase()           // Convert to lowercase
-    .replace(/\s+/g, '-')    // Replace spaces with hyphens
-    .replace(/[^a-z0-9-]/g, ''); // Remove special characters
+    .replace(/\.(det|pou)$/i, '')  // Remove .det or .pou extension
+    .toLowerCase()                  // Convert to lowercase
+    .replace(/\s+/g, '-')           // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '');    // Remove special characters
 }
 
 /**
@@ -95,14 +96,14 @@ function isFileAllowed(fileName, allowedExtensions) {
  * Сканирует директорию и возвращает список файлов с заданными расширениями
  *
  * @param {string} directoryPath - Путь к директории для сканирования
- * @param {string[]} extensions - Массив расширений файлов (например, [".det"])
+ * @param {string[]} extensions - Массив расширений файлов (например, [".det", ".pou"])
  * @returns {Promise<FileInfo[]>} - Массив информации о файлах
  *
  * @example
- * const files = await scanDirectory('./test-data', ['.det']);
+ * const files = await scanDirectory('./test-data', ['.det', '.pou']);
  * console.log(`Найдено ${files.length} файлов`);
  */
-export async function scanDirectory(directoryPath, extensions = ['.det']) {
+export async function scanDirectory(directoryPath, extensions = ['.det', '.pou']) {
   try {
     // Читаем содержимое директории
     const entries = await readdir(directoryPath, { withFileTypes: true });
@@ -139,10 +140,10 @@ export async function scanDirectory(directoryPath, extensions = ['.det']) {
  * @returns {Promise<ProjectFileInfo[]>} - Массив информации о проектах
  *
  * @example
- * const projects = await scanProjects('./test-data', ['.det'], 10485760);
+ * const projects = await scanProjects('./test-data', ['.det', '.pou'], 10485760);
  * console.log(`Найдено ${projects.length} проектов`);
  */
-export async function scanProjects(directoryPath, extensions = ['.det'], maxFileSize = 0) {
+export async function scanProjects(directoryPath, extensions = ['.det', '.pou'], maxFileSize = 0) {
   const files = await scanDirectory(directoryPath, extensions);
 
   // Фильтруем файлы по размеру (если задано ограничение)
@@ -163,12 +164,13 @@ export async function scanProjects(directoryPath, extensions = ['.det'], maxFile
 
       return {
         id: normalizeFilenameToId(file.name), // Normalized ID (slug)
-        name: file.name.replace(/\.det$/i, ''), // Display name (filename without extension)
+        name: file.name.replace(/\.(det|pou)$/i, ''), // Display name (filename without extension)
         fileName: file.name,
         filePath: file.path,
         fileSize: file.size,
         modifiedAt: file.modifiedAt.toISOString(),
         createdAt: file.createdAt.toISOString(),
+        format: summary.format,           // Формат файла ('det' или 'pou')
         numCylinders: summary.numCylinders,
         engineType: summary.engineType,
         calculationsCount: summary.calculationsCount
@@ -179,12 +181,13 @@ export async function scanProjects(directoryPath, extensions = ['.det'], maxFile
       // Возвращаем базовую информацию даже если парсинг не удался
       return {
         id: normalizeFilenameToId(file.name), // Normalized ID (slug)
-        name: file.name.replace(/\.det$/i, ''), // Display name
+        name: file.name.replace(/\.(det|pou)$/i, ''), // Display name
         fileName: file.name,
         filePath: file.path,
         fileSize: file.size,
         modifiedAt: file.modifiedAt.toISOString(),
         createdAt: file.createdAt.toISOString(),
+        format: file.name.endsWith('.pou') ? 'pou' : 'det', // Определяем по расширению
         numCylinders: 0,
         engineType: 'UNKNOWN',
         calculationsCount: 0,
@@ -195,7 +198,29 @@ export async function scanProjects(directoryPath, extensions = ['.det'], maxFile
 
   const projects = await Promise.all(projectPromises);
 
-  return projects;
+  // Дедупликация: если есть файлы .det и .pou с одинаковым base name,
+  // оставляем только один проект (приоритет .pou, так как там 71 параметр vs 24)
+  const projectsMap = new Map();
+
+  for (const project of projects) {
+    const existing = projectsMap.get(project.id);
+
+    if (!existing) {
+      // Первый проект с таким ID
+      projectsMap.set(project.id, project);
+    } else {
+      // Уже есть проект с таким ID - выбираем приоритетный формат
+      // Приоритет: .pou > .det (больше параметров)
+      if (project.format === 'pou') {
+        projectsMap.set(project.id, project);
+        console.log(`[Scanner] Дедупликация: "${project.id}" - выбран .pou формат (71 параметр)`);
+      } else {
+        console.log(`[Scanner] Дедупликация: "${project.id}" - уже есть .${existing.format}, пропускаем .${project.format}`);
+      }
+    }
+  }
+
+  return Array.from(projectsMap.values());
 }
 
 /**
@@ -221,7 +246,7 @@ export async function scanProjects(directoryPath, extensions = ['.det'], maxFile
  * @returns {FileWatcher} - Объект watcher с методами управления
  *
  * @example
- * const watcher = createFileWatcher('./test-data', ['.det'], {
+ * const watcher = createFileWatcher('./test-data', ['.det', '.pou'], {
  *   onAdd: (path) => console.log(`Добавлен файл: ${path}`),
  *   onChange: (path) => console.log(`Изменён файл: ${path}`),
  *   onRemove: (path) => console.log(`Удалён файл: ${path}`),
@@ -231,7 +256,7 @@ export async function scanProjects(directoryPath, extensions = ['.det'], maxFile
  * // Остановить отслеживание
  * await watcher.close();
  */
-export function createFileWatcher(directoryPath, extensions = ['.det'], callbacks = {}) {
+export function createFileWatcher(directoryPath, extensions = ['.det', '.pou'], callbacks = {}) {
   const {
     onAdd = () => {},
     onChange = () => {},
@@ -332,17 +357,17 @@ export function formatFileSize(bytes) {
 }
 
 /**
- * Получает краткую статистику по директории с .det файлами
+ * Получает краткую статистику по директории с файлами двигателей
  *
  * @param {string} directoryPath - Путь к директории
  * @param {string[]} extensions - Массив расширений файлов
  * @returns {Promise<Object>} - Статистика директории
  *
  * @example
- * const stats = await getDirectoryStats('./test-data', ['.det']);
+ * const stats = await getDirectoryStats('./test-data', ['.det', '.pou']);
  * console.log(`Найдено ${stats.filesCount} файлов, общий размер: ${stats.totalSizeFormatted}`);
  */
-export async function getDirectoryStats(directoryPath, extensions = ['.det']) {
+export async function getDirectoryStats(directoryPath, extensions = ['.det', '.pou']) {
   try {
     const files = await scanDirectory(directoryPath, extensions);
 

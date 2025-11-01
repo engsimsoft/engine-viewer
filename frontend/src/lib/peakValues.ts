@@ -49,16 +49,21 @@ export function findPeak(data: DataPoint[], parameter: string): PeakValue | null
       value = point.Torque;
     } else if (parameter === 'PCylMax') {
       // For array parameters, use maximum across cylinders
+      if (!point.PCylMax) return; // Not available in this format
       value = Math.max(...point.PCylMax);
     } else if (parameter === 'TCylMax') {
       // For array parameters, use maximum across cylinders
+      if (!point.TCylMax) return; // Not available in .pou format
       value = Math.max(...point.TCylMax);
     } else if (parameter === 'TUbMax') {
       // For array parameters, use maximum across cylinders
+      if (!point.TUbMax) return; // Not available in this format
       value = Math.max(...point.TUbMax);
     } else if (parameter === 'PurCyl') {
+      if (!point.PurCyl) return; // Not available in this format
       value = Math.max(...point.PurCyl);
     } else if (parameter === 'Deto') {
+      if (!point.Deto) return; // Not available in this format
       value = Math.max(...point.Deto);
     } else if (parameter === 'Convergence') {
       value = point.Convergence;

@@ -112,7 +112,7 @@ export function PrimarySelectionModal() {
     // Build CalculationReference
     const calcRef: CalculationReference = {
       projectId: projectId,
-      projectName: project.fileName,
+      projectName: project.name,
       calculationId: calculation.id,
       calculationName: calculation.name,
       color: CALCULATION_COLORS[0], // Primary always red (index 0)
