@@ -61,7 +61,7 @@
 - All error messages translated to English
 
 ### Technical
-- **Architecture**: Implemented Phase 1-6 from roadmap-v2.md
+- **Architecture**: Implemented Phase 1-6 from roadmap.md
 - **Components**: Created 20+ new components (modals, sections, cards, popovers)
 - **Hooks**: useMultiProjectData for cross-project comparison, useChartPreset for preset management
 - **Contexts**: ChartExportContext for export handler management
@@ -131,7 +131,14 @@
   - ✅ Screen reader: DialogTitle linked via aria-labelledby, semantic HTML structure
   - ✅ Color contrast: Tailwind + shadcn/ui theme meets WCAG 2.1 AA standards
   - ✅ All interactive elements keyboard accessible and properly labeled
-  - Commit: [current]
+
+- **Documentation Cleanup** (2025-11-01):
+  - ✅ Removed 4 obsolete documentation files (completed specs, old versions)
+  - ✅ Deleted: roadmap.md (old v2.0), engine-viewer-tech-spec .md, engine-viewer-ui-spec.md, ENGINE-VIEWER-V2-SPEC-ADDENDUM.md
+  - ✅ Renamed: roadmap-v2.md → roadmap.md (standard naming)
+  - ✅ Updated all references in DOCUMENTATION_GUIDE.md, CLAUDE.md, CHANGELOG.md
+  - ✅ All documentation now points to ENGINE-VIEWER-V2-SPEC.md (current spec)
+  - ✅ Cleaner project root following SSOT principles
 
 - **Responsive Design Optimized (Phase 6.5)** (2025-11-01):
   - ✅ Button sizes increased for better touch targets: default h-11 (44px), icon buttons size-11 (44x44px)
@@ -1113,7 +1120,7 @@
 - Добавлена документация по правилам:
   - 1.7 Документация: правильная организация.md
   - 1.8 Планирование и Roadmap.md
-  - engine-viewer-tech-spec .md
+  - ENGINE-VIEWER-V2-SPEC.md
 
 ### Documentation
 - Принцип SSOT (Single Source of Truth) применён
@@ -1213,7 +1220,7 @@
 
 **Roadmap:** [roadmap.md](roadmap.md)
 **Документация:** [docs/](docs/)
-**Техническое задание:** [engine-viewer-tech-spec .md](engine-viewer-tech-spec%20.md)
+**Техническое задание:** [ENGINE-VIEWER-V2-SPEC.md](ENGINE-VIEWER-V2-SPEC.md)
 
 ---
 
