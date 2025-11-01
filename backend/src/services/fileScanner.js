@@ -199,7 +199,8 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
   const projects = await Promise.all(projectPromises);
 
   // Дедупликация: если есть файлы .det и .pou с одинаковым base name,
-  // оставляем только один проект (приоритет .pou, так как там 71 параметр vs 24)
+  // оставляем только один проект
+  // Приоритет: pou-merged (73 params) > pou (71 params) > det (24 params)
   const projectsMap = new Map();
 
   for (const project of projects) {
@@ -210,12 +211,33 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
       projectsMap.set(project.id, project);
     } else {
       // Уже есть проект с таким ID - выбираем приоритетный формат
-      // Приоритет: .pou > .det (больше параметров)
-      if (project.format === 'pou') {
+
+      // Определяем приоритет форматов
+      const formatPriority = {
+        'pou-merged': 3, // Highest priority (73 parameters)
+        'pou': 2,        // Medium priority (71 parameters)
+        'det': 1         // Lowest priority (24 parameters)
+      };
+
+      const existingPriority = formatPriority[existing.format] || 0;
+      const projectPriority = formatPriority[project.format] || 0;
+
+      if (projectPriority > existingPriority) {
+        // Новый проект имеет более высокий приоритет - заменяем
         projectsMap.set(project.id, project);
-        console.log(`[Scanner] Дедупликация: "${project.id}" - выбран .pou формат (71 параметр)`);
+        console.log(
+          `[Scanner] Дедупликация: "${project.id}" - заменяем .${existing.format} на .${project.format} (приоритет: ${projectPriority} > ${existingPriority})`
+        );
+      } else if (projectPriority === existingPriority && project.format === 'pou-merged') {
+        // Оба проекта pou-merged (идентичные merged результаты) - оставляем существующий
+        console.log(
+          `[Scanner] Дедупликация: "${project.id}" - оба проекта pou-merged (идентичные), оставляем существующий`
+        );
       } else {
-        console.log(`[Scanner] Дедупликация: "${project.id}" - уже есть .${existing.format}, пропускаем .${project.format}`);
+        // Существующий проект имеет более высокий или равный приоритет - пропускаем новый
+        console.log(
+          `[Scanner] Дедупликация: "${project.id}" - уже есть .${existing.format} (приоритет: ${existingPriority}), пропускаем .${project.format} (приоритет: ${projectPriority})`
+        );
       }
     }
   }

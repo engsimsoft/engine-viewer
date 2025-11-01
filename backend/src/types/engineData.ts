@@ -1,21 +1,49 @@
 /**
- * TypeScript типы для данных двигателя из .det файлов
- * Основано на анализе тестового файла: Vesta 1.6 IM.det
+ * TypeScript типы для данных двигателя
+ * Поддерживаемые форматы:
+ * - .det: 24 параметра (базовые характеристики)
+ * - .pou: 71 параметр (расширенный набор)
  */
+
+// =============================================================================
+// МЕТАДАННЫЕ (Строка 1 файла)
+// =============================================================================
 
 /**
  * Метаданные двигателя из первой строки .det файла
+ * Формат: "           4 NATUR     NumCyl"
  */
-export interface EngineMetadata {
+export interface DetMetadata {
   numCylinders: number;      // Количество цилиндров
   engineType: string;         // Тип двигателя (NATUR, TURBO и т.д.)
 }
 
 /**
- * Одна точка данных (одна строка из .det файла)
- * Содержит все параметры для одной точки оборотов
+ * Метаданные двигателя из первой строки .pou файла
+ * Формат: "           4 NATUR       0       0     NumCyl,Breath,NumTurbo,NumWasteGate"
  */
-export interface DataPoint {
+export interface PouMetadata {
+  numCylinders: number;      // Количество цилиндров
+  engineType: string;         // Тип двигателя (NATUR, TURBO и т.д.)
+  breath: number;             // Дыхание (0/1)
+  numTurbo: number;           // Количество турбин
+  numWasteGate: number;       // Количество wastegate
+}
+
+/**
+ * Union type для метаданных (поддержка обоих форматов)
+ */
+export type EngineMetadata = DetMetadata | PouMetadata;
+
+// =============================================================================
+// ТОЧКИ ДАННЫХ (Строки с числовыми данными)
+// =============================================================================
+
+/**
+ * Одна точка данных из .det файла (24 параметра)
+ * Содержит базовые параметры для одной точки оборотов
+ */
+export interface DetDataPoint {
   RPM: number;                // Обороты двигателя (об/мин)
   'P-Av': number;             // Средняя мощность (кВт)
   Torque: number;             // Крутящий момент (Н·м)
@@ -39,6 +67,88 @@ export interface DataPoint {
 }
 
 /**
+ * Одна точка данных из .pou файла (71 параметр)
+ * Содержит расширенный набор параметров для одной точки оборотов
+ */
+export interface PouDataPoint {
+  RPM: number;                // Обороты двигателя (об/мин)
+  'P-Av': number;             // Средняя мощность (кВт)
+  Torque: number;             // Крутящий момент (Н·м)
+  TexAv: number;              // Средняя температура выпуска (K)
+
+  // Мощность для каждого цилиндра (кВт)
+  Power: number[];            // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Индикаторное среднее эффективное давление (бар)
+  IMEP: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Brake Mean Effective Pressure (бар)
+  BMEP: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Pumping Mean Effective Pressure (бар)
+  PMEP: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Friction Mean Effective Pressure (бар)
+  FMEP: number;
+
+  // Degree Ratio
+  DRatio: number[];           // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Коэффициент наполнения для каждого цилиндра
+  PurCyl: number[];           // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Scavenging efficiency
+  Seff: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Trapping efficiency
+  Teff: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Charging efficiency
+  Ceff: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Brake Specific Fuel Consumption (г/кВт·ч)
+  BSFC: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Температура в цилиндре средняя (K)
+  'TC-Av': number[];          // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Максимальная температура выпускных газов (K)
+  TUbMax: number[];           // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Максимальное давление в цилиндре (бар) - добавляется из .det при merge
+  PCylMax?: number[];         // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
+
+  // Детонация для каждого цилиндра - добавляется из .det при merge
+  Deto?: number[];            // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
+
+  // Максимальный угол (градусы)
+  MaxDeg: number[];           // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Timing (градусы)
+  Timing: number;
+
+  // Delay (задержка) для каждого цилиндра
+  Delay: number[];            // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Duration (продолжительность) для каждого цилиндра
+  Durat: number[];            // [cyl1, cyl2, cyl3, cyl4, ...]
+
+  // Total Air Flow
+  TAF: number;
+
+  // Vibe параметры (модель сгорания)
+  VibeDelay: number;          // Задержка Vibe
+  VibeDurat: number;          // Продолжительность Vibe
+  VibeA: number;              // Параметр A Vibe
+  VibeM: number;              // Параметр M Vibe
+}
+
+/**
+ * Union type для точек данных (поддержка обоих форматов)
+ */
+export type DataPoint = DetDataPoint | PouDataPoint;
+
+/**
  * Один расчет (calculation) - набор точек с одним маркером ($1, $2, и т.д.)
  *
  * ВАЖНО:
@@ -57,13 +167,14 @@ export interface Calculation {
 }
 
 /**
- * Полный проект - все данные из одного .det файла
+ * Полный проект - все данные из одного файла двигателя (.det, .pou, или merged)
  */
 export interface EngineProject {
-  fileName: string;           // Имя файла (например "Vesta 1.6 IM.det")
-  metadata: EngineMetadata;   // Метаданные двигателя
-  columnHeaders: string[];    // Заголовки колонок из строки 2
-  calculations: Calculation[]; // Массив всех расчетов
+  fileName: string;                  // Имя файла (например "Vesta 1.6 IM.det" или "TM Soft ShortCut.pou")
+  format: 'det' | 'pou' | 'pou-merged'; // Формат файла (pou-merged = .pou + TCylMax/Convergence from .det)
+  metadata: EngineMetadata;          // Метаданные двигателя (DetMetadata | PouMetadata)
+  columnHeaders: string[];           // Заголовки колонок из строки 2
+  calculations: Calculation[];       // Массив всех расчетов
 }
 
 /**
@@ -71,11 +182,12 @@ export interface EngineProject {
  */
 export interface ProjectsListResponse {
   projects: {
-    id: string;               // ID проекта (имя файла без расширения)
-    fileName: string;         // Полное имя файла
-    engineType: string;       // Тип двигателя
-    numCylinders: number;     // Количество цилиндров
-    calculationsCount: number; // Количество расчетов
+    id: string;                          // ID проекта (имя файла без расширения)
+    fileName: string;                    // Полное имя файла
+    format: 'det' | 'pou' | 'pou-merged'; // Формат файла (pou-merged = merged data)
+    engineType: string;                  // Тип двигателя
+    numCylinders: number;                // Количество цилиндров
+    calculationsCount: number;           // Количество расчетов
   }[];
 }
 
@@ -116,14 +228,15 @@ export interface ProjectMetadata {
 
 /**
  * Расширенная информация о проекте (для списка проектов)
- * Комбинирует данные из .det файла и метаданных
+ * Комбинирует данные из файла двигателя (.det, .pou, или merged) и метаданных
  */
 export interface ProjectInfo {
-  id: string;                 // ID проекта (имя файла без расширения)
-  fileName: string;           // Полное имя файла
-  engineType: string;         // Тип двигателя
-  numCylinders: number;       // Количество цилиндров
-  calculationsCount: number;  // Количество расчетов
+  id: string;                          // ID проекта (имя файла без расширения)
+  fileName: string;                    // Полное имя файла
+  format: 'det' | 'pou' | 'pou-merged'; // Формат файла (pou-merged = merged data)
+  engineType: string;                  // Тип двигателя
+  numCylinders: number;                // Количество цилиндров
+  calculationsCount: number;           // Количество расчетов
   // Метаданные (опциональные, если не созданы пользователем)
   description?: string;
   client?: string;

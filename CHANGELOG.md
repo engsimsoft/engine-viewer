@@ -7,7 +7,21 @@
 
 ---
 
-## [2.0.0] - 2025-11-01
+## [2.0.0] - 2025-11-02
+
+### Fixed
+- **CRITICAL: Fixed .det + .pou file merge** (2025-11-02):
+  - ✅ Fixed incorrect merge logic that was losing TCylMax and Convergence parameters
+  - ✅ Created proper `fileMerger.js` service with `mergeDetPouData()` function
+  - ✅ Merge now adds ALL missing parameters from .det to .pou:
+    - TCylMax (max cylinder temperature) - critical for engine safety analysis
+    - Convergence (calculation quality indicator)
+  - ✅ New format type: 'pou-merged' (73 parameters = 71 from .pou + 2 from .det)
+  - ✅ Improved deduplication logic in fileScanner.js with format priority:
+    - pou-merged (73 params) > pou (71 params) > det (24 params)
+  - ✅ Updated TypeScript types to support 'pou-merged' format
+  - ✅ Proper merge logging for debugging
+  - **Result**: When both files exist (.det + .pou), users get complete 73-parameter dataset automatically
 
 ### Added
 - **Multi-format file support** (2025-11-01):
