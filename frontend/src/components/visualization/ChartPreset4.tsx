@@ -152,15 +152,26 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
         // Prepare data for parameter with units conversion
         const paramData = calc.data!.map((point) => {
-          let rawValue: number;
+          let rawValue: number | undefined;
 
           if (paramOption.isArray) {
             // For arrays, calculate average
-            const arrayValue = (point as any)[paramId] as number[];
+            const arrayValue = (point as any)[paramId] as number[] | undefined;
+
+            // Skip if parameter is not available (e.g., PCylMax not in pure .pou files)
+            if (!arrayValue || arrayValue.length === 0) {
+              return null;
+            }
+
             rawValue = arrayValue.reduce((sum, val) => sum + val, 0) / arrayValue.length;
           } else {
             // For scalar values, use directly
-            rawValue = (point as any)[paramId] as number;
+            rawValue = (point as any)[paramId] as number | undefined;
+
+            // Skip if parameter is not available
+            if (rawValue === undefined || rawValue === null) {
+              return null;
+            }
           }
 
           // Temperature conversion: K → °C first, then apply units
@@ -175,7 +186,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
             value: [point.RPM, convertedValue],
             decimals: decimals,
           };
-        });
+        }).filter((item): item is NonNullable<typeof item> => item !== null);
 
         // Line style: alternate solid and dashed
         const lineStyle = paramIndex % 2 === 0 ? 'solid' : 'dashed';

@@ -139,10 +139,19 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
         const cylinderNumber = cylIndex + 1;
 
         // Prepare pressure data with units conversion and decimals
-        const pressureData = calc.data.map((point) => ({
-          value: [point.RPM, convertPressure(point.PCylMax[cylIndex], units)],
-          decimals: decimals,
-        }));
+        const pressureData = calc.data
+          .map((point) => {
+            // Skip if PCylMax is not available (e.g., pure .pou files without merge)
+            if (!point.PCylMax || point.PCylMax.length <= cylIndex) {
+              return null;
+            }
+
+            return {
+              value: [point.RPM, convertPressure(point.PCylMax[cylIndex], units)],
+              decimals: decimals,
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null);
 
         // Line style: solid for cylinder 1, different dashes for others
         const lineStyle =

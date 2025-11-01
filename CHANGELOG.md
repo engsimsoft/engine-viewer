@@ -23,6 +23,16 @@
   - ✅ Proper merge logging for debugging
   - **Result**: When both files exist (.det + .pou), users get complete 73-parameter dataset automatically
 
+- **TypeError in Chart Presets with optional parameters** (2025-11-02):
+  - ✅ Fixed TypeError "Cannot read properties of undefined (reading 'reduce')" in Custom Chart
+  - ✅ Updated frontend/src/types/index.ts - marked TCylMax, PCylMax, Deto, Convergence as optional (?)
+  - ✅ Added null checks in ChartPreset4.tsx before array operations (.reduce(), .length)
+  - ✅ Added null checks in ChartPreset2.tsx for PCylMax per-cylinder data
+  - ✅ ChartPreset3.tsx already had proper null checks for TCylMax (no changes needed)
+  - ✅ Filter out data points where optional parameters are missing (graceful degradation)
+  - **Root cause**: Pure .pou files don't have PCylMax/TCylMax/Deto/Convergence parameters
+  - **Result**: All chart presets now handle optional parameters correctly without errors
+
 ### Added
 - **Multi-format file support** (2025-11-01):
   - ✅ Added support for .pou files (71 parameters) in addition to .det files (24 parameters)

@@ -16,10 +16,19 @@ export interface EngineMetadata {
 }
 
 /**
- * Одна точка данных (одна строка из .det файла)
+ * Одна точка данных (одна строка из .det, .pou, или pou-merged файла)
  * Содержит все параметры для одной точки оборотов
+ *
+ * Format-specific parameters availability:
+ * - .det: 24 parameters (includes TCylMax, PCylMax, Deto, Convergence)
+ * - .pou: 71 parameters (does NOT include TCylMax, PCylMax, Deto, Convergence)
+ * - pou-merged: 73 parameters (.pou + TCylMax, Convergence from .det)
  */
 export interface DataPoint {
+  // ===========================================
+  // ALWAYS PRESENT (all formats)
+  // ===========================================
+
   RPM: number;                // Обороты двигателя (об/мин)
   'P-Av': number;             // Средняя мощность (кВт)
   Torque: number;             // Крутящий момент (Н·м)
@@ -30,16 +39,56 @@ export interface DataPoint {
   // Максимальная температура выпускных газов для каждого цилиндра (K)
   TUbMax: number[];           // [cyl1, cyl2, cyl3, cyl4, ...]
 
+  // ===========================================
+  // OPTIONAL (.det and pou-merged only)
+  // ===========================================
+
   // Максимальная температура в цилиндре (K)
-  TCylMax: number[];          // [cyl1, cyl2, cyl3, cyl4, ...]
+  // Available in: .det, pou-merged
+  // NOT available in: .pou
+  TCylMax?: number[];         // [cyl1, cyl2, cyl3, cyl4, ...]
 
   // Максимальное давление в цилиндре (бар)
-  PCylMax: number[];          // [cyl1, cyl2, cyl3, cyl4, ...]
+  // Available in: .det, pou-merged
+  // NOT available in: .pou
+  PCylMax?: number[];         // [cyl1, cyl2, cyl3, cyl4, ...]
 
   // Детонация для каждого цилиндра
-  Deto: number[];             // [cyl1, cyl2, cyl3, cyl4, ...]
+  // Available in: .det, pou-merged
+  // NOT available in: .pou
+  Deto?: number[];            // [cyl1, cyl2, cyl3, cyl4, ...]
 
-  Convergence: number;        // Сходимость расчета
+  // Сходимость расчета
+  // Available in: .det, pou-merged
+  // NOT available in: .pou
+  Convergence?: number;
+
+  // ===========================================
+  // OPTIONAL (.pou and pou-merged only)
+  // ===========================================
+
+  // Additional .pou parameters (not present in .det files)
+  TexAv?: number;             // Average exhaust temperature
+  Power?: number[];           // Power per cylinder
+  IMEP?: number[];            // Indicated Mean Effective Pressure
+  BMEP?: number[];            // Brake Mean Effective Pressure
+  PMEP?: number[];            // Pumping Mean Effective Pressure
+  FMEP?: number;              // Friction Mean Effective Pressure
+  DRatio?: number[];          // Delivery Ratio
+  Seff?: number[];            // Scavenging efficiency
+  Teff?: number[];            // Trapping efficiency
+  Ceff?: number[];            // Charging efficiency
+  BSFC?: number[];            // Brake Specific Fuel Consumption
+  'TC-Av'?: number[];         // Average cylinder temperature
+  MaxDeg?: number[];          // Angle at max pressure
+  Timing?: number;            // Ignition/injection timing
+  Delay?: number[];           // Ignition delay
+  Durat?: number[];           // Combustion duration
+  TAF?: number;               // Total Air Flow
+  VibeDelay?: number;         // Vibe model delay
+  VibeDurat?: number;         // Vibe model duration
+  VibeA?: number;             // Vibe parameter A
+  VibeM?: number;             // Vibe parameter M
 }
 
 /**
