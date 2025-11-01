@@ -307,12 +307,12 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       legend: {
         show: false,
       },
-      // Dynamic line style legend at bottom center (only if multiple parameters selected)
+      // Dynamic line style legend at top center (same level as Y-axis labels)
       graphic: selectedParams.length > 1 ? [
         {
           type: 'group',
           left: 'center',
-          bottom: 15,
+          top: 45,
           children: legendChildren,
         },
       ] : undefined,

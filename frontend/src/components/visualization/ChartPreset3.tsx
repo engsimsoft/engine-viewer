@@ -268,12 +268,12 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       legend: {
         show: false,
       },
-      // Line style legend at the bottom center (same level as axis labels)
+      // Line style legend at the top center (same level as Y-axis labels)
       graphic: [
         {
           type: 'group',
           left: 'center',
-          bottom: 15,
+          top: 45,
           children: [
             // TCylMax solid line symbol
             {
