@@ -268,12 +268,12 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       legend: {
         show: false,
       },
-      // Line style legend at the top center
+      // Line style legend at the bottom center (same level as axis labels)
       graphic: [
         {
           type: 'group',
           left: 'center',
-          top: 10,
+          bottom: 15,
           children: [
             // TCylMax solid line symbol
             {
@@ -281,37 +281,38 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
               shape: {
                 x1: 0,
                 y1: 0,
-                x2: 20,
+                x2: 25,
                 y2: 0,
               },
               style: {
-                stroke: '#6b7280',
+                stroke: '#666',
                 lineWidth: 2,
               },
             },
             // TCylMax label
             {
               type: 'text',
-              left: 25,
+              left: 30,
               top: -8,
               style: {
                 text: 'TCylMax',
-                fontSize: 12,
-                fill: '#6b7280',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fill: '#666',
               },
             },
             // TUbMax dashed line symbol
             {
               type: 'line',
-              left: 85,
+              left: 95,
               shape: {
                 x1: 0,
                 y1: 0,
-                x2: 20,
+                x2: 25,
                 y2: 0,
               },
               style: {
-                stroke: '#6b7280',
+                stroke: '#666',
                 lineWidth: 2,
                 lineDash: [5, 5],
               },
@@ -319,12 +320,13 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
             // TUbMax label
             {
               type: 'text',
-              left: 110,
+              left: 125,
               top: -8,
               style: {
                 text: 'TUbMax',
-                fontSize: 12,
-                fill: '#6b7280',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fill: '#666',
               },
             },
           ],

@@ -280,7 +280,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
           y2: 0,
         },
         style: {
-          stroke: '#6b7280',
+          stroke: '#666',
           lineWidth: 2,
           lineDash: lineStyle === 'dashed' ? [5, 5] : undefined,
         },
@@ -293,8 +293,9 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         top: -8,
         style: {
           text: param.label,
-          fontSize: 12,
-          fill: '#6b7280',
+          fontSize: 14,
+          fontWeight: 'bold',
+          fill: '#666',
         },
       });
 
@@ -306,12 +307,12 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       legend: {
         show: false,
       },
-      // Dynamic line style legend (only if multiple parameters selected)
+      // Dynamic line style legend at bottom center (only if multiple parameters selected)
       graphic: selectedParams.length > 1 ? [
         {
           type: 'group',
           left: 'center',
-          top: 10,
+          bottom: 15,
           children: legendChildren,
         },
       ] : undefined,

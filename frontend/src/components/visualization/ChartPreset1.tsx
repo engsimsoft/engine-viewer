@@ -233,12 +233,12 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
       legend: {
         show: false,
       },
-      // Line style legend at the top center
+      // Line style legend at the bottom center (same level as axis labels)
       graphic: [
         {
           type: 'group',
           left: 'center',
-          top: 10,
+          bottom: 15,
           children: [
             // P-Av solid line symbol
             {
@@ -246,37 +246,38 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
               shape: {
                 x1: 0,
                 y1: 0,
-                x2: 20,
+                x2: 25,
                 y2: 0,
               },
               style: {
-                stroke: '#6b7280',
+                stroke: '#666',
                 lineWidth: 2,
               },
             },
             // P-Av label
             {
               type: 'text',
-              left: 25,
+              left: 30,
               top: -8,
               style: {
                 text: 'P-Av',
-                fontSize: 12,
-                fill: '#6b7280',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fill: '#666',
               },
             },
             // Torque dashed line symbol
             {
               type: 'line',
-              left: 70,
+              left: 75,
               shape: {
                 x1: 0,
                 y1: 0,
-                x2: 20,
+                x2: 25,
                 y2: 0,
               },
               style: {
-                stroke: '#6b7280',
+                stroke: '#666',
                 lineWidth: 2,
                 lineDash: [5, 5],
               },
@@ -284,12 +285,13 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
             // Torque label
             {
               type: 'text',
-              left: 95,
+              left: 105,
               top: -8,
               style: {
                 text: 'Torque',
-                fontSize: 12,
-                fill: '#6b7280',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fill: '#666',
               },
             },
           ],

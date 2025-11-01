@@ -36,6 +36,12 @@
 
 ### Changed
 - **Complete UI redesign**: iPhone-quality professional interface
+- **Professional chart legend design** (2025-11-01):
+  - ✅ Repositioned legend from top to bottom (same level as axis labels)
+  - ✅ Updated typography to match axis labels (fontSize: 14, fontWeight: bold)
+  - ✅ Changed color from #6b7280 (light gray) to #666 (darker, better contrast)
+  - ✅ Increased line symbol length from 20px to 25px for better visibility
+  - ✅ Applied unified style across all chart presets (Preset 1, 3, 4)
 - **New modal dialogs**: PrimarySelectionModal and ComparisonModal for calculation selection
 - **Restructured left panel**: Three sections (Primary + Presets + Comparison)
 - **Updated all 4 chart presets**: Support for multi-project data display
