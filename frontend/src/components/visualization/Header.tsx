@@ -86,12 +86,12 @@ export function Header({
             </h1>
 
             {/* Metadata Line */}
-            <div className="flex items-center justify-center gap-2 mt-1 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 mt-1 text-sm text-muted-foreground flex-wrap">
               <span>{engineType}</span>
               <span>•</span>
               <span>{cylinders} cylinders</span>
-              <span>•</span>
-              <span>{calculationsCount} calculations</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:inline">{calculationsCount} calculations</span>
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export function Header({
               className="gap-2"
             >
               <Download className="h-4 w-4" />
-              <span>PNG</span>
+              <span className="hidden sm:inline">PNG</span>
             </Button>
 
             {/* SVG Export Button */}
@@ -120,14 +120,14 @@ export function Header({
               className="gap-2"
             >
               <FileImage className="h-4 w-4" />
-              <span>SVG</span>
+              <span className="hidden sm:inline">SVG</span>
             </Button>
 
             {/* Settings Button */}
             <SettingsPopover>
               <Button
                 variant="ghost"
-                size="icon"
+                size="icon-sm"
                 className="hover:bg-accent"
                 aria-label="Open settings"
               >
