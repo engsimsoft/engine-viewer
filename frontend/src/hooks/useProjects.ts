@@ -15,7 +15,7 @@ export function useProjects() {
       const data = await projectsApi.getProjects();
       setProjects(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить проекты');
+      setError(err instanceof Error ? err.message : 'Failed to load projects');
       console.error('Error loading projects:', err);
     } finally {
       setLoading(false);
@@ -37,7 +37,7 @@ export function useProjects() {
         }
       } catch (err) {
         if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить проекты');
+          setError(err instanceof Error ? err.message : 'Failed to load projects');
           console.error('Error loading projects:', err);
         }
       } finally {

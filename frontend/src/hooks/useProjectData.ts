@@ -14,7 +14,7 @@ import type { EngineProject } from '@/types';
  *
  * if (loading) return <LoadingSpinner />;
  * if (error) return <ErrorMessage message={error} />;
- * if (!project) return <div>Проект не найден</div>;
+ * if (!project) return <div>Project not found</div>;
  *
  * return <div>{project.fileName}</div>;
  * ```
@@ -37,7 +37,7 @@ export function useProjectData(projectId: string | undefined) {
       const data = await projectsApi.getProject(projectId);
       setProject(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить проект');
+      setError(err instanceof Error ? err.message : 'Failed to load project');
       console.error('Error loading project:', err);
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ export function useProjectData(projectId: string | undefined) {
         }
       } catch (err) {
         if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить проект');
+          setError(err instanceof Error ? err.message : 'Failed to load project');
           console.error('Error loading project:', err);
         }
       } finally {

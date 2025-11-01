@@ -4,6 +4,7 @@ import HomePage from '@/pages/HomePage';
 import ProjectPage from '@/pages/ProjectPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useAppStore } from '@/stores/appStore';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import './App.css';
 
 /**
@@ -37,15 +38,17 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Home page - project list */}
-        <Route path="/" element={<HomePage />} />
+      <ErrorBoundary>
+        <Routes>
+          {/* Home page - project list */}
+          <Route path="/" element={<HomePage />} />
 
-        {/* Visualization page - cross-project comparison support */}
-        {/* :id = initial project context (NOT a restriction) */}
-        <Route path="/project/:id" element={<ProjectPage />} />
-      </Routes>
-      <Toaster />
+          {/* Visualization page - cross-project comparison support */}
+          {/* :id = initial project context (NOT a restriction) */}
+          <Route path="/project/:id" element={<ProjectPage />} />
+        </Routes>
+        <Toaster />
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
