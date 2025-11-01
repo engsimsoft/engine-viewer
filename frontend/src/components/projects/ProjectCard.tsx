@@ -37,11 +37,26 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
   const status = metadata?.status || 'active';
   const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
 
+  const handleCardClick = () => {
+    onOpen(project.id);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick();
+    }
+  };
+
   return (
     <Card
-      className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4"
+      className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       style={{ borderLeftColor: metadata?.color || '#3b82f6' }}
-      onClick={() => onOpen(project.id)}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Open project ${project.name}`}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
@@ -110,6 +125,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
               e.stopPropagation();
               onEdit(project);
             }}
+            aria-label={`Edit project ${project.name}`}
           >
             <Edit className="w-4 h-4" />
           </Button>
