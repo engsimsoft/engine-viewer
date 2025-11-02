@@ -15,11 +15,9 @@ import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProj
 import { useAppStore } from '@/stores/appStore';
 import {
   convertValue,
-  getPowerUnit,
-  getTorqueUnit,
-  getPressureUnit,
-  getTemperatureUnit,
+  getParameterUnit,
 } from '@/lib/unitsConversion';
+import { PARAMETERS } from '@/config/parameters';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -30,26 +28,6 @@ interface ChartPreset4Props {
   calculations: CalculationReference[];
 }
 
-/**
- * Available parameters for visualization
- */
-interface ParameterOption {
-  id: string;
-  label: string;
-  getUnit: (units: 'si' | 'american' | 'hp') => string; // Dynamic unit based on settings
-  isArray: boolean; // true if this is a per-cylinder array
-}
-
-const PARAMETER_OPTIONS: ParameterOption[] = [
-  { id: 'P-Av', label: 'P-Av', getUnit: (u) => getPowerUnit(u), isArray: false },
-  { id: 'Torque', label: 'Torque', getUnit: (u) => getTorqueUnit(u), isArray: false },
-  { id: 'PCylMax', label: 'PCylMax', getUnit: (u) => getPressureUnit(u), isArray: true },
-  { id: 'TCylMax', label: 'TCylMax', getUnit: (u) => getTemperatureUnit(u), isArray: true },
-  { id: 'TUbMax', label: 'TUbMax', getUnit: (u) => getTemperatureUnit(u), isArray: true },
-  { id: 'PurCyl', label: 'PurCyl', getUnit: () => '', isArray: true },
-  { id: 'Deto', label: 'Deto', getUnit: () => '', isArray: true },
-  { id: 'Convergence', label: 'Convergence', getUnit: () => '', isArray: false },
-];
 
 /**
  * Chart Preset 4: Custom Chart (v2.0 - Multi-Project Support)
@@ -105,7 +83,9 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   // Selected parameters state from Zustand store (shared with DataTable)
   const selectedParams = useAppStore((state) => state.selectedCustomParams);
-  const setSelectedParams = useAppStore((state) => state.setSelectedCustomParams);
+  // toggleParameter and setCylinderSelection will be used in Phase 2 (Parameter Selector Modal)
+  // const toggleParameter = useAppStore((state) => state.toggleParameter);
+  // const setCylinderSelection = useAppStore((state) => state.setCylinderSelection);
 
   // Load cross-project data
   const {
@@ -129,12 +109,31 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
     const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
     const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
+    // Determine if we should use parameter colors (single calculation mode)
+    const isSingleCalculation = readyCalculations.length === 1;
+
+    // Parameter color palette (used for axes and lines in single calculation mode)
+    const parameterColorPalette = ['#1f77b4', '#ff7f0e', '#d62728', '#2ca02c', '#9467bd'];
+
+    // Collect unique units from selected parameters for multi-axis configuration
+    // Also assign color to each parameter
+    const uniqueUnits = new Map<string, number>(); // unit -> yAxisIndex
+    const parameterColors = new Map<string, string>(); // paramId -> color
+
+    selectedParams.forEach((selectedParam, index) => {
+      const unit = getParameterUnit(selectedParam.id, units);
+      if (unit && !uniqueUnits.has(unit)) {
+        uniqueUnits.set(unit, uniqueUnits.size); // Assign next yAxisIndex
+      }
+      // Assign color to parameter (used for axes and single calc mode lines)
+      parameterColors.set(selectedParam.id, parameterColorPalette[index % parameterColorPalette.length]);
+    });
+
     // Create series for each calculation and parameter
     const series: any[] = [];
     const legendData: string[] = [];
 
     readyCalculations.forEach((calc, calcIndex) => {
-      const color = calc.color;
       const label = `${calc.projectName} → ${calc.calculationName}`;
 
       // Ensure data is loaded
@@ -143,9 +142,19 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       // Get marker symbol for this calculation
       const markerSymbol = getMarkerSymbol(calcIndex);
 
-      selectedParams.forEach((paramId, paramIndex) => {
-        const paramOption = PARAMETER_OPTIONS.find((p) => p.id === paramId);
-        if (!paramOption) return;
+      selectedParams.forEach((selectedParam, paramIndex) => {
+        const { id: paramId, cylinder } = selectedParam;
+        const param = PARAMETERS[paramId];
+        if (!param) return;
+
+        // Determine color: parameter color in single mode, calc color in comparison mode
+        const lineColor = isSingleCalculation
+          ? (parameterColors.get(paramId) || '#666')
+          : calc.color;
+
+        // Determine yAxisIndex for this parameter based on its unit
+        const paramUnit = getParameterUnit(paramId, units);
+        const yAxisIndex = paramUnit ? (uniqueUnits.get(paramUnit) ?? 0) : 0;
 
         // Find peak value for this parameter
         const peak = findPeak(calc.data!, paramId);
@@ -153,30 +162,39 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         // Prepare data for parameter with units conversion
         const paramData = calc.data!.map((point) => {
           let rawValue: number | undefined;
+          const dataValue = (point as any)[paramId];
 
-          if (paramOption.isArray) {
-            // For arrays, calculate average
-            const arrayValue = (point as any)[paramId] as number[] | undefined;
-
-            // Skip if parameter is not available (e.g., PCylMax not in pure .pou files)
-            if (!arrayValue || arrayValue.length === 0) {
-              return null;
-            }
-
-            rawValue = arrayValue.reduce((sum, val) => sum + val, 0) / arrayValue.length;
-          } else {
-            // For scalar values, use directly
-            rawValue = (point as any)[paramId] as number | undefined;
-
-            // Skip if parameter is not available
-            if (rawValue === undefined || rawValue === null) {
-              return null;
-            }
+          // Skip if parameter is not available
+          if (dataValue === undefined || dataValue === null) {
+            return null;
           }
 
-          // Temperature conversion: K → °C first, then apply units
-          if (paramId === 'TCylMax' || paramId === 'TUbMax') {
-            rawValue = rawValue - 273.15; // K → °C
+          if (param.perCylinder) {
+            // Per-cylinder parameter
+            if (!Array.isArray(dataValue) || dataValue.length === 0) {
+              return null;
+            }
+
+            if (cylinder === 'avg' || cylinder === null) {
+              // Average across all cylinders
+              rawValue = dataValue.reduce((sum: number, val: number) => sum + val, 0) / dataValue.length;
+            } else {
+              // Specific cylinder (cylinder is 1-indexed, array is 0-indexed)
+              const cylIndex = (cylinder as number) - 1;
+              if (cylIndex >= 0 && cylIndex < dataValue.length) {
+                rawValue = dataValue[cylIndex];
+              } else {
+                return null; // Cylinder index out of range
+              }
+            }
+          } else {
+            // Scalar parameter
+            rawValue = dataValue as number;
+          }
+
+          // Skip if rawValue is still undefined
+          if (rawValue === undefined || rawValue === null) {
+            return null;
           }
 
           // Apply units conversion
@@ -196,19 +214,14 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         if (peak) {
           let peakValue = peak.value;
 
-          // Temperature conversion: K → °C first for peak value
-          if (paramId === 'TCylMax' || paramId === 'TUbMax') {
-            peakValue = peakValue - 273.15; // K → °C
-          }
-
-          // Apply units conversion to peak value
+          // Apply units conversion to peak value (data already in °C for temperatures)
           const convertedPeakValue = convertValue(peakValue, paramId, units);
 
           peakMarkPoint = {
             symbol: markerSymbol,
             symbolSize: 20,
             itemStyle: {
-              color: color,
+              color: lineColor,
               borderColor: '#fff',
               borderWidth: 2,
             },
@@ -226,17 +239,27 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
           };
         }
 
+        // Build series name with cylinder selection
+        let seriesName = `${label} - ${param.name}`;
+        if (param.perCylinder) {
+          if (cylinder === 'avg' || cylinder === null) {
+            seriesName += ' (Avg)';
+          } else {
+            seriesName += ` (Cyl${cylinder})`;
+          }
+        }
+
         // Series for parameter
         series.push({
-          name: `${label} - ${paramOption.label}`,
+          name: seriesName,
           type: 'line',
-          yAxisIndex: 0,
+          yAxisIndex: yAxisIndex, // Dynamic yAxisIndex based on parameter unit
           data: paramData,
           itemStyle: {
-            color,
+            color: lineColor,
           },
           lineStyle: {
-            color,
+            color: lineColor,
             width: 2,
             type: lineStyle,
           },
@@ -251,34 +274,63 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         });
 
         // Add to legend
-        legendData.push(`${label} - ${paramOption.label}`);
+        legendData.push(seriesName);
       });
     });
 
-    // Determine Y axis name (only units)
-    let yAxisName = 'Value';
-    if (selectedParams.length === 1) {
-      const param = PARAMETER_OPTIONS.find((p) => p.id === selectedParams[0]);
-      if (param) {
-        const unit = param.getUnit(units);
-        yAxisName = unit || 'Value';  // Only unit, no parameter name
+    // Create dynamic Y-axis array for each unique unit (following ChartPreset3 pattern)
+    // Axes use parameter colors (first parameter with this unit)
+    const yAxisArray: any[] = [];
+    const unitEntries = Array.from(uniqueUnits.entries()); // [[unit, index], ...]
+
+    // Map unit to parameter color (find first parameter with this unit)
+    const unitToColor = new Map<string, string>();
+    selectedParams.forEach((selectedParam) => {
+      const unit = getParameterUnit(selectedParam.id, units);
+      if (unit && !unitToColor.has(unit)) {
+        unitToColor.set(unit, parameterColors.get(selectedParam.id) || '#666');
       }
-    } else if (selectedParams.length > 1) {
-      yAxisName = 'Value (mixed units)';
-    }
+    });
+
+    unitEntries.forEach(([unit, index]) => {
+      const position = index === 0 ? 'left' : 'right';
+      const color = unitToColor.get(unit) || '#666';
+
+      if (index === 0) {
+        // First axis (left)
+        yAxisArray.push(createYAxis(unit, position, color, showGrid));
+      } else if (index === 1) {
+        // Second axis (right, no offset)
+        yAxisArray.push(createYAxis(unit, position, color, showGrid));
+      } else {
+        // Third+ axes (right, with offset like ChartPreset3)
+        const offset = (index - 1) * 60; // 60px offset for each additional right axis
+        yAxisArray.push({
+          ...createYAxis(unit, position, color, showGrid),
+          offset: offset,
+        });
+      }
+    });
 
     // Create dynamic line style legend based on selected parameters
+    // Single calc mode: colored (parameter colors), Comparison mode: gray
     const legendChildren: any[] = [];
     let xOffset = 0;
 
-    selectedParams.forEach((paramId, index) => {
-      const param = PARAMETER_OPTIONS.find((p) => p.id === paramId);
+    selectedParams.forEach((selectedParam, index) => {
+      const param = PARAMETERS[selectedParam.id];
       if (!param) return;
 
+      // Line style: alternate solid and dashed
       const lineStyle = index % 2 === 0 ? 'solid' : 'dashed';
       const lineLength = 20;
       const labelOffset = 25;
-      const spacing = param.label.length * 7 + 50; // Dynamic spacing based on label length
+      const spacing = param.name.length * 7 + 50; // Dynamic spacing based on label length
+
+      // Legend color: parameter color in single mode, gray in comparison mode
+      const legendColor = isSingleCalculation
+        ? (parameterColors.get(selectedParam.id) || '#666')
+        : '#666';
 
       // Line symbol
       legendChildren.push({
@@ -291,7 +343,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
           y2: 0,
         },
         style: {
-          stroke: '#666',
+          stroke: legendColor,
           lineWidth: 2,
           lineDash: lineStyle === 'dashed' ? [5, 5] : undefined,
         },
@@ -303,10 +355,10 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         left: xOffset + labelOffset,
         top: -8,
         style: {
-          text: param.label,
+          text: param.name,
           fontSize: 14,
           fontWeight: 'bold',
-          fill: '#666',
+          fill: legendColor,
         },
       });
 
@@ -318,33 +370,20 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       legend: {
         show: false,
       },
-      // Dynamic line style legend at top center (same level as Y-axis labels)
-      graphic: selectedParams.length > 1 ? [
+      // Dynamic line style legend at top center (always shown, same level as Y-axis labels)
+      graphic: [
         {
           type: 'group',
           left: 'center',
           top: 15, // Adjusted for reduced grid.top (50px instead of 80px)
           children: legendChildren,
         },
-      ] : undefined,
+      ],
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(yAxisName, 'left', '#2ca02c', showGrid),  // Only unit label
+      yAxis: yAxisArray, // Dynamic multi-axis configuration (following ChartPreset3 pattern)
       series,
     };
   }, [readyCalculations, selectedParams, units, animation, showGrid, decimals]);
-
-  // Parameter toggle handler
-  const handleToggleParam = (paramId: string) => {
-    if (selectedParams.includes(paramId)) {
-      // Remove parameter (minimum 1 must remain)
-      if (selectedParams.length > 1) {
-        setSelectedParams(selectedParams.filter((id) => id !== paramId));
-      }
-    } else {
-      // Add parameter
-      setSelectedParams([...selectedParams, paramId]);
-    }
-  };
 
   // Loading state
   if (isLoading) {
@@ -398,38 +437,41 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   return (
     <div className="w-full space-y-2">
-      {/* Parameter selector */}
-      <div className="p-4 bg-muted/30 rounded-lg border">
-        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
-          Select parameters to display
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {PARAMETER_OPTIONS.map((param) => {
-            const isSelected = selectedParams.includes(param.id);
-            const unit = param.getUnit(units);
-            return (
-              <button
-                key={param.id}
-                onClick={() => handleToggleParam(param.id)}
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-all',
-                  'border-2',
-                  isSelected
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background text-foreground border-border hover:border-primary/50'
-                )}
-              >
-                {param.label}
-                {unit && ` (${unit})`}
-                {param.isArray && ' (avg)'}
-              </button>
-            );
-          })}
+      {/* Parameter selector button - Opens modal (Phase 2) */}
+      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              // TODO Phase 2: Open ParameterSelectorModal
+              console.log('Open parameter selector modal');
+            }}
+            className={cn(
+              'px-4 py-2 rounded-md text-sm font-semibold transition-all',
+              'bg-primary text-primary-foreground hover:bg-primary/90',
+              'border-2 border-primary'
+            )}
+          >
+            Select Parameters ({selectedParams.length} selected)
+          </button>
+
+          {/* Show selected parameter names */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {selectedParams.map((selectedParam, index) => {
+              const param = PARAMETERS[selectedParam.id];
+              if (!param) return null;
+              return (
+                <span key={selectedParam.id} className="font-medium">
+                  {param.name}
+                  {index < selectedParams.length - 1 && ','}
+                </span>
+              );
+            })}
+          </div>
         </div>
+
         {selectedParams.length > 1 && (
-          <p className="text-xs text-muted-foreground mt-3">
-            ⚠️ Multiple parameters with different units selected.
-            Ensure their scales are comparable for correct display.
+          <p className="text-xs text-muted-foreground">
+            ⚠️ Multiple parameters with different units
           </p>
         )}
       </div>

@@ -16,6 +16,7 @@ import type {
   AppState,
   CalculationReference,
   ChartSettings,
+  SelectedParameter,
 } from '../types/v2';
 import {
   CALCULATION_COLORS,
@@ -23,6 +24,7 @@ import {
   DEFAULT_UNITS,
   DEFAULT_THEME,
 } from '../types/v2';
+import { PARAMETERS } from '../config/parameters';
 
 /**
  * Расширенный интерфейс Store с actions
@@ -106,7 +108,21 @@ interface AppStore extends AppState {
   /**
    * Установить выбранные параметры для Custom Chart (Preset 4)
    */
-  setSelectedCustomParams: (params: string[]) => void;
+  setSelectedCustomParams: (params: SelectedParameter[]) => void;
+
+  /**
+   * Toggle parameter selection for Custom Chart
+   * Adds parameter if not selected, removes if already selected
+   * For per-cylinder params, defaults to 'avg'
+   */
+  toggleParameter: (paramId: string) => void;
+
+  /**
+   * Set cylinder selection for a per-cylinder parameter
+   * @param paramId - Parameter ID
+   * @param cylinder - 'avg' or cylinder number (1-4)
+   */
+  setCylinderSelection: (paramId: string, cylinder: 'avg' | number) => void;
 }
 
 /**
@@ -164,7 +180,10 @@ export const useAppStore = create<AppStore>()(
   isPrimaryModalOpen: false,
   isComparisonModalOpen: false,
   selectedPreset: 1, // Power & Torque по умолчанию
-  selectedCustomParams: ['P-Av', 'Torque'], // Default parameters for Custom Chart (Preset 4)
+  selectedCustomParams: [
+    { id: 'P-Av', cylinder: null },    // Default: P-Av (scalar parameter)
+    { id: 'Torque', cylinder: null },  // Default: Torque (scalar parameter)
+  ] as SelectedParameter[],
 
   // ============================================================
   // Calculation Management Actions
@@ -277,6 +296,40 @@ export const useAppStore = create<AppStore>()(
     set({
       selectedCustomParams: params,
     }),
+
+  toggleParameter: (paramId) =>
+    set((state) => {
+      const isSelected = state.selectedCustomParams.some(p => p.id === paramId);
+
+      if (isSelected) {
+        // Remove parameter (but keep at least 1)
+        if (state.selectedCustomParams.length > 1) {
+          return {
+            selectedCustomParams: state.selectedCustomParams.filter(p => p.id !== paramId),
+          };
+        }
+        // Cannot remove last parameter
+        return state;
+      } else {
+        // Add parameter
+        const param = PARAMETERS[paramId];
+        const newParam: SelectedParameter = {
+          id: paramId,
+          // Default cylinder selection: 'avg' for per-cylinder params, null for scalars
+          cylinder: param?.perCylinder ? 'avg' : null,
+        };
+        return {
+          selectedCustomParams: [...state.selectedCustomParams, newParam],
+        };
+      }
+    }),
+
+  setCylinderSelection: (paramId, cylinder) =>
+    set((state) => ({
+      selectedCustomParams: state.selectedCustomParams.map(p =>
+        p.id === paramId ? { ...p, cylinder } : p
+      ),
+    })),
     }),
     {
       name: 'engine-viewer-settings',

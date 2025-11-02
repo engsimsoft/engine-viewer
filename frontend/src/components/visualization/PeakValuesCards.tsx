@@ -33,7 +33,7 @@
  * ```
  */
 
-import type { CalculationReference } from '@/types/v2';
+import type { CalculationReference, SelectedParameter } from '@/types/v2';
 import { useAppStore } from '@/stores/appStore';
 import { findPeak } from '@/lib/peakValues';
 import {
@@ -49,8 +49,8 @@ interface PeakValuesCardsProps {
   calculations: CalculationReference[];
   /** Current selected preset (1-6) to determine which peaks to show */
   preset: 1 | 2 | 3 | 4 | 5 | 6;
-  /** Optional: selected parameters for Preset 4 */
-  selectedParams?: string[];
+  /** Optional: selected parameters for Preset 4 (with cylinder selection) */
+  selectedParams?: SelectedParameter[];
 }
 
 interface PeakValueItem {
@@ -67,7 +67,7 @@ function getPeakValuesForCalculation(
   preset: 1 | 2 | 3 | 4 | 5 | 6,
   units: 'si' | 'american' | 'hp',
   decimals: number,
-  selectedParams?: string[]
+  selectedParams?: SelectedParameter[]
 ): PeakValueItem[] {
   if (!calc.data || calc.data.length === 0) return [];
 
@@ -224,15 +224,26 @@ function getPeakValuesForCalculation(
         }
       } else {
         // Show peaks for selected parameters
-        selectedParams.forEach((paramId) => {
+        selectedParams.forEach((selectedParam) => {
+          const { id: paramId, cylinder } = selectedParam;
           const peak = findPeak(calc.data!, paramId);
           if (peak) {
             // Determine precision based on parameter type
             const param = PARAMETERS[paramId];
             const precision = param?.category === 'temperature' ? 0 : 1;
 
+            // Build label with cylinder selection
+            let label = param?.displayName || paramId;
+            if (param?.perCylinder) {
+              if (cylinder === 'avg' || cylinder === null) {
+                label += ' (Avg)';
+              } else {
+                label += ` (Cyl${cylinder})`;
+              }
+            }
+
             peaks.push({
-              label: paramId,
+              label,
               value: `${convertValue(peak.value, paramId, units).toFixed(precision)} ${getParameterUnit(paramId, units)}`,
               rpm: peak.rpm,
             });

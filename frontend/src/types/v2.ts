@@ -21,6 +21,22 @@ import type { DataPoint } from './index';
 export type CalculationData = DataPoint[];
 
 /**
+ * Selected parameter with optional cylinder selection
+ * Used for Custom Chart (Preset 4) per-cylinder feature
+ */
+export interface SelectedParameter {
+  /** Parameter ID (e.g., 'P-Av', 'IMEP', 'PCylMax') */
+  id: string;
+  /**
+   * Cylinder selection:
+   * - null: scalar parameter (no cylinder data)
+   * - 'avg': averaged across all cylinders
+   * - number: specific cylinder (1-4)
+   */
+  cylinder: null | 'avg' | number;
+}
+
+/**
  * Ссылка на расчёт из любого проекта
  *
  * ВАЖНО:
@@ -178,9 +194,10 @@ export interface AppState {
   /**
    * Выбранные параметры для Custom Chart (Preset 4)
    * Используется для синхронизации между ChartPreset4 и DataTable
-   * Default: ['P-Av', 'Torque']
+   * Supports per-cylinder selection for array parameters
+   * Default: [{ id: 'P-Av', cylinder: null }, { id: 'Torque', cylinder: null }]
    */
-  selectedCustomParams: string[];
+  selectedCustomParams: SelectedParameter[];
 }
 
 // ====================================================================

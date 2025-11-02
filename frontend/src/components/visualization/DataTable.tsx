@@ -22,14 +22,14 @@ import {
   convertTorque,
   convertPressure,
   convertTemperature,
-  convertValue,
+  // convertValue,  // Will be used in future unified conversion refactoring
   getPowerUnit,
   getTorqueUnit,
   getPressureUnit,
   getTemperatureUnit,
-  getParameterUnit,
+  // getParameterUnit,  // Will be used in future unified conversion refactoring
 } from '@/lib/unitsConversion';
-import { PARAMETERS } from '@/config/parameters';
+// import { PARAMETERS } from '@/config/parameters';  // Will be used in future refactoring
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
@@ -599,7 +599,8 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
       };
 
       // Add columns for selected parameters only
-      selectedCustomParams.forEach((paramId) => {
+      selectedCustomParams.forEach((selectedParam) => {
+        const paramId = selectedParam.id;
         const colIndex = paramToColIndex[paramId];
         if (colIndex !== undefined && cols[colIndex]) {
           filteredCols.push(cols[colIndex]);
@@ -665,7 +666,8 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow['MaxDeg (°)'] = row.maxDeg !== undefined ? row.maxDeg.toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 4) {
         // Preset 4: Custom Chart - export only selected parameters
-        selectedCustomParams.forEach((paramId) => {
+        selectedCustomParams.forEach((selectedParam) => {
+          const paramId = selectedParam.id;
           if (paramId === 'P-Av') {
             exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
           } else if (paramId === 'Torque') {
@@ -727,7 +729,8 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow['MaxDeg (°)'] = row.maxDeg !== undefined ? row.maxDeg.toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 4) {
         // Preset 4: Custom Chart - export only selected parameters
-        selectedCustomParams.forEach((paramId) => {
+        selectedCustomParams.forEach((selectedParam) => {
+          const paramId = selectedParam.id;
           if (paramId === 'P-Av') {
             exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
           } else if (paramId === 'Torque') {

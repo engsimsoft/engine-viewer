@@ -78,6 +78,25 @@
 
 ### Changed
 - **Complete UI redesign**: iPhone-quality professional interface
+- **ChartPreset4 (Custom Chart) refactoring - Phase 1** (2025-11-02):
+  - ✅ Fixed critical naming convention: replaced long names (`param.displayName`) with short names (`param.name`)
+    - Series names: "P-Av", "Torque" instead of "Average Power", "Torque"
+    - Legend labels: "P-Av", "Torque" (concise)
+    - Y-axis labels: "PS", "N·m", "bar" (only units, no parameter names)
+  - ✅ Removed massive parameter selector UI from chart page (45 lines)
+  - ✅ Added compact "Select Parameters" button showing selected count and parameter names
+  - ✅ Implemented dynamic multi-axis system (following ChartPreset3 pattern):
+    - 1 parameter → 1 Y-axis (left)
+    - 2 parameters with different units → 2 Y-axes (left + right)
+    - 3+ parameters → multiple Y-axes with 60px offset for readability
+  - ✅ Implemented proper color system (following ChartPreset1 pattern):
+    - Single calculation mode: parameter colors for axes and lines (blue P-Av, orange Torque)
+    - Comparison mode: parameter colors for axes, calculation colors for lines (red primary, blue comparison)
+  - ✅ Enhanced legend with line style indicators (solid/dashed) and dynamic colors:
+    - Single mode: colored legend matching parameter colors
+    - Comparison mode: gray legend (user relies on line styles)
+  - ✅ Legend always shown (not only for multiple parameters)
+  - **Result**: ChartPreset4 now follows established design patterns from ChartPreset1-3, clean professional UI
 - **Professional chart legend design** (2025-11-01):
   - ✅ Repositioned legend at top center (top: 15px) - perfect alignment with Y-axis labels
   - ✅ Updated typography to match axis labels (fontSize: 14, fontWeight: bold)
