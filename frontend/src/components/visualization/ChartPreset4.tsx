@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
 import { PeakValuesCards } from './PeakValuesCards';
+import { ParameterSelectorModal } from './ParameterSelectorModal';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -83,9 +84,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   // Selected parameters state from Zustand store (shared with DataTable)
   const selectedParams = useAppStore((state) => state.selectedCustomParams);
-  // toggleParameter and setCylinderSelection will be used in Phase 2 (Parameter Selector Modal)
-  // const toggleParameter = useAppStore((state) => state.toggleParameter);
-  // const setCylinderSelection = useAppStore((state) => state.setCylinderSelection);
+  const toggleParameterSelector = useAppStore((state) => state.toggleParameterSelector);
 
   // Load cross-project data
   const {
@@ -441,10 +440,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
       <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              // TODO Phase 2: Open ParameterSelectorModal
-              console.log('Open parameter selector modal');
-            }}
+            onClick={toggleParameterSelector}
             className={cn(
               'px-4 py-2 rounded-md text-sm font-semibold transition-all',
               'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -494,6 +490,9 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
         preset={4}
         selectedParams={selectedParams}
       />
+
+      {/* Parameter Selector Modal */}
+      <ParameterSelectorModal />
     </div>
   );
 }

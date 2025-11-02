@@ -101,6 +101,11 @@ interface AppStore extends AppState {
   toggleComparisonModal: () => void;
 
   /**
+   * Переключить Parameter Selector Modal (ChartPreset4)
+   */
+  toggleParameterSelector: () => void;
+
+  /**
    * Установить выбранный preset графиков
    */
   setSelectedPreset: (preset: 1 | 2 | 3 | 4 | 5 | 6) => void;
@@ -179,6 +184,7 @@ export const useAppStore = create<AppStore>()(
   isSettingsOpen: false,
   isPrimaryModalOpen: false,
   isComparisonModalOpen: false,
+  isParameterSelectorOpen: false, // Parameter Selector Modal (ChartPreset4)
   selectedPreset: 1, // Power & Torque по умолчанию
   selectedCustomParams: [
     { id: 'P-Av', cylinder: null },    // Default: P-Av (scalar parameter)
@@ -285,6 +291,11 @@ export const useAppStore = create<AppStore>()(
   toggleComparisonModal: () =>
     set((state) => ({
       isComparisonModalOpen: !state.isComparisonModalOpen,
+    })),
+
+  toggleParameterSelector: () =>
+    set((state) => ({
+      isParameterSelectorOpen: !state.isParameterSelectorOpen,
     })),
 
   setSelectedPreset: (preset) =>

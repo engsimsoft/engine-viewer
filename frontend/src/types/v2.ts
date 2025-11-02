@@ -181,6 +181,11 @@ export interface AppState {
   isComparisonModalOpen: boolean;
 
   /**
+   * Флаг открытия Parameter Selector Modal (ChartPreset4)
+   */
+  isParameterSelectorOpen: boolean;
+
+  /**
    * Выбранный пресет графиков
    * 1 = Power & Torque
    * 2 = MEP (Mean Effective Pressures)

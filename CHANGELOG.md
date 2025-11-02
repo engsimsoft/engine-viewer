@@ -97,6 +97,21 @@
     - Comparison mode: gray legend (user relies on line styles)
   - ✅ Legend always shown (not only for multiple parameters)
   - **Result**: ChartPreset4 now follows established design patterns from ChartPreset1-3, clean professional UI
+- **ChartPreset4 (Custom Chart) refactoring - Phase 2** (2025-11-02):
+  - ✅ Created **ParameterSelectorModal.tsx** - Simple modal for parameter selection
+  - ✅ Modal features:
+    - Search bar with real-time filtering (search by short name or full name)
+    - Parameter grid (2-3 columns responsive layout)
+    - Parameter cards with: short name, unit badge, "AVG" badge for per-cylinder params
+    - Selected state styling (blue border + background)
+    - Footer with count ("2 parameters selected") and Done button
+  - ✅ NO category tabs - Custom Chart doesn't duplicate Preset 1-6 logic
+  - ✅ NO selected chips section - Selected params already shown on chart page
+  - ✅ RPM excluded from list - It's always X-axis, can't be Y-parameter
+  - ✅ 23 chartable parameters available (all except RPM, vibe-model, quality)
+  - ✅ Integration with ChartPreset4 via "Select Parameters (2 selected)" button
+  - ✅ State management via Zustand store (isParameterSelectorOpen, toggleParameterSelector)
+  - **Result**: Clean, simple parameter selection without interface clutter, doesn't duplicate ready-made presets
 - **Professional chart legend design** (2025-11-01):
   - ✅ Repositioned legend at top center (top: 15px) - perfect alignment with Y-axis labels
   - ✅ Updated typography to match axis labels (fontSize: 14, fontWeight: bold)
