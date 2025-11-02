@@ -5,9 +5,10 @@ import type { CalculationReference } from '@/types/v2';
  */
 const PRESET_NAMES: Record<number, string> = {
   1: 'PowerTorque',
-  2: 'CylinderPressure',
-  3: 'Temperature',
+  2: 'MEP',
+  3: 'Critical',
   4: 'CustomChart',
+  5: 'Combustion',
 };
 
 /**
@@ -39,7 +40,7 @@ function getCurrentDate(): string {
  * - Multiple calculations: "Multi-Project-Comparison_PresetName_Date.ext"
  *
  * @param calculations - Array of CalculationReference (primary + comparisons)
- * @param presetNumber - Preset number (1-4)
+ * @param presetNumber - Preset number (1-5)
  * @returns Base filename (without extension)
  *
  * @example
@@ -55,7 +56,7 @@ function getCurrentDate(): string {
  */
 export function generateChartFilename(
   calculations: CalculationReference[],
-  presetNumber: 1 | 2 | 3 | 4
+  presetNumber: 1 | 2 | 3 | 4 | 5
 ): string {
   const presetName = PRESET_NAMES[presetNumber] || 'Chart';
   const date = getCurrentDate();

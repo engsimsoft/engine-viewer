@@ -47,8 +47,8 @@ import { Info } from 'lucide-react';
 interface PeakValuesCardsProps {
   /** Array of calculations with loaded data */
   calculations: CalculationReference[];
-  /** Current selected preset (1-4) to determine which peaks to show */
-  preset: 1 | 2 | 3 | 4;
+  /** Current selected preset (1-5) to determine which peaks to show */
+  preset: 1 | 2 | 3 | 4 | 5;
   /** Optional: selected parameters for Preset 4 */
   selectedParams?: string[];
 }
@@ -64,7 +64,7 @@ interface PeakValueItem {
  */
 function getPeakValuesForCalculation(
   calc: CalculationReference,
-  preset: 1 | 2 | 3 | 4,
+  preset: 1 | 2 | 3 | 4 | 5,
   units: 'si' | 'american' | 'hp',
   selectedParams?: string[]
 ): PeakValueItem[] {
@@ -233,6 +233,50 @@ function getPeakValuesForCalculation(
           }
         });
       }
+      break;
+    }
+
+    case 5: {
+      // Preset 5: Combustion Parameters (TAF, Timing, Delay, Durat)
+      // Delay and Durat are per-cylinder arrays → need averaging
+      const combustionParameters = ['TAF', 'Timing', 'Delay', 'Durat'];
+
+      combustionParameters.forEach((paramName) => {
+        const param = PARAMETERS[paramName];
+        const isPerCylinder = param?.perCylinder || false;
+
+        // Find peak with averaging for per-cylinder parameters
+        let peak;
+        if (isPerCylinder) {
+          // For per-cylinder parameters (Delay, Durat), find peak from averaged data
+          let maxValue = -Infinity;
+          let maxRpm = 0;
+
+          calc.data!.forEach((point) => {
+            const rawValue = (point as any)[paramName];
+            if (Array.isArray(rawValue)) {
+              const avg = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+              if (avg > maxValue) {
+                maxValue = avg;
+                maxRpm = point.RPM;
+              }
+            }
+          });
+
+          peak = maxValue > -Infinity ? { value: maxValue, rpm: maxRpm } : null;
+        } else {
+          // For scalar parameters (TAF, Timing), use findPeak directly
+          peak = findPeak(calc.data!, paramName);
+        }
+
+        if (peak) {
+          peaks.push({
+            label: paramName,
+            value: `${convertValue(peak.value, paramName, units).toFixed(1)} ${getParameterUnit(paramName, units)}`.trim(),
+            rpm: peak.rpm,
+          });
+        }
+      });
       break;
     }
   }

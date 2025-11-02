@@ -20,6 +20,12 @@ export const PARAMETER_COLORS = {
   // Preset 3: Temperature
   temperatureCyl: '#1f77b4',  // Синий TCylMax (соответствует left axis)
   temperatureExh: '#ff7f0e',  // Оранжевый TUbMax (соответствует right axis)
+
+  // Preset 5: Combustion (4 parameters - 4 colors)
+  combustion1: '#9467bd',  // TAF - Фиолетовый
+  combustion2: '#ff7f0e',  // Timing - Оранжевый
+  combustion3: '#2ca02c',  // Delay - Зелёный
+  combustion4: '#d62728',  // Durat - Красный
 } as const;
 
 /**

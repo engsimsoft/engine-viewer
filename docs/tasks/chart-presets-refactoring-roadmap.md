@@ -13,12 +13,12 @@
 
 | Stage | Task | Status | Commit |
 |-------|------|--------|--------|
-| **Stage 1** | Refactor Preset 1 (Performance: P-Av, Torque) | ⬜ Not Started | - |
-| **Stage 1** | Implement NEW Preset 2 (MEP: FMEP, IMEP, BMEP, PMEP) | ⬜ Not Started | - |
-| **Stage 1** | Implement NEW Preset 3 (PCylMax/MaxDeg - Critical Values) | ⬜ Not Started | - |
-| **Stage 1** | Implement NEW Preset 4 (Combustion: TAF, Timing, Delay, Durat) | ⬜ Not Started | - |
-| **Stage 1** | Implement NEW Preset 5 (Efficiency: DRatio, Ceff) | ⬜ Not Started | - |
-| **Stage 1** | Test All 5 Presets + Git Commit + Documentation | ⬜ Not Started | - |
+| **Stage 1** | Refactor Preset 1 (Performance: P-Av, Torque) | ✅ Complete | 6c93f23 |
+| **Stage 1** | Implement NEW Preset 2 (MEP: FMEP, IMEP, BMEP, PMEP) | ✅ Complete | 6c93f23 |
+| **Stage 1** | Implement NEW Preset 3 (PCylMax/MaxDeg - Critical Values) | ✅ Complete | 9cba15e |
+| **Stage 1** | Implement NEW Preset 5 (Combustion: TAF, Timing, Delay, Durat) | ✅ Complete | pending |
+| **Stage 1** | Implement NEW Preset 6 (Efficiency: DRatio, Ceff) | ⬜ Not Started | - |
+| **Stage 1** | Test All Presets + Git Commit + Documentation | ⬜ Not Started | - |
 | **Stage 2** | Discuss & Approve Custom Preset UI Design | ⬜ Not Started | - |
 | **Stage 2** | Implement Custom Preset Refactoring | ⬜ Not Started | - |
 | **Stage 2** | Test Custom Preset + Git Commit + Documentation | ⬜ Not Started | - |

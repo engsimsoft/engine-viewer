@@ -114,6 +114,31 @@
 ## [Unreleased]
 
 ### Added
+- **Chart Preset 5: Combustion Parameters (TAF, Timing, Delay, Durat)** (2025-11-02):
+  - ✅ **NEW Chart Preset 5** - Combustion parameters visualization
+  - ✅ **ChartPreset5.tsx** - Dual Y-axis chart:
+    - **Dual Y-axis**: Left (Deg) for Timing/Delay/Durat, Right (AFR) for TAF
+    - 4 combustion parameters with different line styles (solid, dashed, dotted, dash-dot)
+    - Per-cylinder averaging for Delay and Durat (array parameters)
+    - Scalar handling for TAF and Timing (global parameters)
+    - TAF (Trapped Air/Fuel ratio) on right axis, degree-based parameters on left axis
+    - Dynamic color system: combustion colors in single calc mode, calculation colors in comparison mode
+    - Custom graphic legend at top center: TAF (purple), Timing (orange), Delay (green), Durat (red)
+    - Peak markers with averaged values for all 4 parameters
+    - No unit conversion needed (all parameters: conversionType 'none')
+  - ✅ **PeakValuesCards.tsx** - Case 5 for combustion parameters:
+    - Per-cylinder averaging for Delay and Durat
+    - Scalar peak finding for TAF and Timing
+    - Shows all 4 peaks with parameter labels
+  - ✅ **chartConfig.ts** - Added combustion color palette:
+    - combustion1-4: Purple, Orange, Green, Red
+  - ✅ **PresetSelector.tsx** - Added Preset 5 button "Combustion"
+  - ✅ **exportFilename.ts** - Updated for 5 presets, fixed preset names (MEP, Critical)
+  - ✅ **appStore.ts, types/v2.ts** - Extended selectedPreset type to `1 | 2 | 3 | 4 | 5`
+  - ✅ **ProjectPage.tsx** - Added case 5 routing
+  - **Result**: Clean dual-axis combustion chart with intuitive Deg/AFR labels (iPhone-quality simplicity)
+  - Files: [ChartPreset5.tsx](frontend/src/components/visualization/ChartPreset5.tsx), [PeakValuesCards.tsx](frontend/src/components/visualization/PeakValuesCards.tsx), [chartConfig.ts](frontend/src/lib/chartConfig.ts), [PresetSelector.tsx](frontend/src/components/visualization/PresetSelector.tsx), [exportFilename.ts](frontend/src/lib/exportFilename.ts)
+
 - **Chart Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)** (2025-11-02):
   - ✅ Complete rewrite of Preset 3 for Critical Engine Values
   - ✅ **ChartPreset3.tsx** - NEW triple Y-axis chart:

@@ -101,7 +101,7 @@ interface AppStore extends AppState {
   /**
    * Установить выбранный preset графиков
    */
-  setSelectedPreset: (preset: 1 | 2 | 3 | 4) => void;
+  setSelectedPreset: (preset: 1 | 2 | 3 | 4 | 5) => void;
 
   /**
    * Установить выбранные параметры для Custom Chart (Preset 4)

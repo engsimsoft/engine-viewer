@@ -167,11 +167,12 @@ export interface AppState {
   /**
    * Выбранный пресет графиков
    * 1 = Power & Torque
-   * 2 = Cylinder Pressure
-   * 3 = Temperature
+   * 2 = MEP (Mean Effective Pressures)
+   * 3 = Critical (PCylMax, TC-Av, MaxDeg)
    * 4 = Custom
+   * 5 = Combustion (TAF, Timing, Delay, Durat)
    */
-  selectedPreset: 1 | 2 | 3 | 4;
+  selectedPreset: 1 | 2 | 3 | 4 | 5;
 
   /**
    * Выбранные параметры для Custom Chart (Preset 4)
