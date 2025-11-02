@@ -205,7 +205,7 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
   'RPM': {
     name: 'RPM',
     displayName: 'Engine Speed',
-    unit: 'об/мин',
+    unit: 'rpm',
     conversionType: 'none',
     category: 'performance',
     formats: ['det', 'pou'],

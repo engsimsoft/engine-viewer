@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { PARAMETERS } from '@/config/parameters';
 import type { ParameterMetadata } from '@/config/parameters';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Info } from 'lucide-react';
+import { ArrowLeft, Info, Layers } from 'lucide-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 /**
@@ -70,6 +70,14 @@ function ParameterRow({ param }: ParameterRowProps) {
         {param.unit && (
           <span className="text-xs text-muted-foreground">
             {param.unit}
+          </span>
+        )}
+
+        {/* Per-Cylinder Indicator */}
+        {param.perCylinder && (
+          <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-950 px-1.5 py-0.5 rounded text-blue-700 dark:text-blue-400">
+            <Layers className="h-3 w-3" />
+            <span>Per Cyl</span>
           </span>
         )}
       </div>
