@@ -15,10 +15,11 @@
  * Parameter category groups
  *
  * - `global`: Single value parameters (RPM, P-Av, Torque, etc.)
+ * - `mep`: Mean Effective Pressure parameters (FMEP, BMEP, IMEP, PMEP)
  * - `per-cylinder`: Array parameters with one value per cylinder (PCylMax, TUbMax, etc.)
  * - `vibe-model`: Vibe combustion model parameters (VibeDelay, VibeDurat, etc.)
  */
-export type ParameterCategory = 'global' | 'per-cylinder' | 'vibe-model';
+export type ParameterCategory = 'global' | 'mep' | 'per-cylinder' | 'vibe-model';
 
 /**
  * File format availability
@@ -37,7 +38,7 @@ export type ParameterFormat = 'det' | 'pou' | 'pou-merged';
  * - `power`: Power values (kW ↔ bhp ↔ PS)
  * - `torque`: Torque values (N·m ↔ lb-ft)
  * - `pressure`: Pressure values (bar ↔ psi)
- * - `temperature`: Temperature values (°C ↔ °F, K → °C)
+ * - `temperature`: Temperature values (°C ↔ °F)
  * - `none`: No conversion needed (dimensionless or RPM)
  */
 export type ConversionType = 'power' | 'torque' | 'pressure' | 'temperature' | 'none';
@@ -89,7 +90,7 @@ export interface ParameterMetadata {
   /**
    * SI unit (base unit in database)
    *
-   * @example 'kW', 'N·m', 'bar', 'K', 'об/мин', ''
+   * @example 'kW', 'N·m', 'bar', '°C', 'об/мин', ''
    */
   unit: string;
 
@@ -133,9 +134,18 @@ export interface ParameterMetadata {
   chartable: boolean;
 
   /**
-   * Description for tooltips
+   * Brief description (1 sentence) for tooltips and parameter selector
    *
-   * Short explanation of what this parameter represents.
+   * Short explanation shown on hover in UI.
+   *
+   * @optional
+   */
+  brief?: string;
+
+  /**
+   * Detailed description for Help page
+   *
+   * Full explanation for non-technical users, shown in Help modal/page.
    *
    * @optional
    */
@@ -150,6 +160,8 @@ export interface ParameterMetadata {
    *
    * `true` for PCylMax, TUbMax, Power, etc.
    * `false` for global parameters like RPM, P-Av, etc.
+   *
+   * Used for "Show 1 cylinder / ALL" button in UI.
    *
    * @optional Only defined for per-cylinder parameters
    */
@@ -195,7 +207,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'global',
     formats: ['det', 'pou'],
     chartable: true,
-    description: 'Engine rotational speed',
+    brief: 'Simulated engine rpm',
+    description: 'This is the rpm value for which the following results were obtained. If a batch run was conducted these results will form a power curve that can be displayed. If single point runs were conducted these are just data and the file can be opened with any text editor and the results examined.',
   },
 
   'P-Av': {
@@ -206,7 +219,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'global',
     formats: ['det', 'pou'],
     chartable: true,
-    description: 'Average power output',
+    brief: 'Average engine total power over a number of cycles (kW)',
+    description: 'Because of the cyclic variability of an engine, the power is averaged over a number of cycles: Average engine total power over the last three cycles for a naturally aspirated engine. The same for a Supercharged engine but with the power absorbed by the Compressor and its drive subtracted. Average engine total power over the last forty cycles for a Turbocharged engine.',
   },
 
   'Torque': {
@@ -217,7 +231,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'global',
     formats: ['det', 'pou'],
     chartable: true,
-    description: 'Engine torque',
+    brief: 'The engine torque calculated from the P-av value (Nm)',
+    description: 'This torque value is the torque calculated from the averaged power and is thus the averaged torque over the last 3 cycles.',
   },
 
   'Convergence': {
@@ -234,12 +249,13 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
   'TexAv': {
     name: 'TexAv',
     displayName: 'Average Exhaust Temperature',
-    unit: 'K',
+    unit: '°C',
     conversionType: 'temperature',
     category: 'global',
     formats: ['pou'],
     chartable: true,
-    description: 'Average exhaust gas temperature',
+    brief: 'Average temperature in center of exhaust (°C)',
+    description: 'This is the average bulk temperature of the gas at the trace position defined for the cylinder and its position is measured from the piston. This is the value used to tune engines using an EGT guage.',
   },
 
   'FMEP': {
@@ -247,32 +263,35 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     displayName: 'Friction Mean Effective Pressure',
     unit: 'bar',
     conversionType: 'pressure',
-    category: 'global',
+    category: 'mep',
     formats: ['pou'],
     chartable: true,
-    description: 'Friction losses in the engine',
+    brief: 'Friction mean effective pressure (bar)',
+    description: 'This is the frictional and other parasitic losses in the engine expressed as an average pressure.',
   },
 
   'Timing': {
     name: 'Timing',
-    displayName: 'Ignition/Injection Timing',
-    unit: '°',
+    displayName: 'Ignition Timing',
+    unit: '°BTDC',
     conversionType: 'none',
     category: 'global',
     formats: ['pou'],
     chartable: true,
-    description: 'Ignition or injection timing',
+    brief: 'Ignition timing (°BTDC)',
+    description: 'This is the number of degrees before (or after) TDC where the actual spark happens for a spark ignition engine and the start of injection for a compression ignition engine.',
   },
 
   'TAF': {
     name: 'TAF',
-    displayName: 'Total Air Flow',
+    displayName: 'Trapped Air/Fuel Ratio',
     unit: '',
     conversionType: 'none',
     category: 'global',
     formats: ['pou'],
     chartable: true,
-    description: 'Total air flow rate',
+    brief: 'Trapped Air/fuel ratio',
+    description: 'This is the prescribed air/fuel ratio as specified in the combustion subsystem.',
   },
 
   // ========================================
@@ -288,7 +307,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['det', 'pou-merged'],
     chartable: true,
     perCylinder: true,
-    description: 'Maximum pressure in combustion chamber',
+    brief: 'Maximum pressure per cylinder (bar)',
+    description: 'Maximum pressure in combustion chamber per cylinder.',
   },
 
   'Deto': {
@@ -300,43 +320,47 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['det', 'pou-merged'],
     chartable: true,
     perCylinder: true,
-    description: 'Detonation indicator',
+    brief: 'The count of the number of detonations per cylinder over the last 4 cycles',
+    description: 'The count of the number of detonations per cylinder over the last 4 cycles. Range: 0 to 4.',
   },
 
   'TCylMax': {
     name: 'TCylMax',
     displayName: 'Max Cylinder Temperature',
-    unit: 'K',
+    unit: '°C',
     conversionType: 'temperature',
     category: 'per-cylinder',
     formats: ['det'],
     chartable: true,
     perCylinder: true,
-    description: 'Maximum temperature in combustion chamber',
+    brief: 'Maximum temperature per cylinder (°C)',
+    description: 'Maximum temperature in combustion chamber per cylinder.',
   },
 
   'TUbMax': {
     name: 'TUbMax',
-    displayName: 'Max Exhaust Temperature',
-    unit: 'K',
+    displayName: 'Max Unburned Mixture Temperature',
+    unit: '°C',
     conversionType: 'temperature',
     category: 'per-cylinder',
     formats: ['det', 'pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Maximum exhaust gas temperature',
+    brief: 'Maximum unburned mixture temperature per cylinder (°C)',
+    description: 'This is the highest temperature the gas in the unburnt zone reaches without being part of the burnt zone. This temperature is one of the strongest indicators of whether detonation will occur or not.',
   },
 
   'PurCyl': {
     name: 'PurCyl',
-    displayName: 'Volumetric Efficiency',
+    displayName: 'Mixture Purity',
     unit: '',
     conversionType: 'none',
     category: 'per-cylinder',
     formats: ['det', 'pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Volumetric efficiency (breathing efficiency)',
+    brief: 'Purity of the mixture in the cylinder at inlet valve closure',
+    description: 'The purity is defined as the ratio of the air trapped at inlet valve closure to the total mass of the cylinder charge.',
   },
 
   'Power': {
@@ -348,7 +372,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Power output per cylinder',
+    brief: 'Power per cylinder (kW)',
+    description: 'This is the power produced by each cylinder over the last cycle. On a single cylinder engine comparing this value to the one averaged over 3 cycles (P-av) gives an indication of the cyclic variability.',
   },
 
   'IMEP': {
@@ -356,11 +381,12 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     displayName: 'Indicated Mean Effective Pressure',
     unit: 'bar',
     conversionType: 'pressure',
-    category: 'per-cylinder',
+    category: 'mep',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Indicated mean effective pressure',
+    brief: 'Indicated mean effective pressure per cylinder (bar)',
+    description: 'This is the averaged pressure value in the cylinder over a simulation cycle and is an indication of the maximum power the engine can make if there was no pumping or friction losses.',
   },
 
   'BMEP': {
@@ -368,11 +394,12 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     displayName: 'Brake Mean Effective Pressure',
     unit: 'bar',
     conversionType: 'pressure',
-    category: 'per-cylinder',
+    category: 'mep',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Brake mean effective pressure',
+    brief: 'Brake mean effective pressure per cylinder (bar)',
+    description: 'This is the averaged cylinder pressure calculated from the netto power as measured on an engine dyno (or an engine simulation such as this) and takes the frictional and pumping losses into account. Comparing the BMEP with the IMEP gives a good indication of the mechanical and pumping efficiencies. A more efficient engine will have a smaller difference.',
   },
 
   'PMEP': {
@@ -380,11 +407,12 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     displayName: 'Pumping Mean Effective Pressure',
     unit: 'bar',
     conversionType: 'pressure',
-    category: 'per-cylinder',
+    category: 'mep',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Pumping losses',
+    brief: 'Pumping mean effective pressure per cylinder (bar)',
+    description: 'This is the average pumping work done in the cylinder and crankcase expressed as an average pressure.',
   },
 
   'DRatio': {
@@ -396,7 +424,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Delivery ratio',
+    brief: 'Delivery ratio per cylinder',
+    description: 'The delivery ratio of the engine defines the mass of air supplied during the scavenge period as a function of the reference mass which is the mass required to fill the swept volume under the atmospheric conditions.',
   },
 
   'Seff': {
@@ -408,7 +437,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Scavenging efficiency',
+    brief: 'Purity of the mixture in the cylinder at exhaust valve closure',
+    description: 'The scavenging efficiency defines the effectiveness of the scavenging process during the overlap period.',
   },
 
   'Teff': {
@@ -420,7 +450,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Trapping efficiency',
+    brief: 'Trapping efficiency per cylinder',
+    description: 'The trapping efficiency is the ratio of the delivered air that has been trapped to the total amount of delivered air.',
   },
 
   'Ceff': {
@@ -432,43 +463,47 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Charging efficiency',
+    brief: 'Charging efficiency per cylinder',
+    description: 'Charging efficiency expresses the ratio of actually filling the cylinder with air by comparison with filling the same cylinder perfectly with air.',
   },
 
   'BSFC': {
     name: 'BSFC',
     displayName: 'Brake Specific Fuel Consumption',
-    unit: 'г/кВт·ч',
+    unit: 'kg/kWh',
     conversionType: 'none',
     category: 'per-cylinder',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Brake specific fuel consumption',
+    brief: 'Brake specific fuel consumption per cylinder (kg/kWh)',
+    description: 'This is the ratio of the fuel consumption rate to the power produced by that fuel.',
   },
 
   'TC-Av': {
     name: 'TC-Av',
     displayName: 'Average Cylinder Temperature',
-    unit: 'K',
+    unit: '°C',
     conversionType: 'temperature',
     category: 'per-cylinder',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Average cylinder temperature',
+    brief: 'Average maximum cylinder temperature per cylinder (°C)',
+    description: 'The maximum cylinder temperature averaged over the number of cylinders. This is the value that is calculated from the cylinder pressure and is somewhere between the burnt and unburnt zone temperatures.',
   },
 
   'MaxDeg': {
     name: 'MaxDeg',
     displayName: 'Angle at Max Pressure',
-    unit: '°',
+    unit: '°ATDC',
     conversionType: 'none',
     category: 'per-cylinder',
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Crank angle at maximum pressure',
+    brief: 'Degrees after TDC where maximum cylinder pressure occurs per cylinder',
+    description: 'For maximum power it is typical to set the ignition timing to have maximum cylinder pressure to occur around 8-12° ATDC.',
   },
 
   'Delay': {
@@ -480,7 +515,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Ignition delay',
+    brief: 'The user prescribed delay period in degrees (deg)',
+    description: 'The period from spark or injection to about 1% mass fraction burned. The flame kernel in this part is primarily grown through laminar burning.',
   },
 
   'Durat': {
@@ -492,7 +528,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     formats: ['pou'],
     chartable: true,
     perCylinder: true,
-    description: 'Combustion duration',
+    brief: 'The user prescribed combustion duration (burn period) in degrees (deg)',
+    description: 'This is the period from the end of the delay period until about 99.9% of the mixture has been burned.',
   },
 
   // ========================================
@@ -507,7 +544,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'vibe-model',
     formats: ['pou'],
     chartable: false,
-    description: 'Vibe model delay parameter',
+    brief: 'The calculated delay period for a turbulent combustion model',
+    description: 'The calculated delay period for a turbulent combustion model (for the prescribed combustion model it is the same as "Delay").',
   },
 
   'VibeDurat': {
@@ -518,7 +556,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'vibe-model',
     formats: ['pou'],
     chartable: false,
-    description: 'Vibe model duration parameter',
+    brief: 'The calculated burn period for a turbulent combustion model',
+    description: 'The calculated burn period for a turbulent combustion model (for the prescribed combustion model it is the same as "Durat").',
   },
 
   'VibeA': {
@@ -529,7 +568,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'vibe-model',
     formats: ['pou'],
     chartable: false,
-    description: 'Vibe model shape parameter A',
+    brief: 'The calculated Vibe A value for a turbulent combustion model',
+    description: 'The calculated Vibe A value for a turbulent combustion model (for the prescribed combustion model it is the same as prescribed).',
   },
 
   'VibeM': {
@@ -540,7 +580,8 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     category: 'vibe-model',
     formats: ['pou'],
     chartable: false,
-    description: 'Vibe model shape parameter M',
+    brief: 'The calculated Vibe M value for a turbulent combustion model',
+    description: 'The calculated Vibe M value for a turbulent combustion model (for the prescribed combustion model it is the same as prescribed).',
   },
 };
 
