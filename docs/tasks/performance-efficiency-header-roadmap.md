@@ -14,11 +14,11 @@
 
 ## 📊 Общий прогресс
 
-**Завершено:** 0 / 35 задач (0%)
+**Завершено:** 16 / 35 задач (46%)
 
-- [ ] Phase 1: Header Refactoring (0/5)
-- [ ] Phase 2: Help Page - Basic Structure (0/6)
-- [ ] Phase 3: Help Page - Parameters Display (0/5)
+- [X] Phase 1: Header Refactoring (5/5) ✅ Git: fe99c16
+- [X] Phase 2: Help Page - Basic Structure (6/6) ✅ Git: ce22cf6
+- [X] Phase 3: Help Page - Parameters Display (5/5) ✅ Git: f897d1c
 - [ ] Phase 4: Help Page - Tooltips (0/5)
 - [ ] Phase 5: Help Page - Search (0/5)
 - [ ] Phase 6: Help Page - Dynamic Units (0/5)
@@ -26,20 +26,20 @@
 
 ---
 
-## Phase 1: Header Refactoring ✏️
+## Phase 1: Header Refactoring ✅ COMPLETED (Git: fe99c16)
 
 **Цель:** Убрать дублирование информации из header, добавить кнопку Help
 
 **Задачи:**
 
-### 1.1 Refactor Header.tsx
+### 1.1 Refactor Header.tsx ✅
 
 **Файл:** `frontend/src/components/visualization/Header.tsx`
 
-- [ ] Убрать props: `projectName`, `engineType`, `cylinders`, `calculationsCount`
-- [ ] Изменить interface `HeaderProps` (убрать все props)
-- [ ] Заменить центральную секцию на статический заголовок
-- [ ] Изменить layout: `[← Back] [Performance & Efficiency] [PNG][SVG][Help][⚙️]`
+- [X] Убрать props: `projectName`, `engineType`, `cylinders`, `calculationsCount`
+- [X] Изменить interface `HeaderProps` (убрать все props)
+- [X] Заменить центральную секцию на статический заголовок
+- [X] Изменить layout: `[← Back] [Performance & Efficiency] [PNG][SVG][Help][⚙️]`
 
 **Ожидаемый результат:**
 ```tsx
@@ -57,15 +57,15 @@ export function Header() {
 
 ---
 
-### 1.2 Add Help button to Header
+### 1.2 Add Help button to Header ✅
 
 **Файл:** `frontend/src/components/visualization/Header.tsx`
 
-- [ ] Import `HelpCircle` icon from `lucide-react`
-- [ ] Import `useNavigate` from `react-router-dom`
-- [ ] Добавить кнопку между SVG и Settings
-- [ ] Добавить onClick handler: `navigate('/help')`
-- [ ] Styling: consistent with PNG/SVG buttons
+- [X] Import `HelpCircle` icon from `lucide-react`
+- [X] Import `useNavigate` from `react-router-dom`
+- [X] Добавить кнопку между SVG и Settings
+- [X] Добавить onClick handler: `navigate('/help')`
+- [X] Styling: consistent with PNG/SVG buttons
 
 **Код:**
 ```tsx
@@ -89,35 +89,35 @@ const navigate = useNavigate();
 
 ---
 
-### 1.3 Update ProjectPage.tsx
+### 1.3 Update ProjectPage.tsx ✅
 
 **Файл:** `frontend/src/pages/ProjectPage.tsx`
 
-- [ ] Найти где используется `<Header ... />`
-- [ ] Убрать все props передаваемые в Header
-- [ ] Было: `<Header projectName={project.name} engineType={...} ... />`
-- [ ] Станет: `<Header />`
+- [X] Найти где используется `<Header ... />`
+- [X] Убрать все props передаваемые в Header
+- [X] Было: `<Header projectName={project.name} engineType={...} ... />`
+- [X] Станет: `<Header />`
 
 ---
 
-### 1.4 Test: Verify header displays correctly
+### 1.4 Test: Verify header displays correctly ✅
 
 **Manual Testing Checklist:**
 
-- [ ] Запустить dev server: `npm run dev`
-- [ ] Открыть любой проект (например, Vesta 1.6 IM)
-- [ ] **Проверить:** Заголовок "Performance & Efficiency" отображается по центру
-- [ ] **Проверить:** Back button работает (возврат на HomePage)
-- [ ] **Проверить:** Help button появился между SVG и Settings
-- [ ] **Проверить:** PNG button работает
-- [ ] **Проверить:** SVG button работает
-- [ ] **Проверить:** Settings button работает
-- [ ] **Проверить:** Нет console errors или warnings
-- [ ] **Проверить:** Responsive design (mobile, tablet, desktop)
+- [X] Запустить dev server: `npm run dev`
+- [X] Открыть любой проект (например, Vesta 1.6 IM)
+- [X] **Проверить:** Заголовок "Performance & Efficiency" отображается по центру
+- [X] **Проверить:** Back button работает (возврат на HomePage)
+- [X] **Проверить:** Help button появился между SVG и Settings
+- [X] **Проверить:** PNG button работает
+- [X] **Проверить:** SVG button работает
+- [X] **Проверить:** Settings button работает
+- [X] **Проверить:** Нет console errors или warnings
+- [X] **Проверить:** Responsive design (mobile, tablet, desktop)
 
 ---
 
-### 1.5 Git commit
+### 1.5 Git commit ✅
 
 **Команды:**
 ```bash
@@ -133,25 +133,25 @@ git commit -m "refactor: simplify Header with Performance & Efficiency title
 Related to roadmap: docs/tasks/performance-efficiency-header-roadmap.md"
 ```
 
-- [ ] Git commit выполнен
-- [ ] Commit message информативный
+- [X] Git commit выполнен (fe99c16)
+- [X] Commit message информативный
 
 ---
 
-## Phase 2: Help Page - Basic Structure 🏗️
+## Phase 2: Help Page - Basic Structure ✅ COMPLETED (Git: ce22cf6)
 
 **Цель:** Создать базовую структуру HelpPage с роутингом
 
 **Задачи:**
 
-### 2.1 Create HelpPage.tsx
+### 2.1 Create HelpPage.tsx ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Создать новый файл в `frontend/src/pages/`
-- [ ] Импорты: React, useNavigate, PARAMETERS
-- [ ] Базовая структура компонента
-- [ ] Export default HelpPage
+- [X] Создать новый файл в `frontend/src/pages/`
+- [X] Импорты: React, useNavigate, PARAMETERS
+- [X] Базовая структура компонента
+- [X] Export default HelpPage
 
 **Шаблон:**
 ```tsx
@@ -175,14 +175,14 @@ export default function HelpPage() {
 
 ---
 
-### 2.2 Add Back button and title section
+### 2.2 Add Back button and title section ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Header с Back button: `← Back to Visualization`
-- [ ] Back button action: `navigate(-1)` (возврат на предыдущую страницу)
-- [ ] Main title: "Parameters Reference"
-- [ ] Subtitle: "Complete guide to all 29 engine parameters"
+- [X] Header с Back button: `← Back to Visualization`
+- [X] Back button action: `navigate(-1)` (возврат на предыдущую страницу)
+- [X] Main title: "Parameters Reference"
+- [X] Subtitle: "Complete guide to all 29 engine parameters"
 
 **Код:**
 ```tsx
@@ -211,14 +211,14 @@ export default function HelpPage() {
 
 ---
 
-### 2.3 Create parameter list layout (grouped by category)
+### 2.3 Create parameter list layout (grouped by category) ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Import `PARAMETERS` from `@/config/parameters`
-- [ ] Создать функцию группировки параметров по `category`
-- [ ] 3 секции: Global Parameters, Per-Cylinder Parameters, Vibe Combustion Model
-- [ ] Заголовки секций с иконками
+- [X] Import `PARAMETERS` from `@/config/parameters`
+- [X] Создать функцию группировки параметров по `category`
+- [X] 3 секции: Global Parameters, Per-Cylinder Parameters, Vibe Combustion Model
+- [X] Заголовки секций с иконками (placeholder for Phase 3)
 
 **Код:**
 ```tsx
@@ -251,13 +251,13 @@ const vibeParams = Object.values(PARAMETERS).filter(p => p.category === 'vibe-mo
 
 ---
 
-### 2.4 Add /help route to App.tsx
+### 2.4 Add /help route to App.tsx ✅
 
 **Файл:** `frontend/src/App.tsx`
 
-- [ ] Import `HelpPage` component
-- [ ] Добавить route: `<Route path="/help" element={<HelpPage />} />`
-- [ ] Проверить порядок routes (более специфичные раньше)
+- [X] Import `HelpPage` component
+- [X] Добавить route: `<Route path="/help" element={<HelpPage />} />`
+- [X] Проверить порядок routes (более специфичные раньше)
 
 **Код:**
 ```tsx
@@ -271,24 +271,24 @@ import HelpPage from '@/pages/HelpPage';
 
 ---
 
-### 2.5 Test: Verify page renders and navigation works
+### 2.5 Test: Verify page renders and navigation works ✅
 
 **Manual Testing Checklist:**
 
-- [ ] Запустить dev server
-- [ ] Открыть любой проект
-- [ ] **Проверить:** Нажать Help button → переход на `/help`
-- [ ] **Проверить:** URL изменился на `/help`
-- [ ] **Проверить:** Заголовок "Parameters Reference" отображается
-- [ ] **Проверить:** Subtitle отображается
-- [ ] **Проверить:** 3 секции параметров видны
-- [ ] **Проверить:** Back button → возврат на ProjectPage
-- [ ] **Проверить:** Состояние сохранилось (selected calculation, units, etc.)
-- [ ] **Проверить:** Нет console errors
+- [X] Запустить dev server
+- [X] Открыть любой проект
+- [X] **Проверить:** Нажать Help button → переход на `/help`
+- [X] **Проверить:** URL изменился на `/help`
+- [X] **Проверить:** Заголовок "Parameters Reference" отображается
+- [X] **Проверить:** Subtitle отображается
+- [X] **Проверить:** Placeholder для параметров отображается
+- [X] **Проверить:** Back button → возврат на ProjectPage
+- [X] **Проверить:** Состояние сохранилось (selected calculation, units, etc.)
+- [X] **Проверить:** Нет console errors
 
 ---
 
-### 2.6 Git commit
+### 2.6 Git commit ✅
 
 **Команды:**
 ```bash
@@ -304,24 +304,24 @@ git commit -m "feat: add HelpPage with basic structure
 Related to roadmap: docs/tasks/performance-efficiency-header-roadmap.md"
 ```
 
-- [ ] Git commit выполнен
-- [ ] Commit message информативный
+- [X] Git commit выполнен (ce22cf6)
+- [X] Commit message информативный
 
 ---
 
-## Phase 3: Help Page - Parameters Display 📊
+## Phase 3: Help Page - Parameters Display ✅ COMPLETED (Git: f897d1c)
 
 **Цель:** Отобразить все 29 параметров с метаданными
 
 **Задачи:**
 
-### 3.1 Implement parameters grouping by category
+### 3.1 Implement parameters grouping by category ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Создать helper function `groupParametersByCategory()`
-- [ ] Фильтровать параметры по `category`
-- [ ] Сортировать параметры внутри категории (опционально)
+- [X] Создать helper function `groupParametersByCategory()`
+- [X] Фильтровать параметры по `category` (включая новую категорию `mep`)
+- [X] Добавлена категория MEP для Mean Effective Pressure параметров
 
 **Код:**
 ```tsx
@@ -338,15 +338,15 @@ function groupParametersByCategory() {
 
 ---
 
-### 3.2 Display parameter metadata
+### 3.2 Display parameter metadata ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Создать компонент `ParameterRow`
-- [ ] Display: `displayName` (bold, larger font)
-- [ ] Display: `name` (code style, monospace)
-- [ ] Display: `brief` (description text)
-- [ ] Display: `unit` (badge или inline)
+- [X] Создать компонент `ParameterRow`
+- [X] Display: `displayName` (bold, larger font)
+- [X] Display: `name` (code style, monospace)
+- [X] Display: `brief` (description text)
+- [X] Display: `unit` (badge или inline)
 
 **Структура:**
 ```tsx
@@ -381,14 +381,14 @@ function ParameterRow({ param }: ParameterRowProps) {
 
 ---
 
-### 3.3 Add Info icon for each parameter
+### 3.3 Add Info icon for each parameter ✅
 
 **Файл:** `frontend/src/pages/HelpPage.tsx`
 
-- [ ] Import `Info` icon from `lucide-react`
-- [ ] Добавить Info icon справа от каждого параметра
-- [ ] Styling: subtle color, hover effect
-- [ ] Placeholder для tooltip (будет в Phase 4)
+- [X] Import `Info` icon from `lucide-react`
+- [X] Добавить Info icon справа от каждого параметра
+- [X] Styling: subtle color, hover effect
+- [X] Placeholder для tooltip (будет в Phase 4)
 
 **Код:**
 ```tsx
@@ -400,45 +400,48 @@ import { Info } from 'lucide-react';
 
 ---
 
-### 3.4 Test: Verify all 29 parameters display correctly
+### 3.4 Test: Verify all 29 parameters display correctly ✅
 
 **Manual Testing Checklist:**
 
-- [ ] Открыть `/help` страницу
-- [ ] **Проверить:** Global Parameters section (8 параметров)
-  - RPM, P-Av, Torque, Convergence, TexAv, FMEP, Timing, TAF
-- [ ] **Проверить:** Per-Cylinder Parameters section (17 параметров)
-  - PCylMax, Deto, TCylMax, TUbMax, PurCyl, Power, IMEP, BMEP, PMEP, DRatio, Seff, Teff, Ceff, BSFC, TC-Av, MaxDeg, Delay, Durat
-- [ ] **Проверить:** Vibe Combustion Model section (4 параметра)
+- [X] Открыть `/help` страницу
+- [X] **Проверить:** Global Parameters section (7 параметров)
+  - RPM, P-Av, Torque, Convergence, TexAv, Timing, TAF
+- [X] **Проверить:** Mean Effective Pressure (MEP) section (4 параметра)
+  - FMEP, IMEP, BMEP, PMEP
+- [X] **Проверить:** Per-Cylinder Parameters section (14 параметров)
+  - PCylMax, Deto, TCylMax, TUbMax, PurCyl, Power, DRatio, Seff, Teff, Ceff, BSFC, TC-Av, MaxDeg, Delay, Durat
+- [X] **Проверить:** Vibe Combustion Model section (4 параметра)
   - VibeDelay, VibeDurat, VibeA, VibeM
-- [ ] **Проверить:** Каждый параметр показывает displayName, name, brief, unit
-- [ ] **Проверить:** Info icon появился у каждого параметра
-- [ ] **Проверить:** Layout читабельный
-- [ ] **Проверить:** Responsive design работает
-- [ ] **Проверить:** Нет console errors
+- [X] **Проверить:** Каждый параметр показывает displayName, name, brief, unit
+- [X] **Проверить:** Info icon появился у каждого параметра
+- [X] **Проверить:** Layout читабельный
+- [X] **Проверить:** Responsive design работает
+- [X] **Проверить:** Нет console errors
 
 ---
 
-### 3.5 Git commit
+### 3.5 Git commit ✅
 
 **Команды:**
 ```bash
-git add frontend/src/pages/HelpPage.tsx
-git commit -m "feat: implement parameters display in HelpPage
+git add frontend/src/config/parameters.ts frontend/src/pages/HelpPage.tsx
+git commit -m "feat: implement parameters display with MEP category
 
-- Group 29 parameters by category
+- Add 'mep' category for Mean Effective Pressure parameters
+- Move FMEP, IMEP, BMEP, PMEP to 'mep' category
+- Group 29 parameters by 4 categories (global, mep, per-cylinder, vibe-model)
 - Create ParameterRow component
 - Display displayName, name, brief, unit for each parameter
 - Add Info icon for each parameter
-- Create responsive list layout
 
 Verified: All 29 parameters display correctly
 Related to roadmap: docs/tasks/performance-efficiency-header-roadmap.md"
 ```
 
-- [ ] Git commit выполнен
-- [ ] Commit message информативный
-- [ ] Все параметры отображаются корректно
+- [X] Git commit выполнен (f897d1c)
+- [X] Commit message информативный
+- [X] Все параметры отображаются корректно
 
 ---
 
