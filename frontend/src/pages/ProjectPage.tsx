@@ -103,13 +103,8 @@ export default function ProjectPage() {
   return (
     <ChartExportProvider>
       <div className="min-h-screen bg-background flex flex-col">
-        {/* Header Component (Phase 2) */}
-        <Header
-          projectName={project.name}
-          engineType={project.metadata.engineType}
-          cylinders={project.metadata.numCylinders}
-          calculationsCount={project.calculations.length}
-        />
+        {/* Header Component (Phase 2 - Updated: Performance & Efficiency) */}
+        <Header />
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">

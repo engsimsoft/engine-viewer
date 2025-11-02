@@ -1,56 +1,37 @@
 /**
  * Header Component - Visualization Page Header
  *
- * Phase 2 - Section 2.1
+ * Phase 2 - Section 2.1 (Updated: Performance & Efficiency Header)
  *
  * Layout:
- * [← Back to Projects]  [Project Name + Metadata]  [⚙️ Settings]
+ * [← Back to Projects]  [Performance & Efficiency]  [PNG][SVG][Help][⚙️]
  *
  * Features:
  * - Back button to navigate to projects list
- * - Project name and metadata display (engine type, cylinders, calculations count)
- * - Settings icon button to open Settings popover
+ * - Static "Performance & Efficiency" title
+ * - Export buttons (PNG, SVG)
+ * - Help button to navigate to /help page
+ * - Settings popover
  * - Responsive layout
  */
 
-import { ArrowLeft, Settings, Download, FileImage } from 'lucide-react';
+import { ArrowLeft, Settings, Download, FileImage, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useChartExport } from '@/contexts/ChartExportContext';
 
-interface HeaderProps {
-  /** Project name to display (e.g., "Vesta 1.6 IM") */
-  projectName: string;
-  /** Engine type (e.g., "NATUR", "TURBO") */
-  engineType: string;
-  /** Number of cylinders (e.g., 4, 6, 8) */
-  cylinders: number;
-  /** Number of calculations in the project */
-  calculationsCount: number;
-}
-
 /**
  * Header Component for Visualization Page
  *
- * Displays project information and navigation controls.
+ * Displays static "Performance & Efficiency" title with navigation and export controls.
  *
  * @example
  * ```tsx
- * <Header
- *   projectName="Vesta 1.6 IM"
- *   engineType="NATUR"
- *   cylinders={4}
- *   calculationsCount={17}
- * />
+ * <Header />
  * ```
  */
-export function Header({
-  projectName,
-  engineType,
-  cylinders,
-  calculationsCount,
-}: HeaderProps) {
+export function Header() {
   const navigate = useNavigate();
   const { exportPNG, exportSVG, isExportAvailable } = useChartExport();
 
@@ -78,24 +59,14 @@ export function Header({
             </Button>
           </div>
 
-          {/* Center: Project Name + Metadata */}
+          {/* Center: Static Title */}
           <div className="flex-1 text-center px-4">
-            {/* Project Name */}
             <h1 className="text-xl font-bold text-foreground">
-              {projectName}
+              Performance & Efficiency
             </h1>
-
-            {/* Metadata Line */}
-            <div className="flex items-center justify-center gap-2 mt-1 text-sm text-muted-foreground flex-wrap">
-              <span>{engineType}</span>
-              <span>•</span>
-              <span>{cylinders} cylinders</span>
-              <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">{calculationsCount} calculations</span>
-            </div>
           </div>
 
-          {/* Right: Export Buttons + Settings */}
+          {/* Right: Export Buttons + Help + Settings */}
           <div className="flex items-center gap-2">
             {/* PNG Export Button */}
             <Button
@@ -121,6 +92,18 @@ export function Header({
             >
               <FileImage className="h-4 w-4" />
               <span className="hidden sm:inline">SVG</span>
+            </Button>
+
+            {/* Help Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/help')}
+              title="View parameters documentation"
+              className="gap-2"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Help</span>
             </Button>
 
             {/* Settings Button */}
