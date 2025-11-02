@@ -16,7 +16,7 @@
 | **Stage 1** | Refactor Preset 1 (Performance: P-Av, Torque) | ✅ Complete | 6c93f23 |
 | **Stage 1** | Implement NEW Preset 2 (MEP: FMEP, IMEP, BMEP, PMEP) | ✅ Complete | 6c93f23 |
 | **Stage 1** | Implement NEW Preset 3 (PCylMax/MaxDeg - Critical Values) | ✅ Complete | 9cba15e |
-| **Stage 1** | Implement NEW Preset 5 (Combustion: TAF, Timing, Delay, Durat) | ✅ Complete | pending |
+| **Stage 1** | Implement NEW Preset 5 (Combustion: TAF, Timing, Delay, Durat) | ✅ Complete | 7ee5c4c |
 | **Stage 1** | Implement NEW Preset 6 (Efficiency: DRatio, Ceff) | ⬜ Not Started | - |
 | **Stage 1** | Test All Presets + Git Commit + Documentation | ⬜ Not Started | - |
 | **Stage 2** | Discuss & Approve Custom Preset UI Design | ⬜ Not Started | - |
