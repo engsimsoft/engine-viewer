@@ -16,7 +16,7 @@
  *
  * - `performance`: Performance metrics (RPM, P-Av, Torque, PCylMax, Power)
  * - `mep`: Mean Effective Pressure parameters (FMEP, BMEP, IMEP, PMEP)
- * - `temperature`: Temperature parameters (TexAv, TC-Av, TUbMax, TCylMax)
+ * - `temperature`: Temperature parameters (TexAv, TC-Av, TUbMax)
  * - `combustion`: Combustion parameters (Timing, TAF, Deto, MaxDeg, Delay, Durat)
  * - `efficiency`: Efficiency parameters (DRatio, Seff, Teff, Ceff, PurCyl, BSFC)
  * - `vibe-model`: Vibe combustion model parameters (VibeDelay, VibeDurat, VibeA, VibeM)
@@ -327,19 +327,6 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     description: 'The count of the number of detonations per cylinder over the last 4 cycles. Range: 0 to 4.',
   },
 
-  'TCylMax': {
-    name: 'TCylMax',
-    displayName: 'Max Cylinder Temperature',
-    unit: '°C',
-    conversionType: 'temperature',
-    category: 'temperature',
-    formats: ['det'],
-    chartable: true,
-    perCylinder: true,
-    brief: 'Maximum temperature per cylinder (°C)',
-    description: 'Maximum temperature in combustion chamber per cylinder.',
-  },
-
   'TUbMax': {
     name: 'TUbMax',
     displayName: 'Max Unburned Mixture Temperature',
@@ -489,7 +476,7 @@ export const PARAMETERS: Record<string, ParameterMetadata> = {
     unit: '°C',
     conversionType: 'temperature',
     category: 'temperature',
-    formats: ['pou'],
+    formats: ['det', 'pou'],  // .det files map TCylMax → TC-Av
     chartable: true,
     perCylinder: true,
     brief: 'Average maximum cylinder temperature per cylinder (°C)',
