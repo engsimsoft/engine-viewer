@@ -18,6 +18,7 @@ import { PARAMETERS } from '@/config/parameters';
 import type { ParameterMetadata } from '@/config/parameters';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Info } from 'lucide-react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 /**
  * Group parameters by category
@@ -26,10 +27,13 @@ function groupParametersByCategory() {
   const params = Object.values(PARAMETERS);
 
   return {
-    global: params.filter((p) => p.category === 'global'),
+    performance: params.filter((p) => p.category === 'performance'),
     mep: params.filter((p) => p.category === 'mep'),
-    perCylinder: params.filter((p) => p.category === 'per-cylinder'),
+    temperature: params.filter((p) => p.category === 'temperature'),
+    combustion: params.filter((p) => p.category === 'combustion'),
+    efficiency: params.filter((p) => p.category === 'efficiency'),
     vibeModel: params.filter((p) => p.category === 'vibe-model'),
+    quality: params.filter((p) => p.category === 'quality'),
   };
 }
 
@@ -43,49 +47,67 @@ interface ParameterRowProps {
 }
 
 function ParameterRow({ param }: ParameterRowProps) {
+  // Build tooltip content: brief + description
+  const tooltipContent = [param.brief, param.description]
+    .filter(Boolean)
+    .join('\n\n');
+
   return (
-    <div className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-      {/* Left: Parameter Info */}
-      <div className="flex-1 space-y-1">
-        {/* Display Name (Bold) */}
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">
-            {param.displayName}
-          </h3>
-          {/* Info Icon (Placeholder for Phase 4 tooltips) */}
-          <Info className="h-4 w-4 text-muted-foreground" />
-        </div>
+    <div className="flex items-center gap-3 p-2.5 border rounded-lg hover:bg-accent/50 transition-colors">
+      {/* Parameter Info */}
+      <div className="flex-1 flex items-center gap-2">
+        {/* Display Name */}
+        <h3 className="text-base font-medium text-foreground">
+          {param.displayName}
+        </h3>
 
         {/* Technical Name (Monospace) */}
-        <div className="flex items-center gap-2">
-          <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
-            {param.name}
-          </code>
-          {/* Unit Badge */}
-          {param.unit && (
-            <span className="text-sm text-muted-foreground">
-              {param.unit}
-            </span>
-          )}
-        </div>
+        <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+          {param.name}
+        </code>
 
-        {/* Brief Description */}
-        {param.brief && (
-          <p className="text-sm text-muted-foreground mt-2">
-            {param.brief}
-          </p>
+        {/* Unit Badge */}
+        {param.unit && (
+          <span className="text-xs text-muted-foreground">
+            {param.unit}
+          </span>
         )}
       </div>
+
+      {/* Info Icon with Tooltip */}
+      {tooltipContent && (
+        <Tooltip.Root delayDuration={300}>
+          <Tooltip.Trigger asChild>
+            <button
+              className="inline-flex items-center justify-center rounded-full hover:bg-accent p-1 transition-colors flex-shrink-0"
+              aria-label={`More information about ${param.displayName}`}
+            >
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content
+              side="right"
+              sideOffset={8}
+              className="max-w-sm rounded-md bg-popover px-4 py-3 text-sm text-popover-foreground shadow-md border border-border z-50"
+            >
+              <p className="whitespace-pre-wrap">{tooltipContent}</p>
+              <Tooltip.Arrow className="fill-popover" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      )}
     </div>
   );
 }
 
 export default function HelpPage() {
   const navigate = useNavigate();
-  const { global, mep, perCylinder, vibeModel } = groupParametersByCategory();
+  const { performance, mep, temperature, combustion, efficiency, vibeModel, quality } = groupParametersByCategory();
 
   return (
-    <div className="min-h-screen bg-background">
+    <Tooltip.Provider delayDuration={300}>
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-background">
         <div className="container mx-auto px-4 py-4">
@@ -112,49 +134,81 @@ export default function HelpPage() {
 
         {/* Parameters Sections */}
         <div className="space-y-8">
-          {/* Global Parameters Section */}
+          {/* Performance Section */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
               <span className="text-blue-500">🔷</span>
-              Global Parameters
+              Performance
               <span className="text-sm font-normal text-muted-foreground">
-                ({global.length})
+                ({performance.length})
               </span>
             </h2>
-            <div className="space-y-3">
-              {global.map((param) => (
+            <div className="space-y-2">
+              {performance.map((param) => (
                 <ParameterRow key={param.name} param={param} />
               ))}
             </div>
           </section>
 
-          {/* MEP Parameters Section */}
+          {/* MEP Section */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
               <span className="text-purple-500">🔷</span>
               Mean Effective Pressure (MEP)
               <span className="text-sm font-normal text-muted-foreground">
                 ({mep.length})
               </span>
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {mep.map((param) => (
                 <ParameterRow key={param.name} param={param} />
               ))}
             </div>
           </section>
 
-          {/* Per-Cylinder Parameters Section */}
+          {/* Temperature Section */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <span className="text-orange-500">🔷</span>
-              Per-Cylinder Parameters
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
+              <span className="text-red-500">🔷</span>
+              Temperature
               <span className="text-sm font-normal text-muted-foreground">
-                ({perCylinder.length})
+                ({temperature.length})
               </span>
             </h2>
-            <div className="space-y-3">
-              {perCylinder.map((param) => (
+            <div className="space-y-2">
+              {temperature.map((param) => (
+                <ParameterRow key={param.name} param={param} />
+              ))}
+            </div>
+          </section>
+
+          {/* Combustion Section */}
+          <section>
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
+              <span className="text-orange-500">🔷</span>
+              Combustion
+              <span className="text-sm font-normal text-muted-foreground">
+                ({combustion.length})
+              </span>
+            </h2>
+            <div className="space-y-2">
+              {combustion.map((param) => (
+                <ParameterRow key={param.name} param={param} />
+              ))}
+            </div>
+          </section>
+
+          {/* Efficiency Section */}
+          <section>
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
+              <span className="text-cyan-500">🔷</span>
+              Efficiency
+              <span className="text-sm font-normal text-muted-foreground">
+                ({efficiency.length})
+              </span>
+            </h2>
+            <div className="space-y-2">
+              {efficiency.map((param) => (
                 <ParameterRow key={param.name} param={param} />
               ))}
             </div>
@@ -162,15 +216,31 @@ export default function HelpPage() {
 
           {/* Vibe Combustion Model Section */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
               <span className="text-green-500">🔷</span>
               Vibe Combustion Model
               <span className="text-sm font-normal text-muted-foreground">
                 ({vibeModel.length})
               </span>
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {vibeModel.map((param) => (
+                <ParameterRow key={param.name} param={param} />
+              ))}
+            </div>
+          </section>
+
+          {/* Calculation Quality Section */}
+          <section>
+            <h2 className="text-2xl font-semibold mb-3 flex items-center gap-2">
+              <span className="text-gray-500">🔷</span>
+              Calculation Quality
+              <span className="text-sm font-normal text-muted-foreground">
+                ({quality.length})
+              </span>
+            </h2>
+            <div className="space-y-2">
+              {quality.map((param) => (
                 <ParameterRow key={param.name} param={param} />
               ))}
             </div>
@@ -178,5 +248,6 @@ export default function HelpPage() {
         </div>
       </main>
     </div>
+    </Tooltip.Provider>
   );
 }
