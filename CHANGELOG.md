@@ -113,7 +113,47 @@
 
 ## [Unreleased]
 
+### Added
+- **Chart Preset 2: MEP (Mean Effective Pressures)** (2025-11-02):
+  - ✅ Complete rewrite of Preset 2 for MEP parameters (FMEP, IMEP, BMEP, PMEP)
+  - ✅ **ChartPreset2.tsx** - NEW single-axis chart replacing old PCylMax preset:
+    - Shows 4 MEP parameters with different line styles (solid, dashed, dotted, dash-dot)
+    - Per-cylinder averaging for IMEP, BMEP, PMEP (array parameters)
+    - Scalar handling for FMEP (global parameter)
+    - Dynamic color system: parameter colors in single calc mode, calculation colors in comparison mode
+    - Custom graphic legend at top center (colored in single mode, gray in comparison mode)
+    - Units conversion via unified API (convertValue, getParameterUnit)
+    - Peak markers with averaged values
+  - ✅ **PeakValuesCards.tsx** - Updated for Preset 2:
+    - Case 2 logic rewritten to show MEP peaks instead of PCylMax
+    - Per-cylinder averaging matching ChartPreset2 logic
+    - Added info icon with Tooltip explaining averaged values
+    - Tooltip text: "Averaged values across all cylinders. To view per-cylinder data, use Custom Chart."
+    - Parameter labels displayed for Preset 2 (FMEP:, IMEP:, BMEP:, PMEP:) since all share same unit "bar"
+    - Format: "FMEP: 19.1 bar at 6800 RPM • IMEP: 15.5 bar at 5600 RPM • ..."
+  - ✅ **peakValues.ts** - Generic parameter handling:
+    - Added else block for unknown parameters (FMEP support)
+    - Generic access via (point as any)[parameter]
+    - Automatic array detection with Math.max(...value) for per-cylinder parameters
+    - Scalar value handling for non-array parameters
+  - ✅ **chartConfig.ts** - MEP color palette:
+    - Added PARAMETER_COLORS.mep1-mep4 (Blue, Orange, Green, Red)
+    - Color definitions for single calculation mode visualization
+  - ✅ **PresetSelector.tsx** - Updated label:
+    - Preset 2 label changed from "Pressure / PCylMax" to "MEP"
+    - Simplified UI (removed description field) for professional users
+    - Compact card sizing (px-2.5 py-2, text-xs)
+  - **Result**: Preset 2 now shows critical MEP engineering parameters with proper averaging and clear visualization
+  - Files: [ChartPreset2.tsx](frontend/src/components/visualization/ChartPreset2.tsx), [PeakValuesCards.tsx](frontend/src/components/visualization/PeakValuesCards.tsx), [peakValues.ts](frontend/src/lib/peakValues.ts), [chartConfig.ts](frontend/src/lib/chartConfig.ts), [PresetSelector.tsx](frontend/src/components/visualization/PresetSelector.tsx)
+
 ### Changed
+- **Unified Conversion API Migration** (2025-11-02):
+  - ✅ Migrated all chart presets and peak values to use unified conversion API
+  - ✅ Replaced old conversion functions (convertPower, convertTorque, etc.) with convertValue(value, paramName, units)
+  - ✅ Replaced old unit getters (getPowerUnit, getTorqueUnit, etc.) with getParameterUnit(paramName, units)
+  - ✅ **Benefits**: Single source of truth (PARAMETERS config), extensible for new parameters, cleaner code
+  - Files: ChartPreset1.tsx, ChartPreset2.tsx, PeakValuesCards.tsx
+
 - **Help Page Header Unification** (2025-11-02):
   - ✅ Unified header layout between Help page and Visualization page for consistent UX
   - ✅ Three-column flexbox layout: [Back button] [Title + Subtitle centered] [Spacer for balance]

@@ -20,35 +20,19 @@ import { useAppStore } from '@/stores/appStore';
 interface PresetOption {
   id: 1 | 2 | 3 | 4;
   label: string;
-  description: string;
 }
 
 /**
  * Chart preset options
  *
- * ВАЖНО: Названия параметров НЕ переводить! (P-Av, Torque, PCylMax, TCylMax, TUbMax)
+ * Professional tool - concise labels only.
+ * Detailed descriptions available on Help page.
  */
 const PRESET_OPTIONS: PresetOption[] = [
-  {
-    id: 1,
-    label: 'Power & Torque',
-    description: 'P-Av & Torque',
-  },
-  {
-    id: 2,
-    label: 'Pressure',
-    description: 'PCylMax',
-  },
-  {
-    id: 3,
-    label: 'Temperature',
-    description: 'TCylMax & TUbMax',
-  },
-  {
-    id: 4,
-    label: 'Custom',
-    description: 'Custom Chart',
-  },
+  { id: 1, label: 'Power & Torque' },
+  { id: 2, label: 'MEP' },
+  { id: 3, label: 'Temperature' },
+  { id: 4, label: 'Custom' },
 ];
 
 /**
@@ -56,7 +40,7 @@ const PRESET_OPTIONS: PresetOption[] = [
  *
  * Allows switching between 4 chart visualization presets:
  * - Preset 1: Power & Torque (P-Av + Torque)
- * - Preset 2: Cylinder Pressure (PCylMax)
+ * - Preset 2: MEP - Mean Effective Pressures (FMEP, IMEP, BMEP, PMEP)
  * - Preset 3: Temperature (TCylMax + TUbMax)
  * - Preset 4: Custom Chart (user-selected parameters)
  *
@@ -90,7 +74,7 @@ export function PresetSelector() {
               key={preset.id}
               onClick={() => setSelectedPreset(preset.id)}
               className={cn(
-                'flex flex-col items-start px-3 py-2.5 rounded-md border transition-all',
+                'flex items-center justify-center px-2.5 py-2 rounded-md border transition-all',
                 'hover:shadow-sm active:scale-[0.98]',
                 isActive
                   ? 'bg-primary text-primary-foreground border-primary shadow-sm'
@@ -100,14 +84,6 @@ export function PresetSelector() {
               aria-pressed={isActive}
             >
               <span className="font-semibold text-xs">{preset.label}</span>
-              <span
-                className={cn(
-                  'text-xs mt-0.5',
-                  isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                )}
-              >
-                {preset.description}
-              </span>
             </button>
           );
         })}

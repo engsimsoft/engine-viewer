@@ -14,9 +14,10 @@ import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
-  convertPressure,
-  getPressureUnit,
+  convertValue,
+  getParameterUnit,
 } from '@/lib/unitsConversion';
+import { PARAMETERS } from '@/config/parameters';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -28,22 +29,19 @@ interface ChartPreset2Props {
 }
 
 /**
- * Chart Preset 2: Cylinder Pressure (v2.0 - Multi-Project Support)
+ * Chart Preset 2: Mean Effective Pressures (MEP)
  *
- * Single-axis chart:
- * - Y axis: PCylMax (Cylinder Pressure)
- * - X axis: RPM
- * - Separate lines for each cylinder of each calculation
- *
- * Example: If 2 calculations are selected and engine has 4 cylinders,
- * the chart will show 8 lines:
- * - ProjectA → $1 - Cyl 1, ProjectA → $1 - Cyl 2, ProjectA → $1 - Cyl 3, ProjectA → $1 - Cyl 4
- * - ProjectB → $2 - Cyl 1, ProjectB → $2 - Cyl 2, ProjectB → $2 - Cyl 3, ProjectB → $2 - Cyl 4
+ * Single-axis chart showing 4 MEP parameters:
+ * - FMEP (Friction Mean Effective Pressure)
+ * - IMEP (Indicated Mean Effective Pressure)
+ * - BMEP (Brake Mean Effective Pressure)
+ * - PMEP (Pumping Mean Effective Pressure)
  *
  * Features:
  * - Cross-project comparison support
- * - Units conversion (bar/psi)
- * - Color-coded calculations with different line styles per cylinder
+ * - Units conversion (bar ↔ psi)
+ * - 4 different line styles for distinction
+ * - Color-coded calculations
  * - Loading/error states
  *
  * @example
@@ -106,17 +104,18 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
     const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
     const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
+    // MEP parameters and their line styles
+    const parameters = ['FMEP', 'IMEP', 'BMEP', 'PMEP'];
+    const lineStyles: Array<'solid' | 'dashed' | 'dotted'> = ['solid', 'dashed', 'dotted', 'solid'];
+    const lineDash = [undefined, [5, 5], [2, 2], [10, 5, 2, 5]]; // solid, dashed, dotted, dash-dot
+
     // Create series for each calculation
     const series: any[] = [];
-    const legendData: string[] = [];
 
     // Determine if we should use parameter colors (single calculation mode)
     const isSingleCalculation = readyCalculations.length === 1;
 
     readyCalculations.forEach((calc, calcIndex) => {
-      // Use parameter color for single calculation, source color for comparison
-      const color = isSingleCalculation ? PARAMETER_COLORS.pressure : calc.color;
-
       // Label: show project name only in comparison mode
       const label = isSingleCalculation
         ? calc.calculationName
@@ -125,67 +124,95 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
 
-      // Get number of cylinders from metadata
-      const numCylinders = calc.metadata.cylinders;
-
-      // Find peak pressure (maximum across all cylinders)
-      const pressurePeak = findPeak(calc.data, 'PCylMax');
-
       // Get marker symbol for this calculation
       const markerSymbol = getMarkerSymbol(calcIndex);
 
-      // Create series for each cylinder
-      for (let cylIndex = 0; cylIndex < numCylinders; cylIndex++) {
-        const cylinderNumber = cylIndex + 1;
+      // Create series for each MEP parameter
+      parameters.forEach((paramName, paramIndex) => {
+        // Use parameter colors for single calculation, calc color for comparison
+        // In single calculation mode: each MEP parameter gets its own color
+        // In comparison mode: all parameters of one calculation use calc.color
+        const mepColors = [
+          PARAMETER_COLORS.mep1, // FMEP - Blue
+          PARAMETER_COLORS.mep2, // IMEP - Orange
+          PARAMETER_COLORS.mep3, // BMEP - Green
+          PARAMETER_COLORS.mep4, // PMEP - Red
+        ];
+        const color = isSingleCalculation ? mepColors[paramIndex] : calc.color;
 
-        // Prepare pressure data with units conversion and decimals
-        const pressureData = calc.data
-          .map((point) => {
-            // Skip if PCylMax is not available (e.g., pure .pou files without merge)
-            if (!point.PCylMax || point.PCylMax.length <= cylIndex) {
-              return null;
+        // Check if parameter is per-cylinder (needs averaging)
+        const param = PARAMETERS[paramName];
+        const isPerCylinder = param?.perCylinder || false;
+
+        // Prepare data with units conversion and per-cylinder averaging
+        const paramData = calc.data!.map((point) => {
+          // Get raw value
+          const rawValue = (point as any)[paramName];
+
+          // Average per-cylinder arrays (IMEP, BMEP, PMEP are arrays)
+          let valueToConvert: number;
+          if (isPerCylinder && Array.isArray(rawValue)) {
+            // Average across cylinders
+            valueToConvert = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+          } else {
+            // Scalar value (FMEP is scalar)
+            valueToConvert = rawValue as number;
+          }
+
+          return {
+            value: [point.RPM, convertValue(valueToConvert, paramName, units)],
+            decimals: decimals,
+          };
+        });
+
+        // Find peak for this parameter (need to average for per-cylinder)
+        let peak;
+        if (isPerCylinder) {
+          // For per-cylinder parameters, manually find peak from averaged data
+          let maxValue = -Infinity;
+          let maxRpm = 0;
+          let maxIndex = 0;
+          calc.data!.forEach((point, idx) => {
+            const rawValue = (point as any)[paramName];
+            if (Array.isArray(rawValue)) {
+              const avg = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+              if (avg > maxValue) {
+                maxValue = avg;
+                maxRpm = point.RPM;
+                maxIndex = idx;
+              }
             }
+          });
+          peak = maxValue > -Infinity ? { value: maxValue, rpm: maxRpm, index: maxIndex } : null;
+        } else {
+          // For scalar parameters, use findPeak directly
+          peak = findPeak(calc.data!, paramName);
+        }
 
-            return {
-              value: [point.RPM, convertPressure(point.PCylMax[cylIndex], units)],
-              decimals: decimals,
-            };
-          })
-          .filter((item): item is NonNullable<typeof item> => item !== null);
-
-        // Line style: solid for cylinder 1, different dashes for others
-        const lineStyle =
-          cylIndex === 0
-            ? 'solid'
-            : cylIndex === 1
-            ? 'dashed'
-            : cylIndex === 2
-            ? 'dotted'
-            : 'solid';
-
-        // Cylinder pressure series
+        // Create series
         series.push({
-          name: `${label} - Cyl ${cylinderNumber}`,
+          name: `${label} - ${paramName}`,
           type: 'line',
-          yAxisIndex: 0,
-          data: pressureData,
+          yAxisIndex: 0, // Single Y-axis (all MEP use pressure units)
+          data: paramData,
           itemStyle: {
-            color,
+            color: color,
           },
           lineStyle: {
-            color,
+            color: color,
             width: 2,
-            type: lineStyle,
+            type: lineStyles[paramIndex],
+            // For dash-dot pattern, use lineDash array
+            ...(lineDash[paramIndex] ? { lineDash: lineDash[paramIndex] } : {}),
           },
           symbol: 'circle',
-          symbolSize: 4,
+          symbolSize: 6,
           smooth: false,
           emphasis: {
             focus: 'series',
           },
-          // Add peak marker only to the first cylinder series
-          // (represents the maximum pressure across all cylinders)
-          markPoint: cylIndex === 0 && pressurePeak ? {
+          // Peak marker
+          markPoint: peak ? {
             symbol: markerSymbol,
             symbolSize: 20,
             itemStyle: {
@@ -197,27 +224,93 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
               show: false, // Hide default label, use tooltip instead
             },
             data: [{
-              coord: [pressurePeak.rpm, convertPressure(pressurePeak.value, units)],
-              value: formatPeakValue(pressurePeak, 'PCylMax', units),
+              coord: [peak.rpm, convertValue(peak.value, paramName, units)],
+              value: formatPeakValue(peak, paramName, units),
             }],
           } : undefined,
         });
-
-        // Add to legend
-        legendData.push(`${label} - Cyl ${cylinderNumber}`);
-      }
+      });
     });
 
-    // Get unit label
-    const pressureUnit = getPressureUnit(units);
+    // Get unit label (all MEP parameters use same pressure unit)
+    const pressureUnit = getParameterUnit('FMEP', units);
+
+    // Legend colors: colored in single calc mode, gray in comparison mode
+    const legendColor1 = isSingleCalculation ? PARAMETER_COLORS.mep1 : '#666';
+    const legendColor2 = isSingleCalculation ? PARAMETER_COLORS.mep2 : '#666';
+    const legendColor3 = isSingleCalculation ? PARAMETER_COLORS.mep3 : '#666';
+    const legendColor4 = isSingleCalculation ? PARAMETER_COLORS.mep4 : '#666';
 
     return {
       ...baseConfig,
       legend: {
         show: false,
       },
+      // Custom legend at the top center
+      // Single calc mode: colored (matches line colors)
+      // Comparison mode: gray (user relies on line styles only)
+      graphic: [
+        {
+          type: 'group',
+          left: 'center',
+          top: 15,
+          children: [
+            // FMEP - solid line
+            {
+              type: 'line',
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor1, lineWidth: 2 },
+            },
+            {
+              type: 'text',
+              left: 30,
+              top: -8,
+              style: { text: 'FMEP', fontSize: 14, fontWeight: 'bold', fill: legendColor1 },
+            },
+            // IMEP - dashed line
+            {
+              type: 'line',
+              left: 85,
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor2, lineWidth: 2, lineDash: [5, 5] },
+            },
+            {
+              type: 'text',
+              left: 115,
+              top: -8,
+              style: { text: 'IMEP', fontSize: 14, fontWeight: 'bold', fill: legendColor2 },
+            },
+            // BMEP - dotted line
+            {
+              type: 'line',
+              left: 165,
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor3, lineWidth: 2, lineDash: [2, 2] },
+            },
+            {
+              type: 'text',
+              left: 195,
+              top: -8,
+              style: { text: 'BMEP', fontSize: 14, fontWeight: 'bold', fill: legendColor3 },
+            },
+            // PMEP - dash-dot line
+            {
+              type: 'line',
+              left: 250,
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor4, lineWidth: 2, lineDash: [10, 5, 2, 5] },
+            },
+            {
+              type: 'text',
+              left: 280,
+              top: -8,
+              style: { text: 'PMEP', fontSize: 14, fontWeight: 'bold', fill: legendColor4 },
+            },
+          ],
+        },
+      ],
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(pressureUnit, 'left', '#1f77b4', showGrid),  // Only unit label
+      yAxis: createYAxis(pressureUnit, 'left', '#1f77b4', showGrid),
       series,
     };
   }, [readyCalculations, units, animation, showGrid, decimals]);

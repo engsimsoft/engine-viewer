@@ -11,8 +11,11 @@ export const PARAMETER_COLORS = {
   power: '#1f77b4',    // Синий (соответствует left axis)
   torque: '#ff7f0e',   // Оранжевый (соответствует right axis)
 
-  // Preset 2: Pressure
-  pressure: '#1f77b4', // Синий (соответствует left axis)
+  // Preset 2: MEP (4 parameters - 4 colors)
+  mep1: '#1f77b4',     // FMEP - Синий
+  mep2: '#ff7f0e',     // IMEP - Оранжевый
+  mep3: '#2ca02c',     // BMEP - Зелёный
+  mep4: '#d62728',     // PMEP - Красный
 
   // Preset 3: Temperature
   temperatureCyl: '#1f77b4',  // Синий TCylMax (соответствует left axis)

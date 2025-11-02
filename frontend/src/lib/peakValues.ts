@@ -66,10 +66,17 @@ export function findPeak(data: DataPoint[], parameter: string): PeakValue | null
       if (!point.Deto) return; // Not available in this format
       value = Math.max(...point.Deto);
     } else if (parameter === 'Convergence') {
+      if (!point.Convergence) return; // Not available in this format
       value = point.Convergence;
     } else {
-      // Unknown parameter
-      return;
+      // Generic access for other parameters (FMEP, etc.)
+      value = (point as any)[parameter];
+      if (value === undefined || value === null) return;
+
+      // If value is an array (per-cylinder), use maximum
+      if (Array.isArray(value)) {
+        value = Math.max(...value);
+      }
     }
 
     if (value > maxValue) {
