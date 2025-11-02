@@ -12,10 +12,10 @@ export const PARAMETER_COLORS = {
   torque: '#ff7f0e',   // Оранжевый (соответствует right axis)
 
   // Preset 2: MEP (4 parameters - 4 colors)
-  mep1: '#1f77b4',     // FMEP - Синий
-  mep2: '#ff7f0e',     // IMEP - Оранжевый
-  mep3: '#2ca02c',     // BMEP - Зелёный
-  mep4: '#d62728',     // PMEP - Красный
+  mep1: '#ff7f0e',     // FMEP - Оранжевый (friction losses)
+  mep2: '#e74c3c',     // IMEP - Красный (indicated power)
+  mep3: '#1f77b4',     // BMEP - Синий (brake power)
+  mep4: '#9467bd',     // PMEP - Фиолетовый (pumping losses)
 
   // Preset 3: Temperature
   temperatureCyl: '#1f77b4',  // Синий TCylMax (соответствует left axis)

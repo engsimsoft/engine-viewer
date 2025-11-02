@@ -178,10 +178,12 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         const torqueNm = point.Torque;
 
         // Preset 2: MEP parameters
-        const fmep = averageIfArray(point.FMEP); // FMEP is scalar
-        const imep = averageIfArray(point.IMEP); // IMEP per-cylinder
-        const bmep = averageIfArray(point.BMEP); // BMEP per-cylinder
-        const pmep = averageIfArray(point.PMEP); // PMEP per-cylinder
+        // Educational visualization: FMEP and PMEP shown as negative for energy balance clarity
+        // Formula: BMEP = IMEP - FMEP - PMEP
+        const fmep = averageIfArray(point.FMEP) !== undefined ? -averageIfArray(point.FMEP)! : undefined;
+        const imep = averageIfArray(point.IMEP); // IMEP per-cylinder (positive)
+        const bmep = averageIfArray(point.BMEP); // BMEP per-cylinder (positive)
+        const pmep = averageIfArray(point.PMEP) !== undefined ? -averageIfArray(point.PMEP)! : undefined;
 
         // Preset 3: Critical parameters
         const pcylMax = averageIfArray(point.PCylMax); // PCylMax per-cylinder

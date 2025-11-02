@@ -130,9 +130,14 @@ function getPeakValuesForCalculation(
         }
 
         if (peak) {
+          // Educational visualization: invert sign for FMEP and PMEP to show energy losses
+          // Formula: BMEP = IMEP - FMEP - PMEP
+          const signMultiplier = (paramName === 'FMEP' || paramName === 'PMEP') ? -1 : 1;
+          const displayValue = peak.value * signMultiplier;
+
           peaks.push({
             label: paramName,
-            value: `${convertValue(peak.value, paramName, units).toFixed(decimals)} ${getParameterUnit(paramName, units)}`,
+            value: `${convertValue(displayValue, paramName, units).toFixed(decimals)} ${getParameterUnit(paramName, units)}`,
             rpm: peak.rpm,
           });
         }
@@ -388,8 +393,9 @@ export function PeakValuesCards({
     return null;
   }
 
-  // Tooltip text for Preset 2 (MEP - averaged values)
-  const mepTooltipText = "Averaged values across all cylinders. To view per-cylinder data, use Custom Chart.";
+  // Tooltip texts for Preset 2 (MEP)
+  const mepAveragingTooltip = "Averaged values across all cylinders. To view per-cylinder data, use Custom Chart.";
+  const mepEducationalTooltip = "💡 FMEP and PMEP shown as negative for educational clarity: BMEP = IMEP - FMEP - PMEP";
 
   return (
     <Tooltip.Provider delayDuration={300}>
@@ -423,7 +429,7 @@ export function PeakValuesCards({
                     <Tooltip.Trigger asChild>
                       <button
                         className="inline-flex items-center justify-center rounded-full hover:bg-accent p-1.5 transition-colors flex-shrink-0 ml-auto"
-                        aria-label="Information about averaged MEP values"
+                        aria-label="Information about MEP visualization"
                       >
                         <Info className="h-4 w-4 text-muted-foreground" />
                       </button>
@@ -432,9 +438,12 @@ export function PeakValuesCards({
                       <Tooltip.Content
                         side="top"
                         sideOffset={8}
-                        className="max-w-xs rounded-md bg-popover px-4 py-3 text-sm text-popover-foreground shadow-md border border-border z-50"
+                        className="max-w-sm rounded-md bg-popover px-4 py-3 text-sm text-popover-foreground shadow-md border border-border z-50"
                       >
-                        <p>{mepTooltipText}</p>
+                        <div className="space-y-2">
+                          <p>{mepAveragingTooltip}</p>
+                          <p className="border-t border-border pt-2">{mepEducationalTooltip}</p>
+                        </div>
                         <Tooltip.Arrow className="fill-popover" />
                       </Tooltip.Content>
                     </Tooltip.Portal>

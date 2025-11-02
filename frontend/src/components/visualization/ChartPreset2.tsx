@@ -159,8 +159,13 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
             valueToConvert = rawValue as number;
           }
 
+          // Educational visualization: invert sign for FMEP and PMEP to show energy losses
+          // Formula: BMEP = IMEP - FMEP - PMEP
+          // Note: This deviates from Professor Blair's convention (all positive) for better visual understanding
+          const signMultiplier = (paramName === 'FMEP' || paramName === 'PMEP') ? -1 : 1;
+
           return {
-            value: [point.RPM, convertValue(valueToConvert, paramName, units)],
+            value: [point.RPM, convertValue(valueToConvert * signMultiplier, paramName, units)],
             decimals: decimals,
           };
         });
@@ -187,6 +192,12 @@ export function ChartPreset2({ calculations }: ChartPreset2Props) {
         } else {
           // For scalar parameters, use findPeak directly
           peak = findPeak(calc.data!, paramName);
+        }
+
+        // Apply sign inversion for peak display (FMEP and PMEP)
+        if (peak) {
+          const signMultiplier = (paramName === 'FMEP' || paramName === 'PMEP') ? -1 : 1;
+          peak = { ...peak, value: peak.value * signMultiplier };
         }
 
         // Create series
