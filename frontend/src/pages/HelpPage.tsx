@@ -19,6 +19,8 @@ import type { ParameterMetadata } from '@/config/parameters';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Info, Layers } from 'lucide-react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { useAppStore } from '@/stores/appStore';
+import { getParameterUnit } from '@/lib/unitsConversion';
 
 /**
  * Group parameters by category
@@ -44,13 +46,17 @@ function groupParametersByCategory() {
  */
 interface ParameterRowProps {
   param: ParameterMetadata;
+  units: 'si' | 'american' | 'hp';
 }
 
-function ParameterRow({ param }: ParameterRowProps) {
+function ParameterRow({ param, units }: ParameterRowProps) {
   // Build tooltip content: brief + description
   const tooltipContent = [param.brief, param.description]
     .filter(Boolean)
     .join('\n\n');
+
+  // Get dynamic unit label based on current unit system
+  const unitLabel = getParameterUnit(param.name, units);
 
   return (
     <div className="flex items-center gap-3 p-2.5 border rounded-lg hover:bg-accent/50 transition-colors">
@@ -66,10 +72,10 @@ function ParameterRow({ param }: ParameterRowProps) {
           {param.name}
         </code>
 
-        {/* Unit Badge */}
-        {param.unit && (
+        {/* Unit Badge - Dynamic based on unit system */}
+        {unitLabel && (
           <span className="text-xs text-muted-foreground">
-            {param.unit}
+            {unitLabel}
           </span>
         )}
 
@@ -111,6 +117,7 @@ function ParameterRow({ param }: ParameterRowProps) {
 
 export default function HelpPage() {
   const navigate = useNavigate();
+  const units = useAppStore((state) => state.units);
   const { performance, mep, temperature, combustion, efficiency, vibeModel, quality } = groupParametersByCategory();
 
   return (
@@ -153,7 +160,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {performance.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -169,7 +176,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {mep.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -185,7 +192,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {temperature.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -201,7 +208,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {combustion.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -217,7 +224,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {efficiency.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -233,7 +240,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {vibeModel.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
@@ -249,7 +256,7 @@ export default function HelpPage() {
             </h2>
             <div className="space-y-2">
               {quality.map((param) => (
-                <ParameterRow key={param.name} param={param} />
+                <ParameterRow key={param.name} param={param} units={units} />
               ))}
             </div>
           </section>
