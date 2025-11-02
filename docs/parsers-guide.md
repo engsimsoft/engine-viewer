@@ -1,19 +1,134 @@
 # 📘 Руководство по добавлению парсеров
 
 **Дата создания:** 31 октября 2025
-**Версия:** 1.0
+**Обновлено:** 2 ноября 2025
+**Версия:** 2.1
 
 ---
 
 ## 🎯 Назначение
 
-Это руководство описывает как добавить поддержку нового формата файлов в Engine Results Viewer.
+Это руководство описывает как добавить поддержку нового формата файлов в Engine Results Viewer используя **Registry Pattern Architecture**.
 
 **Текущие форматы:**
-- ✅ [.det Format](file-formats/det-format.md) - Реализовано
-- ⏳ ~5 форматов - Планируется
+- ✅ [.det Format](file-formats/det-format.md) - 24 параметра (базовый набор)
+- ✅ [.pou Format](file-formats/pou-format.md) - 71 параметр (расширенный набор)
+- ⏳ ~3 формата - Планируется
 
-**Принцип:** Все парсеры преобразуют данные в **единый JSON формат**, который понимает frontend.
+**Принцип:** Все парсеры преобразуют данные в **единый JSON формат** и регистрируются в **ParserRegistry**.
+
+---
+
+## 🏗️ Архитектура парсеров
+
+### Структура папок
+
+```
+backend/src/parsers/
+├── index.js                    # Единый API, регистрация парсеров
+├── ParserRegistry.js           # Registry pattern - управление парсерами
+├── common/                     # Общие утилиты для всех парсеров
+│   ├── calculationMarker.js    # Парсинг $ маркеров
+│   └── formatDetector.js       # Автоопределение формата файла
+└── formats/                    # Парсеры для конкретных форматов
+    ├── detParser.js            # .det формат (24 параметра)
+    └── pouParser.js            # .pou формат (71 параметр)
+```
+
+### Компоненты системы
+
+#### 1. ParserRegistry (Реестр парсеров)
+
+**Назначение:** Централизованное управление парсерами
+
+```javascript
+// backend/src/parsers/ParserRegistry.js
+class ParserRegistry {
+  constructor() {
+    this.parsers = new Map();
+  }
+
+  // Регистрация парсера
+  register(format, ParserClass) {
+    this.parsers.set(format, ParserClass);
+  }
+
+  // Получение парсера
+  getParser(format) {
+    return new (this.parsers.get(format))();
+  }
+
+  // Проверка поддержки формата
+  hasParser(format) {
+    return this.parsers.has(format);
+  }
+}
+
+export const globalRegistry = new ParserRegistry();
+```
+
+#### 2. Format Detector (Определение формата)
+
+**Назначение:** Автоматическое определение формата файла
+
+```javascript
+// backend/src/parsers/common/formatDetector.js
+export function detectFormat(filePath, firstLine) {
+  // 1. Проверка по расширению
+  if (filePath.endsWith('.det')) return 'det';
+  if (filePath.endsWith('.pou')) return 'pou';
+
+  // 2. Проверка по содержимому (metadata fields)
+  const parts = firstLine.split(/\s+/).filter(Boolean);
+  if (parts.length === 2) return 'det';  // .det: 2 поля
+  if (parts.length >= 5) return 'pou';   // .pou: 5 полей
+
+  throw new Error('Неизвестный формат файла');
+}
+```
+
+#### 3. Common Utilities (Общие утилиты)
+
+**calculationMarker.js** - Универсальный парсинг $ маркеров:
+
+```javascript
+// backend/src/parsers/common/calculationMarker.js
+export function parseCalculationMarker(line) {
+  const cleaned = cleanLine(line);
+  const fullId = cleaned.trim();         // "$3.1 R 0.86"
+  const userInputName = fullId.substring(1).trim(); // "3.1 R 0.86"
+
+  return {
+    id: fullId,              // Для API (с $)
+    name: userInputName      // Для UI (без $)
+  };
+}
+```
+
+#### 4. Unified API (Единый API)
+
+**index.js** - Точка входа для всех парсеров:
+
+```javascript
+// backend/src/parsers/index.js
+import { globalRegistry } from './ParserRegistry.js';
+import { DetParser } from './formats/detParser.js';
+import { PouParser } from './formats/pouParser.js';
+
+// Регистрируем парсеры при импорте
+globalRegistry.register('det', DetParser);
+globalRegistry.register('pou', PouParser);
+
+export async function parseEngineFile(filePath) {
+  const content = await readFile(filePath, 'utf-8');
+  const firstLine = content.split('\n')[0];
+
+  const format = detectFormat(filePath, firstLine);
+  const parser = globalRegistry.getParser(format);
+
+  return await parser.parse(filePath);
+}
+```
 
 ---
 
@@ -24,6 +139,7 @@
 ```json
 {
   "fileName": "BMW M42.det",
+  "format": "det",
   "metadata": {
     "numCylinders": 4,
     "engineType": "NATUR"
@@ -55,16 +171,18 @@
 
 **Обязательные поля:**
 - `fileName` - имя исходного файла
+- `format` - формат файла ('det', 'pou', и т.д.)
 - `metadata` - метаданные двигателя (cylinders, engineType, etc.)
+- `columnHeaders` - заголовки колонок
 - `calculations` - массив расчётов
-  - `id` - уникальный идентификатор расчёта
-  - `name` - отображаемое имя
+  - `id` - уникальный идентификатор расчёта (с $)
+  - `name` - отображаемое имя (без $)
   - `dataPoints` - массив точек данных
 
 **Требования к dataPoints:**
 - Базовые параметры: `RPM`, `P-Av`, `Torque`
-- Массивы по цилиндрам: `PurCyl`, `TCylMax`, `PCylMax`, `TUbMax`, `Deto`
 - Дополнительные параметры: зависят от формата
+- Массивы по цилиндрам: длина = `metadata.numCylinders`
 
 ---
 
@@ -91,493 +209,767 @@ test-data/
 - Есть ли заголовок?
 - Как обозначаются метаданные?
 - Как организованы расчёты? (маркеры, секции)
-- Сколько строк/записей в типичном файле?
+- Сколько параметров в строке данных?
 - Какие параметры присутствуют?
+- Есть ли массивы по цилиндрам?
 
-**Пример анализа (.det формат):**
-```
-✅ Расширение: .det
-✅ Формат: Текстовый, табуляция
-✅ Структура:
-   - Строка 1: Метаданные (cylinders, engineType)
-   - Строка 2: Заголовки колонок
-   - Строка 3+: Данные с маркерами ($1, $2...)
-✅ Особенности:
-   - Первая колонка служебная (номер строки)
-   - Маркеры могут быть сложными ($3.1 R 0.86)
-   - Массивы параметров (PurCyl(1-4))
-```
+**Пример анализа (.det vs .pou):**
 
-### 1.3. Создать примеры в docs/
+| Aspect | .det Format | .pou Format |
+|--------|-------------|-------------|
+| Расширение | `.det` | `.pou` |
+| Формат | Текстовый, пробелы | Текстовый, пробелы |
+| Строка 1 | Метаданные (2 поля) | Метаданные (5 полей) |
+| Строка 2 | Заголовки (24 параметра) | Заголовки (71 параметр) |
+| Строка 3+ | Маркеры $ + данные | Маркеры $ + данные |
+| Параметры | 24 | 71 |
+| Особенности | Служебная колонка →, массивы PCylMax/TCylMax/Deto | Служебная колонка →, много массивов (Power, IMEP, BMEP, etc.) |
+
+### 1.3. Создать документацию формата
 
 Создай файл `docs/file-formats/xyz-format.md`:
 
 ```markdown
-# XYZ File Format - Детальное описание
+# .xyz File Format Specification
 
-**Расширение:** `.xyz`
-**Назначение:** [Описание данных]
+**Version:** 1.0
+**Date:** YYYY-MM-DD
 
-## Структура файла
+## Overview
 
-[Построчное описание]
+[Краткое описание формата]
 
-## Пример файла
+## File Structure
+
+Line 1: Metadata
+Line 2: Column headers
+Line 3+: Calculation markers ($) and data
+
+## Metadata
+
+Format: <Field1> <Field2> ...
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| Field1 | type | description | value |
+
+## Parameters
+
+[Описание всех параметров с единицами измерения]
+
+## Example
 
 [Реальный пример из test-data]
-
-## Особенности формата
-
-[Проблемы парсинга, edge cases]
 ```
+
+**Примеры:** [det-format.md](file-formats/det-format.md), [pou-format.md](file-formats/pou-format.md)
 
 ---
 
-## 📝 Шаг 2: Создать ADR (Architecture Decision Record)
+## 💻 Шаг 2: Создать парсер
 
-**Зачем:** Документировать ПОЧЕМУ выбрано именно такое решение парсинга.
-
-### 2.1. Создать файл ADR
+### 2.1. Создать файл парсера
 
 ```bash
-# Номер следующий по порядку (001 уже занят для .det)
-touch docs/decisions/002-xyz-file-format.md
+touch backend/src/parsers/formats/xyzParser.js
 ```
 
-### 2.2. Заполнить по шаблону
-
-Используй [docs/decisions/template.md](decisions/template.md).
-
-**Ключевые секции для парсера:**
-- **Контекст:** Зачем нужен этот формат? Какие данные в нём?
-- **Решение:** Как парсится файл? (построчно, regex, JSON.parse)
-- **Причины:** Почему именно так? (производительность, простота, надёжность)
-- **Последствия:** Что это даёт? Какие ограничения?
-- **Альтернативы:** Какие подходы рассматривались? Почему отклонены?
-- **Реализация:** Ссылки на код парсера
-
-**Пример ADR:** [docs/decisions/001-det-file-format.md](decisions/001-det-file-format.md)
-
----
-
-## 💻 Шаг 3: Написать парсер
-
-### 3.1. Создать файл парсера
-
-**Вариант 1: Отдельный модуль (рекомендуется для будущих форматов)**
-
-```bash
-touch backend/src/services/parsers/xyzParser.js
-```
-
-**Вариант 2: В fileParser.js (текущий подход для .det)**
-
-Функции в `backend/src/services/fileParser.js`.
-
-### 3.2. Структура парсера
-
-**Обязательные функции:**
+### 2.2. Структура парсера (шаблон)
 
 ```javascript
 /**
- * Парсит .xyz файл
- * @param {string} filePath - Путь к файлу
- * @returns {Promise<Object>} - Объект в едином JSON формате
+ * Парсер для .xyz файлов двигателей
  */
-async function parseXyzFile(filePath) {
-  try {
-    // 1. Прочитать файл
-    const content = await readFile(filePath, 'utf-8');
 
-    // 2. Разбить на строки/секции
-    const lines = content.split('\n');
+import { readFile } from 'fs/promises';
+import { basename } from 'path';
+import {
+  cleanLine,
+  parseCalculationMarker,
+  isCalculationMarker
+} from '../common/calculationMarker.js';
 
-    // 3. Парсить метаданные
-    const metadata = parseMetadata(lines[0]);
+class XyzParser {
+  /**
+   * Парсит метаданные из первой строки .xyz файла
+   * @param {string} line - Первая строка файла
+   * @returns {Object} - Метаданные
+   */
+  parseMetadata(line) {
+    const cleaned = cleanLine(line);
+    const parts = cleaned.split(/\s+/).filter(Boolean);
 
-    // 4. Парсить заголовки (если есть)
-    const columnHeaders = parseColumnHeaders(lines[1]);
+    if (parts.length < 2) {
+      throw new Error('Некорректный формат метаданных');
+    }
 
-    // 5. Парсить данные
-    const calculations = parseCalculations(lines.slice(2), metadata);
-
-    // 6. Вернуть в едином формате
     return {
-      fileName: basename(filePath),
-      metadata,
-      columnHeaders,
-      calculations
+      numCylinders: parseInt(parts[0], 10),
+      engineType: parts[1],
+      // ... другие поля специфичные для формата
     };
-  } catch (error) {
-    console.error(`Ошибка парсинга ${filePath}:`, error);
-    throw error;
   }
-}
 
-/**
- * Парсит метаданные (строка 1)
- */
-function parseMetadata(line) {
-  // Ваша логика парсинга
-  return {
-    numCylinders: 4,
-    engineType: 'NATUR'
-    // ... другие поля
-  };
-}
+  /**
+   * Парсит заголовки колонок из второй строки .xyz файла
+   * @param {string} line - Вторая строка файла
+   * @returns {string[]} - Массив заголовков
+   */
+  parseColumnHeaders(line) {
+    const cleaned = cleanLine(line);
+    const headers = cleaned.split(/\s+/).filter(Boolean);
+    return headers;
+  }
 
-/**
- * Парсит заголовки колонок
- */
-function parseColumnHeaders(line) {
-  // Разбить по разделителям
-  return line.split('\t').filter(Boolean);
-}
+  /**
+   * Парсит одну строку данных из .xyz файла
+   * @param {string} line - Строка с данными
+   * @param {string[]} headers - Заголовки колонок
+   * @param {number} numCylinders - Количество цилиндров
+   * @returns {Object|null} - Объект DataPoint или null
+   */
+  parseDataLine(line, headers, numCylinders) {
+    const cleaned = cleanLine(line);
 
-/**
- * Парсит расчёты и данные
- */
-function parseCalculations(lines, metadata) {
-  const calculations = [];
-  let currentCalculation = null;
+    // Если строка пустая или это маркер расчёта
+    if (!cleaned || cleaned.startsWith('$')) {
+      return null;
+    }
 
-  for (const line of lines) {
-    // Обнаружение маркера расчёта
-    if (isCalculationMarker(line)) {
-      if (currentCalculation) {
+    // Разбиваем по пробелам
+    const values = cleaned.split(/\s+/).filter(Boolean);
+
+    // Проверяем соответствие количества значений
+    if (values.length !== headers.length) {
+      console.warn(
+        `[XyzParser] Несоответствие: ${values.length} значений, ${headers.length} заголовков`
+      );
+    }
+
+    // Создаём объект DataPoint
+    const dataPoint = {
+      RPM: parseFloat(values[0]),
+      'P-Av': parseFloat(values[1]),
+      Torque: parseFloat(values[2]),
+      // ... остальные параметры специфичные для формата
+    };
+
+    // Если есть массивы по цилиндрам:
+    let idx = 3; // После базовых параметров
+
+    // Пример: парсинг массива Power(1-N)
+    dataPoint.Power = [];
+    for (let i = 0; i < numCylinders; i++) {
+      dataPoint.Power.push(parseFloat(values[idx++]));
+    }
+
+    return dataPoint;
+  }
+
+  /**
+   * Парсит .xyz файл и возвращает структурированные данные
+   * @param {string} filePath - Путь к .xyz файлу
+   * @returns {Promise<Object>} - Объект EngineProject
+   */
+  async parse(filePath) {
+    try {
+      // Читаем файл
+      const content = await readFile(filePath, 'utf-8');
+      const lines = content.split('\n');
+
+      if (lines.length < 3) {
+        throw new Error('Файл слишком короткий');
+      }
+
+      // Парсим метаданные (строка 1)
+      const metadata = this.parseMetadata(lines[0]);
+
+      // Парсим заголовки (строка 2)
+      const columnHeaders = this.parseColumnHeaders(lines[1]);
+
+      // Парсим расчёты (строка 3+)
+      const calculations = [];
+      let currentCalculation = null;
+
+      for (let i = 2; i < lines.length; i++) {
+        const line = lines[i];
+
+        // Пропускаем пустые строки
+        if (!line.trim()) {
+          continue;
+        }
+
+        // Проверяем, является ли строка маркером расчёта
+        if (isCalculationMarker(line)) {
+          // Сохраняем предыдущий расчёт (если был)
+          if (currentCalculation && currentCalculation.dataPoints.length > 0) {
+            calculations.push(currentCalculation);
+          }
+
+          // Начинаем новый расчёт
+          const { id, name } = parseCalculationMarker(line);
+          currentCalculation = {
+            id,    // С символом $
+            name,  // Без символа $
+            dataPoints: []
+          };
+        } else if (currentCalculation) {
+          // Парсим строку данных
+          const dataPoint = this.parseDataLine(
+            line,
+            columnHeaders,
+            metadata.numCylinders
+          );
+
+          if (dataPoint) {
+            currentCalculation.dataPoints.push(dataPoint);
+          }
+        }
+      }
+
+      // Добавляем последний расчёт
+      if (currentCalculation && currentCalculation.dataPoints.length > 0) {
         calculations.push(currentCalculation);
       }
-      currentCalculation = {
-        id: extractCalculationId(line),
-        name: extractCalculationName(line),
-        dataPoints: []
+
+      // Формируем результат в едином формате
+      const result = {
+        fileName: basename(filePath),
+        format: 'xyz',              // ← Формат файла
+        metadata,
+        columnHeaders,
+        calculations
       };
-    } else if (currentCalculation) {
-      // Парсинг строки данных
-      const dataPoint = parseDataLine(line, metadata);
-      if (dataPoint) {
-        currentCalculation.dataPoints.push(dataPoint);
-      }
+
+      return result;
+    } catch (error) {
+      console.error(`[XyzParser] Ошибка при парсинге файла ${filePath}:`, error);
+      throw error;
     }
   }
-
-  // Добавить последний расчёт
-  if (currentCalculation) {
-    calculations.push(currentCalculation);
-  }
-
-  return calculations;
 }
 
-/**
- * Парсит одну строку данных
- */
-function parseDataLine(line, metadata) {
-  const values = line.split('\t').filter(Boolean);
-
-  return {
-    RPM: parseFloat(values[0]),
-    'P-Av': parseFloat(values[1]),
-    Torque: parseFloat(values[2]),
-    PurCyl: parseArrayValues(values, 3, metadata.numCylinders),
-    TCylMax: parseArrayValues(values, 3 + metadata.numCylinders, metadata.numCylinders),
-    // ... остальные параметры
-  };
-}
-
-// Экспортировать функции
-export { parseXyzFile };
+export { XyzParser };
 ```
 
-### 3.3. Важные моменты
+### 2.3. Важные моменты
 
 **✅ DO:**
-- Валидировать входные данные (проверка формата)
+- Использовать `cleanLine()` из `calculationMarker.js` для удаления служебных символов
+- Использовать `isCalculationMarker()` и `parseCalculationMarker()` для обработки $ маркеров
+- Валидировать входные данные
 - Обрабатывать edge cases (пустые строки, неполные данные)
-- Логировать ошибки с деталями (`console.error`)
+- Логировать ошибки с деталями
+- Возвращать `format` поле в результате
 - Бросать исключения при критических ошибках
 - Комментировать сложную логику
-- Использовать TypeScript JSDoc для типов
 
 **❌ DON'T:**
-- Игнорировать ошибки (`try/catch` без действий)
+- Дублировать логику парсинга $ маркеров (используй common utilities)
+- Игнорировать ошибки
 - Предполагать что данные всегда корректны
-- Хардкодить константы (использовать `metadata.numCylinders`)
-- Парсить весь файл в память (если файл >100MB)
-- Изменять оригинальные данные
+- Хардкодить количество цилиндров (использовать `metadata.numCylinders`)
+- Забывать про `format` поле в результате
 
----
+### 2.4. Продвинутые техники
 
-## 🔌 Шаг 4: Интегрировать парсер
+#### Parameter Mapping (Унификация названий параметров)
 
-### 4.1. Обновить config.yaml
+**Проблема:** Разные форматы могут использовать разные названия для одного параметра.
 
-Добавить новое расширение в `config.yaml`:
+**Пример:** `.pou` файлы используют `Purc`, а `.det` файлы используют `PurCyl` для одного и того же параметра "Mixture Purity".
 
-```yaml
-files:
-  extensions:
-    - '.det'
-    - '.xyz'  # ← Новое расширение
-  maxSize: 10485760  # 10 MB
-```
-
-### 4.2. Обновить роуты (если нужно)
-
-**Если парсер в отдельном файле:**
-
-Обновить `backend/src/routes/data.js`:
+**Решение:** Создать маппинг для унификации названий к каноническому виду.
 
 ```javascript
-import { parseDetFile } from '../services/fileParser.js';
-import { parseXyzFile } from '../services/parsers/xyzParser.js';
-
-// В функции роута:
-let projectData;
-if (filePath.endsWith('.det')) {
-  projectData = await parseDetFile(filePath);
-} else if (filePath.endsWith('.xyz')) {
-  projectData = await parseXyzFile(filePath);
-} else {
-  throw new Error('Unsupported file format');
-}
-```
-
-**Лучше: Создать фабрику парсеров:**
-
-```javascript
-// backend/src/services/parserFactory.js
-import { parseDetFile } from './fileParser.js';
-import { parseXyzFile } from './parsers/xyzParser.js';
-
-const PARSERS = {
-  '.det': parseDetFile,
-  '.xyz': parseXyzFile
+/**
+ * Маппинг параметров: .pou файл → каноническое название
+ */
+const PARAMETER_MAPPING = {
+  'Purc': 'PurCyl',  // .pou использует "Purc", .det использует "PurCyl"
+  // Добавляйте сюда другие маппинги при необходимости
 };
 
-export function getParser(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  const parser = PARSERS[ext];
+/**
+ * Применяет маппинг к названию параметра
+ */
+function mapParameterName(paramName) {
+  // Убираем номера цилиндров: "Purc( 1)" → "Purc"
+  const baseName = paramName.replace(/\(\s*\d+\s*\)/, '').trim();
 
-  if (!parser) {
-    throw new Error(`No parser found for extension: ${ext}`);
+  // Применяем маппинг
+  const mappedName = PARAMETER_MAPPING[baseName] || baseName;
+
+  // Восстанавливаем номер цилиндра: "Purc" → "PurCyl( 1)"
+  const cylinderMatch = paramName.match(/\(\s*\d+\s*\)/);
+  if (cylinderMatch) {
+    return mappedName + cylinderMatch[0];
   }
 
-  return parser;
+  return mappedName;
 }
 
-export async function parseFile(filePath) {
-  const parser = getParser(filePath);
-  return await parser(filePath);
+// В методе parseColumnHeaders:
+parseColumnHeaders(line) {
+  const cleaned = cleanLine(line);
+  const headers = cleaned.split(/\s+/).filter(Boolean);
+
+  // Применяем маппинг к каждому заголовку
+  const mappedHeaders = headers.map(header => mapParameterName(header));
+
+  return mappedHeaders;
 }
 ```
 
-Обновить `routes/data.js`:
+**Результат:** Frontend получает единые названия параметров, независимо от формата файла.
+
+#### Temperature Units (Единицы температуры)
+
+**Важно:** Все температурные параметры хранятся в **°C (Celsius)**, не в Kelvin!
 
 ```javascript
-import { parseFile } from '../services/parserFactory.js';
+// ✅ ПРАВИЛЬНО - данные уже в °C
+dataPoint.TCylMax = [450, 452, 448, 451];  // °C
+dataPoint.TUbMax = [680, 685, 678, 682];   // °C
+dataPoint.TexAv = 584.6;                   // °C
 
-// В функции роута:
-const projectData = await parseFile(filePath);
+// ❌ НЕПРАВИЛЬНО - НЕ конвертировать K → °C!
+// dataPoint.TCylMax = tempK - 273.15;  // Не делайте так!
+```
+
+**Параметры с температурой:**
+- `TCylMax` - Maximum cylinder temperature (°C)
+- `TUbMax` - Maximum unburned mixture temperature (°C)
+- `TexAv` - Average exhaust temperature (°C)
+- `TC-Av` - Average cylinder temperature (°C)
+
+Frontend выполняет конверсию °C ↔ °F для American units через `unitsConversion.ts`.
+
+#### Parameter Metadata (Метаданные параметров)
+
+**Single Source of Truth:** `frontend/src/config/parameters.ts`
+
+Этот файл содержит официальные метаданные для всех 29 параметров:
+- `name` - Каноническое название (RPM, P-Av, PurCyl, etc.)
+- `displayName` - Человеко-читаемое название (Engine Speed, Average Power, etc.)
+- `unit` - Единица измерения SI (об/мин, kW, N·m, bar, °C, etc.)
+- `conversionType` - Тип конверсии (power, torque, pressure, temperature, none)
+- `category` - Категория (global, per-cylinder, vibe-model)
+- `formats` - Доступность (['det'], ['pou'], ['det', 'pou'], etc.)
+- `chartable` - Можно ли отобразить на графике
+- `brief` - Краткое описание (для tooltips)
+- `description` - Полное описание (для Help страницы)
+
+**При добавлении нового формата:** Если вводите новые параметры, добавьте их в `parameters.ts` с полной документацией.
+
+---
+
+## 🔌 Шаг 3: Зарегистрировать парсер
+
+### 3.1. Обновить parsers/index.js
+
+```javascript
+// backend/src/parsers/index.js
+import { globalRegistry } from './ParserRegistry.js';
+import { DetParser } from './formats/detParser.js';
+import { PouParser } from './formats/pouParser.js';
+import { XyzParser } from './formats/xyzParser.js'; // ← Импортируем новый парсер
+
+function registerParsers() {
+  try {
+    globalRegistry.register('det', DetParser);
+    globalRegistry.register('pou', PouParser);
+    globalRegistry.register('xyz', XyzParser); // ← Регистрируем
+  } catch (error) {
+    if (!error.message.includes('уже зарегистрирован')) {
+      throw error;
+    }
+  }
+}
+
+registerParsers();
+
+// ... остальной код остаётся без изменений
+```
+
+### 3.2. Обновить formatDetector.js
+
+```javascript
+// backend/src/parsers/common/formatDetector.js
+
+function detectFormatByExtension(filePath) {
+  const lowerPath = filePath.toLowerCase();
+
+  if (lowerPath.endsWith('.det')) return 'det';
+  if (lowerPath.endsWith('.pou')) return 'pou';
+  if (lowerPath.endsWith('.xyz')) return 'xyz'; // ← Добавляем
+
+  return null;
+}
+
+function detectFormatByContent(firstLine) {
+  const parts = firstLine.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 2) return 'det';
+  if (parts.length >= 5) return 'pou';
+  if (parts.length === X) return 'xyz'; // ← Добавляем логику для .xyz
+
+  return null;
+}
+```
+
+### 3.3. Обновить TypeScript типы
+
+```typescript
+// backend/src/types/engineData.ts
+
+// 1. Добавить метаданные
+export interface XyzMetadata {
+  numCylinders: number;
+  engineType: string;
+  // ... поля специфичные для .xyz
+}
+
+export type EngineMetadata = DetMetadata | PouMetadata | XyzMetadata;
+
+// 2. Добавить DataPoint
+export interface XyzDataPoint {
+  RPM: number;
+  'P-Av': number;
+  Torque: number;
+  // ... параметры специфичные для .xyz
+}
+
+export type DataPoint = DetDataPoint | PouDataPoint | XyzDataPoint;
+
+// 3. Обновить формат
+export interface EngineProject {
+  fileName: string;
+  format: 'det' | 'pou' | 'xyz'; // ← Добавить 'xyz'
+  metadata: EngineMetadata;
+  columnHeaders: string[];
+  calculations: Calculation[];
+}
+```
+
+### 3.4. Обновить fileScanner.js
+
+```javascript
+// backend/src/services/fileScanner.js
+
+// Обновить расширения по умолчанию
+export async function scanDirectory(
+  directoryPath,
+  extensions = ['.det', '.pou', '.xyz'] // ← Добавить '.xyz'
+) {
+  // ... остальной код
+}
+
+export async function scanProjects(
+  directoryPath,
+  extensions = ['.det', '.pou', '.xyz'], // ← Добавить '.xyz'
+  maxFileSize = 0
+) {
+  // ... остальной код
+}
+
+// В функции scanProjects, в fallback для ошибок парсинга:
+return {
+  // ... existing fields
+  format: file.name.endsWith('.pou')
+    ? 'pou'
+    : file.name.endsWith('.xyz')
+      ? 'xyz'
+      : 'det', // ← Обновить определение формата
+  // ... rest of fields
+};
 ```
 
 ---
 
-## ✅ Шаг 5: Тестирование
+## ✅ Шаг 4: Тестирование
 
-### 5.1. Unit тесты (опционально)
+### 4.1. Подготовка тестовых данных
 
-Создать `backend/tests/parsers/xyzParser.test.js`:
-
-```javascript
-import { parseXyzFile } from '../../src/services/parsers/xyzParser.js';
-import { describe, it, expect } from 'vitest';
-
-describe('XYZ Parser', () => {
-  it('should parse valid XYZ file', async () => {
-    const result = await parseXyzFile('test-data/example.xyz');
-
-    expect(result).toHaveProperty('fileName');
-    expect(result).toHaveProperty('metadata');
-    expect(result).toHaveProperty('calculations');
-    expect(result.calculations).toBeInstanceOf(Array);
-  });
-
-  it('should handle metadata correctly', async () => {
-    const result = await parseXyzFile('test-data/example.xyz');
-
-    expect(result.metadata.numCylinders).toBe(4);
-    expect(result.metadata.engineType).toBe('NATUR');
-  });
-
-  it('should throw error for invalid file', async () => {
-    await expect(
-      parseXyzFile('test-data/invalid.xyz')
-    ).rejects.toThrow();
-  });
-});
+```bash
+# Скопировать тестовые файлы
+cp /path/to/examples/*.xyz test-data/
 ```
 
-### 5.2. Интеграционное тестирование
+### 4.2. Запуск backend
 
-**Ручное тестирование:**
-
-1. Добавить тестовый `.xyz` файл в `test-data/`
-2. Запустить backend:
-   ```bash
-   ./scripts/start.sh
-   ```
-3. Открыть браузер:
-   ```
-   http://localhost:5173
-   ```
-4. Проверить:
-   - Файл появился в списке проектов
-   - Открывается без ошибок
-   - Графики отображаются корректно
-   - Таблица показывает данные
-
-**Проверить в DevTools:**
-
-```javascript
-// В консоли браузера
-fetch('http://localhost:3000/api/projects')
-  .then(r => r.json())
-  .then(data => console.log(data));
-
-fetch('http://localhost:3000/api/project/example-xyz')
-  .then(r => r.json())
-  .then(data => console.log(data));
+```bash
+./scripts/start.sh
 ```
 
-### 5.3. Тестирование производительности
-
-**Проверить время парсинга:**
-
-```javascript
-// В routes/data.js уже есть таймер:
-const startTime = Date.now();
-const projectData = await parseFile(filePath);
-const parseDuration = Date.now() - startTime;
-
-console.log(`Parse duration: ${parseDuration}ms`);
+**Проверить логи:**
 ```
+[ParserRegistry] Зарегистрировано парсеров: 3
+  - det: DetParser
+  - pou: PouParser
+  - xyz: XyzParser
+```
+
+### 4.3. Тестирование API
+
+**1. Список проектов:**
+```bash
+curl http://localhost:3000/api/projects | jq
+```
+
+**Ожидаемый результат:**
+```json
+{
+  "projects": [
+    {
+      "id": "example-xyz",
+      "fileName": "example.xyz",
+      "format": "xyz",
+      "engineType": "NATUR",
+      "numCylinders": 4,
+      "calculationsCount": 2
+    }
+  ]
+}
+```
+
+**2. Детали проекта:**
+```bash
+curl http://localhost:3000/api/project/example-xyz | jq
+```
+
+**Ожидаемый результат:**
+```json
+{
+  "project": {
+    "fileName": "example.xyz",
+    "format": "xyz",
+    "metadata": { ... },
+    "calculations": [ ... ]
+  }
+}
+```
+
+### 4.4. Тестирование в UI
+
+1. Открыть http://localhost:5173
+2. Проверить:
+   - [ ] Файл .xyz появился в списке проектов
+   - [ ] Открывается без ошибок
+   - [ ] Графики отображаются корректно
+   - [ ] Таблица показывает данные
+   - [ ] Badge формата показывает "xyz"
+
+### 4.5. Проверка производительности
 
 **Целевые показатели:**
-- Файл <1 MB: <50ms
-- Файл 1-5 MB: <200ms
-- Файл 5-10 MB: <500ms
+- Файл <1 MB: <100ms
+- Файл 1-5 MB: <300ms
+- Файл 5-10 MB: <800ms
 
-**Если медленно:**
-- Использовать stream parsing (для больших файлов)
-- Оптимизировать регулярные выражения
-- Кэшировать промежуточные результаты
+**Проверить в логах backend:**
+```
+[ParserAPI] Парсинг файла example.xyz занял: 85ms
+```
 
 ---
 
-## 📚 Шаг 6: Обновить документацию
+## 📚 Шаг 5: Документация
 
-### 6.1. Обновить docs/file-formats/README.md
+### 5.1. Создать спецификацию формата
 
-Добавить строку в таблицу:
-
-```markdown
-| Формат | Расширение | Описание | Парсер | ADR | Статус |
-|--------|-----------|----------|--------|-----|--------|
-| **DET** | `.det` | Результаты расчётов | `detParser.js` | [ADR 001](decisions/001-det-file-format.md) | ✅ Реализовано |
-| **XYZ** | `.xyz` | [Описание] | `xyzParser.js` | ADR 002 (пример) | ⏳ Планируется |
+Создай детальную документацию:
+```
+docs/file-formats/xyz-format.md
 ```
 
-### 6.2. Обновить README.md
+**См. примеры:**
+- [det-format.md](file-formats/det-format.md)
+- [pou-format.md](file-formats/pou-format.md)
 
-Добавить информацию о новом формате в секцию "Supported Formats".
+### 5.2. Создать пример файла
 
-### 6.3. Обновить CHANGELOG.md
+```bash
+# Создать аннотированный пример
+touch docs/file-formats/examples/sample.xyz
+```
+
+### 5.3. Обновить сравнительную таблицу
+
+Добавить в [comparison.md](file-formats/comparison.md) раздел с .xyz форматом.
+
+### 5.4. Обновить README проекта
+
+```markdown
+## Supported File Formats
+
+| Format | Extension | Parameters | Status |
+|--------|-----------|------------|--------|
+| DET | `.det` | 24 | ✅ Supported |
+| POU | `.pou` | 71 | ✅ Supported |
+| XYZ | `.xyz` | XX | ✅ Supported |
+```
+
+### 5.5. Обновить CHANGELOG
 
 ```markdown
 ## [Unreleased]
 
 ### Added
-- Support for .xyz file format
-- Parser: `xyzParser.js`
-- Documentation: `docs/file-formats/xyz-format.md`
-- ADR 002: XYZ file format parsing decision
+- Support for .xyz file format (XX parameters)
+- Parser: XyzParser implementing Registry pattern
+- Documentation: xyz-format.md specification
+- Example file: docs/file-formats/examples/sample.xyz
+- TypeScript types: XyzMetadata, XyzDataPoint
 
 ### Changed
-- Updated file format table in README.md
-- Extended `config.yaml` with .xyz extension
+- Updated formatDetector.js with .xyz detection
+- Extended fileScanner.js default extensions
+- Updated ParserRegistry with xyz parser
 ```
 
-### 6.4. Создать примеры
+### 5.6. Обновить file-formats/README.md
 
-Добавить пример файла в `docs/file-formats/examples/`:
-
-```
-docs/file-formats/examples/
-├── sample.det       # Существующий
-└── sample.xyz       # Новый
+```markdown
+| Формат | Расширение | Параметры | Парсер | Документация | Статус |
+|--------|-----------|-----------|--------|--------------|--------|
+| DET | `.det` | 24 | `detParser.js` | [det-format.md](det-format.md) | ✅ Реализовано |
+| POU | `.pou` | 71 | `pouParser.js` | [pou-format.md](pou-format.md) | ✅ Реализовано |
+| XYZ | `.xyz` | XX | `xyzParser.js` | [xyz-format.md](xyz-format.md) | ✅ Реализовано |
 ```
 
 ---
 
 ## 🔍 Checklist: Добавление нового формата
 
-Используй этот чеклист при добавлении каждого нового формата:
-
 ### Подготовка
 - [ ] Получил тестовые файлы (2-3 примера)
 - [ ] Сохранил в `test-data/`
 - [ ] Проанализировал структуру файла
 - [ ] Изучил особенности формата (edge cases)
-
-### Документация
-- [ ] Создал ADR: `docs/decisions/00X-format-name.md`
-- [ ] Создал описание: `docs/file-formats/format-name.md`
-- [ ] Обновил `docs/file-formats/README.md`
-- [ ] Добавил примеры в `docs/file-formats/examples/`
+- [ ] Определил количество параметров
+- [ ] Определил структуру метаданных
 
 ### Код
-- [ ] Создал парсер: `backend/src/services/parsers/formatParser.js`
-- [ ] Реализовал `parseFormatFile()` функцию
+- [ ] Создал парсер: `backend/src/parsers/formats/xyzParser.js`
+- [ ] Реализовал класс `XyzParser` с методом `parse()`
+- [ ] Использовал common utilities (`cleanLine`, `parseCalculationMarker`)
 - [ ] Возвращает данные в едином JSON формате
+- [ ] Включает поле `format: 'xyz'`
 - [ ] Добавлены JSDoc комментарии
 - [ ] Обработаны ошибки и edge cases
 
 ### Интеграция
-- [ ] Обновил `config.yaml` (добавил расширение)
-- [ ] Интегрировал в `parserFactory.js` (или `routes/data.js`)
-- [ ] Парсер корректно вызывается для файлов
+- [ ] Зарегистрировал парсер в `parsers/index.js`
+- [ ] Обновил `formatDetector.js` (extension + content detection)
+- [ ] Обновил TypeScript типы (`engineData.ts`)
+- [ ] Обновил `fileScanner.js` (добавил расширение в defaults)
+- [ ] Парсер корректно вызывается через Registry
 
 ### Тестирование
-- [ ] Написал unit тесты (опционально)
-- [ ] Ручное тестирование: файл появляется в списке
-- [ ] Ручное тестирование: открывается без ошибок
-- [ ] Ручное тестирование: графики отображаются
-- [ ] Ручное тестирование: таблица работает
+- [ ] Backend запускается без ошибок
+- [ ] Парсер регистрируется в логах
+- [ ] API `/projects` возвращает .xyz файлы
+- [ ] API `/project/<id>` парсит .xyz корректно
+- [ ] UI: файл появляется в списке
+- [ ] UI: открывается без ошибок
+- [ ] UI: графики отображаются
+- [ ] UI: таблица работает
+- [ ] UI: badge формата показывает правильный формат
 - [ ] Проверил производительность (время парсинга)
 
+### Документация
+- [ ] Создал `docs/file-formats/xyz-format.md`
+- [ ] Создал пример: `docs/file-formats/examples/sample.xyz`
+- [ ] Обновил `docs/file-formats/README.md`
+- [ ] Обновил `docs/file-formats/comparison.md`
+- [ ] Обновил `README.md` (Supported Formats)
+- [ ] Обновил `CHANGELOG.md` ([Unreleased] секция)
+
 ### Финализация
-- [ ] Обновил README.md (секция Supported Formats)
-- [ ] Обновил CHANGELOG.md ([Unreleased] секция)
 - [ ] Сделал коммит с понятным сообщением
 - [ ] Протестировал в Chrome и Safari
+- [ ] Обновил roadmap.md если нужно
+
+---
+
+## 🎓 Примеры реализации
+
+### Пример 1: DetParser (24 параметра)
+
+**Файл:** [backend/src/parsers/formats/detParser.js](../backend/src/parsers/formats/detParser.js)
+
+**Особенности:**
+- Простая структура метаданных (2 поля)
+- 5 массивов по цилиндрам
+- Параметр Convergence в конце
+
+### Пример 2: PouParser (71 параметр)
+
+**Файл:** [backend/src/parsers/formats/pouParser.js](../backend/src/parsers/formats/pouParser.js)
+
+**Особенности:**
+- Расширенные метаданные (5 полей)
+- 16 массивов по цилиндрам
+- Последовательное извлечение через индекс
+- Vibe параметры в конце
+- **Parameter Mapping:** `Purc` → `PurCyl` унификация
+- **Temperature Data:** Все температуры в °C (не Kelvin)
+
+### Сравнение подходов
+
+| Aspect | DetParser | PouParser |
+|--------|-----------|-----------|
+| Метаданные | 2 поля | 5 полей |
+| Параметры | 24 | 71 |
+| Массивы | 5 | 16 |
+| Индексация | Простая | Последовательная (idx++) |
+| Сложность | Низкая | Средняя |
 
 ---
 
 ## 🔗 Ссылки
 
-### Существующие примеры
-- [.det Parser](../backend/src/services/fileParser.js) - Рабочий пример парсера
-- [ADR 001: DET Format](decisions/001-det-file-format.md) - Пример ADR
-- [DET Format Spec](file-formats/det-format.md) - Пример описания формата
+### Документация форматов
+- [.det Format Specification](file-formats/det-format.md) - 24 параметра
+- [.pou Format Specification](file-formats/pou-format.md) - 71 параметр
+- [Format Comparison](file-formats/comparison.md) - Сравнение форматов
 
-### Инструменты
-- [ADR Template](decisions/template.md) - Шаблон для новых ADR
+### Исходный код
+- [DetParser](../backend/src/parsers/formats/detParser.js) - Пример простого парсера
+- [PouParser](../backend/src/parsers/formats/pouParser.js) - Пример сложного парсера
+- [ParserRegistry](../backend/src/parsers/ParserRegistry.js) - Registry pattern
+- [Format Detector](../backend/src/parsers/common/formatDetector.js) - Автоопределение
+- [Calculation Marker](../backend/src/parsers/common/calculationMarker.js) - Парсинг $
 
 ### Документация проекта
 - [README.md](../README.md) - Главная документация
 - [Architecture](architecture.md) - Архитектура проекта
 - [API Documentation](api.md) - REST API endpoints
+
+---
+
+## 🚀 Преимущества Registry Pattern
+
+**1. Расширяемость:**
+- Добавление нового формата не требует изменения существующего кода
+- Просто создать парсер и зарегистрировать его
+
+**2. Единообразие:**
+- Все парсеры следуют одному интерфейсу
+- Общие утилиты переиспользуются
+
+**3. Автоматизация:**
+- Формат определяется автоматически
+- Правильный парсер выбирается через Registry
+
+**4. Поддерживаемость:**
+- Каждый парсер изолирован
+- Легко тестировать и отлаживать
+
+**5. Масштабируемость:**
+- Легко добавлять новые форматы
+- Нет необходимости в if/else цепочках
 
 ---
 

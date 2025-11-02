@@ -33,7 +33,7 @@ project-name.det  (adds TCylMax + PCylMax + Deto + Convergence)
 ```
 
 **What gets added:**
-- **TCylMax** - Maximum cylinder temperature (K) - from .det file
+- **TCylMax** - Maximum cylinder temperature (°C) - from .det file
 - **PCylMax** - Maximum cylinder pressure (bar) - from .det file
 - **Deto** - Detonation indicator - from .det file
 - **Convergence** - Calculation convergence quality - from .det file
@@ -110,7 +110,7 @@ $Cal_2
 | `RPM` | об/мин | Engine speed (revolutions per minute) |
 | `P-Av` | кВт | Average power output |
 | `Torque` | Н·м | Engine torque |
-| `TexAv` | K | Average exhaust temperature |
+| `TexAv` | °C | Average exhaust temperature |
 
 ### 2. Per-Cylinder Power (N parameters)
 
@@ -204,7 +204,7 @@ $Cal_2
 
 | Parameter | Unit | Description |
 |-----------|------|-------------|
-| `TC-Av(1..N)` | K | Average cylinder temperature for each cylinder |
+| `TC-Av(1..N)` | °C | Average cylinder temperature for each cylinder |
 
 **Definition:** Mean temperature inside the cylinder during the cycle.
 
@@ -212,7 +212,7 @@ $Cal_2
 
 | Parameter | Unit | Description |
 |-----------|------|-------------|
-| `TUbMax(1..N)` | K | Maximum exhaust gas temperature for each cylinder |
+| `TUbMax(1..N)` | °C | Maximum exhaust gas temperature for each cylinder |
 
 **Definition:** Peak temperature in the exhaust port.
 
@@ -438,7 +438,7 @@ export interface PouDataPoint {
   RPM: number;                // Обороты двигателя (об/мин)
   'P-Av': number;             // Средняя мощность (кВт)
   Torque: number;             // Крутящий момент (Н·м)
-  TexAv: number;              // Средняя температура выпуска (K)
+  TexAv: number;              // Средняя температура выпуска (°C)
 
   // Per-cylinder arrays (N = numCylinders)
   Power: number[];            // Мощность для каждого цилиндра (кВт)
@@ -452,8 +452,8 @@ export interface PouDataPoint {
   Teff: number[];             // Trapping efficiency
   Ceff: number[];             // Charging efficiency
   BSFC: number[];             // Brake Specific Fuel Consumption (г/кВт·ч)
-  'TC-Av': number[];          // Температура в цилиндре средняя (K)
-  TUbMax: number[];           // Максимальная температура выпускных газов (K)
+  'TC-Av': number[];          // Температура в цилиндре средняя (°C)
+  TUbMax: number[];           // Максимальная температура выпускных газов (°C)
   MaxDeg: number[];           // Максимальный угол (градусы)
 
   // Global timing and combustion

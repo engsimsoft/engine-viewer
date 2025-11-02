@@ -59,7 +59,7 @@
 | RPM | ✅ | ✅ | об/мин | Engine speed |
 | P-Av | ✅ | ✅ | кВт | Average power |
 | Torque | ✅ | ✅ | Н·м | Engine torque |
-| TexAv | ❌ | ✅ | K | Average exhaust temperature |
+| TexAv | ❌ | ✅ | °C | Average exhaust temperature |
 | FMEP | ❌ | ✅ | бар | Friction losses |
 | Timing | ❌ | ✅ | градусы | Ignition/injection timing |
 | TAF | ❌ | ✅ | - | Total air flow |
@@ -71,8 +71,8 @@
 |-----------|------|------|------|-------------|
 | **Power** | ❌ | ✅ | кВт | Power per cylinder |
 | **PurCyl** | ✅ | ✅ | - | Volumetric efficiency |
-| **TUbMax** | ✅ | ✅ | K | Max exhaust temperature |
-| **TCylMax** | ✅ | ❌ | K | Max cylinder temperature |
+| **TUbMax** | ✅ | ✅ | °C | Max exhaust temperature |
+| **TCylMax** | ✅ | ❌ | °C | Max cylinder temperature |
 | **PCylMax** | ✅ | ⚠️* | бар | Max cylinder pressure (*via merge) |
 | **Deto** | ✅ | ⚠️* | - | Detonation indicator (*via merge) |
 | **IMEP** | ❌ | ✅ | бар | Indicated MEP |
@@ -83,7 +83,7 @@
 | **Teff** | ❌ | ✅ | - | Trapping efficiency |
 | **Ceff** | ❌ | ✅ | - | Charging efficiency |
 | **BSFC** | ❌ | ✅ | г/кВт·ч | Fuel consumption |
-| **TC-Av** | ❌ | ✅ | K | Average cylinder temp |
+| **TC-Av** | ❌ | ✅ | °C | Average cylinder temp |
 | **MaxDeg** | ❌ | ✅ | градусы | Angle at max pressure |
 | **Delay** | ❌ | ✅ | градусы | Ignition delay |
 | **Durat** | ❌ | ✅ | градусы | Combustion duration |

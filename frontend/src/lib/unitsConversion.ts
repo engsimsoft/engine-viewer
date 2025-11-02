@@ -13,7 +13,7 @@
  * - Power: kW
  * - Torque: N·m
  * - Pressure: bar
- * - Temperature: °C (Celsius, в базе K, конвертируется при парсинге)
+ * - Temperature: °C (Celsius, уже в файлах .det/.pou)
  */
 
 import type { Units } from '@/types/v2';

@@ -223,3 +223,5 @@ _personal/
 # ============================================
 # Если не хочешь коммитить production конфиги:
 # config.production.yaml
+
+# Personal notes and cheat sheets (local only)

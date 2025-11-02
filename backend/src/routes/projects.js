@@ -109,6 +109,7 @@ router.get('/', async (req, res, next) => {
       id: project.id,
       name: project.name, // Display name (filename without extension)
       fileName: project.fileName,
+      format: project.format || 'unknown', // File format ('det', 'pou', etc.)
       numCylinders: project.numCylinders || 0,
       engineType: project.engineType || 'UNKNOWN',
       calculationsCount: project.calculationsCount || 0,

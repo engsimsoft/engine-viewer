@@ -97,12 +97,13 @@
     - Comparison mode: gray legend (user relies on line styles)
   - ✅ Legend always shown (not only for multiple parameters)
   - **Result**: ChartPreset4 now follows established design patterns from ChartPreset1-3, clean professional UI
-- **ChartPreset4 (Custom Chart) refactoring - Phase 2** (2025-11-02):
+- **ChartPreset4 (Custom Chart) refactoring - Phase 2-3** (2025-11-02):
   - ✅ Created **ParameterSelectorModal.tsx** - Simple modal for parameter selection
   - ✅ Modal features:
     - Search bar with real-time filtering (search by short name or full name)
     - Parameter grid (2-3 columns responsive layout)
     - Parameter cards with: short name, unit badge, "AVG" badge for per-cylinder params
+    - **Per-cylinder selection**: Popover dropdown (Avg/Cyl1-4) for selected per-cylinder parameters
     - Selected state styling (blue border + background)
     - Footer with count ("2 parameters selected") and Done button
   - ✅ NO category tabs - Custom Chart doesn't duplicate Preset 1-6 logic
@@ -110,8 +111,30 @@
   - ✅ RPM excluded from list - It's always X-axis, can't be Y-parameter
   - ✅ 23 chartable parameters available (all except RPM, vibe-model, quality)
   - ✅ Integration with ChartPreset4 via "Select Parameters (2 selected)" button
-  - ✅ State management via Zustand store (isParameterSelectorOpen, toggleParameterSelector)
-  - **Result**: Clean, simple parameter selection without interface clutter, doesn't duplicate ready-made presets
+  - ✅ State management via Zustand store (isParameterSelectorOpen, toggleParameterSelector, setCylinderSelection)
+  - ✅ Per-cylinder data support: Users can drill into specific cylinders for detailed analysis
+  - **Result**: Clean, simple parameter selection with advanced per-cylinder analysis capabilities
+- **ChartPreset4 (Custom Chart) refactoring - Phase 4** (2025-11-03):
+  - ✅ Enhanced **ParameterSelectorModal.tsx** - Category grouping matching Help page layout
+  - ✅ Modal improvements:
+    - **Category-based grouping**: Parameters organized into 7 categories (Performance, MEP, Temperature, Combustion, Efficiency, Vibe Model, Calculation Quality)
+    - **Color-coded section headers**: Each category has distinct color (blue Performance, purple MEP, red Temperature, orange Combustion, cyan Efficiency, green Vibe, gray Quality)
+    - **Parameter count badges**: Shows count of parameters in each category
+    - **Smart search mode**: When user searches, groups disappear and flat filtered list appears
+    - **Empty state handling**: "No parameters found" message for empty search results
+    - **Consistent with Help page**: Categories and colors match HelpPage.tsx for UX consistency
+  - ✅ 7 category sections with proper grouping:
+    - Performance (2): P-Av, Torque
+    - MEP (4): FMEP, IMEP, BMEP, PMEP
+    - Temperature (3): TCylMax, TUbMax, TexAv
+    - Combustion (4): TAF, Timing, Delay, Durat
+    - Efficiency (5): DRatio, PurCyl, Seff, Teff, Ceff
+    - Vibe Combustion Model (4): VibeDelay, VibeDurat, VibeA, VibeM
+    - Calculation Quality (1): Convergence
+  - ✅ Responsive grid maintained: 3 columns desktop, 2 columns mobile
+  - ✅ Per-cylinder selection (Avg/Cyl1-4) preserved for array parameters
+  - ✅ Search functionality: Real-time filtering across all categories, instant clear
+  - **Result**: Professional category-based organization matching Help page, improved UX and parameter discovery
 - **Professional chart legend design** (2025-11-01):
   - ✅ Repositioned legend at top center (top: 15px) - perfect alignment with Y-axis labels
   - ✅ Updated typography to match axis labels (fontSize: 14, fontWeight: bold)

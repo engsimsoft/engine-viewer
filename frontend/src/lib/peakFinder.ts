@@ -39,7 +39,8 @@ export function findPeak(
 
   for (const point of dataPoints) {
     const value = point[parameter];
-    if (value > maxValue) {
+    // Skip if value is undefined (optional parameter not present)
+    if (value !== undefined && value > maxValue) {
       maxValue = value;
       maxRPM = point.RPM;
     }

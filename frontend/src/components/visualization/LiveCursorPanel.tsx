@@ -134,16 +134,17 @@ export function LiveCursorPanel({
 
         case 3: // Temperature
           // Show average TCylMax and TUbMax
-          const avgTCylMax =
+          // Data already in °C from files
+          const avgTCylMaxC =
             dataPoint.TCylMax.reduce((sum: number, t: number) => sum + t, 0) /
             dataPoint.TCylMax.length;
-          const avgTUbMax =
+          const avgTUbMaxC =
             dataPoint.TUbMax.reduce((sum: number, t: number) => sum + t, 0) /
             dataPoint.TUbMax.length;
 
-          // Convert K → °C first
-          const tCyl = convertTemperature(avgTCylMax - 273.15, units);
-          const tUb = convertTemperature(avgTUbMax - 273.15, units);
+          // Apply unit conversion (°C ↔ °F)
+          const tCyl = convertTemperature(avgTCylMaxC, units);
+          const tUb = convertTemperature(avgTUbMaxC, units);
 
           calcValues.push({
             label: 'TCylMax (avg)',

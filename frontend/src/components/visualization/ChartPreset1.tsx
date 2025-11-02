@@ -14,10 +14,8 @@ import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
-  convertPower,
-  convertTorque,
-  getPowerUnit,
-  getTorqueUnit,
+  convertValue,
+  getParameterUnit,
 } from '@/lib/unitsConversion';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import { generateChartFilename } from '@/lib/exportFilename';
@@ -132,13 +130,13 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
 
       // Prepare power data with units conversion and decimals
       const powerData = calc.data.map((point) => ({
-        value: [point.RPM, convertPower(point['P-Av'], units)],
+        value: [point.RPM, convertValue(point['P-Av'], 'P-Av', units)],
         decimals: decimals,
       }));
 
       // Prepare torque data with units conversion and decimals
       const torqueData = calc.data.map((point) => ({
-        value: [point.RPM, convertTorque(point.Torque, units)],
+        value: [point.RPM, convertValue(point.Torque, 'Torque', units)],
         decimals: decimals,
       }));
 
@@ -174,7 +172,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
             show: false, // Hide default label, use tooltip instead
           },
           data: [{
-            coord: [powerPeak.rpm, convertPower(powerPeak.value, units)],
+            coord: [powerPeak.rpm, convertValue(powerPeak.value, 'P-Av', units)],
             value: formatPeakValue(powerPeak, 'P-Av', units),
           }],
         } : undefined,
@@ -213,7 +211,7 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
             show: false, // Hide default label, use tooltip instead
           },
           data: [{
-            coord: [torquePeak.rpm, convertTorque(torquePeak.value, units)],
+            coord: [torquePeak.rpm, convertValue(torquePeak.value, 'Torque', units)],
             value: formatPeakValue(torquePeak, 'Torque', units),
           }],
         } : undefined,
@@ -225,8 +223,8 @@ export function ChartPreset1({ calculations }: ChartPreset1Props) {
     });
 
     // Get unit labels
-    const powerUnit = getPowerUnit(units);
-    const torqueUnit = getTorqueUnit(units);
+    const powerUnit = getParameterUnit('P-Av', units);
+    const torqueUnit = getParameterUnit('Torque', units);
 
     return {
       ...baseConfig,

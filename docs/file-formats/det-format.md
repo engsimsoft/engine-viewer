@@ -59,15 +59,15 @@ $2  1000  16.20  125.00  0.8700  0.8800  0.8900  0.8600  ...
 
 | Параметр | Единицы | Описание |
 |----------|---------|----------|
-| `RPM` | об/мин | Обороты двигателя |
-| `P-Av` | кВт | Средняя мощность |
-| `Torque` | Н·м | Крутящий момент |
-| `PurCyl(1-4)` | - | Коэффициент наполнения цилиндров |
-| `TCylMax(1-4)` | °C | Макс. температура в цилиндрах |
-| `PCylMax(1-4)` | бар | Макс. давление в цилиндрах |
-| `TUbMax(1-4)` | °C | Макс. температура выпуска |
-| `Deto(1-4)` | - | Детонация (0 = нет, >0 = есть) |
-| `Convergence` | - | Сходимость расчёта |
+| `RPM` | об/мин | Simulated engine rpm |
+| `P-Av` | кВт | Average engine total power over the last six cycles (kW) for a naturally aspirated engine. The same for a Supercharged engine but with the power absorbed by the Compressor and its drive subtracted. Average engine total power over the last forty cycles (kW) for a Turbocharged engine. |
+| `Torque` | Н·м | The engine torque calculated from the P-av value (Nm) |
+| `PurCyl(1-4)` | - | Purity of the mixture in the cylinder at inlet valve closure |
+| `TCylMax(1-4)` | °C | Maximum temperature per cylinder (°C) |
+| `PCylMax(1-4)` | бар | Maximum pressure per cylinder (bar) |
+| `TUbMax(1-4)` | °C | Maximum unburned mixture temperature per cylinder (°C) |
+| `Deto(1-4)` | - | The count of the number of detonations per cylinder over the last 4 cycles. 0 to 4. |
+| `Convergence` | - | Convergence of the calculation (quality indicator) |
 
 **⚠️ Важно:** Первая колонка (→) служебная - пропускается при парсинге!
 
