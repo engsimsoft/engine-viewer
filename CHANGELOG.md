@@ -113,6 +113,25 @@
 
 ## [Unreleased]
 
+### Changed
+- **Help Page Header Unification** (2025-11-02):
+  - ✅ Unified header layout between Help page and Visualization page for consistent UX
+  - ✅ Three-column flexbox layout: [Back button] [Title + Subtitle centered] [Spacer for balance]
+  - ✅ Moved title "Parameters Reference" and subtitle from main content to header
+  - ✅ Responsive Back button text: "Back to Visualization" on desktop, "Back" on mobile
+  - ✅ Matching styling: bg-card, px-6 py-4, text-xl font-bold
+  - ✅ Result: Unified styling across all application pages
+  - File: [frontend/src/pages/HelpPage.tsx](frontend/src/pages/HelpPage.tsx)
+
+### Fixed
+- **Help Page UX Improvements** (2025-11-02):
+  - ✅ Improved Info icon clickable area from 24px × 24px to 32px × 32px (+33%)
+  - ✅ Increased button padding p-1 → p-2 without changing icon visual size
+  - ✅ Better accessibility meeting WCAG 32px touch target minimum
+  - ✅ Preserved visual hierarchy (icon stays h-4 w-4 = 16px)
+  - Commit: 5bc5b02
+  - File: [frontend/src/pages/HelpPage.tsx](frontend/src/pages/HelpPage.tsx)
+
 ### Added
 - **Phase 8: Parameter System Integration (Sections 8.1 & 8.2)** (2025-11-02):
   - ✅ **Section 8.1 - Parameters Configuration**:

@@ -123,29 +123,41 @@ export default function HelpPage() {
   return (
     <Tooltip.Provider delayDuration={300}>
       <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="gap-2 hover:bg-accent"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Visualization</span>
-          </Button>
+      {/* Header - Unified style with Visualization page */}
+      <header className="bg-card border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Back button */}
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-2 hover:bg-accent"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Visualization</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+            </div>
+
+            {/* Center: Title + Subtitle */}
+            <div className="flex-1 text-center px-4">
+              <h1 className="text-xl font-bold text-foreground">
+                Parameters Reference
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Complete guide to all engine parameters
+              </p>
+            </div>
+
+            {/* Right: Spacer for visual balance */}
+            <div className="w-[180px]" />
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Title Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Parameters Reference</h1>
-          <p className="text-muted-foreground mt-2">
-            Complete guide to all engine parameters
-          </p>
-        </div>
 
         {/* Parameters Sections */}
         <div className="space-y-8">
