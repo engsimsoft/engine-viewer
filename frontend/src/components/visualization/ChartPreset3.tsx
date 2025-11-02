@@ -1,12 +1,47 @@
+/**
+ * Chart Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)
+ *
+ * "Очень важный preset" - Shows critical values that can destroy the engine
+ *
+ * Triple Y-axis chart:
+ * - Left axis: PCylMax (bar/psi) - Maximum cylinder pressure (per-cylinder, averaged)
+ * - Right axis 1: TC-Av (°C/°F) - Average cylinder temperature (scalar)
+ * - Right axis 2: MaxDeg (deg) - Degrees after TDC where max pressure occurs (per-cylinder, averaged) (offset 60px)
+ * - X axis: RPM
+ *
+ * Parameter types:
+ * - PCylMax: per-cylinder array → averaged across cylinders
+ * - TC-Av: scalar (already averaged)
+ * - MaxDeg: per-cylinder array → averaged across cylinders
+ *
+ * Features:
+ * - Triple Y-axis for parameters with different units and scales
+ * - Fixed Y-axis ranges: PCylMax (20-120 bar), TC-Av (1800-2800°C), MaxDeg (0-30 °ATDC)
+ * - Cross-project comparison support
+ * - Per-cylinder averaging for PCylMax and MaxDeg (TC-Av is scalar)
+ * - Units conversion (bar ↔ psi, °C ↔ °F)
+ * - Peak markers: MAX for PCylMax/TC-Av, MIN for MaxDeg (<14° = detonation risk)
+ * - Different line styles: solid (PCylMax), dashed (TC-Av), dotted (MaxDeg)
+ *
+ * Scale differences:
+ * - PCylMax: ~100 bar (range: 20-120)
+ * - TC-Av: ~2500°C (range: 1800-2800)
+ * - MaxDeg: ~8-12 °ATDC (range: 0-30, showing MIN value)
+ *
+ * @example
+ * ```tsx
+ * <ChartPreset3 calculations={calculations} />
+ * ```
+ */
+
 import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption, YAXisComponentOption } from 'echarts';
 import type { CalculationReference } from '@/types/v2';
 import {
   getBaseChartConfig,
   createXAxis,
   createYAxis,
-  PARAMETER_COLORS,
 } from '@/lib/chartConfig';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
@@ -14,9 +49,10 @@ import { PeakValuesCards } from './PeakValuesCards';
 import { useMultiProjectData, getLoadedCalculations } from '@/hooks/useMultiProjectData';
 import { useAppStore } from '@/stores/appStore';
 import {
-  convertTemperature,
-  getTemperatureUnit,
+  convertValue,
+  getParameterUnit,
 } from '@/lib/unitsConversion';
+import { PARAMETERS } from '@/config/parameters';
 import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -27,43 +63,11 @@ interface ChartPreset3Props {
   calculations: CalculationReference[];
 }
 
-/**
- * Chart Preset 3: Temperature (v2.0 - Multi-Project Support)
- *
- * Single-axis chart:
- * - Y axis: Temperature (TCylMax & TUbMax)
- * - X axis: RPM
- * - Two lines per calculation:
- *   1. TCylMax (average across cylinders) - solid line
- *   2. TUbMax (average across cylinders) - dashed line
- *
- * Example: If 2 calculations are selected, chart shows 4 lines:
- * - ProjectA → $1 - TCylMax
- * - ProjectA → $1 - TUbMax
- * - ProjectB → $2 - TCylMax
- * - ProjectB → $2 - TUbMax
- *
- * Features:
- * - Cross-project comparison support
- * - Units conversion (°C/°F)
- * - Kelvin → Celsius conversion from database
- * - Color-coded calculations
- * - Loading/error states
- *
- * @example
- * ```tsx
- * const primary = useAppStore(state => state.primaryCalculation);
- * const comparisons = useAppStore(state => state.comparisonCalculations);
- * const allCalcs = [primary, ...comparisons].filter(Boolean);
- *
- * <ChartPreset3 calculations={allCalcs} />
- * ```
- */
 export function ChartPreset3({ calculations }: ChartPreset3Props) {
   // Get units and chart settings from store
   const units = useAppStore((state) => state.units);
   const chartSettings = useAppStore((state) => state.chartSettings);
-  const { animation, showGrid, decimals} = chartSettings;
+  const { animation, showGrid, decimals } = chartSettings;
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(
@@ -110,18 +114,18 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
     const rpmMin = Math.min(...allRpmRanges.map(([min]) => min));
     const rpmMax = Math.max(...allRpmRanges.map(([, max]) => max));
 
+    // Critical parameters and their line styles
+    const parameters = ['PCylMax', 'TC-Av', 'MaxDeg'];
+    const lineStyles: Array<'solid' | 'dashed' | 'dotted'> = ['solid', 'dashed', 'dotted'];
+    const lineDash = [undefined, [5, 5], [2, 2]]; // solid, dashed, dotted
+
     // Create series for each calculation
     const series: any[] = [];
-    const legendData: string[] = [];
 
     // Determine if we should use parameter colors (single calculation mode)
     const isSingleCalculation = readyCalculations.length === 1;
 
     readyCalculations.forEach((calc, calcIndex) => {
-      // Use parameter colors for single calculation, source colors for comparison
-      const tCylMaxColor = isSingleCalculation ? PARAMETER_COLORS.temperatureCyl : calc.color;
-      const tUbMaxColor = isSingleCalculation ? PARAMETER_COLORS.temperatureExh : calc.color;
-
       // Label: show project name only in comparison mode
       const label = isSingleCalculation
         ? calc.calculationName
@@ -130,59 +134,100 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
       // Ensure data is loaded
       if (!calc.data || calc.data.length === 0) return;
 
-      // Find peak temperatures
-      // TCylMax: ONLY available in .det format (not in .pou)
-      const hasTCylMax = calc.data[0]?.TCylMax !== undefined;
-      const tCylMaxPeak = hasTCylMax ? findPeak(calc.data, 'TCylMax') : null;
-      const tUbMaxPeak = findPeak(calc.data, 'TUbMax');
-
       // Get marker symbol for this calculation
       const markerSymbol = getMarkerSymbol(calcIndex);
 
-      // Prepare TCylMax data (average cylinder temperature)
-      // IMPORTANT: Convert K → °C first, then apply units conversion
-      // NOTE: TCylMax is ONLY available in .det format (not in .pou)
-      const tCylMaxData = hasTCylMax
-        ? calc.data.map((point) => {
-            const avgTempK =
-              point.TCylMax!.reduce((sum, temp) => sum + temp, 0) /
-              point.TCylMax!.length;
-            const celsius = avgTempK - 273.15; // K → °C
-            return {
-              value: [point.RPM, convertTemperature(celsius, units)],
-              decimals: decimals,
-            };
-          })
-        : [];
+      // Create series for each critical parameter
+      parameters.forEach((paramName, paramIndex) => {
+        // Use parameter colors for single calculation, calc color for comparison
+        // In single calculation mode: each parameter gets its own color
+        // In comparison mode: all parameters of one calculation use calc.color
+        const criticalColors = [
+          '#1f77b4', // PCylMax - Blue
+          '#d62728', // TC-Av - Red
+          '#ff7f0e', // MaxDeg - Orange
+        ];
+        const color = isSingleCalculation ? criticalColors[paramIndex] : calc.color;
 
-      // Prepare TUbMax data (average exhaust temperature)
-      // IMPORTANT: Convert K → °C first, then apply units conversion
-      const tUbMaxData = calc.data.map((point) => {
-        const avgTempK =
-          point.TUbMax.reduce((sum, temp) => sum + temp, 0) /
-          point.TUbMax.length;
-        const celsius = avgTempK - 273.15; // K → °C
-        return {
-          value: [point.RPM, convertTemperature(celsius, units)],
-          decimals: decimals,
-        };
-      });
+        // Check if parameter is per-cylinder (needs averaging)
+        // PCylMax: per-cylinder array → average
+        // TC-Av: scalar (already averaged) → no averaging
+        // MaxDeg: per-cylinder array → average
+        const param = PARAMETERS[paramName];
+        const isPerCylinder = param?.perCylinder || false;
 
-      // TCylMax series (cylinder temperature) - solid line
-      // NOTE: Only add if TCylMax is available (.det format)
-      if (hasTCylMax) {
+        // Y-axis index for triple axis configuration
+        // PCylMax: yAxisIndex 0 (left)
+        // TC-Av: yAxisIndex 1 (right 1)
+        // MaxDeg: yAxisIndex 2 (right 2, offset)
+        const yAxisIndex = paramIndex;
+
+        // Prepare data with units conversion and per-cylinder averaging
+        const paramData = calc.data!.map((point) => {
+          // Get raw value
+          const rawValue = (point as any)[paramName];
+
+          // Handle per-cylinder vs scalar parameters
+          let valueToConvert: number;
+          if (isPerCylinder && Array.isArray(rawValue)) {
+            // Per-cylinder array (PCylMax, MaxDeg) → average across cylinders
+            valueToConvert = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+          } else {
+            // Scalar value (TC-Av) → use directly
+            valueToConvert = rawValue as number;
+          }
+
+          return {
+            value: [point.RPM, convertValue(valueToConvert, paramName, units)],
+            decimals: decimals,
+          };
+        });
+
+        // Find peak for this parameter
+        // MaxDeg: find MINIMUM (lower values = closer to detonation, dangerous if <14°)
+        // PCylMax, TC-Av: find MAXIMUM
+        let peak;
+        const findMinimum = paramName === 'MaxDeg';
+
+        if (isPerCylinder) {
+          // For per-cylinder parameters, manually find peak/min from averaged data
+          let extremeValue = findMinimum ? Infinity : -Infinity;
+          let extremeRpm = 0;
+          let extremeIndex = 0;
+          calc.data!.forEach((point, idx) => {
+            const rawValue = (point as any)[paramName];
+            if (Array.isArray(rawValue)) {
+              const avg = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+              const isExtreme = findMinimum ? (avg < extremeValue) : (avg > extremeValue);
+              if (isExtreme) {
+                extremeValue = avg;
+                extremeRpm = point.RPM;
+                extremeIndex = idx;
+              }
+            }
+          });
+          const isValid = findMinimum ? (extremeValue < Infinity) : (extremeValue > -Infinity);
+          peak = isValid ? { value: extremeValue, rpm: extremeRpm, index: extremeIndex } : null;
+        } else {
+          // For scalar parameters, use findPeak directly (always finds max)
+          // Note: TC-Av doesn't need minimum search
+          peak = findPeak(calc.data!, paramName);
+        }
+
+        // Create series
         series.push({
-          name: `${label} - TCylMax`,
+          name: `${label} - ${paramName}`,
           type: 'line',
-          yAxisIndex: 0,
-          data: tCylMaxData,
+          yAxisIndex: yAxisIndex, // 0 (left), 1 (right 1), 2 (right 2)
+          data: paramData,
           itemStyle: {
-            color: tCylMaxColor,
+            color: color,
           },
           lineStyle: {
-            color: tCylMaxColor,
+            color: color,
             width: 2,
-            type: 'solid',
+            type: lineStyles[paramIndex],
+            ...(lineDash[paramIndex] ? { lineDash: lineDash[paramIndex] } : {}),
           },
           symbol: 'circle',
           symbolSize: 6,
@@ -190,12 +235,12 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
           emphasis: {
             focus: 'series',
           },
-          // Peak marker (K → °C conversion for peak value)
-          markPoint: tCylMaxPeak ? {
+          // Peak marker
+          markPoint: peak ? {
             symbol: markerSymbol,
             symbolSize: 20,
             itemStyle: {
-              color: tCylMaxColor,
+              color: color,
               borderColor: '#fff',
               borderWidth: 2,
             },
@@ -203,147 +248,105 @@ export function ChartPreset3({ calculations }: ChartPreset3Props) {
               show: false, // Hide default label, use tooltip instead
             },
             data: [{
-              coord: [
-                tCylMaxPeak.rpm,
-                convertTemperature(tCylMaxPeak.value - 273.15, units)
-              ],
-              value: formatPeakValue(
-                { ...tCylMaxPeak, value: tCylMaxPeak.value - 273.15 },
-                'TCylMax',
-                units
-              ),
+              coord: [peak.rpm, convertValue(peak.value, paramName, units)],
+              value: findMinimum
+                ? `Min ${paramName}: ${peak.value.toFixed(1)} °ATDC at ${peak.rpm} RPM`
+                : formatPeakValue(peak, paramName, units),
             }],
           } : undefined,
         });
-      }
-
-      // TUbMax series (exhaust temperature) - dashed line
-      series.push({
-        name: `${label} - TUbMax`,
-        type: 'line',
-        yAxisIndex: 0,
-        data: tUbMaxData,
-        itemStyle: {
-          color: tUbMaxColor,
-        },
-        lineStyle: {
-          color: tUbMaxColor,
-          width: 2,
-          type: 'dashed',
-        },
-        symbol: 'diamond',
-        symbolSize: 6,
-        smooth: false,
-        emphasis: {
-          focus: 'series',
-        },
-        // Peak marker (K → °C conversion for peak value)
-        markPoint: tUbMaxPeak ? {
-          symbol: markerSymbol,
-          symbolSize: 20,
-          itemStyle: {
-            color: tUbMaxColor,
-            borderColor: '#fff',
-            borderWidth: 2,
-          },
-          label: {
-            show: false, // Hide default label, use tooltip instead
-          },
-          data: [{
-            coord: [
-              tUbMaxPeak.rpm,
-              convertTemperature(tUbMaxPeak.value - 273.15, units)
-            ],
-            value: formatPeakValue(
-              { ...tUbMaxPeak, value: tUbMaxPeak.value - 273.15 },
-              'TUbMax',
-              units
-            ),
-          }],
-        } : undefined,
       });
-
-      // Add to legend (TCylMax only if available)
-      if (hasTCylMax) {
-        legendData.push(`${label} - TCylMax`);
-      }
-      legendData.push(`${label} - TUbMax`);
     });
 
-    // Get unit label
-    const tempUnit = getTemperatureUnit(units);
+    // Get unit labels for each axis
+    const pcylMaxUnit = getParameterUnit('PCylMax', units);
+    const tcAvUnit = getParameterUnit('TC-Av', units);
+    const maxDegUnit = '°ATDC'; // MaxDeg: degrees After Top Dead Center
+
+    // Fixed Y-axis ranges (converted based on unit system)
+    // PCylMax: 20-120 bar (or psi) - shows MAX value
+    // TC-Av: 1800-2800°C (or °F) - shows MAX value
+    // MaxDeg: 0-30 °ATDC (no conversion) - shows MIN value (detonation risk if <14°)
+    const pcylMaxMin = convertValue(20, 'PCylMax', units);
+    const pcylMaxMax = convertValue(120, 'PCylMax', units);
+    const tcAvMin = convertValue(1800, 'TC-Av', units);
+    const tcAvMax = convertValue(2800, 'TC-Av', units);
+    const maxDegMin = 0;
+    const maxDegMax = 30;
+
+    // Legend colors: colored in single calc mode, gray in comparison mode
+    const legendColor1 = isSingleCalculation ? '#1f77b4' : '#666'; // PCylMax
+    const legendColor2 = isSingleCalculation ? '#d62728' : '#666'; // TC-Av
+    const legendColor3 = isSingleCalculation ? '#ff7f0e' : '#666'; // MaxDeg
 
     return {
       ...baseConfig,
       legend: {
         show: false,
       },
-      // Line style legend at the top center (same level as Y-axis labels)
+      // Custom legend at the top center
+      // Single calc mode: colored (matches line colors)
+      // Comparison mode: gray (user relies on line styles only)
       graphic: [
         {
           type: 'group',
           left: 'center',
-          top: 15, // Adjusted for reduced grid.top (50px instead of 80px)
+          top: 15,
           children: [
-            // TCylMax solid line symbol
+            // PCylMax - solid line
             {
               type: 'line',
-              shape: {
-                x1: 0,
-                y1: 0,
-                x2: 25,
-                y2: 0,
-              },
-              style: {
-                stroke: '#666',
-                lineWidth: 2,
-              },
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor1, lineWidth: 2 },
             },
-            // TCylMax label
             {
               type: 'text',
               left: 30,
               top: -8,
-              style: {
-                text: 'TCylMax',
-                fontSize: 14,
-                fontWeight: 'bold',
-                fill: '#666',
-              },
+              style: { text: 'PCylMax', fontSize: 14, fontWeight: 'bold', fill: legendColor1 },
             },
-            // TUbMax dashed line symbol
+            // TCylMax - dashed line
             {
               type: 'line',
-              left: 95,
-              shape: {
-                x1: 0,
-                y1: 0,
-                x2: 25,
-                y2: 0,
-              },
-              style: {
-                stroke: '#666',
-                lineWidth: 2,
-                lineDash: [5, 5],
-              },
+              left: 100,
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor2, lineWidth: 2, lineDash: [5, 5] },
             },
-            // TUbMax label
             {
               type: 'text',
-              left: 125,
+              left: 130,
               top: -8,
-              style: {
-                text: 'TUbMax',
-                fontSize: 14,
-                fontWeight: 'bold',
-                fill: '#666',
-              },
+              style: { text: 'TC-Av', fontSize: 14, fontWeight: 'bold', fill: legendColor2 },
+            },
+            // MaxDeg - dotted line
+            {
+              type: 'line',
+              left: 200,
+              shape: { x1: 0, y1: 0, x2: 25, y2: 0 },
+              style: { stroke: legendColor3, lineWidth: 2, lineDash: [2, 2] },
+            },
+            {
+              type: 'text',
+              left: 230,
+              top: -8,
+              style: { text: 'MaxDeg', fontSize: 14, fontWeight: 'bold', fill: legendColor3 },
             },
           ],
         },
       ],
       xAxis: createXAxis('RPM', rpmMin, rpmMax, showGrid),
-      yAxis: createYAxis(tempUnit, 'left', '#d62728', showGrid),  // Only unit label
+      // Triple Y-axis configuration with fixed ranges
+      yAxis: [
+        // Left axis: PCylMax (bar/psi) - 20-120 bar
+        createYAxis(pcylMaxUnit, 'left', '#1f77b4', showGrid, pcylMaxMin, pcylMaxMax),
+        // Right axis 1: TC-Av (°C/°F) - 1800-2800°C
+        createYAxis(tcAvUnit, 'right', '#d62728', showGrid, tcAvMin, tcAvMax),
+        // Right axis 2: MaxDeg (degrees) - 0-30 deg - offset 60px to the right
+        {
+          ...createYAxis(maxDegUnit, 'right', '#ff7f0e', showGrid, maxDegMin, maxDegMax) as YAXisComponentOption,
+          offset: 60, // Shift second right axis 60px to the right
+        },
+      ] as YAXisComponentOption[],
       series,
     };
   }, [readyCalculations, units, animation, showGrid, decimals]);

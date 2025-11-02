@@ -18,6 +18,12 @@
  * - Added info icon with tooltip for Preset 2 to explain averaging
  * - Tooltip text: "Averaged values across all cylinders. To view per-cylinder data, use Custom Chart."
  *
+ * Addendum v2.0.3 Changes (Preset 3 - Critical Values):
+ * - Preset 3 now shows Critical Engine Values (PCylMax, TC-Av, MaxDeg)
+ * - MaxDeg shows MINIMUM value (detonation risk if <14°)
+ * - MaxDeg unit: °ATDC (degrees After Top Dead Center)
+ * - ALL presets now show parameter labels before values for clarity
+ *
  * @example
  * ```tsx
  * <PeakValuesCards
@@ -134,26 +140,58 @@ function getPeakValuesForCalculation(
     }
 
     case 3: {
-      // Preset 3: Temperature (TCylMax & TUbMax)
-      const tCylMaxPeak = findPeak(calc.data, 'TCylMax');
-      if (tCylMaxPeak) {
-        // Data already in °C, just apply unit conversion (°C ↔ °F)
-        peaks.push({
-          label: 'TCylMax',
-          value: `${convertValue(tCylMaxPeak.value, 'TCylMax', units).toFixed(0)} ${getParameterUnit('TCylMax', units)}`,
-          rpm: tCylMaxPeak.rpm,
-        });
-      }
+      // Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)
+      const criticalParameters = ['PCylMax', 'TC-Av', 'MaxDeg'];
 
-      const tUbMaxPeak = findPeak(calc.data, 'TUbMax');
-      if (tUbMaxPeak) {
-        // Data already in °C, just apply unit conversion (°C ↔ °F)
-        peaks.push({
-          label: 'TUbMax',
-          value: `${convertValue(tUbMaxPeak.value, 'TUbMax', units).toFixed(0)} ${getParameterUnit('TUbMax', units)}`,
-          rpm: tUbMaxPeak.rpm,
-        });
-      }
+      criticalParameters.forEach((paramName) => {
+        const param = PARAMETERS[paramName];
+        const isPerCylinder = param?.perCylinder || false;
+
+        // MaxDeg: find MINIMUM (lower values = closer to detonation, dangerous if <14°)
+        // PCylMax, TC-Av: find MAXIMUM
+        const findMinimum = paramName === 'MaxDeg';
+
+        // Find peak/min with averaging for per-cylinder parameters
+        let peak;
+        if (isPerCylinder) {
+          // For per-cylinder parameters (PCylMax, MaxDeg), find peak/min from averaged data
+          let extremeValue = findMinimum ? Infinity : -Infinity;
+          let extremeRpm = 0;
+
+          calc.data!.forEach((point) => {
+            const rawValue = (point as any)[paramName];
+            if (Array.isArray(rawValue)) {
+              const avg = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+              const isExtreme = findMinimum ? (avg < extremeValue) : (avg > extremeValue);
+              if (isExtreme) {
+                extremeValue = avg;
+                extremeRpm = point.RPM;
+              }
+            }
+          });
+
+          const isValid = findMinimum ? (extremeValue < Infinity) : (extremeValue > -Infinity);
+          peak = isValid ? { value: extremeValue, rpm: extremeRpm } : null;
+        } else {
+          // For scalar parameters (TC-Av), use findPeak directly
+          peak = findPeak(calc.data!, paramName);
+        }
+
+        if (peak) {
+          // Determine precision based on parameter
+          const precision = paramName === 'MaxDeg' ? 1 : (param?.category === 'temperature' ? 0 : 1);
+
+          // MaxDeg has custom unit °ATDC
+          const unit = paramName === 'MaxDeg' ? '°ATDC' : getParameterUnit(paramName, units);
+          const value = paramName === 'MaxDeg' ? peak.value : convertValue(peak.value, paramName, units);
+
+          peaks.push({
+            label: paramName,
+            value: `${value.toFixed(precision)} ${unit}`,
+            rpm: peak.rpm,
+          });
+        }
+      });
       break;
     }
 
@@ -205,20 +243,21 @@ function getPeakValuesForCalculation(
 /**
  * Format peak values for inline display
  *
- * Format varies by preset:
- * - Preset 1: "215.7 PS at 7800 RPM • 219.1 N·m at 6600 RPM" (no labels - different units)
- * - Preset 2: "FMEP: 19.1 bar at 6800 RPM • IMEP: 15.5 bar at 5600 RPM" (with labels - same units)
- * - Preset 3+: Standard format without labels
+ * Format with parameter labels:
+ * - Preset 1: "P-Av: 215.7 PS at 7800 RPM • Torque: 219.1 N·m at 6600 RPM"
+ * - Preset 2: "FMEP: 19.1 bar at 6800 RPM • IMEP: 15.5 bar at 5600 RPM"
+ * - Preset 3: "PCylMax: 95.3 bar at 6800 RPM • TC-Av: 2456°C at 7800 RPM • MaxDeg: 9.5 °ATDC at 5600 RPM"
+ * - Preset 4: Custom parameters with labels
  *
  * Responsive:
  * - Desktop: Inline with bullet separators
  * - Mobile (<768px): Stacked vertically
  */
-function formatInlinePeaks(peaks: PeakValueItem[], preset: 1 | 2 | 3 | 4): React.ReactNode {
+function formatInlinePeaks(peaks: PeakValueItem[]): React.ReactNode {
   if (peaks.length === 0) return null;
 
-  // For Preset 2 (MEP), include parameter labels since all share same unit
-  const showLabels = preset === 2;
+  // Always show parameter labels for clarity
+  const showLabels = true;
 
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm leading-5">
@@ -312,7 +351,7 @@ export function PeakValuesCards({
 
               {/* Line 2: Peak Values (Inline) */}
               <div>
-                {formatInlinePeaks(peaks, preset)}
+                {formatInlinePeaks(peaks)}
               </div>
             </div>
           );

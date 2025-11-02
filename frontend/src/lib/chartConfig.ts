@@ -239,17 +239,23 @@ export function createXAxis(
  * @param position - Позиция оси (left/right)
  * @param color - Цвет оси
  * @param showGrid - Show/hide grid lines (from settings, only for left axis)
+ * @param min - Minimum value for Y axis (optional)
+ * @param max - Maximum value for Y axis (optional)
  */
 export function createYAxis(
   name: string,
   position: 'left' | 'right' = 'left',
   color?: string,
-  showGrid = true
+  showGrid = true,
+  min?: number,
+  max?: number
 ): EChartsOption['yAxis'] {
   return {
     type: 'value',
     name,
     position,
+    min,
+    max,
     nameTextStyle: {
       fontSize: 14,
       fontWeight: 'bold',

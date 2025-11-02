@@ -31,7 +31,7 @@ interface PresetOption {
 const PRESET_OPTIONS: PresetOption[] = [
   { id: 1, label: 'Power & Torque' },
   { id: 2, label: 'MEP' },
-  { id: 3, label: 'Temperature' },
+  { id: 3, label: 'Critical' },
   { id: 4, label: 'Custom' },
 ];
 
@@ -41,7 +41,7 @@ const PRESET_OPTIONS: PresetOption[] = [
  * Allows switching between 4 chart visualization presets:
  * - Preset 1: Power & Torque (P-Av + Torque)
  * - Preset 2: MEP - Mean Effective Pressures (FMEP, IMEP, BMEP, PMEP)
- * - Preset 3: Temperature (TCylMax + TUbMax)
+ * - Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)
  * - Preset 4: Custom Chart (user-selected parameters)
  *
  * Connected to Zustand store - no props needed.

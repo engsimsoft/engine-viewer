@@ -114,6 +114,34 @@
 ## [Unreleased]
 
 ### Added
+- **Chart Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)** (2025-11-02):
+  - ✅ Complete rewrite of Preset 3 for Critical Engine Values
+  - ✅ **ChartPreset3.tsx** - NEW triple Y-axis chart:
+    - Triple Y-axis: PCylMax (left), TC-Av (right), MaxDeg (right offset 60px)
+    - Fixed Y-axis ranges: PCylMax (20-120 bar), TC-Av (1800-2800°C), MaxDeg (0-30 °ATDC)
+    - Per-cylinder averaging for PCylMax and MaxDeg
+    - TC-Av: scalar parameter (already averaged, no averaging needed)
+    - **CRITICAL**: MaxDeg shows MINIMUM value (detonation risk if <14°)
+    - MaxDeg unit: °ATDC (degrees After Top Dead Center)
+    - Dynamic color system: parameter colors in single calc mode, calculation colors in comparison mode
+    - Custom graphic legend at top center with line styles (solid, dashed, dotted)
+    - Peak markers: MAX for PCylMax/TC-Av, MIN for MaxDeg
+    - Units conversion (bar ↔ psi, °C ↔ °F)
+  - ✅ **PeakValuesCards.tsx** - Updated for Preset 3:
+    - Case 3 logic rewritten for Critical Values
+    - MaxDeg: finds MINIMUM value (detonation risk indicator)
+    - Per-cylinder averaging for PCylMax and MaxDeg
+    - TC-Av: scalar handling (no averaging)
+    - **ALL presets now show parameter labels** for consistency and clarity
+    - Format: "PCylMax: 95.3 bar at 6800 RPM • TC-Av: 2456°C at 7800 RPM • MaxDeg: 9.5 °ATDC at 5600 RPM"
+  - ✅ **chartConfig.ts** - Extended Y-axis support:
+    - Added min/max parameters to createYAxis() for fixed ranges
+    - Enables consistent scale across different calculations
+  - ✅ **PresetSelector.tsx** - Updated label:
+    - Preset 3 label changed from "Temperature" to "Critical"
+  - **Result**: Preset 3 now shows critical engine parameters that can destroy the engine if values are dangerous
+  - Files: [ChartPreset3.tsx](frontend/src/components/visualization/ChartPreset3.tsx), [PeakValuesCards.tsx](frontend/src/components/visualization/PeakValuesCards.tsx), [chartConfig.ts](frontend/src/lib/chartConfig.ts), [PresetSelector.tsx](frontend/src/components/visualization/PresetSelector.tsx)
+
 - **Chart Preset 2: MEP (Mean Effective Pressures)** (2025-11-02):
   - ✅ Complete rewrite of Preset 2 for MEP parameters (FMEP, IMEP, BMEP, PMEP)
   - ✅ **ChartPreset2.tsx** - NEW single-axis chart replacing old PCylMax preset:
