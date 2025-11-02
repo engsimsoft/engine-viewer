@@ -22,19 +22,22 @@ import {
   convertTorque,
   convertPressure,
   convertTemperature,
+  convertValue,
   getPowerUnit,
   getTorqueUnit,
   getPressureUnit,
   getTemperatureUnit,
+  getParameterUnit,
 } from '@/lib/unitsConversion';
+import { PARAMETERS } from '@/config/parameters';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface DataTableProps {
   /** Array of CalculationReference from Zustand store (primary + comparisons) */
   calculations: CalculationReference[];
-  /** Selected preset (1-4) to filter displayed columns */
-  selectedPreset: 1 | 2 | 3 | 4;
+  /** Selected preset (1-6) to filter displayed columns */
+  selectedPreset: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -52,18 +55,60 @@ interface TableRow {
   calculationId: string;
   /** RPM value */
   rpm: number;
+
+  // Preset 1: Power & Torque
   /** Power (P-Av) in original SI units (kW) */
   powerKW: number;
   /** Torque in original SI units (N·m) */
   torqueNm: number;
-  /** Average cylinder pressure in original SI units (bar) */
-  pressureBar: number;
-  /** Average cylinder temperature (TCylMax) in original SI units (°C) */
-  temperatureCylC: number;
-  /** Average exhaust temperature (TUbMax) in original SI units (°C) */
-  temperatureExhC: number;
-  /** Convergence value */
-  convergence: number;
+
+  // Preset 2: MEP (Mean Effective Pressures)
+  /** FMEP (Friction MEP) in bar - scalar */
+  fmep: number | undefined;
+  /** IMEP (Indicated MEP) in bar - per-cylinder averaged */
+  imep: number | undefined;
+  /** BMEP (Brake MEP) in bar - per-cylinder averaged */
+  bmep: number | undefined;
+  /** PMEP (Pumping MEP) in bar - per-cylinder averaged */
+  pmep: number | undefined;
+
+  // Preset 3: Critical Engine Values
+  /** PCylMax (Max Cylinder Pressure) in bar - per-cylinder averaged */
+  pcylMax: number | undefined;
+  /** TC-Av (Average Cylinder Temperature) in °C - per-cylinder averaged */
+  tcAv: number | undefined;
+  /** MaxDeg (Angle at Max Pressure) in degrees - per-cylinder averaged */
+  maxDeg: number | undefined;
+
+  // Preset 5: Combustion
+  /** TAF (Air/Fuel Ratio) - scalar */
+  taf: number | undefined;
+  /** Timing (Ignition Timing) in degrees - scalar */
+  timing: number | undefined;
+  /** Delay (Ignition Delay) in degrees - per-cylinder averaged */
+  delay: number | undefined;
+  /** Durat (Combustion Duration) in degrees - per-cylinder averaged */
+  durat: number | undefined;
+
+  // Preset 6: Efficiency
+  /** DRatio (Delivery Ratio) - per-cylinder averaged */
+  dRatio: number | undefined;
+  /** PurCyl (Mixture Purity) - per-cylinder averaged */
+  purCyl: number | undefined;
+  /** Seff (Scavenging Efficiency) - per-cylinder averaged */
+  seff: number | undefined;
+  /** Teff (Trapping Efficiency) - per-cylinder averaged */
+  teff: number | undefined;
+  /** Ceff (Charging Efficiency / VE) - per-cylinder averaged */
+  ceff: number | undefined;
+
+  // Legacy fields (for Preset 4 Custom Chart)
+  /** Average cylinder temperature (TCylMax) in °C - only in .det files */
+  temperatureCylC: number | undefined;
+  /** Average exhaust temperature (TUbMax) in °C */
+  temperatureExhC: number | undefined;
+  /** Convergence value - only in .det files */
+  convergence: number | undefined;
 }
 
 /**
@@ -106,6 +151,15 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
     return getLoadedCalculations(loadedCalculations);
   }, [loadedCalculations]);
 
+  // Helper: average per-cylinder array or return scalar
+  const averageIfArray = (value: any): number | undefined => {
+    if (value === undefined || value === null) return undefined;
+    if (Array.isArray(value)) {
+      return value.reduce((sum, val) => sum + val, 0) / value.length;
+    }
+    return value as number;
+  };
+
   // Prepare table data from all calculations
   const tableData = useMemo(() => {
     if (readyCalculations.length === 0) {
@@ -119,17 +173,38 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
       if (!calc.data || calc.data.length === 0) return;
 
       calc.data.forEach((point) => {
-        // Calculate averages for cylinder-specific parameters (with format compatibility checks)
-        // PCylMax: available in .det and .pou-merged
-        const avgPressure = point.PCylMax?.reduce((sum, val) => sum + val, 0) / (point.PCylMax?.length || 1);
+        // Preset 1: Power & Torque (always available)
+        const powerKW = point['P-Av'];
+        const torqueNm = point.Torque;
 
-        // TCylMax: ONLY in .det format (not available in .pou)
-        const avgTCylMax = point.TCylMax
-          ? point.TCylMax.reduce((sum, val) => sum + val, 0) / point.TCylMax.length
-          : undefined;
+        // Preset 2: MEP parameters
+        const fmep = averageIfArray(point.FMEP); // FMEP is scalar
+        const imep = averageIfArray(point.IMEP); // IMEP per-cylinder
+        const bmep = averageIfArray(point.BMEP); // BMEP per-cylinder
+        const pmep = averageIfArray(point.PMEP); // PMEP per-cylinder
 
-        // TUbMax: available in .det and .pou
-        const avgTUbMax = point.TUbMax?.reduce((sum, val) => sum + val, 0) / (point.TUbMax?.length || 1);
+        // Preset 3: Critical parameters
+        const pcylMax = averageIfArray(point.PCylMax); // PCylMax per-cylinder
+        const tcAv = averageIfArray(point['TC-Av']); // TC-Av per-cylinder (maps from TCylMax in .det)
+        const maxDeg = averageIfArray(point.MaxDeg); // MaxDeg per-cylinder
+
+        // Preset 5: Combustion parameters
+        const taf = averageIfArray(point.TAF); // TAF scalar
+        const timing = averageIfArray(point.Timing); // Timing scalar
+        const delay = averageIfArray(point.Delay); // Delay per-cylinder
+        const durat = averageIfArray(point.Durat); // Durat per-cylinder
+
+        // Preset 6: Efficiency parameters (all per-cylinder)
+        const dRatio = averageIfArray(point.DRatio);
+        const purCyl = averageIfArray(point.PurCyl);
+        const seff = averageIfArray(point.Seff);
+        const teff = averageIfArray(point.Teff);
+        const ceff = averageIfArray(point.Ceff);
+
+        // Legacy fields for Preset 4 (Custom Chart)
+        const temperatureCylC = averageIfArray(point.TCylMax); // TCylMax per-cylinder
+        const temperatureExhC = averageIfArray(point.TUbMax); // TUbMax per-cylinder
+        const convergence = point.Convergence; // Scalar
 
         rows.push({
           id: `${calc.calculationId}-${point.RPM}`,
@@ -137,12 +212,33 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
           sourceColor: calc.color,
           calculationId: calc.calculationId,
           rpm: point.RPM,
-          powerKW: point['P-Av'],
-          torqueNm: point.Torque,
-          pressureBar: avgPressure,
-          temperatureCylC: avgTCylMax, // undefined for .pou files
-          temperatureExhC: avgTUbMax,
-          convergence: point.Convergence, // undefined for .pou files (but that's ok)
+          // Preset 1
+          powerKW,
+          torqueNm,
+          // Preset 2
+          fmep,
+          imep,
+          bmep,
+          pmep,
+          // Preset 3
+          pcylMax,
+          tcAv,
+          maxDeg,
+          // Preset 5
+          taf,
+          timing,
+          delay,
+          durat,
+          // Preset 6
+          dRatio,
+          purCyl,
+          seff,
+          teff,
+          ceff,
+          // Legacy (Preset 4)
+          temperatureCylC,
+          temperatureExhC,
+          convergence,
         });
       });
     });
@@ -165,16 +261,20 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
   const temperatureUnit = getTemperatureUnit(units);
 
   // Get preset name for CardDescription
-  const getPresetName = (preset: 1 | 2 | 3 | 4): string => {
+  const getPresetName = (preset: 1 | 2 | 3 | 4 | 5 | 6): string => {
     switch (preset) {
       case 1:
         return 'Power & Torque Data';
       case 2:
-        return 'Pressure Data';
+        return 'MEP Data';
       case 3:
-        return 'Temperature Data';
+        return 'Critical Engine Values';
       case 4:
         return 'Complete Data';
+      case 5:
+        return 'Combustion Data';
+      case 6:
+        return 'Efficiency Data';
       default:
         return 'Data Table';
     }
@@ -210,6 +310,8 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         sortingFn: 'basic',
       }) as ColumnDef<TableRow, any>,
 
+      // === Preset 1: Power & Torque ===
+
       // P-Av column with units conversion
       columnHelper.accessor('powerKW', {
         header: `P-Av (${powerUnit})`,
@@ -232,16 +334,197 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         sortingFn: 'basic',
       }) as ColumnDef<TableRow, any>,
 
-      // PCylMax column with units conversion (average)
-      columnHelper.accessor('pressureBar', {
-        header: `PCylMax (${pressureUnit})`,
+      // === Preset 2: MEP (Mean Effective Pressures) ===
+
+      // FMEP column
+      columnHelper.accessor('fmep', {
+        header: `FMEP (${pressureUnit})`,
         cell: (info) => {
           const value = info.getValue();
+          if (value === undefined) return '—';
           const converted = convertPressure(value, units);
           return converted.toFixed(decimals);
         },
         sortingFn: 'basic',
       }) as ColumnDef<TableRow, any>,
+
+      // IMEP column
+      columnHelper.accessor('imep', {
+        header: `IMEP (${pressureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          const converted = convertPressure(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // BMEP column
+      columnHelper.accessor('bmep', {
+        header: `BMEP (${pressureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          const converted = convertPressure(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // PMEP column
+      columnHelper.accessor('pmep', {
+        header: `PMEP (${pressureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          const converted = convertPressure(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // === Preset 3: Critical Engine Values ===
+
+      // PCylMax column
+      columnHelper.accessor('pcylMax', {
+        header: `PCylMax (${pressureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          const converted = convertPressure(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // TC-Av column
+      columnHelper.accessor('tcAv', {
+        header: `TC-Av (${temperatureUnit})`,
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          const converted = convertTemperature(value, units);
+          return converted.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // MaxDeg column
+      columnHelper.accessor('maxDeg', {
+        header: 'MaxDeg (°)',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // === Preset 5: Combustion ===
+
+      // TAF column
+      columnHelper.accessor('taf', {
+        header: 'TAF',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Timing column
+      columnHelper.accessor('timing', {
+        header: 'Timing (°)',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Delay column
+      columnHelper.accessor('delay', {
+        header: 'Delay (°)',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Durat column
+      columnHelper.accessor('durat', {
+        header: 'Durat (°)',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // === Preset 6: Efficiency ===
+
+      // DRatio column
+      columnHelper.accessor('dRatio', {
+        header: 'DRatio',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // PurCyl column
+      columnHelper.accessor('purCyl', {
+        header: 'PurCyl',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Seff column
+      columnHelper.accessor('seff', {
+        header: 'Seff',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Teff column
+      columnHelper.accessor('teff', {
+        header: 'Teff',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // Ceff column
+      columnHelper.accessor('ceff', {
+        header: 'Ceff (VE)',
+        cell: (info) => {
+          const value = info.getValue();
+          if (value === undefined) return '—';
+          return value.toFixed(decimals);
+        },
+        sortingFn: 'basic',
+      }) as ColumnDef<TableRow, any>,
+
+      // === Legacy columns (for Preset 4 Custom Chart) ===
 
       // TCylMax column with units conversion (average cylinder temperature)
       columnHelper.accessor('temperatureCylC', {
@@ -260,6 +543,7 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         header: `TUbMax (${temperatureUnit})`,
         cell: (info) => {
           const value = info.getValue();
+          if (value === undefined) return '—';
           const converted = convertTemperature(value, units);
           return converted.toFixed(decimals);
         },
@@ -290,22 +574,26 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
       filteredCols.push(cols[2]); // P-Av
       filteredCols.push(cols[3]); // Torque
     } else if (selectedPreset === 2) {
-      // Preset 2: Pressure & Temperature
-      filteredCols.push(cols[4]); // PCylMax
+      // Preset 2: MEP (Mean Effective Pressures)
+      filteredCols.push(cols[4]); // FMEP
+      filteredCols.push(cols[5]); // IMEP
+      filteredCols.push(cols[6]); // BMEP
+      filteredCols.push(cols[7]); // PMEP
     } else if (selectedPreset === 3) {
-      // Preset 3: Temperature Analysis
-      filteredCols.push(cols[5]); // TCylMax
-      filteredCols.push(cols[6]); // TUbMax
+      // Preset 3: Critical Engine Values
+      filteredCols.push(cols[8]);  // PCylMax
+      filteredCols.push(cols[9]);  // TC-Av
+      filteredCols.push(cols[10]); // MaxDeg
     } else if (selectedPreset === 4) {
       // Preset 4: Custom Chart - show only selected parameters
       // Map parameter IDs to column indices
       const paramToColIndex: Record<string, number> = {
         'P-Av': 2,
         'Torque': 3,
-        'PCylMax': 4,
-        'TCylMax': 5,
-        'TUbMax': 6,
-        'Convergence': 7,
+        'PCylMax': 8,      // Updated index (new pcylMax column)
+        'TCylMax': 20,     // Updated index (legacy temperatureCylC)
+        'TUbMax': 21,      // Updated index (legacy temperatureExhC)
+        'Convergence': 22, // Updated index (legacy convergence)
       };
 
       // Add columns for selected parameters only
@@ -315,6 +603,19 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
           filteredCols.push(cols[colIndex]);
         }
       });
+    } else if (selectedPreset === 5) {
+      // Preset 5: Combustion
+      filteredCols.push(cols[11]); // TAF
+      filteredCols.push(cols[12]); // Timing
+      filteredCols.push(cols[13]); // Delay
+      filteredCols.push(cols[14]); // Durat
+    } else if (selectedPreset === 6) {
+      // Preset 6: Efficiency
+      filteredCols.push(cols[15]); // DRatio
+      filteredCols.push(cols[16]); // PurCyl
+      filteredCols.push(cols[17]); // Seff
+      filteredCols.push(cols[18]); // Teff
+      filteredCols.push(cols[19]); // Ceff (VE)
     }
 
     return filteredCols;
@@ -350,12 +651,16 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
         exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
       } else if (selectedPreset === 2) {
-        // Preset 2: Pressure
-        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+        // Preset 2: MEP
+        exportRow[`FMEP (${pressureUnit})`] = row.fmep !== undefined ? convertPressure(row.fmep, units).toFixed(decimals) : 'N/A';
+        exportRow[`IMEP (${pressureUnit})`] = row.imep !== undefined ? convertPressure(row.imep, units).toFixed(decimals) : 'N/A';
+        exportRow[`BMEP (${pressureUnit})`] = row.bmep !== undefined ? convertPressure(row.bmep, units).toFixed(decimals) : 'N/A';
+        exportRow[`PMEP (${pressureUnit})`] = row.pmep !== undefined ? convertPressure(row.pmep, units).toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 3) {
-        // Preset 3: Temperature
-        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
-        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+        // Preset 3: Critical Engine Values
+        exportRow[`PCylMax (${pressureUnit})`] = row.pcylMax !== undefined ? convertPressure(row.pcylMax, units).toFixed(decimals) : 'N/A';
+        exportRow[`TC-Av (${temperatureUnit})`] = row.tcAv !== undefined ? convertTemperature(row.tcAv, units).toFixed(decimals) : 'N/A';
+        exportRow['MaxDeg (°)'] = row.maxDeg !== undefined ? row.maxDeg.toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 4) {
         // Preset 4: Custom Chart - export only selected parameters
         selectedCustomParams.forEach((paramId) => {
@@ -364,15 +669,28 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
           } else if (paramId === 'Torque') {
             exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
           } else if (paramId === 'PCylMax') {
-            exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+            exportRow[`PCylMax (${pressureUnit})`] = row.pcylMax !== undefined ? convertPressure(row.pcylMax, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'TCylMax') {
-            exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+            exportRow[`TCylMax (${temperatureUnit})`] = row.temperatureCylC !== undefined ? convertTemperature(row.temperatureCylC, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'TUbMax') {
-            exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+            exportRow[`TUbMax (${temperatureUnit})`] = row.temperatureExhC !== undefined ? convertTemperature(row.temperatureExhC, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'Convergence') {
-            exportRow['Convergence'] = row.convergence.toFixed(4);
+            exportRow['Convergence'] = row.convergence !== undefined ? row.convergence.toFixed(4) : 'N/A';
           }
         });
+      } else if (selectedPreset === 5) {
+        // Preset 5: Combustion
+        exportRow['TAF'] = row.taf !== undefined ? row.taf.toFixed(decimals) : 'N/A';
+        exportRow['Timing (°)'] = row.timing !== undefined ? row.timing.toFixed(decimals) : 'N/A';
+        exportRow['Delay (°)'] = row.delay !== undefined ? row.delay.toFixed(decimals) : 'N/A';
+        exportRow['Durat (°)'] = row.durat !== undefined ? row.durat.toFixed(decimals) : 'N/A';
+      } else if (selectedPreset === 6) {
+        // Preset 6: Efficiency
+        exportRow['DRatio'] = row.dRatio !== undefined ? row.dRatio.toFixed(decimals) : 'N/A';
+        exportRow['PurCyl'] = row.purCyl !== undefined ? row.purCyl.toFixed(decimals) : 'N/A';
+        exportRow['Seff'] = row.seff !== undefined ? row.seff.toFixed(decimals) : 'N/A';
+        exportRow['Teff'] = row.teff !== undefined ? row.teff.toFixed(decimals) : 'N/A';
+        exportRow['Ceff (VE)'] = row.ceff !== undefined ? row.ceff.toFixed(decimals) : 'N/A';
       }
 
       return exportRow;
@@ -395,12 +713,16 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
         exportRow[`P-Av (${powerUnit})`] = convertPower(row.powerKW, units).toFixed(decimals);
         exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
       } else if (selectedPreset === 2) {
-        // Preset 2: Pressure
-        exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+        // Preset 2: MEP
+        exportRow[`FMEP (${pressureUnit})`] = row.fmep !== undefined ? convertPressure(row.fmep, units).toFixed(decimals) : 'N/A';
+        exportRow[`IMEP (${pressureUnit})`] = row.imep !== undefined ? convertPressure(row.imep, units).toFixed(decimals) : 'N/A';
+        exportRow[`BMEP (${pressureUnit})`] = row.bmep !== undefined ? convertPressure(row.bmep, units).toFixed(decimals) : 'N/A';
+        exportRow[`PMEP (${pressureUnit})`] = row.pmep !== undefined ? convertPressure(row.pmep, units).toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 3) {
-        // Preset 3: Temperature
-        exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
-        exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+        // Preset 3: Critical Engine Values
+        exportRow[`PCylMax (${pressureUnit})`] = row.pcylMax !== undefined ? convertPressure(row.pcylMax, units).toFixed(decimals) : 'N/A';
+        exportRow[`TC-Av (${temperatureUnit})`] = row.tcAv !== undefined ? convertTemperature(row.tcAv, units).toFixed(decimals) : 'N/A';
+        exportRow['MaxDeg (°)'] = row.maxDeg !== undefined ? row.maxDeg.toFixed(decimals) : 'N/A';
       } else if (selectedPreset === 4) {
         // Preset 4: Custom Chart - export only selected parameters
         selectedCustomParams.forEach((paramId) => {
@@ -409,15 +731,28 @@ export function DataTable({ calculations, selectedPreset }: DataTableProps) {
           } else if (paramId === 'Torque') {
             exportRow[`Torque (${torqueUnit})`] = convertTorque(row.torqueNm, units).toFixed(decimals);
           } else if (paramId === 'PCylMax') {
-            exportRow[`PCylMax (${pressureUnit})`] = convertPressure(row.pressureBar, units).toFixed(decimals);
+            exportRow[`PCylMax (${pressureUnit})`] = row.pcylMax !== undefined ? convertPressure(row.pcylMax, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'TCylMax') {
-            exportRow[`TCylMax (${temperatureUnit})`] = convertTemperature(row.temperatureCylC, units).toFixed(decimals);
+            exportRow[`TCylMax (${temperatureUnit})`] = row.temperatureCylC !== undefined ? convertTemperature(row.temperatureCylC, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'TUbMax') {
-            exportRow[`TUbMax (${temperatureUnit})`] = convertTemperature(row.temperatureExhC, units).toFixed(decimals);
+            exportRow[`TUbMax (${temperatureUnit})`] = row.temperatureExhC !== undefined ? convertTemperature(row.temperatureExhC, units).toFixed(decimals) : 'N/A';
           } else if (paramId === 'Convergence') {
-            exportRow['Convergence'] = row.convergence.toFixed(4);
+            exportRow['Convergence'] = row.convergence !== undefined ? row.convergence.toFixed(4) : 'N/A';
           }
         });
+      } else if (selectedPreset === 5) {
+        // Preset 5: Combustion
+        exportRow['TAF'] = row.taf !== undefined ? row.taf.toFixed(decimals) : 'N/A';
+        exportRow['Timing (°)'] = row.timing !== undefined ? row.timing.toFixed(decimals) : 'N/A';
+        exportRow['Delay (°)'] = row.delay !== undefined ? row.delay.toFixed(decimals) : 'N/A';
+        exportRow['Durat (°)'] = row.durat !== undefined ? row.durat.toFixed(decimals) : 'N/A';
+      } else if (selectedPreset === 6) {
+        // Preset 6: Efficiency
+        exportRow['DRatio'] = row.dRatio !== undefined ? row.dRatio.toFixed(decimals) : 'N/A';
+        exportRow['PurCyl'] = row.purCyl !== undefined ? row.purCyl.toFixed(decimals) : 'N/A';
+        exportRow['Seff'] = row.seff !== undefined ? row.seff.toFixed(decimals) : 'N/A';
+        exportRow['Teff'] = row.teff !== undefined ? row.teff.toFixed(decimals) : 'N/A';
+        exportRow['Ceff (VE)'] = row.ceff !== undefined ? row.ceff.toFixed(decimals) : 'N/A';
       }
 
       return exportRow;

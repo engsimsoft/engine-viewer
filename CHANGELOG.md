@@ -114,6 +114,54 @@
 ## [Unreleased]
 
 ### Added
+- **Chart Preset 6: Efficiency Parameters (Premium Interactive Version)** (2025-11-02):
+  - ✅ **NEW Chart Preset 6** - Interactive efficiency parameters visualization
+  - ✅ **ChartPreset6.tsx** - Single-axis chart with interactive legend:
+    - 5 efficiency parameters with different line styles: DRatio (solid), PurCyl (dashed), Seff (dotted), Teff (dash-dot), Ceff (VE) (long-dash)
+    - Per-cylinder averaging for all 5 parameters (all are array parameters)
+    - **Interactive legend**: Click to hide/show parameters, minimum 1 always visible
+    - Centered legend buttons with visual line style previews
+    - Parameter labels: "Ceff (VE)" for user clarity (VE = Volumetric Efficiency)
+    - Dynamic color system: efficiency colors in single calc mode, calculation colors in comparison mode
+    - Peak markers with averaged values for all 5 parameters
+    - All parameters dimensionless (no unit conversion needed)
+    - Apple-level UX: smooth transitions, accessibility (aria-labels, disabled states)
+  - ✅ **PeakValuesCards.tsx** - Case 6 for efficiency parameters:
+    - Per-cylinder averaging matching ChartPreset6 logic
+    - Shows all 5 peaks with parameter labels
+    - **CRITICAL FIX**: Fixed decimals hardcoded bug affecting ALL presets
+    - Added `decimals` parameter to `getPeakValuesForCalculation()` function
+    - Replaced all hardcoded `.toFixed(1)` with dynamic `.toFixed(decimals)` (7 occurrences)
+    - Now respects decimals setting from Settings popover across all 6 presets
+  - ✅ **chartConfig.ts** - Extended efficiency color palette:
+    - Added 5 efficiency colors (was 2, expanded to 5): efficiency1-5
+    - High-contrast palette: Blue, Red, Green, Orange, Purple
+  - ✅ **DataTable.tsx** - **CRITICAL FIX**: Comprehensive refactoring to support ALL 6 presets:
+    - **Issue**: DataTable was completely broken for Presets 2, 3, 5, 6 (only Preset 1 worked)
+    - **Root cause**: Hardcoded for 4 presets, missing 15+ parameters
+    - Extended `selectedPreset` type from `1 | 2 | 3 | 4` to `1 | 2 | 3 | 4 | 5 | 6`
+    - Added 15 new fields to TableRow interface:
+      - Preset 2 (MEP): fmep, imep, bmep, pmep
+      - Preset 3 (Critical): pcylMax, tcAv, maxDeg
+      - Preset 5 (Combustion): taf, timing, delay, durat
+      - Preset 6 (Efficiency): dRatio, purCyl, seff, teff, ceff
+    - Created `averageIfArray()` helper for per-cylinder averaging
+    - Added data extraction logic for all 15 missing parameters
+    - Added 15 new column definitions with proper headers and units
+    - **FIXED column filter logic** for all 6 presets:
+      - Preset 2 now shows MEP parameters (FMEP, IMEP, BMEP, PMEP) instead of PCylMax
+      - Preset 3 now shows Critical parameters (PCylMax, TC-Av, MaxDeg) instead of TCylMax/TUbMax
+      - Preset 5 now shows Combustion parameters (TAF, Timing, Delay, Durat)
+      - Preset 6 now shows Efficiency parameters (DRatio, PurCyl, Seff, Teff, Ceff (VE))
+    - Updated CSV/Excel export handlers for all 6 presets with correct parameters
+    - Fixed preset names: "MEP Data", "Critical Engine Values", "Combustion Data", "Efficiency Data"
+    - **Preset 4 (Custom) unchanged per user request** - will be worked on in Phase 2
+  - ✅ **PresetSelector.tsx** - Added Preset 6 button "Efficiency"
+  - ✅ **appStore.ts, types/v2.ts** - Extended selectedPreset type to `1 | 2 | 3 | 4 | 5 | 6`
+  - ✅ **ProjectPage.tsx** - Added case 6 routing
+  - **Result**: Complete 6-preset system with interactive Preset 6, DataTable working for all presets, decimals fix across all peak values
+  - Files: [ChartPreset6.tsx](frontend/src/components/visualization/ChartPreset6.tsx), [PeakValuesCards.tsx](frontend/src/components/visualization/PeakValuesCards.tsx), [DataTable.tsx](frontend/src/components/visualization/DataTable.tsx), [chartConfig.ts](frontend/src/lib/chartConfig.ts), [PresetSelector.tsx](frontend/src/components/visualization/PresetSelector.tsx)
+
 - **Chart Preset 5: Combustion Parameters (TAF, Timing, Delay, Durat)** (2025-11-02):
   - ✅ **NEW Chart Preset 5** - Combustion parameters visualization
   - ✅ **ChartPreset5.tsx** - Dual Y-axis chart:

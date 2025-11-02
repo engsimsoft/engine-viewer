@@ -18,7 +18,7 @@ import { useAppStore } from '@/stores/appStore';
  * Preset option definition
  */
 interface PresetOption {
-  id: 1 | 2 | 3 | 4 | 5;
+  id: 1 | 2 | 3 | 4 | 5 | 6;
   label: string;
 }
 
@@ -34,17 +34,19 @@ const PRESET_OPTIONS: PresetOption[] = [
   { id: 3, label: 'Critical' },
   { id: 4, label: 'Custom' },
   { id: 5, label: 'Combustion' },
+  { id: 6, label: 'Efficiency' },
 ];
 
 /**
  * Preset Selector Component
  *
- * Allows switching between 5 chart visualization presets:
+ * Allows switching between 6 chart visualization presets:
  * - Preset 1: Power & Torque (P-Av + Torque)
  * - Preset 2: MEP - Mean Effective Pressures (FMEP, IMEP, BMEP, PMEP)
  * - Preset 3: Critical Engine Values (PCylMax, TC-Av, MaxDeg)
  * - Preset 4: Custom Chart (user-selected parameters)
  * - Preset 5: Combustion Parameters (TAF, Timing, Delay, Durat)
+ * - Preset 6: Efficiency Parameters (DRatio, Ceff)
  *
  * Connected to Zustand store - no props needed.
  *

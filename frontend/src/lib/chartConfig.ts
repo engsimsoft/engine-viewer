@@ -26,6 +26,13 @@ export const PARAMETER_COLORS = {
   combustion2: '#ff7f0e',  // Timing - Оранжевый
   combustion3: '#2ca02c',  // Delay - Зелёный
   combustion4: '#d62728',  // Durat - Красный
+
+  // Preset 6: Efficiency (5 parameters - 5 high-contrast colors)
+  efficiency1: '#1f77b4',  // DRatio - Синий
+  efficiency2: '#e74c3c',  // PurCyl - Красный
+  efficiency3: '#2ca02c',  // Seff - Зелёный
+  efficiency4: '#ff7f0e',  // Teff - Оранжевый
+  efficiency5: '#9467bd',  // Ceff (VE) - Фиолетовый
 } as const;
 
 /**

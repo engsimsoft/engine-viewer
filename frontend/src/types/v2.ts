@@ -171,8 +171,9 @@ export interface AppState {
    * 3 = Critical (PCylMax, TC-Av, MaxDeg)
    * 4 = Custom
    * 5 = Combustion (TAF, Timing, Delay, Durat)
+   * 6 = Efficiency (DRatio, Ceff)
    */
-  selectedPreset: 1 | 2 | 3 | 4 | 5;
+  selectedPreset: 1 | 2 | 3 | 4 | 5 | 6;
 
   /**
    * Выбранные параметры для Custom Chart (Preset 4)

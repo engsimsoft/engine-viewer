@@ -47,8 +47,8 @@ import { Info } from 'lucide-react';
 interface PeakValuesCardsProps {
   /** Array of calculations with loaded data */
   calculations: CalculationReference[];
-  /** Current selected preset (1-5) to determine which peaks to show */
-  preset: 1 | 2 | 3 | 4 | 5;
+  /** Current selected preset (1-6) to determine which peaks to show */
+  preset: 1 | 2 | 3 | 4 | 5 | 6;
   /** Optional: selected parameters for Preset 4 */
   selectedParams?: string[];
 }
@@ -64,8 +64,9 @@ interface PeakValueItem {
  */
 function getPeakValuesForCalculation(
   calc: CalculationReference,
-  preset: 1 | 2 | 3 | 4 | 5,
+  preset: 1 | 2 | 3 | 4 | 5 | 6,
   units: 'si' | 'american' | 'hp',
+  decimals: number,
   selectedParams?: string[]
 ): PeakValueItem[] {
   if (!calc.data || calc.data.length === 0) return [];
@@ -79,7 +80,7 @@ function getPeakValuesForCalculation(
       if (powerPeak) {
         peaks.push({
           label: 'P-Av',
-          value: `${convertValue(powerPeak.value, 'P-Av', units).toFixed(1)} ${getParameterUnit('P-Av', units)}`,
+          value: `${convertValue(powerPeak.value, 'P-Av', units).toFixed(decimals)} ${getParameterUnit('P-Av', units)}`,
           rpm: powerPeak.rpm,
         });
       }
@@ -88,7 +89,7 @@ function getPeakValuesForCalculation(
       if (torquePeak) {
         peaks.push({
           label: 'Torque',
-          value: `${convertValue(torquePeak.value, 'Torque', units).toFixed(1)} ${getParameterUnit('Torque', units)}`,
+          value: `${convertValue(torquePeak.value, 'Torque', units).toFixed(decimals)} ${getParameterUnit('Torque', units)}`,
           rpm: torquePeak.rpm,
         });
       }
@@ -131,7 +132,7 @@ function getPeakValuesForCalculation(
         if (peak) {
           peaks.push({
             label: paramName,
-            value: `${convertValue(peak.value, paramName, units).toFixed(1)} ${getParameterUnit(paramName, units)}`,
+            value: `${convertValue(peak.value, paramName, units).toFixed(decimals)} ${getParameterUnit(paramName, units)}`,
             rpm: peak.rpm,
           });
         }
@@ -203,7 +204,7 @@ function getPeakValuesForCalculation(
         if (powerPeak) {
           peaks.push({
             label: 'P-Av',
-            value: `${convertValue(powerPeak.value, 'P-Av', units).toFixed(1)} ${getParameterUnit('P-Av', units)}`,
+            value: `${convertValue(powerPeak.value, 'P-Av', units).toFixed(decimals)} ${getParameterUnit('P-Av', units)}`,
             rpm: powerPeak.rpm,
           });
         }
@@ -212,7 +213,7 @@ function getPeakValuesForCalculation(
         if (torquePeak) {
           peaks.push({
             label: 'Torque',
-            value: `${convertValue(torquePeak.value, 'Torque', units).toFixed(1)} ${getParameterUnit('Torque', units)}`,
+            value: `${convertValue(torquePeak.value, 'Torque', units).toFixed(decimals)} ${getParameterUnit('Torque', units)}`,
             rpm: torquePeak.rpm,
           });
         }
@@ -272,7 +273,54 @@ function getPeakValuesForCalculation(
         if (peak) {
           peaks.push({
             label: paramName,
-            value: `${convertValue(peak.value, paramName, units).toFixed(1)} ${getParameterUnit(paramName, units)}`.trim(),
+            value: `${convertValue(peak.value, paramName, units).toFixed(decimals)} ${getParameterUnit(paramName, units)}`.trim(),
+            rpm: peak.rpm,
+          });
+        }
+      });
+      break;
+    }
+
+    case 6: {
+      // Preset 6: Efficiency Parameters (DRatio, PurCyl, Seff, Teff, Ceff)
+      // All 5 efficiency parameters are per-cylinder arrays → need averaging
+      const efficiencyParameters = ['DRatio', 'PurCyl', 'Seff', 'Teff', 'Ceff'];
+
+      efficiencyParameters.forEach((paramName) => {
+        const param = PARAMETERS[paramName];
+        const isPerCylinder = param?.perCylinder || false;
+
+        // Find peak with averaging for per-cylinder parameters
+        let peak;
+        if (isPerCylinder) {
+          // For per-cylinder parameters, find peak from averaged data
+          let maxValue = -Infinity;
+          let maxRpm = 0;
+
+          calc.data!.forEach((point) => {
+            const rawValue = (point as any)[paramName];
+            if (Array.isArray(rawValue)) {
+              const avg = rawValue.reduce((sum: number, v: number) => sum + v, 0) / rawValue.length;
+              if (avg > maxValue) {
+                maxValue = avg;
+                maxRpm = point.RPM;
+              }
+            }
+          });
+
+          peak = maxValue > -Infinity ? { value: maxValue, rpm: maxRpm } : null;
+        } else {
+          // For scalar parameters, use findPeak directly
+          peak = findPeak(calc.data!, paramName);
+        }
+
+        if (peak) {
+          // Special label for Ceff: show as "Ceff (VE)" for user clarity
+          const displayLabel = paramName === 'Ceff' ? 'Ceff (VE)' : paramName;
+
+          peaks.push({
+            label: displayLabel,
+            value: `${convertValue(peak.value, paramName, units).toFixed(decimals)} ${getParameterUnit(paramName, units)}`.trim(),
             rpm: peak.rpm,
           });
         }
@@ -333,6 +381,7 @@ export function PeakValuesCards({
   selectedParams,
 }: PeakValuesCardsProps) {
   const units = useAppStore((state) => state.units);
+  const decimals = useAppStore((state) => state.chartSettings.decimals);
 
   // Don't render if no calculations
   if (calculations.length === 0) {
@@ -346,7 +395,7 @@ export function PeakValuesCards({
     <Tooltip.Provider delayDuration={300}>
       <div className="w-full flex flex-col gap-3">
         {calculations.map((calc, index) => {
-          const peaks = getPeakValuesForCalculation(calc, preset, units, selectedParams);
+          const peaks = getPeakValuesForCalculation(calc, preset, units, decimals, selectedParams);
 
           if (peaks.length === 0) return null;
 

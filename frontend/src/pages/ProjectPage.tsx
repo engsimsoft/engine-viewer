@@ -12,6 +12,7 @@ import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
 import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
 import { ChartPreset4 } from '@/components/visualization/ChartPreset4';
 import { ChartPreset5 } from '@/components/visualization/ChartPreset5';
+import { ChartPreset6 } from '@/components/visualization/ChartPreset6';
 import { DataTable } from '@/components/visualization/DataTable';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
@@ -140,6 +141,11 @@ export default function ProjectPage() {
                 )}
                 {selectedPreset === 5 && (
                   <ChartPreset5
+                    calculations={allCalculations}
+                  />
+                )}
+                {selectedPreset === 6 && (
+                  <ChartPreset6
                     calculations={allCalculations}
                   />
                 )}

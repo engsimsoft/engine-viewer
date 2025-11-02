@@ -9,6 +9,7 @@ const PRESET_NAMES: Record<number, string> = {
   3: 'Critical',
   4: 'CustomChart',
   5: 'Combustion',
+  6: 'Efficiency',
 };
 
 /**
@@ -40,7 +41,7 @@ function getCurrentDate(): string {
  * - Multiple calculations: "Multi-Project-Comparison_PresetName_Date.ext"
  *
  * @param calculations - Array of CalculationReference (primary + comparisons)
- * @param presetNumber - Preset number (1-5)
+ * @param presetNumber - Preset number (1-6)
  * @returns Base filename (without extension)
  *
  * @example
@@ -56,7 +57,7 @@ function getCurrentDate(): string {
  */
 export function generateChartFilename(
   calculations: CalculationReference[],
-  presetNumber: 1 | 2 | 3 | 4 | 5
+  presetNumber: 1 | 2 | 3 | 4 | 5 | 6
 ): string {
   const presetName = PRESET_NAMES[presetNumber] || 'Chart';
   const date = getCurrentDate();
