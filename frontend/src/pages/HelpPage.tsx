@@ -93,7 +93,7 @@ function ParameterRow({ param, units }: ParameterRowProps) {
         <Tooltip.Root delayDuration={300}>
           <Tooltip.Trigger asChild>
             <button
-              className="inline-flex items-center justify-center rounded-full hover:bg-accent p-1 transition-colors flex-shrink-0"
+              className="inline-flex items-center justify-center rounded-full hover:bg-accent p-2 transition-colors flex-shrink-0"
               aria-label={`More information about ${param.displayName}`}
             >
               <Info className="h-4 w-4 text-muted-foreground" />
