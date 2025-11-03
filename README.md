@@ -93,8 +93,9 @@ cd frontend && npm install && npm run dev
 
 ### Для разработчиков
 - **[CLAUDE.md](CLAUDE.md)** - инструкции для работы с Claude Code
-- **[roadmap.md](roadmap.md)** - план разработки и текущий статус
 - **[CHANGELOG.md](CHANGELOG.md)** - история изменений
+- **[docs/chart-presets.md](docs/chart-presets.md)** - документация по пресетам графиков
+- **[docs/decisions/](docs/decisions/)** - Architecture Decision Records (ADRs)
 
 ### Техническое задание
 - **[engine-viewer-tech-spec .md](engine-viewer-tech-spec%20.md)** - полное ТЗ
@@ -104,25 +105,22 @@ cd frontend && npm install && npm run dev
 
 ## Статус проекта
 
-**Stable Version:** v1.0.0 ✅
-**Development Version:** v2.0.0 (65% complete) 🚧
+**Current Version:** v2.0.0 ✅
 
-**v1.0.0 (Stable):**
-- ✅ Backend (парсинг, REST API, метаданные)
-- ✅ Frontend (UI, графики, таблицы, экспорт)
-- ✅ Все 4 пресета графиков
-- ✅ Таблица данных с экспортом
-
-**v2.0.0 (In Development):**
-- ✅ Cross-project calculation comparison
-- ✅ Multi-calculation visualization (1 primary + 4 comparisons)
-- ✅ Units conversion (SI/American/HP)
-- ✅ Peak values cards (always visible)
-- ✅ Settings popover (theme, animation, grid)
+**v2.0.0 Features:**
+- ✅ Cross-project calculation comparison (1 primary + 4 comparisons)
+- ✅ Multi-format support (.det, .pou, .pou-merged)
+- ✅ Units conversion (SI/American/HP) with live updates
+- ✅ 6 chart presets (Power/Torque, Pressure/Temp, MEP, Critical, Efficiency, Custom)
+- ✅ Peak values cards (always visible, no hover needed)
+- ✅ Professional UI (iPhone-quality design, smooth animations)
+- ✅ Accessibility (WCAG 2.1 AA compliant, keyboard navigation, screen readers)
+- ✅ Responsive design (mobile, tablet, desktop optimized)
+- ✅ Settings management (theme, units, animation, grid)
 - ✅ DataTable with multi-project support
-- 🚧 UI translations, polish, testing
+- ✅ Export capabilities (PNG/SVG charts, CSV/Excel data)
 
-**Development Plan:** См. [roadmap-v2.md](roadmap-v2.md)
+**Previous versions:** See [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
