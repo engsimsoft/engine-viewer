@@ -38,11 +38,11 @@
 
 **CRITICAL:** First column (№, →, row numbers) MUST be skipped in ALL parsing:
 ```javascript
-// CORRECT - slice(1) mandatory!
-const values = line.split(/\t+/).slice(1);
+// CORRECT - slice(1) mandatory! Use \s+ for multiple spaces
+const values = line.trim().split(/\s+/).slice(1);
 
 // WRONG - will break everything
-const values = line.split(/\t+/);
+const values = line.trim().split(/\s+/);  // Missing slice(1)!
 ```
 
 **WHY:** External software adds service column for human readability. Parser must skip it.
@@ -92,6 +92,53 @@ PurCyl(1)  PurCyl(2)  PurCyl(3)  PurCyl(4)
 ```
 
 **Applies to:** `PCylMax`, `TCylMax`, `TUbMax`, `PurCyl`, `Deto` (all per-cylinder parameters)
+
+### 5. EngMod4T Source Program - Universal Fixed-Width Format
+
+**CRITICAL DISCOVERY:** All ~15 file types (.det, .pou, .prt, traces) come from the SAME source program → SAME format structure.
+
+**Source Program:**
+- **Name:** EngMod4T (Thermodynamic 4-stroke ICE simulation)
+- **Language:** Delphi (Object Pascal) 7 (80% confidence)
+- **Platform:** Windows Desktop
+- **Age:** 15+ years (early 2000s)
+- **Developer:** CIS engineering community
+
+**Universal File Format (ALL file types):**
+- **Type:** Fixed-width ASCII text (**NOT** space-separated CSV, **NOT** tab-separated)
+- **Created by:** Delphi `WriteLn(F, Format('%12.2f %12.2f ...', [values]))`
+- **Characteristics:**
+  - Multiple spaces for column alignment (not single space, not tabs)
+  - Right-aligned numbers with space padding
+  - First column always service data (skip with `slice(1)`)
+  - Line endings: CRLF (Windows style)
+- **Encoding:** ASCII for numbers, Windows-1251 for Cyrillic metadata
+
+**Parsing Strategy (Universal for ALL file types):**
+```javascript
+// ✅ CORRECT for ALL EngMod4T files
+const columns = line.trim().split(/\s+/);      // Multiple spaces
+const dataColumns = columns.slice(1);          // Skip first (service) column
+const values = dataColumns.map(parseFloat);
+
+// ❌ WRONG approaches
+const values = line.split(',');      // NO! Not CSV
+const values = line.split(/\t+/);    // NO! Not tabs (though may work accidentally)
+const values = line.split(' ');      // NO! Multiple spaces, not single
+```
+
+**WHY This Matters:**
+- Future parsers (.prt, trace files) will use SAME format
+- Single Source of Truth: [docs/engmod4t-overview.md](docs/engmod4t-overview.md)
+- All parsing logic should follow universal pattern
+- No need to guess format for new file types - it's always fixed-width ASCII
+
+**Evidence:**
+1. All existing files (.det, .pou) use identical structure
+2. Delphi `Format()` produces fixed-width output by design
+3. Same program creates all file types → same format approach
+
+**IMPACT:** When adding new parsers, ALWAYS refer to [EngMod4T Overview](docs/engmod4t-overview.md) first - the format is already documented.
 
 ---
 

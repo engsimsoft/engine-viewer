@@ -4,16 +4,19 @@
 **Date:** November 1, 2025
 **Status:** Complete
 
+**📖 См. также:** [EngMod4T Overview](../engmod4t-overview.md) - Single Source of Truth о программе-источнике и универсальном формате файлов.
+
 ---
 
 ## Overview
 
-`.pou` files are extended engine calculation result files containing **71 parameters** per data point. They are produced by the main engine simulation software and contain more detailed information compared to `.det` files (24 parameters).
+`.pou` files are extended engine calculation result files containing **71 parameters** per data point. They are produced by EngMod4T simulation software (Delphi 7) and contain more detailed information compared to `.det` files (24 parameters).
 
 ### Key Characteristics
 
-- **Format:** Plain text, space-separated values
-- **Encoding:** UTF-8
+- **Source:** EngMod4T simulation software (Delphi 7)
+- **Format:** Fixed-width ASCII text (**NOT** space-separated CSV)
+- **Encoding:** ASCII (Windows-1251 for Cyrillic metadata)
 - **Parameters:** 71 per data point (75 with automatic merge)
 - **Structure:** Metadata + Headers + Calculation blocks
 - **Markers:** Same `$` calculation markers as `.det` format
@@ -343,13 +346,30 @@ Power(1)  Power(2)  Power(3)  Power(4)
 
 ## Parsing Rules
 
+### Fixed-width ASCII Format
+
+**Important:** `.pou` files use fixed-width ASCII format (Delphi origin), **NOT** CSV format.
+
+- **Multiple spaces** separate columns (not single space or comma)
+- **Right-aligned** numbers with space padding
+- Created by: `WriteLn(F, Format('%12.2f ...', [values]))`
+
 ### Line Processing
 
 1. **Skip first column** (line number marker `→`)
-2. **Split by whitespace** and filter empty strings
+2. **Split by multiple spaces** using `split(/\s+/)` (NOT CSV parser)
 3. **Parse metadata** from line 1 (5 fields)
 4. **Parse headers** from line 2 (71 fields)
 5. **Parse data** from line 3+ (71 values per line)
+
+**Correct parsing approach:**
+```javascript
+// ✅ ПРАВИЛЬНО: Split по множественным пробелам
+const values = line.trim().split(/\s+/).slice(1);  // slice(1) пропускает первую колонку
+
+// ❌ НЕПРАВИЛЬНО: Использовать CSV парсер
+const values = line.split(',');  // НЕТ! Это не CSV формат
+```
 
 ### Calculation Grouping
 
