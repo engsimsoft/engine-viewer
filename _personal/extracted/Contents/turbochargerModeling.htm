@@ -1,0 +1,196 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-za">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Turbocharger Modeling</title>
+</head>
+
+<body>
+
+<h2>Turbocharger Modeling</h2>
+
+<p><font color="#FF0000"><b>NOTE: This is the fifth release of the turbocharger 
+module and a number of options discussed here are not yet available but under 
+development.</b></font></p>
+
+<p>A turbocharger is modeled by importing a compressor map and a turbine 
+swallowing curve. Once this is done the rest of the turbocharger characteristics 
+are added. To select a turbocharged engine the following radio button is 
+selected on the main engine dialog:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboEngineMenuTurbo.jpg"></p>
+
+<p align="left">After saving the engine subsystem the turbocharger dialog will 
+open:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboNewMenu.jpg"></p>
+
+<h3 align="left">Number of Turbochargers</h3>
+
+<p align="left">The user can select between one and two turbochargers.</p>
+
+<h3 align="left">Multi Turbo Configuration</h3>
+
+<p align="left">If two turbochargers were selected the user has the choice 
+between two parallel turbos (typically one per bank on a Vee or Flat engine) or 
+two sequential turbos where one is the low pressure stage (LP) and one is the 
+high pressure stage (HP), typically this is used on a highly boosted 3 or 4 
+cylinder engine. For the first case the two parallel turbos use the same 
+compressor map and turbine swallowing curve, while for the sequential case each 
+turbo has its own compressor map and turbine swallowing curve.</p>
+
+<h3 align="left">Wastegate</h3>
+
+<p align="left">The user select whether a wastegate is fitted or not. There are two 
+options if a wastegate is fitted: </p>
+
+<ul>
+	<li>If a single boost value is selected the user has to supply the following data:
+	<p align="center">
+    <img border="0" src="../Pictures/TurboWasteGateData.jpg"></p></li>
+	<li>If a boost map is selected the user has to supply the following data:
+	<p align="center">
+    <img border="0" src="../Pictures/TurboWasteGateData1.jpg"></p></li>
+	<p align="center">
+    <img border="0" src="../Pictures/TurboWasteGateCurveData.jpg"></p></li>
+</ul>
+
+<p>Using the button "<b>Draw BoostCurve</b>" the boost curve is displayed:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/BoostCurveGraph.jpg"></p>
+
+<h3 align="left">Boost Measurement Point</h3>
+
+<p align="left">The user has to select where the boost pressure and boost temperature 
+will be measured. This is the point where the pressure will be measured for wastegate 
+or other boost control as well as the value that goes into the results files.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboBoostPressPoint.jpg"></p>
+
+<h3 align="left">Boost Control on Compressor Side</h3>
+
+<p align="left">The boost pressure can also be controlled on the compressor side 
+by using a &quot;blow off valve&quot; or &quot;bypass control&quot;. Blow off is inefficient as 
+pressure is just bleat to atmosphere. Bypass control is also used to control 
+boost but is used to prevent compressor surge during sudden shutting of the 
+throttle.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboBoostControl.jpg"></p>
+
+<h3 align="left">Moment of Inertia (MoI)</h3>
+
+<p align="left">The turbo does not operate at a constant speed but accelerates 
+and decelerates continuously during operation. To capture these dynamics 
+correctly the moment of inertia must be supplied. The user can choose to supply 
+the MoI of each of the 3 main&nbsp; components separately or combined. This is a 
+very difficult value to obtain so a calculator has been added that calculates a 
+first order approximation from the compressor and turbine dimensions that has 
+been entered.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboMoIMenu.jpg"></p>
+
+<h3 align="left">Turbine Entry Type</h3>
+<p>There are three options available for the turbine entry:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboTurbineEntry.jpg"></p>
+
+<h3 align="left">Turbine Inlet Guide Vanes</h3>
+
+<p>There are three options available for guide vanes in the impellor inlet, no guide vanes,
+fixed guide vanes and moveable guide vanes, also known as variable geometry turbine (VGT). 
+If the VGT option is selected the turbine characteristic must be a family of swallowing curves 
+with each curve the value for a different vane angle.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboTurbineGeometry.jpg"></p>
+
+<h3>Back Pressure Measurement Position</h3>
+
+<p>There are three back pressure measurement positions available to choose from:</p>
+<ul>
+    <li><b>Turbine Entry</b> This is the default position and the generally accepted option.</li>
+	<li><b>Exhaust Port</b> This option will show the highest value and is the actual value 
+	that influences the engine performance but not easy to measure in practice.</li>
+	<li><b>Collector</b> This option is often chosen in practice because of accessibility 
+	reasons. It will give a back pressure value slightly higher than the turbine entrace value.</li> 
+</ul>
+
+<p align="center">
+<img border="0" src="../Pictures/BackPressureMeasurementPoint-02.jpg"></p>
+
+<h3>Compressor Map and Characteristics</h3>
+
+<p>The compressor map and characteristics are generated by the <b>DigiComp</b> software which 
+generates a file with the impeller dimensions and flow characteristics in a format required 
+by the simulation software. To import a compressor map the button "<b>Select Compressor 
+File</b>" is clicked which opens a typical file open dialog where the relevant file is selected:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboSelectComp.jpg"</p>
+
+<p>After selecting the file the dialog is updated by displaying the file name and the relevent 
+impeller dimensional data:
+
+<p align="center">
+<img border="0" src="../Pictures/TurboCompSelected.jpg"></p>
+
+<h3>Turbine Map and Characteristics</h3>
+
+<p>The turbine map and characteristics are generated by the <b>DigiTurb</b> software which 
+generates a file with the turbine dimensions and flow characteristics in a format required 
+by the simulation software. To import a turbine map the button "<b>Select Turbine 
+File</b>" is clicked which opens a typical file open dialog where the relevant file is selected:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboSelectTurb.jpg"></p>
+
+<p>After selecting the file the dialog is updated by displaying the file name and the relevent 
+turbine dimensional data:
+
+<p align="center">
+<img border="0" src="../Pictures/TurboTurbSelected.jpg"></p>
+
+<p>After selecting both the compressor and turbine we can now test the first order matching 
+of the compressor and turbine to the engine. This matching is done at the maximum power rpm 
+value as specified on the engine dialog. To test the compressor matching click on the <b>"Plot"</b>
+button next to the compressor file name:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboCompMatch.jpg"></p>
+
+<p>The red dot on the compressor map is the area where the compressor will operate under the current 
+assumptions of volumetric efficiency and heat release rates. This is internal to the software and 
+cannot be changed by the user. In this case we see it is very close to the surge line indicating that
+this compressor is probably too big for this engine.</p>
+
+<p>Next we test the matching of the turbine by clicking on the <b>"Plot"</b>
+button next to the turbine file name:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboTurbMatch.jpg"></p>
+
+<p>The red dot on the swallowing curve is the probable area where the turbine will operate. 
+The green dot is the full engine mass flow and the difference will flow through the wastegate.</p>
+
+<p>The final bit of data required is the moment of inertia of the rotor. As this is very seldom 
+available a utility is included in the software that estimates it from the compressor wheel 
+diameter. Clicking on the <b>"Estimate MoI"</b> button the following is displayed:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboMoIEstimated.jpg"></p>
+
+<p>The <b>"Save and Exit"</b> button can now be clicked.</p>
+
+</body>
+
+</html>

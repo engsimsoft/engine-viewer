@@ -1,0 +1,137 @@
+<html>
+
+<head>
+<title>Temperature Data</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+</head>
+
+<body>
+
+<h1><b>Description of Temperature and Atmospheric Data</b></h1>
+
+<p>When creating a new temperature subsystem the program will display a dialog 
+box with default engine cooling systems to select from:</p>
+
+<p align="center"> <img border="0" src="../Pictures/TemperatureModelSelection.jpg"></p>
+
+<p>After selecting an option the program will display a dialog 
+box with default values for the engine (based on the cooling system, 
+combustion system and whether it has forced induction or not) already filled in:</p>
+
+<p align="center"> <img border="0" src="../Pictures/NewTemperature.jpg"></p>
+
+<p align="left">The user can then accept these values as is if no better info is 
+available or the values can be edited to represent more correct value for the 
+engine being modeled.  </p>
+
+<h2 align="left"><u>Description of Variables</u></h2>
+
+<h3>Inlet System Wall Temperature</h3>
+
+<p>This is the inlet duct system internal wall temperature and will be
+used for all the inlet ducts and boxes excluding the inlet ports. (Typically about <b>25</b>
+degrees Celsius)</p>
+
+<h3><b>Inlet Box Wall Temperature</b></h3>
+
+<p>This is the inlet system airbox, plenums and charge air cooler header tank internal 
+wall temperature and will be used for all the inlet plenums. (Typically about 
+25 degrees Celsius)</p>
+
+<h3>Inlet Port Wall Temperature</h3>
+
+<p>This is the inlet port system internal wall temperature 
+and will be used for all the inlet ports. (Typically about <b>150</b>
+degrees Celsius)</p>
+
+<h3>Exhaust Port Wall Temperature</h3>
+
+<p>This is the exhaust port internal wall temperature and will be used
+for all the exhaust ports. (Typically about <b>250</b> degrees Celsius but it varies from engine
+to engine, especially between air and water cooled engines)</p>
+
+<h3><b>Exhaust Wall Temperature</b></h3>
+
+<p>This is the inside surface temperature of the exhaust 
+headers. On a multi-pipe system the collector and connector pipe wall 
+temperatures are scaled inside the program. This value in conjunction with the 
+simulation rpm and the maximum power rpm is also used to calculate the exhaust 
+gas start-up temperature. (Typically <b>350 to 450</b> degrees Celsius) </p>
+
+<h3><b>Exhaust Box Wall Temperature</b></h3>
+
+<p>This is the exhaust system box or plenums wall temperature and will be used for 
+all the exhaust plenums. (Typically about 125 to 300 degrees Celsius)</p>
+
+<h3><b>Piston Crown Temperature</b></h3>
+
+<p>This is the average surface temperature of the piston crown in
+centigrade. Typically a value of <b>250</b> degrees Celsius is used. This value in
+conjunction with the cylinder liner and combustion chamber surface temperature is used to
+calculate the heat flux from or into the cylinder.</p>
+
+<h3><b>Combustion Chamber (Cylinder Head) Wall Temperature</b></h3>
+
+<p>This is the average temperature of the combustion chamber surface
+in centigrade. Typically a value of <b>280</b> degrees Celsius is used. This value in
+conjunction with the cylinder liner and piston crown surface temperature is used to
+calculate the heat flux from or into the cylinder.</p>
+
+<h3><b>Cylinder Liner Temperature</b></h3>
+
+<p>This is the average surface temperature of the cylinder liner in
+centigrade. Typically a value of <b>220</b> degrees Celsius is used. This value in
+conjunction with the piston crown and combustion chamber surface temperature is used to
+calculate the heat flux from or into the cylinder.</p>
+
+<h2><b><u>Atmospheric Conditions</u></b></h2>
+
+<h3><b>Atmospheric Temperature</b></h3>
+
+<p>This is the atmospheric temperature at which the simulation is required to give the 
+output predictions and is also the temperature used at the atmospheric inlet to the engine. 
+The standard value is 20 degrees Celsius.</p>
+
+<h3><b>Atmospheric Pressure</b></h3>
+
+<p>This is the atmospheric pressure at which the simulation is required to give the 
+output predictions and is also the pressure used at the atmospheric inlet to the engine. 
+The standard value is 101.325 kPa.</p>
+
+<h3><b>Outlet Atmospheric Temperature</b></h3>
+
+<p>This is the temperature at the outlet(s) of the engine. Sometimes the engine outlet is not 
+at atmospheric conditions and a different value from atmospheric conditions is required. If not, 
+use the atmospheric value. The standard value is 20 degrees Celsius.</p>
+
+<h3><b>Outlet Atmospheric Pressure</b></h3>
+
+<p>This is the pressure at the outlet(s) of the engine. Sometimes the engine outlet is not 
+at atmospheric conditions and a different value from atmospheric conditions is required. If not, 
+use the atmospheric value. The standard value is 101.325 kPa.</p>
+
+<h2><u>Simulation of Turbocharger or Supercharger</u></h2>
+
+<p>There is a facility to simulate a turbocharged or supercharged engine by specifying the boost 
+pressure, back pressure and the related temperatures as atmospheric conditions to speed up the 
+development of the engine before the much more complex and time consuming turbocharger model is 
+added to the simulation model.</p>
+
+<h3>Turbocharger simulated with same boosted inlet and outlet conditions, cold exhaust and no back pressure.</h3>
+
+<p align="center"> <img border="0" src="../Pictures/TemperatureSameBoostBackPressure.jpg"></p>
+
+<h3>Turbocharger simulated with different inlet and outlet conditions, hot exhaust and with back pressure.</h3>
+
+<p align="center"> <img border="0" src="../Pictures/TemperatureDeltaBoostBackPressure.jpg"></p>
+
+<h3>Supercharger simulated with boosted inlet and atmospheric outlet conditions and no back pressure.</h3>
+
+<p align="center"> <img border="0" src="../Pictures/TemperatureSuperBoostBackPressure.jpg"></p>
+
+<hr>
+
+<p>&copy; Neels van Niekerk 2024</p>
+
+</body>
+</html>

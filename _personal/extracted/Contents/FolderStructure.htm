@@ -1,0 +1,135 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Folder Structure</title>
+</head>
+
+<body>
+
+<h1>The Folder Structure used by the EngMod4T Suite of Programs</h1>
+
+<p>During the installation process the installer software creates the program folders and 
+the working folder as well as shortcut Icons on the desktop. Unless you know how to change 
+a target folder for a program it is strongly recommended that you use the default file 
+structure.</p>
+
+<ol>Folders Created:
+
+  <li><b>C:\4Stroke</b> - This is the working folder where all the Project files is stored.</li>
+  <li><b>C:\Program Files (x86)\Dat4T</b> - The Dat4T executable, license file and Help files are installed to this folder.</li>
+  <li><b>C:\Program Files (x86)\EngMod4T</b> - The EngMod4T executable, license file and Help file are installed to this folder.</li>
+  <li><b>C:\Program Files (x86)\Post4T</b> - The Post4T executable and Help file are installed to this folder.</li>
+  <li><b>C:\Program Files (x86)\Waveviewer4T</b> - The WaveViewer4T executable and Help files are installed to this folder.</li>
+
+</ol>
+
+<p>Only the first folder is of any interest if everything is normal. The other folders are 
+only accessed if there are issues with the software, most often when Windows decides to install 
+the license file somewhere else. A typical executable folder looks as follows:</p>
+
+<p align="center"><img border="0" src="../Pictures/SuiteFolder-07.jpg"></p>
+
+<h2>Working Folder - "C:\4Stroke"</h2>
+
+<p>The working folder is the one we are interested in. It is created when the software is installed and 
+populated with some examples to supply a starting point for the new user to get up to speed.</p>
+
+<p align="center"><img border="0" src="../Pictures/SuiteFolder-01.jpg"></p>
+
+<p>Double clicking on the "C:\4Stroke" icon opens the working folder. Normally there would be a large 
+number of files in this folder but to make it easier to explain there is only one Project loaded: 
+Blast. The folder shown below is after running a single simulation:</p>
+
+<p align="center"><img border="0" src="../Pictures/SuiteFolder-02.jpg"></p>
+
+<p>There are a number of files in this folder other than directly Project related files and they are 
+as follows with the following functions:</p>
+
+<ol>
+
+  <li><b>Dat4TErrorLog.dat</b> - Every time Dat4T is started a new file is over written over the old one and 
+  It stores all the errors and commands used. Send this file with an error report when Dat4T gives a funny 
+  error or crashes, before opening Dat4T again as that will just over write the file.</li>
+  <li><b>Dat4TLicenseCheck.dat</b> - Certain parts in Dat4T is only available if you have a valid license 
+  and this logs the checks.</li>
+  <li><b>EngMod4TLicenseCheck.dat</b> - Every time EngMod4T is started the validity of the license is first 
+  verified. If you have any license issues please send this file.</li>
+  <li><b>OldEngMod4TFile.fle</b> - This stores the choices made during the previous EngMod4T run to save 
+  time selecting them if the next run will use the same parameters.</li>
+  <li><b>OldProjectFile.fle</b> - This stores the previous Project opened by Dat4T and loads it when Dat4T 
+  is opened again.</li>
+  <li><b>Post4TErrorLog.dat</b> - Every time Post4T is started a new file is over written over the old one and 
+  It stores all the errors and commands used. Send this file with an error report when Post4T gives a funny 
+  error or crashes, before opening Post4T again as that will just over write the file.</li>
+  <li><b>Post4TWorkDir.dat</b> - Stores the Post4T working folder of the previous run, not yet used for anything.</li>
+
+</ol>
+
+<h2>Project Folder - "C:\4Stroke\Blast"</h2>
+
+<h3>Single Run Results</h3>
+
+<p>Once a simulation of a Project is run a folder is created with the name of the Project and all the 
+result files are stored in this folder. We double click on the "Blast" folder icon in the Project 
+folder to open it:</p>
+
+<p align="center"><img border="0" src="../Pictures/SuiteFolder-03.jpg"></p>
+
+<p>In this folder is a list of all the simulation results at 8000rpm, they are the files with the "8000" 
+appended to the name but before the extention. These are the files used by Post4T to display the "Trace" 
+values. There are also three new files without the "8000" in the name. They are the following and is 
+used for specific outputs:</p>
+
+<ol>
+
+  <li><b>Blast.dat</b> - This file (.dat) lists the running of the main simulator, EngMod4T, and captures 
+      errors. Any time a simulation crashes this is the file you send to report the error and ask for assistance.</li>
+  <li><b>Blast.des</b> - The detonation results for a single run is stored in this file (.des). To see the 
+      values inside it, open it with a normal text editor, something like "Wordpad" or "Notepad++".</li>
+  <li><b>Blast.spo</b> - The performance results for a single run is stored in this file (.spo). To see the 
+      values inside it, open it with a normal text editor, something like "Wordpad" or "Notepad++".</li>
+
+</ol>
+
+<p>Note that both the last two files are appended during each batch run so the performance and detonation results are 
+just added during each run.</p>
+
+<h3>Batch Run Results</h3>
+
+<p>After a "Batch" run there are a lot more files with the results for each rpm point in the batch run. There are 
+now two new files which we are interested in.</p>
+
+<p align="center"><img border="0" src="../Pictures/SuiteFolder-04.jpg"></p>
+
+<p>The following two files are of interest:</p>
+
+<ol>
+
+  <li><b>Blast.det</b> - The detonation results for a batch run is stored in this file (.det). To see the 
+      values inside it, open it with Post4T.</li>
+  <li><b>Blast.pou</b> - The performance results for a batch run is stored in this file (.pou). To see the 
+      values inside it, open it with Post4T.</li>
+
+</ol>
+
+<p>Note that both these files are appended during each batch run so the performance and detonation results are just 
+added during each run.</p>
+
+<h3>Advanced Users</h3>
+
+<p>There are three files created with each RPM point that lists the instantaneous port open area against crank angle. 
+These files are not opened by Post4T but requires Microsoft Excel to open and plot.</p>
+
+<ol>
+
+  <li><b>Blast8000.epa</b> - This file (.epa) lists the exhaust port open area against crank angle.</li>
+  <li><b>Blast8000.ipa</b> - This file (.ipa) lists the inlet port open area against crank angle.</li>
+
+</ol>
+
+</body>
+
+</html>

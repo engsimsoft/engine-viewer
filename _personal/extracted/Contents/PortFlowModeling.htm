@@ -1,0 +1,147 @@
+<html>
+
+<head>
+<title>Port Flow Modeling </title>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+</head>
+
+<body>
+
+<h1 align="left"><span lang="EN-US" style="font-size:20.0pt;mso-bidi-font-size:10.0pt">Modeling Flow 
+Through Ports and Valves</span></h1>
+
+<p class="MsoBodyText"><span lang="EN-US">The flow through the valves and ports are modeled using 
+gasdynamics and discharge coefficients. It is based on the work of the late <a HREF="References.htm">
+Professor Emeritus Gordon P Blair</a> of The Queen's University of Belfast.</span></p>
+
+<p class="MsoBodyText"><span lang="EN-US">In modeling a port in 1-dimensional gasdynamic simulation 
+software certain assumptions and simplifications must be made. The following discusses these for the 
+EngMod4T program. Other vendors might make different trade-offs but they all will have to make 
+some.</span></p>
+
+<h2>Description of dimensional port and valve input data</h2>
+
+<p>The following figure shows the input required to model an inlet port:</p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/InPortInputData.jpg" width="712" height="577"></p>
+
+<p class="MsoBodyText"><span lang="EN-US"><b>Number of Valves:</b> This is the number of valves per 
+cylinder and can vary from 1 to 3 for inlet valves and 1 or 2 for exhaust valves.</span></p>
+
+<p class="MsoBodyText"><span lang="EN-US"><b>Valve and Port Dimensions: </b>These values are straight 
+forward. It is important to note that the software will automatically adjust the port diameters from 
+the manifold diameter up to the effective throat diameter. The effective throat diameter is the 
+throat diameter adjusted for the effect of the valve stem diameter. They will be discussed in detail 
+in the inlet port and exhaust port topics.</span></p>
+
+<h2>Effect of Seat Dimensions on the Valve and in the Head on Effective Flow Area</h2>
+
+<p>The software uses the smallest available flow area through the valve open apperture times the Cd-value 
+as the area through which the gas flows. This area is dependent on the seat dimensions on the valve 
+and in the head. The two major controlling dimensions are the seat inside diameter on the valve and 
+the seat outside diameter in the head. The next figure shows the possible combinations of these "major" 
+dimensions:</p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/SeatOptions.jpg" width="500" height="526"></p>
+
+<p>The next graph shows the effect on flow area by having first only the inner seat diameter on the valve 
+decreased by 3mm, then the effect of increasing only the outer diameter of the seat in the head by 3mm 
+and finally doing both. The graph goes from the valve opening point to the fully open point:</p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/Seat%20effects.jpg" width="779" height="541"></p>
+
+<h2>Description of the Cd maps</h2>
+
+<p class="MsoBodyText"><span lang="EN-US">During the flow through a valve the flow is less than what 
+the flow theoretical flow through the open area would have been. The ratio of the measured flow to 
+the theoretical flow is known as the “coefficient of discharge” and is usually abbreviated as Cd. 
+This Cd value is a function of how far the valve is open and the pressure ratio across the valve. 
+If we create a map of the Cd as a function of both the valve open ratio and the pressure ratio we 
+end up with a typical Cd map as shown in the next figure (the often used 28” of water pressure used 
+on a flow bench gives a pressure ratio of 1.07 which is very slightly above the x axis).
+ (from SAE2001-01-1798):
+</span></p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/Cd-Map.jpg" width="451" height="402"></p>
+
+<p class="MsoBodyText">The Cd value is actually of the complete port and takes the losses through 
+the “venturi”, the flow around the short side radius and around the valve guide and valve stem into 
+consideration as well as the valve seat and valve masking effects. This map is one of the inputs 
+into EngMod4T and that is why it is stated EngMod4T takes the flow loss into of the smallest cross 
+sectional area into consideration irrespective of where it is.</p>
+
+<p class="MsoBodyText">The following figure shows how the flow through the valve opening migrates 
+as a function of pressure ratio, lift and engine rpm. It is clear that the flow on an engine 
+spends very little time at the 28” line (1.07).</span></p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/Cd-MapMigration.jpg" width="451" height="418"></p>
+
+<p class="MsoBodyText"><span lang="EN-US">Very few people have the facilities to measure a port 
+to construct a Cd map. Getting just the Cd value at a specific pressure ratio (i.e. at 28” of 
+water on a flow bench) is a lot more common. Because of this there are three ways in EngMod4T 
+to describe the flow through a port and valve combination:</span></p>
+
+<ol>
+	<li>1)	If no flow data is available the user selects the most appropriate type of flow
+	<li>2)	If flow bench data is available this data is used to construct a Cd-map
+	<li>3)	Import a full Cd map
+</ol>
+
+<h3>No Flow Data Available</h3>
+
+<p class="MsoBodyText"><span lang="EN-US">For case 1 a number of Cd maps for 1, 2 and 3 valve 
+inlet ports and 1 and 2 valve exhaust ports ranging from severely masked to fully free flow 
+has been included in the software to allow the user a choice of what he thinks approximates 
+his engine best.</span></p>
+
+<p class="MsoBodyText"><span lang="EN-US"><b>Severely Masked</b> is defined where the combustion 
+chamber and/or cylinder wall restricts the flow through the valve open aperture over more than 
+90 degrees of its circumference and with a clearance of less than half the valve lift. The 
+following figure shows it schematically:</span></p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/ValveMaskingSevere.jpg" width="451" height="264"></p>
+
+<p class="MsoBodyText"><span lang="EN-US"><b>Partially Masked</b> is defined where the 
+combustion chamber and/or cylinder wall restricts the flow through the valve open 
+aperture 
+over less than 90 degrees of its circumference with a clearance bigger than half the valve 
+lift but smaller than the full valve lift. Almost all 4 and 5 valve heads fall in this 
+category. The following figure shows it schematically:</span></p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/ValveMaskingPartial.jpg" width="470" height="264"></p>
+
+<p class="MsoBodyText"><span lang="EN-US"><b>Free Flowing</b> is where the combustion
+chamber and cylinder walls have almost no detrimental effect on the flow through the valve 
+aperture. The following figure shows it schematically:</span></p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/ValveMaskingFree.jpg" width="450" height="264"></p>
+
+<p class="MsoBodyText"><span lang="EN-US">To allow further fine tuning of the Cd-map there 
+are multipliers. A severely masked Cd map multiplied with a factor of 1.2 is roughly the 
+same as a partially masked Cd map multiplied by 0.8, and the same way a partially masked 
+Cd map multiplied by 1.2 flows roughly the same as a free flowing Cd map multiplied by 0.8.
+Using this together with good judgement and experience the effect of flow improvements in 
+the chamber can be modeled.</span></p>
+
+<h3>Flow Bench Data Available</h3>
+
+<p class="MsoBodyText"><span lang="EN-US">When a port is measured on a flow bench and the Cd 
+value for each valve lift at a specific pressure ratio is known this Cd curve is used to modify 
+an existing Cd map to closely approximate the map for that port. This is described in 
+<a HREF="InCd-map.htm">"User Defined Cd-Map"</a></span></p>
+
+<h3>Cd-Map Available</h3>
+
+<p class="MsoBodyText"><span lang="EN-US">If the user has access to fully prepared Cd maps they 
+can import those directly.</span></p>
+
+</body>
+</html>

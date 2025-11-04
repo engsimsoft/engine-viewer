@@ -1,0 +1,154 @@
+<html>
+ <head>
+  <title> Modeling V8 Inlets </title>
+  <meta name="Generator" content="EditPlus">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+ </head>
+
+ <body>
+  
+ <h1>Types of V8 Intake Systems</h1>
+
+ <p>There is a large number of inlet systems available for V8 engines. With some
+ pipes like independent runners connected to the atmosphere there is no ambiguity
+ in the modeling process. However, when a plenum is involved the model is not so 
+ clearcut or obvious. A plenum as modeled in 1-dimensional gasdynamics is a 
+ 0-dimensional item and does not transmit waves over a distance with time delay 
+ but transmits it instantaneously. If the plenum  is in a part of the manifold 
+ where this will have a significant influence on the wave action it should rather 
+ be modeled as a series of large diameter pipes.</p>
+
+ <p>The following shows some examples of inlet systems and how they are modeled 
+ in Dat4T:</p>
+
+<h2>Independent Runners</h2>
+
+<p>There is no ambiguity in modeling this inlet.</p>
+
+<p align="center"><img src="../Pictures/In8_IndependentRunners.jpg"></p>
+
+<p>To model this inlet the following manifold type and manifold layout is selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-IndependentRunners.jpg"></p>
+
+
+<h2>Independent Runners connected to a Plenum per bank - Cross Ram</h2>
+
+<p>In this case it is clearly required to model the two plenums as a combination of pipes.
+If the plenum was much larger the choice is no longer so obvious and might require modeling 
+it using either method and comparing the results.</p>
+
+<p align="center"><img src="../Pictures/V8-CrossRam.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-IndependentRunners-CommonLogPlenumPerBank.jpg"></p>
+
+<p>In the case where the plenums are much larger in diameter to the extent where the wave 
+action in the plenum is so small as to be negligable it can be modeled as two plenums:</p>
+
+<p align="center"><img src="../Pictures/In8_2Box2Throt.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-IndependentRunners-CommonBoxPerBank.jpg"></p>
+
+
+<h2>Single Plane Manifold</h2>
+
+<p>A single plane manifold typically has a very small "plenum" where all the runners collect 
+to the inlet pipe (Which is the effective diameter of all the carburettor pipes combined).</p>
+
+<p align="center"><img src="../Pictures/InV8in1-SinglePlane.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-SinglePlane-Collector.jpg"></p>
+
+<p>If the plenum is very large or the inlet wave action not important the single plane manifold 
+can be modeled as a plenum into which the inlets and runners connect:</p>
+
+<p align="center"><img src="../Pictures/In8_1BoxThrot.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-IndependentRunners-CommonBox.jpg"></p>
+
+
+<h2>Dual Plane Manifold</h2>
+
+<p>A dual plane manifold typically has two very small "plenums" where the runners collect 
+to the inlet pipes (Which is the effective diameters of the connected carburettor pipes).</p>
+
+<p align="center"><img src="../Pictures/V8_DualPlaneUpdate.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-DualPlane-Collector.jpg"></p>
+
+<p>If the plenums are very large or the inlet wave action not important the dual plane manifold 
+can be modeled as two plenums into which the inlet pipes and runners connect:</p>
+
+<p align="center"><img src="../Pictures/V8_DualPlanePlenumUpdated.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-DualPlane-Plenum.jpg"></p>
+
+
+<h2>Tunnel Ram Manifold with One Inlet - Spaced Runners</h2>
+
+<p>There is a single effective inlet into the tunnel. This inlet can be the sum of a single 
+barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel 
+with a space between them requiring extra "collector joints" to model.</p>
+
+<p align="center"><img src="../Pictures/V8-TunnelRam_1Inlet.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-TunnelRam-SeperateRunners-1Inlet.jpg"></p>
+
+
+<h2>Tunnel Ram Manifold with One Inlet - Adjacent Runners</h2>
+
+<p>There is a single effective inlet into the tunnel. This inlet can be the sum of a single 
+barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel 
+in adjacent pairs requiring two 6 pipe collector joints.</p>
+
+<p align="center"><img src="../Pictures/V8-TunnelRam_1Inlet_Small%20Plenum.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-TunnelRam-AdjacentRunners-1Inlet.jpg"></p>
+
+
+<h2>Tunnel Ram Manifold with Two Inlets - Spaced Runners</h2>
+
+<p>There are two effective inlets into the tunnel. These inlet can be the sum of a single 
+barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel 
+with a space between them requiring extra "collector joints" to model.</p>
+
+<p align="center"><img src="../Pictures/V8-TunnelRam_2Inlets.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-TunnelRam-SeperateRunners-2Inlets.jpg"></p>
+
+
+<h2>Tunnel Ram Manifold with Two Inlets - Adjacent Runners</h2>
+
+<p>There are two effective inlets into the tunnel. These inlet can be the sum of a single 
+barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel 
+in adjacent pairs requiring two 7 pipe collector joints.</p>
+
+<p align="center"><img src="../Pictures/V8-TunnelRam_2Inlets_Small%20Plenum.jpg"></p>
+
+<p>To model this inlet the following manifold type and inlet configurations are selected:</p>
+
+<p align="center"><img src="../Pictures/Menu-TunnelRam-AdjacentRunners-2Inlets.jpg"></p>
+
+
+ </body>
+</html>

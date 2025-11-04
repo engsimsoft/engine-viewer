@@ -1,0 +1,377 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Introduction to Dat4T">
+		<param name="Local" value="Headers/IntroductionH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Front Page">
+			<param name="Local" value="Contents/FrontPage.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="License">
+			<param name="Local" value="Contents/LicenseAgreement.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Disclaimer">
+			<param name="Local" value="Contents/Disclaimer.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Folder Structure">
+			<param name="Local" value="Contents/FolderStructure.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Project and File Layout">
+			<param name="Local" value="Contents/ProjectLayout.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Windows Nomenclature">
+			<param name="Local" value="Contents/WindowsNomenclature.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Error Handling and Reporting">
+			<param name="Local" value="Contents/ErrorHandling.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Starting Dat4T">
+		<param name="Local" value="Headers/StartUpH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Starting the Program">
+			<param name="Local" value="Contents/StartUp.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Create a new Project">
+			<param name="Local" value="Contents/NewProject.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Open an existing Project">
+			<param name="Local" value="Contents/ExistingProject.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Creating New Subsystem">
+			<param name="Local" value="Contents/NewSubSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Editing a Subsystem">
+			<param name="Local" value="Contents/EditSubSystem.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Creating or Extracting an Archive">
+			<param name="Local" value="Contents/ArchiveProject.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Dialog Box Error">
+			<param name="Local" value="Contents/GeneralError.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Factors affecting run time duration">
+			<param name="Local" value="Contents/RunTimeDuration.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Engine data">
+		<param name="Local" value="Headers/BasicEngineDataH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Create New Engine">
+			<param name="Local" value="Contents/NewEngine.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Edit Existing Engine">
+			<param name="Local" value="Contents/OldEngine.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Cylinder Numbering Sequence">
+			<param name="Local" value="Contents/CylinderNumbering.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Trace Position">
+			<param name="Local" value="Contents/ExhaustTrace.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet Trace Position">
+			<param name="Local" value="Contents/InletTrace.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Turbocharger or Supercharger Data">
+		<param name="Local" value="Headers/TurbochargerH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Turbocharger Modeling">
+			<param name="Local" value="Contents/turbochargerModeling.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Supercharger Modeling">
+			<param name="Local" value="Contents/SuperchargerModeling.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Ports, Valves and Lift Profiles">
+		<param name="Local" value="Headers/PortLiftValveH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Flow modeling through Valves and Ports">
+			<param name="Local" value="Contents/PortFlowModeling.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Specifying VVT and/or VVL">
+			<param name="Local" value="Contents/VVT_VVL.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Cam, Ports and Valves">
+			<param name="Local" value="Headers/ExPortMainH.htm">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Port and Valve data with Generated Cam Profile">
+				<param name="Local" value="Contents/NewCamCreateEx.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Port and Valve Data with Imported Cam Profile">
+				<param name="Local" value="Contents/NewCamImportEx.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="User Defined Cd-Map">
+				<param name="Local" value="Contents/ExCd-map.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet Cam, Ports and Valves">
+			<param name="Local" value="Headers/InPortMainH.htm">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="New User Defined Cam, Ports and Valves">
+				<param name="Local" value="Contents/NewCamCreateIn.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="New Imported Cam, Port and Valves">
+				<param name="Local" value="Contents/NewCamImportIn.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="User Defined Cd-Map">
+				<param name="Local" value="Contents/InCd-map.htm">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Exhaust Subsystem">
+		<param name="Local" value="Headers/ExhaustSystem.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Pipe Nomenclature and Boundaries">
+			<param name="Local" value="Contents/ExPipeBoundaries.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Pipe Numbering Convention">
+			<param name="Local" value="Contents/ExPipeNumConv.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Collector Modeling">
+			<param name="Local" value="Contents/ExCollector4T.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Stepped pipes">
+			<param name="Local" value="Contents/ExStepMod.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Boxes">
+			<param name="Local" value="Contents/ExBoxMod.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Types of Exhaust systems">
+			<param name="Local" value="Contents/ExhaustSystems.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Types of Turbocharger Exhaust Systems">
+			<param name="Local" value="Contents/TurboExhaustSystems.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Create New Exhaust System">
+			<param name="Local" value="Contents/NewExhaustSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Design new Exhaust System">
+			<param name="Local" value="Contents/DesignExhaustSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Modeling Siamesed Exhaust Port System">
+			<param name="Local" value="Contents/SiamesedExhaustPorts.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Edit Existing Exhaust">
+			<param name="Local" value="Contents/ExistExhaustSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Exhaust Modeling Error">
+			<param name="Local" value="Contents/ExhaustError.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Catalytic Converters">
+			<param name="Local" value="Contents/CatalyticConverter4T.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Silencers">
+			<param name="Local" value="Headers/Silencers.htm">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Introduction">
+				<param name="Local" value="Contents/SilencerIntro.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Simple Plenum Silencer">
+				<param name="Local" value="Contents/SilencerSimplePlenum.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Diffusing Silencer">
+				<param name="Local" value="Contents/SilencerDiffusing.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Side Resonant Silencer">
+				<param name="Local" value="Contents/SilencerSideResonant.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Absorption Silencer">
+				<param name="Local" value="Contents/SilencerAbsorption.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Multiple Plenum Silencer">
+				<param name="Local" value="Contents/SilencerMultiplePlenum.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="FIM Speedway Silencer">
+				<param name="Local" value="Contents/SilencerSpeedway.htm">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Intake Subsystem">
+		<param name="Local" value="Headers/IntakeSystem.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Intake Pipe Numbering Convention">
+			<param name="Local" value="Contents/InPipeNumConv.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet Length Correction">
+			<param name="Local" value="Contents/InletEndCorrection.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Throttles">
+			<param name="Local" value="Contents/Throttle.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet Collectors">
+			<param name="Local" value="Contents/InCollector4T.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet Boxes or Plenums">
+			<param name="Local" value="Contents/InBoxMod.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Variable Inlet Length">
+			<param name="Local" value="Contents/InletVariableLenght.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Types of Intake systems">
+			<param name="Local" value="Contents/IntakeSystems.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="V8 Special Inlets">
+			<param name="Local" value="Contents/V8-Inlets.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Types of Turbo- and Supercharger Inlet Systems">
+			<param name="Local" value="Contents/TurboIntakeSystems.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Intercooler Modeling">
+			<param name="Local" value="Contents/IntercoolerModel.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Create New Inlet System">
+			<param name="Local" value="Contents/NewInletSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Modeling Siamesed Inlet Port Systems">
+			<param name="Local" value="Contents/SiamesedInletPorts.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Edit Existing Inlet">
+			<param name="Local" value="Contents/ExistInletSystem.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Inlet System Modeling Error">
+			<param name="Local" value="Contents/InletError.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Combustion and Ignition Subsystem">
+		<param name="Local" value="Headers/Combustion.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Turbulent Combustion">
+			<param name="Local" value="Contents/TurbulentCombustion.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Spark Ignition Combustion Subsystem">
+			<param name="Local" value="Contents/NewComb.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Compression Ignition Combustion Subsystem">
+			<param name="Local" value="Contents/NewCombComp.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Edit Existing Combustion and Ignition Data">
+			<param name="Local" value="Contents/OldComb.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Surface Temperatures and Atmospheric conditions">
+		<param name="Local" value="Headers/TemperatureH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Create and Edit Temperatures">
+			<param name="Local" value="Contents/NewTemperature.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Design Verfication">
+		<param name="Local" value="Headers/DesignVerificationH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Design Checking and STA">
+			<param name="Local" value="Contents/STA.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="References">
+		<param name="Local" value="Headers/ReferencesH.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="References">
+			<param name="Local" value="Contents/References.htm">
+			</OBJECT>
+	</UL>
+</UL>
+</BODY></HTML>

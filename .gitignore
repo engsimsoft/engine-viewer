@@ -207,8 +207,8 @@ docs/.doctrees/
 # Project Specific
 # ============================================
 
-# Личные заметки и документы (не коммитить)
-_personal/
+# CHM help files (binary, large, can be re-extracted)
+*.chm
 
 # Исключения: НЕ игнорировать эти файлы
 !test-data/

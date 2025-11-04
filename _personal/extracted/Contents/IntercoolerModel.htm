@@ -1,0 +1,132 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Intercooler Model</title>
+</head>
+
+<body>
+
+<h1><u>Creating or Editing an Intercooler</u></h1>
+
+<p>When modeling a turbo or supercharged inlet system there is an option to use an 
+intercooler or more correctly, a charge air cooler. If selecting the "Yes" radio button for 
+intercooler a new field opens that requires the cooler data:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/TurboSuperInlet.jpg"></p>
+
+<p>The input data required is the following:</p>
+
+<h2>Number of Intercoolers</h2>
+
+<p>On some systems it is possible to fit more than one intercooler in parallel and for such 
+a system the choice has to be made at this point.</p>
+
+<h2>Coolant Type</h2>
+
+<p>The cooler can be of the air-air type or the water-air type. For short distance races 
+like drag racing water is often used as the cooling medium where the cooler is in a tank 
+that is filled with ice water before each race. For a short duration this can extract a 
+large amount of heat.
+<br>
+For longer duration usage the air-air cooler is more common and the normal atmospheric air 
+is used as the cooling medium. It cannot absorb as much heat as water but it is continually 
+refreshed. It requires a much larger cooler.</p>
+
+<h2>Material</h2>
+
+<p>Coolers can be made from either aluminium or copper. Aluminium has a higher heat transfer 
+rate and is lighter but less robust and more expensive. It is rare to see a cooler for competition 
+use to be manufactured from anything other than aluminium.</p>
+
+<h2>Single or Double Pass</h2>
+
+<p>A single pass cooler is more efficient as the whole cooler is exposed to cold cooling 
+medium (air or water) but sometimes it is not possible because of packaging constraints 
+to fit the required size cooler so one is made that doubles back on itself. That means 
+that the cooling air passes through the one core and is heated up before it passes through 
+the second core.</p>
+
+<h2>Header Tank Volume (cc)</h2>
+
+<p>This is the volume of each of the two tanks that is on the inlet and outlet side of 
+the cooler.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/CAC-13.jpg"></p>
+
+<h2>Center Tank Volume (cc)</h2>
+
+<p>If a double pass intercooler is used there is an extra tank that joins the two cores.</p>
+
+<h2>Coolant Temperature (°C)</h2>
+
+<p>This is the temperature of the air or water that is used as the cooling medium. In the 
+case of air it is usually the ambient air temperature. In the case of water it can be a 
+dedicated water tank with ice water or part of the engine cooling system.</p>
+
+<h2>Coolant Velocity (m/s)</h2>
+
+<p>This is the speed that the cooling medium flows through the core. For a vehicle using the 
+free stream airflow is is normal to use about 75% of the maximum vehicle speed. For water 
+this can be zero for a static tank or the speed that the water is pumped through the core.</p>
+
+<h2>Intercooler Efficiency</h2>
+
+<p>This is the ratio between the actual temperature drop of the inlet air and the 
+theoretically possible temperature drop. This is usually in the 0.65 to 0.75 range 
+(65% to 75%).</p>
+
+<h2>Number of Tubes (From Header Tank to Header Tank)</h2>
+
+<p>This is the total number of tubes in the core that the inlet air flows through. There can 
+be one or more rows of tubes. The next picture shows an example of the number of rows in a 
+single row cooler (If this was a double row intercooler there would be 48 tubes):</p>
+
+<p align="center">
+<img border="0" src="../Pictures/CAC-01.jpg"></p>
+
+<h2>Tube Major Dimension (Of Tubes flowing from Header Tank to Header Tank)</h2>
+
+<p>This is the inside width of each tube, as shown in the next picture (Note that the 
+intercooler shown in the picture has a single row of tubes):</p>
+
+<p align="center">
+<img border="0" src="../Pictures/CAC-05.jpg"></p>
+
+<h2>Tube Minor Dimension (Of Tubes flowing from Header Tank to Header Tank)</h2>
+
+<p>This is the inside breedth of each inner tube that flows from tank to tank, 
+as shown in the next picture:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/CAC-08.jpg"></p>
+
+<h2>Tube Length (Of Tubes flowing from Header Tank to Header Tank)</h2>
+
+<p>This is the cooling length of each tube, as shown in the next picture:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/CAC-02.jpg"></p>
+
+<h2>Tube Wall Thickness (Of Tubes flowing from Header Tank to Header Tank)</h2>
+
+<p>This is the thickness of the material the tubes are made from and is typically 
+between 0.3 and 0.4mm thick. This is a very important criteria as it plays a large 
+role in the rate of heat transfer.</p>
+
+<h2>General Discussion</h2>
+
+<p>The software calculates the internal flow area of each tube and from that it 
+calculates and displays the effective tube diameter if the tube was round. It also
+calculates and displays the effective diameter of the sum of all the the tube flow 
+areas added together. As the tubes has a fairly high flow resistance because of 
+internal fins and turbulators to aid heat transfer, this diameter should be about 
+50% bigger than the tube flowing into the intercooler.</p>
+
+</body>
+
+</html>

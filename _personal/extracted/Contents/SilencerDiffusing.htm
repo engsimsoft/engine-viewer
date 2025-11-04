@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Diffusing Silencer</title>
+</head>
+
+<body>
+
+<h2><u><b>Diffusing Silencer</b></u></h2>
+<p>The following two figures shows the layout of typical diffusing silencers.
+The first figure shows a single plenum silencer with a re-entry inlet and a
+re-entry outlet. Its internals will be modeled as two three-way branches. The
+second figure shows a two-plenum silencer with the first plenum having the same
+layout as in the first picture but with a plenum added. The second plenum has a
+re-entry inlet but a flush outlet pipe. Its internals will be modeled as three
+three-way branches and one stepped pipe. At the moment the program does not
+cater for re-entry pipes that overlaps each other. The plenums does not have to
+be against each other but the user has to take care in not entering physical
+impossible data as the internal error checking of the software has not been
+developed yet.</p>
+
+<p align="center"><img border="0" src="../Pictures/Silencer_Diffusing_Single.gif" width="443" height="211"></p>
+<p align="left">&nbsp;</p>
+<p align="center"><img border="0" src="../Pictures/Silencer_Diffusing_Dual.gif" width="598" height="217"></p>
+<p align="left"><font size="3">The following figure shows a typical input screen
+for the second silencer.</font></p>
+
+<p align="center">
+<img border="0" src="../Pictures/SilencerDiffusing.jpg" width="855" height="574"></p>
+<p align="left"><font size="3">Note that in this case sum of the inlet and
+outlet re-entry lengths of the interconnecting tube 1 is equal to the length of
+the interconnecting tube. If the sum was smaller it would mean that plenum 1 and
+plenum 2 were not against each other. If the sum was greater the model would
+have no physical meaning.</font></p>
+
+</body>
+
+</html>

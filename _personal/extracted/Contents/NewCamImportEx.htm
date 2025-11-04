@@ -1,0 +1,240 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Originator" content="Microsoft Word 9">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<title>Create New Exhaust Port and Import Lift Profile</title>
+<link rel="Edit-Time-Data" href="NewCamImportEx_files/editdata.mso">
+</head>
+
+<body link="#0000FF" vlink="#0000FF" lang="EN-GB" style="tab-interval:36.0pt">
+
+<h1>Creating a new Exhaust port with an Imported Cam Lift Profile</h1>
+
+<p>This section of the help pages describes how to import an existing
+valve lift file. The user will be prompted to supply the following information:</p>
+
+<h2>Port and Valve Data</h2>
+
+<p>This section of the input data is identical for all the valves and cams.</p>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/ExPortLayout.jpg" width="315" height="244"></p>
+
+<h3>Number of valves</h3>
+
+<p>The maximum number of exhaust valves allowed is 2 and the minimum is 1.</p>
+
+<h3>Number of Port Passages</h3>
+
+<p>Some heads with two valves do not have siamesed ports with one outlet but two 
+separate ports. The maximum number of exhaust passages allowed is 2 and the minimum
+is 1. </p>
+
+<h3>Valve Masking</h3>
+
+<p>By choosing the amount of
+valve masking (interference to the flow by the proximity of the cylinder liner), together
+with the number of valves, the program will choose the relevant coefficient of discharge
+maps. Currently the choices are:</p> 
+
+<ol>
+  <li>fully free flow</li>
+  <li>partially masked</li>
+  <li>severely masked</li>
+  <li>user generated Cd-map</li>
+</ol>
+
+<h3>Cd-Map Multiplier</h3>
+
+<p>Sometimes the engine starts off unmodified with a specific map and because it 
+is modified the flow improves but not so much as to use the next map, the user 
+can adjust the map to the new better flow conditions by multiplying the map by a 
+factor. The maximum a map can be improved is 10% (factor = 1.1) before the next 
+map should be used. The user can also start by using a better map and adjust it 
+downward by up to 10% (factor = 0.9) to simulate the unmodified engine and the 
+progressively adjust the map upward as the flow is improved. See also the help 
+topic on <a href="PortFlowModeling.htm">Cd-maps</a>.</p>
+
+<p align="center" class="MsoNormal" style="margin-left:18.0pt;text-align:center">&nbsp;
+<img border="0" src="../Pictures/ExValve4T.jpg" width="466" height="466"></p>
+
+<p>The next shows the required input data on the valve and port.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/ExValvePassage.jpg" width="323" height="328"></p>
+
+<h3>Outer Seat Diameter on Valve</h3>
+
+<p>The outer diameter of the valve seat area on the valve in millimetres.</p>
+
+<h3>Inner Seat Diameter on Valve</h3>
+
+<p>The inner diameter of the valve seat area on the valve in millimetres.</p>
+
+<h3>Outer Seat Diameter on Head</h3>
+
+<p>The outer diameter of the valve seat area in the head in millimetres.</p>
+
+<h3>Inner Seat Diameter on Head</h3>
+
+<p>The inner diameter of the valve seat area in the head in millimetres.</p>
+
+<h3>Port Throat Diameter</h3>
+
+<p>The diameter of the narrowest part of the port at the valve end of the port 
+between the valve guide and the valve seat in millimetres. This dimension is 
+usually slightly smaller than the <b>valve seat inner diameter </b>but will 
+not be bigger than it.</p>
+
+<h3>Port Diameter at Manifold</h3>
+
+<p>The port diameter in the head at the exhaust manifold face.</p>
+
+<h3>Valve
+Stem Diameter</h3>
+
+<p>Diameter of valve stem in millimetres. This is the diameter of the portion of the 
+valve stem in the port.</p>
+
+<h3>Valve Seat Angle</h3>
+
+<p>The valve seat angle is half the included angle of the valve seat contact area relative 
+to the valve stem center line.</p>
+
+<h3>Length of Port Passage</h3>
+
+<p>This is the effective or mean length of the port from the valve seat surface to 
+the manifold or spigot face in millimetres.</p>
+
+<h3>Tappet Clearance</h3>
+
+<p>This is the tappet clearance or valve train lash in millimetres. If the imported cam 
+file is measured to include the lash take-up ramp, this clearance is the actual 
+clearance as used in the engine. If the start of the lift file is partially or fully up 
+this ramp, the user will have to experiment with this setting to achieve the correct 
+valve opening and closing points.</p>
+
+<h2>Select Cam Control (VVT and/or VVL)</h2>
+
+<p>The software can model variable valve lift combined with variable valve timing. This is achieved by specifying two
+valve lift profiles, each with its own lift, duration and timing and the rpm value up to which profile 1 is used and 
+the rpm value from which profile 2 is used. The simulation will use linear interpolation for timing and lift between 
+the two rpm values. If a step change is required specify the second value as 1 rpm more for example rpm1 = 6000 and 
+rpm2 = 6001. For more information see <a href="VVT_VVL.htm">Modeling of VVT and VVL</a></p>
+
+<h2>Cam Data</h2>
+
+<p align="center">
+<img border="0" src="../Pictures/ExCamImpHelp.jpg" width="327" height="543"></p>
+
+<p>The cam, or more accurately, the valve lift data is imported as a file. This data can 
+be generated by another application all together. This file must have the following format:</p> 
+
+<ul>
+  <li>An optional user specified number of header rows that describes
+    the file content.&nbsp; (min=0)</li>
+  <li>Following this, two columns that are space or tab delimited that
+    lists the degree values in column one and the lift values in column two. </li>
+  <li>The degree values can be either crankshaft or camshaft degrees.
+    The program will make the adjustment internally.</li>
+  <li">The degrees must increase in steps of one degree per lift value
+    and must start at zero lift and end again at zero lift.</li>
+</ul>
+
+<p>The following picture shows a typical 4stHEAD static valve lift file, column 
+one is the degrees, column two the lift, three the velocity and four the 
+acceleration.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/ExValveLiftFile.jpg" width="640" height="533"></p>
+
+<h3>Imported File Name</h3>
+
+<p>The name of the imported
+file with its extension. The maximum total length including the extension is 80
+characters. For this version of the program this file must be in the same directory as
+Project. As shown, the file type can be one of the following:</p>
+
+<ol>
+  <li>4stHEAD Static file (*.svl)</li>
+  <li>4stHEAD Dynamic file (*.dvl)</li>
+  <li>A Space separated file (*.prn)</li>
+  <li>Comma separated file (*.csv)</li>
+  <li>A general lift file (*.*)</li>
+</ol>
+
+<p class="MsoBodyText" align="center">
+<img border="0" src="../Pictures/ExProfileFileSelect.jpg" width="429" height="350"></p>
+
+<h3>Line Number Where Lift Data Starts</h3>
+
+<p>The imported file can have
+lines at the start of the file containing headers and other descriptors and values. The
+software requires the number of the line where the actual degree and lift data starts.</p>
+
+<h3>Crankshaft or Camshaft Degrees</h3>
+
+<p>As it is possible to have a
+lift profile in either crankshaft or camshaft degrees the user has to specify which format
+is used in the imported file.</p>
+
+<h3>Cam Timing Indexing Option</h3>
+
+<p>To index the imported data to have the correct valve timing is not always simple. 
+Four methods are provided:</p> 
+
+<ol>
+  <li>The first method is to specify the valve opening point.
+    Depending on how the cam was measured and on the tappet clearance specified, this could
+    lead to errors in the valve timing as small measurement errors and small tappet
+    clearance errors can have a large influence on indexing the cam.</li>
+  <li>The second method is to specify the cam (or lobe) centre
+    position BTDC. The cam centre is defined as the centre of the period from
+    the start of the opening ramp to the end of the closing ramp, that is the
+    centre of the total cam profile including ramps. On a symmetrical lobe this is halfway between
+    the opening and closing points, but on a non-symmetrical profile this is not necessary the
+    case. When importing a file that describes dynamic lift with valve 
+     bounce the final closing value can change and so will the cam centre. In this
+    case it is recommended that one of the other methods be used.</li>
+  <li>The third method is to specify the dwell centre
+    position BTDC. The dwell centre is defined as the centre of the dwell period or in the case
+    of no dwell, the point of the highest lift. On a symmetrical lobe this is halfway between
+    the opening and closing points, but on a non-symmetrical profile this is not necessary the
+    case.</li>
+  <li>The fourth method is
+    to prescribe the valve lift at TDC. This will be the lift as measured on an
+    engine with the valve clearance set to the specified value.</li>
+</ol>
+
+<p>The following picture 
+demonstrates the difference between <b>lobe centre</b> and <b>lift or dwell 
+centre</b> (for illustrative purposes a large offset is used):</p>
+
+<p class="MsoNormal" style="text-align:center">
+<img border="0" src="../Pictures/Lift-Lobe-Centre.jpg" width="905" height="424"></p>
+
+<p>Whatever the method the user might have to make adjustments to the indexing degrees 
+and tappet clearance to obtain the correct timing and duration.</p>
+
+<p>At the end of this the screen will display typically the following data:</p>
+
+<p align="center" class="MsoNormal" style="text-align:center">
+<img border="0" src="../Pictures/ExCamImport.jpg" width="1062" height="726"></p>
+
+<p>Clicking on &quot;Accept and Save&quot; a summary and graphics will follow that looks as 
+follows:</p>
+
+<p align="center" class="MsoNormal" style="text-align:center">
+<img border="0" src="../Pictures/ExCamImpGraph.jpg" width="919" height="697"></p>
+
+<p>At this point in time it is possible to edit the data if you are not satisfied with the results.
+Clicking on &quot;OK&quot; will accept the results while clicking on &quot;Edit Cam&quot; 
+will take you back to the previous dialog.</p>
+
+<p class="MsoNormal" style="text-align:center">
+&nbsp;</p>
+</body>
+</html>

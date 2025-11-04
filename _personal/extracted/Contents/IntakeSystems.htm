@@ -1,0 +1,414 @@
+<html>
+
+<head>
+<title>Naturally Aspirated Inlet Systems</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+</head>
+
+<body lang="EN-GB" style="tab-interval:36.0pt">
+
+<h1>Types of Intake Systems</h1>
+
+<p>There are three main general types of inlet systems available:</p>
+
+<ul>
+  <li>Individual pipes per cylinder.</li>
+  <li>1intoN branch manifolds where N = number of cylinders</li>
+  <li>Log manifolds – all cylinders connect to a single pipe.</li>
+</ul>
+
+<p>On top of these "normal" pipes
+there is a range of special pipes available depending on the engine types.</p>
+
+<p>All the pipes can have one of two types of "atmospheric inlets":</p>
+
+<ul>
+  <li>
+    <p>Plain pipe. A normal plain opening to the atmosphere.</li>
+  <li>
+    <p>Box pipe. The air flows from the atmosphere into a box or plenum
+and from there via box outlet pipes into the intake system.</li>
+</ul>
+
+<h2>The main inlet system selection dialog box</h2>
+
+<p> When creating an inlet system for the first time or when redefining it 
+the main inlet selection dialog box opens. Depending on the engine layout 
+only some options will be displayed. The next picture shows all the possible 
+options for all the possible engine layouts:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/InletSelectionDialog.jpg"></p>
+
+<h2>Description of Main Intake types</h2>
+
+<p>These are the more common types of intake
+systems. They are general to any engine configuration and number
+of cylinders except for the single cylinder that for obvious
+reasons cannot have any sort of branch pipe.</p>
+
+<h2>Individual Pipes</h2>
+
+<p>This system has a pipe for each cylinder.
+These pipes can each have a box or plenum attached or can be
+directly open to the atmosphere. The pipes can have throttles and
+boost bottles. Figure 1 shows a two-cylinder engine with
+throttles, with ram tubes and box inlets.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/Twin2In.jpg"></p>
+
+<p>To select this inlet layout the following selections were made (The engine is an inline 
+twin, "I2", and only the options for an I2 were available):</p>
+
+<p align="center">
+<img border="0" src="../Pictures/Twin2InDialog.jpg"></p>
+
+<h2>1intoN Branch Manifolds</h2>
+
+<p>These are usually
+a cheaper type of intake manifold with a single carburetor. They
+are used where economy of production is the aim. The cylinder
+pipes or the collector pipe can have a throttle. The collector
+can be connected to a box/plenum or directly open to the
+atmosphere.</p>
+
+<p>Figure 2 shows a
+typical 4into1 manifold.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In4in1.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center"><img src="../Pictures/In4in1Dialog.jpg"></p>
+
+<h2>Double Collector Manifolds</h2>
+
+<p>On some older inline 4 cylinder engines the inlet was often made up from two Y-collectors 
+that connected two adjacent cylinders to a carburator. Some times these manifolds were 
+interconnected. Both types are shown in the next figures:</p>
+
+<p align="center"><img src="../Pictures/I4-TwoYmanifoldColThrot.jpg"></p>
+<p align="center"><img src="../Pictures/I4-TwoYmanifoldInterconnectedColThrot.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center"><img src="../Pictures/I4-TwoYmanifoldColThrotDialog.jpg"></p>
+
+<h2>Log Manifolds</h2>
+
+<p>With a log manifold each cylinder is
+connected to a common pipe. This is usually not found on a high
+performance engine except on turbo-charged engines. This type is
+still under development and will be described in detail once
+development is completed. Figure 3 shows a four-cylinder engine
+with a side inlet log manifold. Note the direction of flow.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In4Log.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In4LogDialog.jpg"></p>
+
+<p>
+The next figure shows a log pipe layout on and inline engine with a central inlet. 
+This example shows a collector throttle.
+</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In6Log-Center.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In6Log-CenterDialog.jpg"></p>
+
+<p>
+The next figure shows a log pipe layout on a V or F engine with one manifold per 
+cylinder bank and side inlets. This example is shown with two air boxes.
+</p>
+
+<p align="center">
+<img border="0" src="../Pictures/InV8Log2Box4T.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/InV8Log2BoxDialog.jpg"></p>
+
+<h2><u>Special Manifolds</u></h2>
+
+<h3>Discussion of Plenums</h3>
+
+<p>A plenum or a box is modeled as a 0D element and should only be used if the 
+transmission of the waves through it is not important as it only simulates emptying 
+and filling with no pressure gradients through the plenum. If the phasing of the 
+pressure pulses through the plenum is important the plenum should rather be modeled 
+as a combination of large diameter pipes and connector points. One way to do this is 
+to use the so called "Plenum-Collectors" described next:</p>
+
+<h2><u>Plenum-Collector</u></h2>
+
+<h3>Plenum-Collector, End Inlet, I-engine</h3>
+
+<p>This manifold is currently  active for inline, Vee 
+and Flat engines and models the typical plenum-collector as found on most fuel 
+injected engines with a single throttle body at the entrance to the plenum. It 
+is modelled as a series of short pipes simulating the plenum, joined to the 
+cylinder pipes by collector junctions. The following picture 
+is of such a manifold but the throttle body is not shown:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/Edelbrock_SportCompactManifoldDim.jpg"></p>
+
+<p>The plenum is usually too long and narrow to be modelled as a box so it is modelled 
+as a log manifold with a blind pipe on the closed end and 4 3into1 junctions as shown in the next 
+figure:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorDialog.jpg"></p>
+
+<h3>Plenum-Collector, Y-Inlet</h3>
+
+<p style="text-align:left">
+This figure shows a special plenum collector on an I4 engine (7 3into1 
+junctions) with Y-shaped central inlet:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector%20Yinlet.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector%20YinletDialog.jpg"></p>
+
+<h3>Plenum-Collector, End Inlet, V or F engine</h3>
+
+<p style="text-align:left">
+The next figure shows the common plenum collector on a V8 engine (4 4into1 
+junctions) with side inlet:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector_VorF.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector_VorFDialog.jpg"></p>
+
+<h3>Plenum-Collector, Center Inlet</h3>
+
+<p style="text-align:left">
+The next figure shows the common plenum collector on a V8 engine (4 4into1 plus 1 3into1 
+junctions) with center inlet:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector_VorF%20CenterInlet.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollector_VorF%20CenterInletDialog.jpg"></p>
+
+<h3>Double Plenum-Collectors, 2 End Inlets, 2 Air Boxes</h3>
+
+<p style="text-align:left">In the examples shown there is also an airbox. The 
+following figure shows the use of double plenum-collectors on a V8 or F8 engine, 
+with individual plenum throttles and air boxes.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorV8.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorV8Dialog.jpg"></p>
+
+<h3>Double Plenum-Collectors, Single End Inlet</h3>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorV8-1Throt.jpg"></p>
+
+<h3>Double Plenum-Collectors, Single End Inlet, Interconnected Plenums</h3>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorInterV8-1Throt.jpg"></p>
+
+<h3>Double Plenum-Collectors, Two End Inlets</h3>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorV8-2Throt.jpg"></p>
+
+<h3>Double Plenum-Collectors, Two End Inlets, Interconnected Plenums</h3>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorInterV8-2Throt.jpg"></p>
+
+<h3>Porsche 964 Inlet System</h3>
+
+<p>The next picture shows the Porsche 964 inlet system modeled as a plenum-collector 
+(This is only available for an F6 engine):</p>
+
+<p align="center">
+<img border="0" src="../Pictures/Porsche964.jpg"></p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorInterF6-Porsche964.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/PlenumCollectorInterF6-Porsche964Dialog.jpg"></p>
+
+<h2><u>Plain Plenums</u></h2>
+
+<h3>Paired Plenum Inlets</h3>
+
+<p>This manifold is currently only active for I2, I4, I6, I8, I10, I12 and I16 engines.</p> 
+
+<p align="center">
+<img border="0" src="../Pictures/I4-2Plenum2Throttle4T.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/I4-2Plenum2ThrottleDialog.jpg"></p>
+
+<h3>Resonant Collector Box</h3>
+
+<p>This manifold is currently only active for 4 
+cylinder engines and models the system as described in US Patent 5,379,735 Jan. 10,1995. 
+The idea behind the layout is to lengthen the inlet pipes by using its opposite pipe 
+as part of the tuned length as shown in the next figure:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/ResonantInlet.jpg"></p>
+
+<p>To model the two "connecting" pipes a collector is used with a 
+very short collector pipe as shown in the next figure:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/ResonantInletModel.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/ResonantInletModelDialog.jpg"></p>
+
+<h2><u>Special Box or Plenum Pipes</u></h2>
+
+<p>There are two special Box pipes depending on the engine layout:</p>
+
+<ul>
+  <li>Single Box. A single common box on all the inlet pipes to the cylinders.</li>
+  <li> Double Box. Two boxes, usually on a V or flat engine, with one box per bank.</li>
+</ul>
+
+<p>It is important to keep in mind that these boxes or plenums should only be used where 
+the wave action in the plenum does not play a major role and missing it will not influence 
+the characteristics being investigated with the simulation. If this is not the case a 
+Plenum-Collector should rather be used.</p>
+
+<h3>One common box on a multi-cylinder engine with individual
+cylinder pipes (Single Plane Manifold), also used to model a 
+<font size="4" color="red">V8 Tunnel Ram</font> or Single Plane manifold</h3>
+
+<p>All the cylinder pipes go directly into a
+common box. The box can have multiple inlet pipes. A typical
+collector type inlet manifold on a V-8 with a four barrel down
+draught carburetor can be modeled using this manifold with a
+small plenum volume.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_1BoxThrot.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_1BoxThrotDialog.jpg"></p>
+
+<h3>Two common boxes, one per bank on a Vee or Flat engine, with
+a separate intakes</h3>
+
+<p>All the cylinder pipes per bank go
+directly into one of the boxes. The intake to the two boxes are
+separate and has separate intakes that can be fitted with a
+throttles.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2BoxThrot.jpg"></p>
+
+<p>The next picture shows the options selected to create this inlet system:</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2BoxThrotDialog.jpg"></p>
+
+<h3>Two common boxes, one per bank on a Vee or Flat engine, with
+a common intake</h3>
+
+<p>All the cylinder pipes per bank go
+directly into one of the boxes. The intake to the two boxes are
+joined and has a common intake that can be fitted with a
+throttle.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2Box.jpg"></p>
+
+<h3>Two common boxes, one per bank on a Vee or Flat engine, with
+separate intakes and an inter connector pipe between the two
+plenums</h3>
+
+<p>All the cylinder pipes per bank go
+directly into one of the boxes. The intake to the two boxes are
+joined and has a separate intakes that can be fitted with a
+throttles. The two plenums are connected through a connecting
+pipe.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2BoxInterThrot.jpg"></p>
+
+<h3>Two common boxes, one per bank on a Vee or Flat engine, with
+a common intake and an inter connector pipe between the two
+plenums</h3>
+
+<p>All the cylinder pipes per bank go
+directly into one of the boxes. The intake to the two boxes are
+joined and has a common intake that can be fitted with a
+throttle. The two plenums are connected through a connecting
+pipe.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2BoxInter.jpg"></p>
+
+<h3>Twin Plane Manifold - Two common plenum, cross connected on a Vee or Flat engine, with
+an intake(s) on each of the two plenums</h3>
+
+<p>Cylinders 1, 4, 6 and 7 
+go directly into one of the plenums and cylinders 2, 3, 5 and 8 go directly into 
+the other plenum. The intake is a typical two-plane manifold used as standard on 
+many older V8 engines.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8-TwoPlane.jpg"></p>
+
+<h3>Twin Plane Manifold - Two common plenum, cross connected on a Vee or Flat engine, with
+a siamesed intake and the two plenums interconnected</h3>
+
+<p>Cylinders 1, 4, 6 and 7 
+go directly into one of the plenums and cylinders 2, 3, 5 and 8 go directly into 
+the other plenum. This intake is a typical two-plane manifold used as standard on 
+the Porsche 928 V8 engines.</p>
+
+<p align="center">
+<img border="0" src="../Pictures/In8_2BoxInter_1Throt_2Plane.jpg"></p>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-za">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>General System Error</title>
+</head>
+
+<body>
+
+<h1><span style="font-weight: 400">General Dialog Box Error</span></h1>
+<p>The software is written using modal dialog boxes. This means that you can open more 
+than one dialog box but cannot proceed without closing all of them. Some typical examples are:</p>
+
+<ul>
+	<li>Sometimes a warning message is not canceled by the user but obscured by clicking in another 
+	dialog box, an action that brings the other dialog box to the front and sends the warning 
+	message to the back.</li>
+	<li>The same can happen to a file save or file open dialog box. The user wants to save the file but 
+	with a new name and opens the file save dialog box. If the main dialog box is now inadvertently 
+	clicked, the file save dialog is send to the back. The user now clicks again on the save button 
+	and a new file save dialog box opens.</li>
+</ul>
+
+<p>Both the above examples will let the user continue until he wants to close the main dialog 
+box when the software will not allow the completion. The solution is to drag the main dialog 
+box out of the way to see if there are unclosed dialog boxes or message boxes behind it.</p>
+
+<p>The following dialog box is always there and not an error:</p>
+<p align="center"><img border="0" src="../Pictures/FrontPage.jpg"></p>
+
+<h2>Example</h2>
+<p>In this example we open the file selection dialog in the cam data dialog by clicking on the
+"Select Cam Lift File 1 to Import" button:</p>
+
+<p align="center"><img border="0" src="../Pictures/CamSelectionError-01.jpg"></p>
+
+<p>Before selecting a file we click on the main dialog and the file dialog disappears:</p>
+
+<p align="center"><img border="0" src="../Pictures/CamSelectionError-02.jpg"></p>
+
+<p>If we now click on the "Select Cam Lift File 1 to Import" button again the following message 
+is displayed:</p>
+
+<p align="center"><img border="0" src="../Pictures/CamSelectionError-03.jpg"></p>
+
+<p>After cancelling this message neither the "Accept and Save" button or the "Exit without saving" 
+button works. If we now drags the main dialog to one side the following is visible underneath it:</p>
+
+<p align="center"><img border="0" src="../Pictures/CamSelectionError-04.jpg"></p>
+
+<p>There are two dialogs visible behind the main dialog, the startup dialog that is always there 
+and the file selection dialog that we opened but never closed. Clicking on its edge will bring it 
+to the front and we can now either complete the file selection operation or cancel it. Once that is 
+done we can now close the main dialog.</p>
+
+<p>Another way to find the errand dialog is to click on its icon in the task bar. There will be 
+second icon behind the main icon in the task bar if a second dialog is open. Clicking on the edge 
+of the rear icon will bring the hidden dialog to the front where it can be completed.</p>
+
+<p align="center"><img border="0" src="../Pictures/CamSelectionError-05.jpg"></p>
+
+<h2>When an unsolved error occurs:</h2>
+
+<p>Make screen shots and exit Dat4T. Then send the screen shots and the file "C:\4Stroke\Dat4TErrorLog.dat" 
+to Vannik Developments at: <a href="mailto:vannik@mweb.co.za">vannik@mweb.co.za</a></p>
+
+<hr>
+
+<p>&copy; Neels van Niekerk 2024</p>
+
+</body>
+
+</html>

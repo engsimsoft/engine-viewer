@@ -1,0 +1,62 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Originator" content="Microsoft Word 9">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<title>Modeling of Stepped Pipes</title>
+<style>
+</style>
+</head>
+
+<body lang="EN-GB" style="tab-interval:36.0pt">
+
+<h1><span lang="EN-US">Modeling of Stepped Pipes</span></h1>
+
+<p class="MsoBodyText"><span lang="EN-US">A stepped pipe is a pipe that has an
+abrupt change of cross sectional area, either larger or smaller.
+A step is considered as a pipe boundary. This means that if for
+instance a header pipe has a step in it, the header will be
+modeled as two pipes connected by a step boundary. Two steps will
+result in three pipes and three steps in four pipes. The program
+can accommodate four steps per pipe.</span></p>
+
+<p class="MsoNormal" style="text-align:justify"><span lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt">The following two
+figures show a step-up and a step-down:<o:p></o:p></span></p>
+
+<p class="MsoNormal" style="text-align:center"><span lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt">&nbsp;&nbsp;<img border="0" src="../Pictures/ExSteps.jpg" width="439" height="266">&nbsp;</span></p>
+
+<p class="MsoNormal" style="text-align:left"><span lang="en-us">On the exhaust 
+system boundary dialog the user can select the number of header pipe and 
+collector pipe steps:</span></p>
+
+<p class="MsoNormal" style="text-align:center">
+<img border="0" src="../Pictures/ExStepDialog.jpg" width="330" height="250"></p>
+
+<p class="MsoBodyText"><span lang="EN-US">In the case where a step is specified and
+the two cross sectional areas are within 1 percent of each other
+the simulation software will default to a gradual area change
+calculation.</span></p>
+
+<p class="MsoNormal" style="text-align:justify"><span lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt">Depending on the
+flow direction, pressure ratio across the step and the area ratio
+between the two pipes the simulation software will determine the
+value of the coefficient of discharge.<o:p></o:p></span></p>
+
+<p class="MsoNormal" style="text-align:justify"><span lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt">The current
+version of Dat4T allows steps in header (cylinder) pipes and
+collector pipes. No steps are allowed in connector pipes or box
+(plenum) outlet pipes. If steps are allowed in a pipe the user
+will be prompted for the number of steps in the pipe. <o:p></o:p></span></p>
+
+<p class="MsoNormal" style="text-align:justify"><span lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt">If steps are
+specified for the header pipes, all the header pipes will have
+that number of steps. If the user wants headers with different
+number of steps the recommended practice is to specify the
+maximum number of steps in the headers and then use equal
+diameter pipes on either side of the redundant or unwanted steps.
+The same principle applies to the collector pipes.<o:p></o:p></span></p>
+</body>
+</html>

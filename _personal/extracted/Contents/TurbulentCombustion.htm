@@ -1,0 +1,246 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+</head>
+
+<body>
+
+<font SIZE="3">
+<h1>Combustion Modeling</h1>
+<p>All combustion in the spark ignition internal combustion engine happens as
+turbulent combustion. If this was not the case the maximum rpm achieved would
+have been around 800rpm as the laminar burn rate is way too slow. The next
+paragraph gives a brief overview of turbulent combustion followed by a
+description of the combustion models used in simulations.</p>
+<h2>Brief Description of Turbulent Combustion</h2>
+<p> Turbulent eddies are created from the bulk flow of the fluid. Kinetic energy
+is taken from the bulk flow and transformed into turbulent energy (the spinning
+of the turbulent eddy). The size of these eddies are in part determined by the
+size of the container or duct and in our engines are typically between 5 and 20mm
+diameter depending on the cylinder and transfer port sizes. (This size is known as the integral length scale) These eddies break
+down into progressively smaller eddies down to eddies of about 0.5 to 1mm. (The
+Taylor length scale) It is at this size that combustion takes place. (These
+eddies are damped out by the viscous forces in the fluid at an even smaller
+scale known as the Kolmogorov scale. This break down of bulk flow to large
+eddies to small eddies to viscous damping of the eddies is known as the
+&quot;Turbulent Cascade&quot; model.) These
+eddies are ignited on the surface by coming into contact with already burning
+eddies. They burn inward at the laminar burning rate over which we have no
+control other than mixture quality and purity. Only the initial ignited eddy
+burns from the inside out as it is ignited by the spark in the spark plug gap.
+The time taken from spark to the flame reaching the surface of this first eddy
+is the delay time from spark to combustion proper starting.&nbsp;</p>
+<p>To decrease the delay time we need to increase the strength and duration of
+the spark to ignite as much of this first eddy as good possible. The size of
+this spark also needs to be at least the size of a turbulent eddy. Bigger does
+not really help because one or two eddies burning at the laminar rate has no
+real effect on the delay time. Increasing the spark strength and duration past
+the point where the eddy has been fully ignited will also have no or a very
+small effect. This partially explains why some engines show a performance 
+improvement with a bigger gap - they have larger turbulent eddies.</p>
+<p>To increase combustion rate we have to spin these eddies faster to come
+into contact with non burning eddies at a faster rate. This is why faster
+spinning eddies (higher turbulent intensity) results in a faster combustion. It
+also implies that combustion happens at a specific rate. Uncontrolled combustion
+is where these eddies ignite because of a sharp temperature and pressure rise.
+This is an uncontrolled event and if enough eddies ignite we have detonation
+which is definitely uncontrolled!</p>
+<p>The above process is chaotic and leads to big variations in burn rate and max
+pressure. In &quot;bad&quot; engines more than 600 measured pressure traces has
+to be averaged to obtain the average pressure trace. Having such a big spread
+means we have to set the operating point far from optimum as some of the cycles
+the pressure and temperature will exceed the value where detonation happen. The
+smaller we can make the cyclic variation the closer we can set the operating
+point to the detonation limit. This means that the more &quot;control&quot; we
+can impose on the turbulence formation the more repeatable we can make it, thus
+limiting cyclic variation and increasing the allowable compression ratio.</p>
+<p>The only practical way we have is to control the bulk motion. Bulk flow
+distributes these eddies in a more controlled way and impose some control on the
+process. Spark ignition 4 strokes use mainly two methods: Swirl and Tumble.
+Swirl is created by having an offset inlet port so that the in cylinder flow is
+swirling around the cylinder axis. Uniflow 2strokes also use this principle.
+Tumble is created using 2 inlet valves and directing flow such that the gas in
+the cylinder starts rotating around an axis perpendicular to the cylinder axis.
+Most modern high performance 4stroke engines use this and it is the reason why
+backyard porters often destroy an engine's performance even if quoting huge flow
+numbers - they messed up the tumble flow!</p>
+<p>So back to the 2stroke - we need a way to control bulk flow without messing 
+up the scavenge process. We do our best with squish flow but as we all know, 
+results will vary from model to model and even from engine to engine! We all 
+agree (I think) that MSV is an indication and can be used with great success on 
+similar engines (usually). We do not have sufficient and/or repeatable 
+control over the turbulence creation process to use MSV as an exact indicator.</p>
+</font>
+
+<h2>Modeling of Combustion</h2>
+<p>To model combustion in a simulation package there are various approaches the
+developer can use and it depends on the time he is willing to spend on the model
+as well as on the typical user requirement and capabilities. The following is a
+list of most of the major types of models listed from the more simplistic to the
+more complex:</p>
+<ol>
+  <li>Prescribed heat release. The developer programs a heat release rate curve
+    into the software. The user has only control over the spark timing and the
+    combustion duration. The chamber geometry is ignored.</li>
+  <li>Prescribed burn rate. This model goes one step further in that the shape
+    of the mass fraction burn rate is described by the user. Mass fraction burnt
+    is usually a curve that is S-shaped. To describe this the model uses
+    typically a Sine function or a Wiebe (Vibe) function to describe the
+    S-shape. The user supplies the constants that describe the form of this
+    function. The user also supplies the ignition timing, the delay period
+    length and the duration of the combustion. The chamber geometry is ignored.</li>
+  <li>Turbulent eddy entrainment. The turbulent intensity is calculated by the
+    simulation and from this and the mixture purity and AFR, the laminar and
+    turbulent burn rates are determined. This is then used to calculate the burn
+    rate. The user supplies the ignition timing. The major characteristics of
+    the chamber is included and squish action is calculated. Blending radiuses
+    are ignored but dome shape and piston crown shape are used to calculate the
+    flame front characteristics.</li>
+  <li>LES (Large Eddy Simulation, a 3dimensional simulation) This is a CFD
+    simulation (Computational Fluid Dynamics) that is fully 3dimensional and
+    takes all the geometry into consideration. It uses cell sizes that capture
+    the Taylor eddies but use a model to describe the turbulence further down
+    the length scale. It has typical run times of hours to do one simulation.</li>
+  <li>DNS (Direct Numerical Simulation, a 3dimensional simulation) This is also
+    a CFD simulation but uses cell sizes small enough to calculate turbulence
+    down to its smallest scales. It uses many millions of cells to model the
+    engine geometry and has run times of days to weeks to do a simulation.</li>
+</ol>
+<p>EngMod4T uses models of type 2 and 3. The user has the choice between the two
+types.</p>
+<h2><u>Prescribed Burn Rate Model</u></h2>
+<p>There are several Prescribed Burn Rate Models available of which the most 
+popular one is the Vibe or Wiebe function model. The Vibe model is used as the 
+prescribed burn rate model in EngMod4T. This model uses the following equation 
+as its basis:</p>
+<p align="center">
+<img border="0" src="../Pictures/VibeFunction.jpg" width="240" height="60" align="left"></p>
+<p align="center">
+&nbsp;</p>
+<p align="center" style="margin-top: -4; margin-bottom: -4">
+&nbsp;</p>
+<p align="center" style="margin-top: -4; margin-bottom: -4">
+&nbsp;</p>
+<p align="left" style="margin-top: -4; margin-bottom: -4">
+&nbsp;</p>
+<p align="left" style="margin-top: -4; margin-bottom: -4">
+<img border="0" src="../Pictures/VibeParameters.jpg" width="350" height="207"></p>
+<p class="MsoNormal">This equation results in an S-shaped function of which the 
+shape is controlled by the Vibe parameters.</p>
+<h3>The effect of VibeA</h3>
+<p align="center">
+<img border="0" src="../Pictures/VibeA.jpg" width="375" height="413"></p>
+<p align="left">
+Increasing the &quot;slope&quot; shape factor increases the burn rate slope as shown in 
+the figure.</p>
+<h3 align="left">The effect of VibeM</h3>
+<p align="center">
+<img border="0" src="../Pictures/VibeM.jpg" width="383" height="423"></p>
+<p align="left">
+Increasing the &quot;distribution&quot; shape factor means more of the mass is burnt 
+later.</p>
+<h3 align="left">Using the Vibe Model</h3>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">The user has to supply 5 values to prescribe the burn rate 
+using this model:</p>
+<ol>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Ignition Timing - The timing of the spark in degrees before 
+TDC</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Delay Period - The time from spark to turbulent combustion 
+in crank angle degrees</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Burn Duration - The time from the end of the delay period 
+to the end of turbulent combustion in crank angle degrees</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">VibeA - The &quot;slope&quot; shape factor</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">VibeM - The &quot;distribution&quot; shape factor</p>
+  </li>
+</ol>
+
+<h2><u>Calculated Burn Rate (Turbulent Eddy Entrainment Model)</u> </h2>
+
+<p>EngMod4T uses the turbulent eddy entrainment model to calculate the burn rate
+and the &quot;Energy Cascade&quot; turbulent model to calculate the turbulent
+intensity and from that the eddy entrainment rate. It uses the transfer port
+flow as the main creator of turbulence with some help from the plugging pulse of
+the exhaust. After port closure some further turbulence is generated by the
+moving piston and the squish action while turbulence is damped out by the fluid
+viscosity. </p>
+
+<p>As this is a fully 3dimensional situation modeled by zero and 1-dimensional
+equations it is not a fully robust method and can fail (give inaccurate
+predictions) under certain conditions. It is based on 3dimensional equations but
+with simplifying assumptions like homogeneity at small scales to remove
+direction from the equation at the small scale turbulence. Large scale movement
+are partially taken into consideration using the transfer port flow, the piston
+movement and squish action but finer detail is lost through the use of
+turbulence generation models based on average flow. Even so, the model works
+quite well under most conditions. </p>
+
+<h3>Using the Turbulent Entrainment Model </h3>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Strictly speaking
+the user has to supply 1 value only to use this model:</p>
+<ol>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Ignition Timing - The timing of the spark in degrees before 
+TDC</p>
+  </li>
+</ol>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">However, to enable
+the user to select between the two models the following values have to be
+supplied as well:</p>
+<ol>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Delay Period - The time from spark to turbulent combustion 
+in crank angle degrees</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">Burn Duration - The time from the end of the delay period 
+to the end of turbulent combustion in crank angle degrees</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">VibeA - The &quot;slope&quot; shape factor</p>
+  </li>
+  <li>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">VibeM - The &quot;distribution&quot; shape factor</p>
+  </li>
+</ol>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0">When using this
+model the user must verify that the model is calculating realistic results. To
+do this the model calculates the previous 4 values, (delay period, burn
+duration, vibeA and vibeM) after each rpm point and stores the results in the
+power output file. After a run the user can then plot them using Post4T and
+inspect them for realism. The following figures show a comparison between using the
+prescribed values as published, then using the turbulent entrainment model and 
+then the calculated values as input for a simulation:</p>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0" align="center">
+<img border="0" src="../Pictures/turbulentvibepower.jpg" width="813" height="597"></p>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0" align="center">
+<img border="0" src="../Pictures/delayduration.jpg" width="825" height="585"></p>
+
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0" align="center">
+<img border="0" src="../Pictures/vibeavibem.jpg" width="824" height="587"></p>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0" align="center">&nbsp;</p>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0" align="left">The
+turbulent entrainment model increases run times quite a bit so a typical way to
+use it is to do a baseline simulation using it to predict the 4 values required
+by the Vibe model and then to use these values as input to the Vibe model and
+use it then for further simulations.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-za">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Exhaust Pipe Nomenclature and Boundaries</title>
+</head>
+
+<body>
+
+<h1>Exhaust Pipe Nomenclature and Boundaries</h1>
+<h2 align="left">Naming Convention:</h2>
+<p>To model complex exhaust systems it was necessary to adopt a naming
+convention. This naming convention is described using the following figure:</p>
+<p align="center">
+<img border="0" src="../Pictures/ExPipeNames4T.jpg" width="652" height="632"></p>
+
+<p align="left"><font size="4"><b>Header Pipe</b></font> - A header pipe is a pipe that 
+is connected to the cylinder head. Because a header can have an abrupt area change 
+(step) as in the top pipe, or a pipe junction for pipes connecting the header pipes as in 
+the second pipe, it is necessary to have "<b>Primary Headers</b>" and "<b>Secondary 
+Headers</b>". As there can be more steps, the next row of headers, if required, is known 
+as the "<b>Tertiary Headers</b>" and so on as up to 4 steps per header pipe is allowed. 
+In both figures the Primary Headers number from 1 to 4 and the Secondary Headers from 
+5 to 8.</p>
+
+<p align="left"><font size="4"><b>Connector Pipe</b></font> - A "<b>Connector Pipe</b>" 
+is any pipe that has multi-pipe junctions (Collectors) on both ends. There are no Connector 
+Pipes in the top pipe but in the second pipe the Connector Pipes number from 9 to 15.</p>
+
+<p align="left"><font size="4"><b>Collector Pipe</b></font> - The "<b>Collector Pipe</b>"
+is any pipe that is connected to only one multi-pipe junction while the other end is open to 
+atmosphere, connected to a box/plenum or a silencer. It can also be divided by steps as in 
+the top pipe.</p>
+
+<p align="left"><font size="4"><b>Box Pipe</b></font> - A "<b>Box Pipe</b>" is 
+any pipe that leaves a box, it has a box connected to its inlet end.</p>
+<p align="left"><font size="4" color='red'><b>Note:</b> Make sure the difference between a 
+<b>Connector Pipe</b> and a <b>Collector Pipe</b> is clear.</font>
+
+<h2 align="left">Boundary Description:</h2>
+<p>In the exhaust system there are boundaries that are modelled by the software. 
+Often these boundaries are 3-dimensional but as the software is based on 
+1-dimensional gasdynamics the boundaries are modelled in a plane with special 
+input values to simulate the 3-dimensional nature of the boundary. The following 
+figure shows a typical exhaust system with most of the boundaries shown:</p>
+<p align="center">
+<img border="0" src="../Pictures/ExBoundaries4T.jpg" width="762" height="342"></p>
+<p align="left"><font size="4"><b>Exhaust Valve Boundary</b></font> - This is the start of the exhaust 
+system and modelled by prescribing the valve and port dimensions, selecting a Cd-map 
+by selecting the amount of masking and prescribing its open and closed duration 
+and area by selecting a cam profile.</p>
+<p align="left"><font size="4"><b>Exhaust Port/Manifold Boundary</b></font> - This is typically where 
+the exhaust manifold bolts to the head and can be a perfect match or there can 
+be a step. A step is created by using a different diameter for the exhaust port 
+manifold diameter and the diameter at the start of the header pipe. The Cd-map 
+for this is automatically selected by the software depending on the area change.</p>
+<p align="left"><font size="4"><b><a href="ExStepMod.htm">Exhaust Header Steps</a></b></font> - This is where there is a 
+discontinuity in the header diameter that forms a step. It is formed where one 
+pipe ends at a certain diameter and then continues as a pipe with a different 
+diameter.&nbsp; The Cd-map for this is automatically selected by the software 
+depending on the area change.</p>
+<p align="left"><font size="4"><b><a href="ExCollector.htm">Exhaust Collector Boundary</a></b></font> - This is a boundary where the 
+number of pipes change. In the example shown four pipes becomes one pipe. This 
+is clearly a full 3-dimensional boundary. The software models the effect of the 
+abrupt area changes and calculates the flow losses as a function of the angles 
+between the pipes. It is important to note that it has no physical length. Any 
+taper parts must be modelled as part of the collector pipe, and in rare cases, 
+also as part of the header pipes.</p>
+<p align="left"><font size="4"><b><a href="ExStepMod.htm">Exhaust Collector Steps</a></b></font> - This is where there is a 
+discontinuity in the collector pipe diameter that forms a step. It is formed 
+where one pipe ends at a certain diameter and then continues as a pipe with a 
+different diameter.&nbsp; The Cd-map for this is automatically selected by the 
+software depending on the area change. (It is the same as a header pipe step, it 
+is just in the collector pipe)</p>
+<p align="left"><font size="4"><b><a href="ExBoxMod.htm">Box In/Outlet Boundaries</a></b></font> - This is where a pipe starts or 
+terminates in an exhaust box or plenum. During the modelling the user selects 
+whether the edge is sharp or radiused and from this the software selects a Cd-map.</p>
+<p align="left"><font size="4"><b>Atmospheric Outlet Boundary</b></font> - This is where the exhaust 
+pipe connects to the atmosphere. During the modelling the user selects whether 
+the edge is sharp or radiused and from this the software selects a Cd-map.</p>
+<p align="left"><font size="4" color='red'><b>Note:</b> Make sure the difference between a <b>Collector</b> 
+and a <b>Collector Pipe</b> is clear.</font>
+</body>
+
+</html>
