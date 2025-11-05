@@ -1,9 +1,10 @@
 /**
- * Сканер файлов двигателей (.det, .pou)
+ * Сканер файлов двигателей (.det, .pou, .prt)
  *
  * Основные функции:
  * - Сканирование директории для поиска файлов двигателей
  * - Получение метаданных файлов (размер, дата изменения)
+ * - Парсинг .prt файлов для извлечения auto metadata
  * - Отслеживание изменений файлов (file watching)
  * - Фильтрация по расширениям файлов
  *
@@ -14,6 +15,8 @@ import { readdir, stat } from 'fs/promises';
 import { join, extname, basename } from 'path';
 import { watch } from 'chokidar';
 import { parseDetFile, getProjectSummary } from './fileParser.js';
+import { PrtParser } from '../parsers/formats/prtParser.js';
+import { updateAutoMetadata } from './metadataService.js';
 
 /**
  * @typedef {Object} FileInfo
@@ -45,16 +48,18 @@ import { parseDetFile, getProjectSummary } from './fileParser.js';
  * - "Vesta 1.6 IM.det" → "vesta-1-6-im"
  * - "BMW M42.det" → "bmw-m42"
  * - "TM Soft ShortCut.pou" → "tm-soft-shortcut"
+ * - "4_Cyl_ITB.prt" → "4-cyl-itb"
  *
  * @param {string} filename - Имя файла
  * @returns {string} Нормализованный ID
  */
 export function normalizeFilenameToId(filename) {
   return filename
-    .replace(/\.(det|pou)$/i, '')  // Remove .det or .pou extension
-    .toLowerCase()                  // Convert to lowercase
-    .replace(/\s+/g, '-')           // Replace spaces with hyphens
-    .replace(/[^a-z0-9-]/g, '');    // Remove special characters
+    .replace(/\.(det|pou|prt)$/i, '')  // Remove .det, .pou, or .prt extension
+    .toLowerCase()                      // Convert to lowercase
+    .replace(/\s+/g, '-')               // Replace spaces with hyphens
+    .replace(/_/g, '-')                 // Replace underscores with hyphens
+    .replace(/[^a-z0-9-]/g, '');        // Remove special characters
 }
 
 /**
@@ -96,14 +101,14 @@ function isFileAllowed(fileName, allowedExtensions) {
  * Сканирует директорию и возвращает список файлов с заданными расширениями
  *
  * @param {string} directoryPath - Путь к директории для сканирования
- * @param {string[]} extensions - Массив расширений файлов (например, [".det", ".pou"])
+ * @param {string[]} extensions - Массив расширений файлов (например, [".det", ".pou", ".prt"])
  * @returns {Promise<FileInfo[]>} - Массив информации о файлах
  *
  * @example
- * const files = await scanDirectory('./test-data', ['.det', '.pou']);
+ * const files = await scanDirectory('./test-data', ['.det', '.pou', '.prt']);
  * console.log(`Найдено ${files.length} файлов`);
  */
-export async function scanDirectory(directoryPath, extensions = ['.det', '.pou']) {
+export async function scanDirectory(directoryPath, extensions = ['.det', '.pou', '.prt']) {
   try {
     // Читаем содержимое директории
     const entries = await readdir(directoryPath, { withFileTypes: true });
@@ -132,6 +137,44 @@ export async function scanDirectory(directoryPath, extensions = ['.det', '.pou']
 }
 
 /**
+ * Парсит .prt файл и обновляет auto metadata
+ * @param {FileInfo} file - Информация о файле
+ * @returns {Promise<Object|null>} - Auto metadata или null если ошибка
+ */
+async function parsePrtFileAndUpdateMetadata(file) {
+  try {
+    const prtParser = new PrtParser();
+    const result = await prtParser.parse(file.path);
+
+    // Извлекаем auto metadata из результата парсинга
+    const autoMetadata = {
+      cylinders: result.engine.cylinders,
+      type: result.engine.type,
+      configuration: result.engine.configuration,
+      bore: result.engine.bore,
+      stroke: result.engine.stroke,
+      compressionRatio: result.engine.compressionRatio,
+      maxPowerRPM: result.engine.maxPowerRPM,
+      intakeSystem: result.engine.intakeSystem,
+      exhaustSystem: result.engine.exhaustSystem
+    };
+
+    // Получаем projectId из имени файла
+    const projectId = normalizeFilenameToId(file.name);
+
+    // Обновляем auto metadata в .metadata/<projectId>.json
+    await updateAutoMetadata(projectId, autoMetadata);
+
+    console.log(`[Scanner] 🔧 Auto metadata updated: ${file.name} → .metadata/${projectId}.json`);
+
+    return autoMetadata;
+  } catch (error) {
+    console.error(`[Scanner] ❌ Error parsing .prt file ${file.name}:`, error.message);
+    return null;
+  }
+}
+
+/**
  * Сканирует директорию и возвращает полную информацию о проектах (файлах + данные парсинга)
  *
  * @param {string} directoryPath - Путь к директории для сканирования
@@ -140,10 +183,10 @@ export async function scanDirectory(directoryPath, extensions = ['.det', '.pou']
  * @returns {Promise<ProjectFileInfo[]>} - Массив информации о проектах
  *
  * @example
- * const projects = await scanProjects('./test-data', ['.det', '.pou'], 10485760);
+ * const projects = await scanProjects('./test-data', ['.det', '.pou', '.prt'], 10485760);
  * console.log(`Найдено ${projects.length} проектов`);
  */
-export async function scanProjects(directoryPath, extensions = ['.det', '.pou'], maxFileSize = 0) {
+export async function scanProjects(directoryPath, extensions = ['.det', '.pou', '.prt'], maxFileSize = 0) {
   const files = await scanDirectory(directoryPath, extensions);
 
   // Фильтруем файлы по размеру (если задано ограничение)
@@ -158,7 +201,16 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
   // Парсим метаданные каждого файла
   const projectPromises = validFiles.map(async (file) => {
     try {
-      // Парсим файл для получения метаданных и расчетов
+      // Если это .prt файл - парсим и обновляем auto metadata
+      if (file.name.endsWith('.prt')) {
+        await parsePrtFileAndUpdateMetadata(file);
+
+        // Для .prt файлов не создаём проект (они только обновляют metadata)
+        // Проект создаётся из .det/.pou файлов
+        return null;
+      }
+
+      // Парсим .det/.pou файл для получения метаданных и расчетов
       const project = await parseDetFile(file.path);
       const summary = getProjectSummary(project);
 
@@ -178,6 +230,11 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
     } catch (error) {
       console.error(`❌ Ошибка парсинга файла ${file.name}:`, error.message);
 
+      // Для .prt файлов - пропускаем, не создаём проект
+      if (file.name.endsWith('.prt')) {
+        return null;
+      }
+
       // Возвращаем базовую информацию даже если парсинг не удался
       return {
         id: normalizeFilenameToId(file.name), // Normalized ID (slug)
@@ -196,7 +253,8 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
     }
   });
 
-  const projects = await Promise.all(projectPromises);
+  // Фильтруем null значения (.prt файлы)
+  const projects = (await Promise.all(projectPromises)).filter(p => p !== null);
 
   // Дедупликация: если есть файлы .det и .pou с одинаковым base name,
   // оставляем только один проект
@@ -268,7 +326,7 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
  * @returns {FileWatcher} - Объект watcher с методами управления
  *
  * @example
- * const watcher = createFileWatcher('./test-data', ['.det', '.pou'], {
+ * const watcher = createFileWatcher('./test-data', ['.det', '.pou', '.prt'], {
  *   onAdd: (path) => console.log(`Добавлен файл: ${path}`),
  *   onChange: (path) => console.log(`Изменён файл: ${path}`),
  *   onRemove: (path) => console.log(`Удалён файл: ${path}`),
@@ -278,7 +336,7 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou'],
  * // Остановить отслеживание
  * await watcher.close();
  */
-export function createFileWatcher(directoryPath, extensions = ['.det', '.pou'], callbacks = {}) {
+export function createFileWatcher(directoryPath, extensions = ['.det', '.pou', '.prt'], callbacks = {}) {
   const {
     onAdd = () => {},
     onChange = () => {},
@@ -386,10 +444,10 @@ export function formatFileSize(bytes) {
  * @returns {Promise<Object>} - Статистика директории
  *
  * @example
- * const stats = await getDirectoryStats('./test-data', ['.det', '.pou']);
+ * const stats = await getDirectoryStats('./test-data', ['.det', '.pou', '.prt']);
  * console.log(`Найдено ${stats.filesCount} файлов, общий размер: ${stats.totalSizeFormatted}`);
  */
-export async function getDirectoryStats(directoryPath, extensions = ['.det', '.pou']) {
+export async function getDirectoryStats(directoryPath, extensions = ['.det', '.pou', '.prt']) {
   try {
     const files = await scanDirectory(directoryPath, extensions);
 

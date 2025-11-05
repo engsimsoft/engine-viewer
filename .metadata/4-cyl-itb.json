@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "id": "4-cyl-itb",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 82.5,
+    "stroke": 75.6,
+    "compressionRatio": 11.3,
+    "maxPowerRPM": 8000,
+    "intakeSystem": "ITB",
+    "exhaustSystem": "4-2-1"
+  },
+  "manual": {},
+  "created": "2025-11-05T14:51:17.039Z",
+  "modified": "2025-11-05T14:51:17.039Z"
+}
