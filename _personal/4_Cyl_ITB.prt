@@ -1,0 +1,399 @@
+   
+   
+ ********************************************************************
+   
+   
+    This File lists the input data as set up for the:
+   
+              4_Cyl_ITB                 engine 
+   
+    for use by the EngMod4T engine simulation program.
+   
+    This dataFile was constructed on:  4-11-2025
+                                  at: 18h: 4min
+ 
+    using Dat4T Version: V7.1.9       
+ 
+ ********************************************************************
+ 
+  The PROJECT File contains the following subsystem Files:  
+ 
+  Engine:                   4_Cyl_ITB.eng            
+  Exhaust port:             4_Cyl_ITB.exp            
+  Intake port:              4_Cyl_ITB.ipo            
+  Exhaust type and lengths: 4_Cyl_ITB.exl            
+  Exhaust diameters:        4_Cyl_ITB.exd            
+  Intake type and lengths:  4_Cyl_ITB.inl            
+  Intake diameters:         4_Cyl_ITB.ind            
+  Combustion data:          4_Cyl_ITB.cbd            
+  Temperature data:         4_Cyl_ITB.tmp            
+ 
+ ********************************************************************
+ 
+ General engine data:  
+ --------------------
+ 
+  This is a Naturally Aspirated Spark Ignition Engine.
+ 
+ Number of cylinders                                 4
+ The engine is an                          : INLINE TYPE
+ 
+ The friction loss model uses the following:
+  Default values for crankshaft bearings of the PLAIN type
+ 
+ The Cylinder head is of Tumble Flow type with 4 valves
+ 
+ Bore                                        82.50000      mm
+ Stroke                                      75.60000      mm
+ Conrod length                               133.3200      mm
+ Gudgeon pin and/or cylinder offset         0.0000000E+00  mm
+ Geometric Compression Ratio                 11.30000    
+ Piston Dome radius                          85.45000      mm
+ Squish Clearence                            1.300000      mm
+ Squish Area ratio                          0.3000000    
+ Included Valve Angle                        38.00000      deg
+ RPM for Maximum Power                       8000.000    
+ Exhaust Pressure Transducer                 70.00000      mm
+ Inlet Pressure Transducer                   80.00000      mm
+ Number of Cycles (Not Less than 8)                 11
+ Throttle open ratio                         1.000000    
+  
+ The Crankshaft Firing order is: 
+ Single plane inline four or one bank of a V8: 1-3-4-2
+ 
+ ********************************************************************
+   
+  
+ The EXHAUST port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of exhaust valves                      2
+ 
+ The Cd-map is user specified: 
+ 
+   FlowFileEx  = SHORTCUT23  RAF.ecd
+   CdMapUserEx = SHORTCUT23  RAF.emp
+ 
+ Exhaust Cd Map Multiplier is          1.000000    
+ Outer valve seat diameter             25.50000      mm
+ Inner valve seat diameter             22.00000      mm
+ Outer head seat diameter              25.50000      mm
+ Inner head seat diameter              22.00000      mm
+ Port throat diameter                  22.00000      mm
+ Port diameter at manifold             33.00000      mm
+ Valve stem diameter                   7.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                72.00000      mm
+ Exhaust valve tappet clearance       0.0000000E+00  mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Exhaust cam data File                     SHORTCUT UFA.mjp                                                                
+ Line number where lift data starts               1
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Exhaust valve Dwell center is at: (BTDC)    104.0000      deg
+ 
+  The Flowbench data is:
+  ----------------------
+ FlowFileEx  = SHORTCUT23  RAF.ecd
+ 
+ Ambient Temperature units: Celcius
+ Ambient Pressure units:    bar
+ Flowbench Pressure units:  inch H2O
+ Flowbench Flow units:      cubic feet per minute (cfm)
+ Valve Lift units:          millimeter
+ Ambient Temperature:        20.00000    
+ Ambient Pressure:           1.000000    
+ Flowbench Test Pressure:    28.00000    
+ Number of Lift Points:             11
+ 
+  Valve Lift    Bench Flow
+   1.000000       25.20000    
+   2.000000       52.60000    
+   3.000000       83.20000    
+   4.000000       112.4000    
+   5.000000       130.9000    
+   6.000000       138.2000    
+   7.000000       140.6000    
+   8.000000       142.2000    
+   9.000000       142.7000    
+   10.00000       143.3000    
+   11.00000       143.9000    
+ 
+   
+ ********************************************************************
+   
+  
+ The INLET port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of inlet valves                        2
+ 
+ The Cd-map is user specified: 
+ 
+   FlowFileIn  = SHORTCUT23  RAF.icd
+   CdMapUserIn = SHORTCUT23  RAF.imp
+ 
+ Inlet Cd Map Multiplier is            1.000000    
+ Outer valve seat diameter             29.00000      mm
+ Inner valve seat diameter             26.70000      mm
+ Port throat diameter                  25.75000      mm
+ Port diameter at manifold             36.00000      mm
+ Valve stem diameter                   7.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                83.00000      mm
+ Intake valve tappet clearance        0.0000000E+00  mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Intake cam data File                      SHORTCUT UFA.mjp                                                                
+ Line number where lift data starts               1
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Inlet valve Dwell center is at: (ATDC)    102.0000      deg
+ 
+  The Flowbench data is:
+  ----------------------
+ FlowFileIn  = SHORTCUT23  RAF.icd
+ 
+ Ambient Temperature units: Celcius
+ Ambient Pressure units:    bar
+ Flowbench Pressure units:  inch H2O
+ Flowbench Flow units:      cubic feet per minute (cfm)
+ Valve Lift units:          millimeter
+ Ambient Temperature:        20.00000    
+ Ambient Pressure:           1.000000    
+ Flowbench Test Pressure:    28.00000    
+ Number of Lift Points:             11
+ 
+  Valve Lift    Bench Flow
+   1.000000       29.50000    
+   2.000000       57.80000    
+   3.000000       88.20000    
+   4.000000       118.3000    
+   5.000000       146.5000    
+   6.000000       170.8000    
+   7.000000       187.6000    
+   8.000000       195.0000    
+   9.000000       197.8000    
+   10.00000       199.6000    
+   11.00000       200.1000    
+ 
+   
+ ********************************************************************
+   
+  
+ The EXHAUST system has the following Characteristics:
+  ----------------------------------------------------
+   
+  
+ The exhaust system layout has: 
+   
+           8  Pipes
+           3  Collectors
+           1  Boxes
+           0  Silencers
+           0  Steps in total
+           0  Steps per header pipe
+           0  Steps per connector pipe
+           0  Steps per collector pipe
+           0  Steps per silencer
+   
+ The exhaust system is a 4into2into1 manifold.
+ It connects cylinder 1+4 into one connector and 2+3 into the next connector,
+ and Then the two connector pipes into a collector pipe
+  with an exhaust box.
+  
+  Total number of pipes (excluding internal silencer pipes) :  8
+  
+  There are  4 header pipe(s), numbering from 1 to  4,
+  and  2 connector pipes, numbering from  5 to  6,
+  and one collector pipe, number  7,
+  and  1 box outlet pipes,  numbering from  8 to  8,
+  
+ Pipe No   Section No  Section length   Start diameter   End diameter
+    1           1           500.0            35.0            35.0
+    2           1           500.0            35.0            35.0
+    3           1           500.0            35.0            35.0
+    4           1           500.0            35.0            35.0
+    5           1           411.0            45.3            45.3
+    6           1           411.0            45.3            45.3
+    7           1           630.0            57.0            57.0
+    8           1           200.0            57.0            57.0
+  
+  The angles for collector:           1
+  
+  1 The angle between pipe  1 and pipe  4 =   0.0 deg
+  2 The angle between pipe  1 and pipe  5 = 180.0 deg
+  3 The angle between pipe  4 and pipe  5 = 180.0 deg
+  
+  The angles for collector:           2
+  
+  1 The angle between pipe  2 and pipe  3 =   0.0 deg
+  2 The angle between pipe  2 and pipe  6 = 180.0 deg
+  3 The angle between pipe  3 and pipe  6 = 180.0 deg
+  
+  The angles for collector:           3
+  
+  1 The angle between pipe  5 and pipe  6 =   0.0 deg
+  2 The angle between pipe  5 and pipe  7 = 180.0 deg
+  3 The angle between pipe  6 and pipe  7 = 180.0 deg
+ 
+ Exhaust Atmospheric Outlet Data: 
+ 
+  The Atmospheric Outlet pipe(s) has a SHARP edge.
+ 
+ ***Exhaust Box Data***
+ 
+  The Box inlet pipe(s) has a SHARP edge.
+  The Box outlet pipe(s) has a SHARP edge.
+  
+  The Exhaust Box volumes:
+  
+  The volume of Exhaust Box  1 is 12000.00 (cc)
+ 
+ ********************************************************************
+   
+  
+ The INTAKE system has the following Characteristics:
+  ---------------------------------------------------
+   
+           8  Intake pipes
+           0  Collectors
+           4  Throttles
+           0  Boxes/Plenums/Boost bottles in total
+           0  Number of closed ends
+  
+  This is an intake system with seperate intake pipes,
+     with no airboxes
+     and no boost bottles but with throttles.
+  
+     The throttle is of the : BUTTERFLY type
+     with spindle diameter of:  5.00mm
+
+ There are  4 cylinder pipes, numbering from 1 to  4
+    4 throttle body pipe(s), numbering from  5 to  8
+ 
+ Number of segments in pipe  1 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    1           1            37.5            43.0            43.0
+                2           145.0            43.0            36.0
+ 
+ Number of segments in pipe  2 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    2           1            37.5            43.0            43.0
+                2           145.0            43.0            36.0
+ 
+ Number of segments in pipe  3 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    3           1            37.5            43.0            43.0
+                2           145.0            43.0            36.0
+ 
+ Number of segments in pipe  4 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    4           1            37.5            43.0            43.0
+                2           145.0            43.0            36.0
+ 
+ Number of segments in pipe  5 is:  7
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    5           1             4.5            65.8            54.1
+                2             4.5            54.1            50.8
+                3             4.5            50.8            49.4
+                4             4.5            49.4            47.9
+                5             4.5            47.9            47.0
+                6            67.5            47.0            47.0
+                7            37.5            47.0            43.0
+ 
+ Number of segments in pipe  6 is:  7
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    6           1             4.5            65.8            54.1
+                2             4.5            54.1            50.8
+                3             4.5            50.8            49.4
+                4             4.5            49.4            47.9
+                5             4.5            47.9            47.0
+                6            67.5            47.0            47.0
+                7            37.5            47.0            43.0
+ 
+ Number of segments in pipe  7 is:  7
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    7           1             4.5            65.8            54.1
+                2             4.5            54.1            50.8
+                3             4.5            50.8            49.4
+                4             4.5            49.4            47.9
+                5             4.5            47.9            47.0
+                6            67.5            47.0            47.0
+                7            37.5            47.0            43.0
+ 
+ Number of segments in pipe  8 is:  7
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    8           1             4.5            65.8            54.1
+                2             4.5            54.1            50.8
+                3             4.5            50.8            49.4
+                4             4.5            49.4            47.9
+                5             4.5            47.9            47.0
+                6            67.5            47.0            47.0
+                7            37.5            47.0            43.0
+ 
+  Atmospheric inlet details :
+ 
+  The inlet pipe(s) from the atmosphere has a BELL edge.
+ 
+ ********************************************************************
+ 
+  The Ignition model data: 
+  ------------------------
+ 
+  
+ The Combustion Model uses Wiebe Curves for prescribed burn rate
+ Type of Fuel          =    100 UNLEADED
+ Nitromethane Ratio   =   0.000
+ 
+        Ignition, AFR and Combustion curves 
+ 
+   RPM     Timing    AFR    Delay Duration  VibeA  VibeB  Beff
+  2000.00   14.70   12.57    4.64   46.40   10.00  2.000  0.910
+  3000.00   17.60   12.55    5.02   50.20   10.00  2.000  0.910
+  4000.00   19.60   12.52    5.40   54.00   10.00  2.000  0.910
+  5000.00   21.50   12.50    5.79   57.90   10.00  2.000  0.895
+  6000.00   23.50   12.50    6.17   61.70   10.00  2.000  0.905
+  7000.00   25.48   12.50    6.56   65.60   10.00  2.000  0.910
+  8000.00   27.45   12.45    6.94   69.40   10.00  2.000  0.910
+  9000.00   29.41   12.42    7.32   73.20   10.00  2.000  0.910
+   
+ ********************************************************************
+   
+   
+   
+  The wall temperature and atmospheric data: 
+  -------------------------------------------
+  
+   Inlet System Wall Temperature              25.00000      C
+   Inlet Plenum Wall Temperature              150.0000      C
+   Inlet Port Wall Temperature                150.0000      C
+   Exhaust Port Wall Temperature              250.0000      C
+   Exhaust Wall temp at Max Power             400.0000      C
+   Exhaust Plenum Wall Temperature            400.0000      C
+   Piston Crown Temperature                   230.9360      C
+   Combustion Chamber Wall Temperature        230.9360      C
+   Cylinder Liner temperature                 190.9360      C
+   Atmospheric Temperature (Std=20)           20.00000      C
+   Atmospheric Pressure (Std=101.325)         101.3250      kPA
+   Exit Atmospheric Temperature (Std=20)      20.00000      C
+   Exit Atmospheric Pressure (Std=101.325)    101.3250      kPa
+ 
+ ********************************************************************
+ 
+ 
