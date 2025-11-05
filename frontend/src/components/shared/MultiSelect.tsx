@@ -82,7 +82,7 @@ export default function MultiSelect<T = string>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between', className)}
+          className={cn('justify-between', className)}
         >
           <span className="truncate">
             {value.length > 0
