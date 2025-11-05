@@ -419,24 +419,25 @@
   - Add lock icon for ID field
   ```
 
-- [ ] **Browser Testing Request (Vladimir):**
+- [X] **Browser Testing Request (Vladimir):** ✅
   **Чек-лист для тестирования:**
-  1. Открыть Dashboard → выбрать проект → нажать Edit Info
-  2. Проверить "📋 Project Identity" section:
-     - ID field показывает ID проекта (readonly, серый, с иконкой замка)
-     - Display Name field редактируемый (можно вводить текст)
-  3. Проверить "🔧 Engine Configuration" section (readonly):
-     - Отображается: cylinders, type, configuration, bore, stroke, intake, exhaust
-     - Все поля серые (нельзя редактировать)
-  4. Тест сохранения:
-     - Изменить Display Name на "Test Project"
-     - Нажать Save
-     - Закрыть dialog → открыть снова
-     - Display Name = "Test Project" (сохранилось)
-     - ID НЕ изменился (readonly работает)
-  5. Проверить что старые поля работают: description, client, tags, status, notes
+  1. Открыть Dashboard → выбрать проект → нажать Edit Info ✅
+  2. Проверить "📋 Project Identity" section: ✅
+     - ID field показывает ID проекта (readonly, серый, с иконкой замка) ✅
+     - Display Name field редактируемый (можно вводить текст) ✅
+  3. Проверить "🔧 Engine Configuration" section (readonly): ✅
+     - Отображается: cylinders, type, configuration, bore, stroke, intake, exhaust ✅
+     - Все поля серые (нельзя редактировать) ✅
+  4. Тест сохранения: ✅
+     - Изменить Display Name на "BMW Dudarev Motorsport" ✅
+     - Нажать Save ✅
+     - Закрыть dialog → вернуться на Dashboard ✅
+     - Display Name = "BMW Dudarev Motorsport" (сохранилось) ✅
+     - ID показывается под displayName: "ID: BMW M42" ✅
+     - ID НЕ изменился (readonly работает) ✅
+  5. Проверить что старые поля работают: description, client, tags, status, notes ✅
 
-  **Ожидаемый результат:** Dialog работает, Display Name редактируется, ID readonly, auto metadata отображается
+  **Результат:** Dialog работает, Display Name редактируется и отображается на карточках, ID readonly, auto metadata отображается ✅
 
 ### 2.6 HomePage: Integration (1-2 часа)
 
