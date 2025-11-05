@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { Lock } from 'lucide-react';
 
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import {
   Select,
@@ -31,17 +33,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { TagInput } from '@/components/shared/TagInput';
 import type { ProjectInfo } from '@/types';
 
-// Zod validation schema
+// Zod validation schema (Metadata v1.0)
 const metadataFormSchema = z.object({
-  description: z.string().max(500, 'Description must not exceed 500 characters'),
-  client: z.string().max(200, 'Client name must not exceed 200 characters'),
+  // Top-level fields
+  displayName: z.string().max(200, 'Display name must not exceed 200 characters').optional(),
+
+  // Manual metadata fields (user-editable)
+  description: z.string().max(500, 'Description must not exceed 500 characters').optional(),
+  client: z.string().max(200, 'Client name must not exceed 200 characters').optional(),
   tags: z.array(z.string()),
   status: z.enum(['active', 'completed', 'archived']),
-  notes: z.string(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (must be HEX)'),
+  notes: z.string().optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (must be HEX)').optional(),
 });
 
 type MetadataFormValues = z.infer<typeof metadataFormSchema>;
@@ -67,6 +74,7 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
   const form = useForm<MetadataFormValues>({
     resolver: zodResolver(metadataFormSchema),
     defaultValues: {
+      displayName: '',
       description: '',
       client: '',
       tags: [],
@@ -79,15 +87,19 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
   // Обновление значений при изменении project (в useEffect!)
   useEffect(() => {
     if (project && open) {
-      // Читаем данные из вложенного объекта metadata (если есть) или defaults
-      const metadata = project.metadata || {};
+      // Читаем данные из metadata v1.0 структуры
+      const metadata = project.metadata;
       form.reset({
-        description: metadata.description || '',
-        client: metadata.client || '',
-        tags: metadata.tags || [],
-        status: metadata.status || 'active',
-        notes: metadata.notes || '',
-        color: metadata.color || '#3b82f6',
+        // Top-level fields
+        displayName: metadata?.displayName || project.displayName || '',
+
+        // Manual metadata fields
+        description: metadata?.manual?.description || '',
+        client: metadata?.manual?.client || '',
+        tags: metadata?.manual?.tags || [],
+        status: metadata?.manual?.status || 'active',
+        notes: metadata?.manual?.notes || '',
+        color: metadata?.manual?.color || '#3b82f6',
       });
     }
   }, [project, open, form]);
@@ -97,8 +109,21 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
     if (!project) return;
 
     try {
-      // Send to Backend API
-      await axios.post(`/api/projects/${project.id}/metadata`, values);
+      // Prepare metadata v1.0 payload
+      const payload = {
+        displayName: values.displayName || undefined,
+        manual: {
+          description: values.description || undefined,
+          client: values.client || undefined,
+          tags: values.tags,
+          status: values.status,
+          notes: values.notes || undefined,
+          color: values.color || undefined,
+        },
+      };
+
+      // Send to Backend API (only manual + displayName, NO auto metadata)
+      await axios.post(`/api/projects/${project.id}/metadata`, payload);
 
       // Success
       toast.success('Project metadata saved');
@@ -140,6 +165,172 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* ========== Section: Project Identity ========== */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  📋 Project Identity
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Basic project information
+                </p>
+              </div>
+
+              {/* ID (readonly) */}
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Lock className="h-3 w-3" />
+                  ID (readonly)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    value={project?.id || ''}
+                    disabled
+                    className="bg-muted cursor-not-allowed"
+                  />
+                </FormControl>
+                <FormDescription className="text-xs">
+                  Project ID is generated from filename and cannot be changed
+                </FormDescription>
+              </FormItem>
+
+              {/* Display Name (editable) */}
+              <FormField
+                control={form.control}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Display Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Custom project name (optional)"
+                        {...field}
+                        className="text-base"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      If empty, project ID will be shown on cards
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* ========== Section: Engine Configuration (if auto metadata exists) ========== */}
+            {project?.metadata?.auto && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center gap-2">
+                      🔧 Engine Configuration
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Auto-extracted from .prt file (read-only)
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Cylinders */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Cylinders</FormLabel>
+                      <Input
+                        value={project.metadata.auto.cylinders || '—'}
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Type */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Type</FormLabel>
+                      <Input
+                        value={project.metadata.auto.type || '—'}
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Configuration */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Configuration</FormLabel>
+                      <Input
+                        value={project.metadata.auto.configuration || '—'}
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Intake System */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Intake</FormLabel>
+                      <Input
+                        value={project.metadata.auto.intakeSystem || '—'}
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Exhaust System */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Exhaust</FormLabel>
+                      <Input
+                        value={project.metadata.auto.exhaustSystem || '—'}
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Bore × Stroke */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Bore × Stroke</FormLabel>
+                      <Input
+                        value={
+                          project.metadata.auto.bore && project.metadata.auto.stroke
+                            ? `${project.metadata.auto.bore} × ${project.metadata.auto.stroke} mm`
+                            : '—'
+                        }
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Compression Ratio */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">CR</FormLabel>
+                      <Input
+                        value={
+                          project.metadata.auto.compressionRatio
+                            ? `${project.metadata.auto.compressionRatio}:1`
+                            : '—'
+                        }
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+
+                    {/* Max Power RPM */}
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">Max RPM</FormLabel>
+                      <Input
+                        value={
+                          project.metadata.auto.maxPowerRPM
+                            ? `${project.metadata.auto.maxPowerRPM} rpm`
+                            : '—'
+                        }
+                        disabled
+                        className="bg-muted text-sm h-9"
+                      />
+                    </FormItem>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <Separator />
+
+            {/* ========== Manual Metadata Fields ========== */}
             {/* Description */}
             <FormField
               control={form.control}
