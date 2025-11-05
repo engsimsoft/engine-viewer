@@ -120,35 +120,89 @@ export interface EngineProject {
   calculations: Calculation[]; // Массив всех расчетов
 }
 
+// ====================================================================
+// Engine Configuration Types (Metadata v1.0)
+// ====================================================================
+
 /**
- * Метаданные проекта (пользовательская информация о проекте)
- * Хранятся в .metadata/<projectId>.json
+ * Intake System Type (from .prt file)
+ */
+export type IntakeSystem = 'ITB' | 'IM';
+
+/**
+ * Exhaust System Type (from .prt file)
+ */
+export type ExhaustSystem = '4-2-1' | '4-1' | 'tri-y' | '4-1-2' | '8-4-2-1';
+
+/**
+ * Engine Configuration Type (from .prt file)
+ */
+export type EngineConfiguration = 'inline' | 'V' | 'boxer' | 'W';
+
+/**
+ * Automatic Metadata (read-only, extracted from .prt file)
+ */
+export interface AutoMetadata {
+  cylinders: number;
+  type: 'NA' | 'Turbo' | 'Supercharged';
+  configuration: EngineConfiguration;
+  bore: number;               // мм
+  stroke: number;             // мм
+  compressionRatio: number;
+  maxPowerRPM: number;
+  intakeSystem: IntakeSystem;
+  exhaustSystem: ExhaustSystem;
+}
+
+/**
+ * Manual Metadata (user-editable)
+ */
+export interface ManualMetadata {
+  description?: string;
+  client?: string;
+  tags?: string[];
+  status?: 'active' | 'completed' | 'archived';
+  notes?: string;
+  color?: string;             // hex color, например "#3b82f6"
+}
+
+/**
+ * Project Metadata v1.0 (complete structure)
+ * Stored in .metadata/<projectId>.json
+ *
+ * ВАЖНО: Разделение на auto (read-only) и manual (user-editable)
+ * - auto: автоматически извлекается из .prt файла
+ * - manual: редактируется пользователем через UI
  */
 export interface ProjectMetadata {
-  projectId: string;          // ID проекта (имя файла без расширения)
-  description: string;        // Краткое описание проекта
-  client: string;             // Название клиента/компании
-  tags: string[];             // Теги для категоризации (lowercase)
-  notes: string;              // Детальные заметки
-  status: 'active' | 'completed' | 'archived'; // Статус проекта
-  color: string;              // Цвет для карточки (hex, например "#3b82f6")
-  createdAt: string;          // ISO дата создания метаданных
-  updatedAt: string;          // ISO дата последнего обновления
+  version: '1.0';
+  id: string;                 // ID проекта (имя файла без расширения)
+  displayName?: string;       // Кастомное название (опционально)
+  auto?: AutoMetadata;        // Read-only данные из .prt
+  manual: ManualMetadata;     // User-editable данные
+  created: string;            // ISO дата создания метаданных
+  modified: string;           // ISO дата последнего обновления
 }
 
 /**
  * Расширенная информация о проекте (для списка проектов)
- * Комбинирует данные из .det файла и метаданных
+ * Комбинирует данные из .det файла и метаданных v1.0
  */
 export interface ProjectInfo {
   id: string;                 // ID проекта (имя файла без расширения)
   name: string;               // Имя проекта (без расширения)
   fileName: string;           // Полное имя файла
-  engineType: string;         // Тип двигателя
-  numCylinders: number;       // Количество цилиндров
+  displayName?: string;       // Кастомное название из metadata
+  engineType: string;         // Тип двигателя (legacy field из .det)
+  numCylinders: number;       // Количество цилиндров (legacy field из .det)
   calculationsCount: number;  // Количество расчетов
   lastModified: string;       // ISO дата последнего изменения файла
-  // Метаданные (опциональные, если не созданы пользователем)
+
+  // Metadata v1.0 (опциональные, если не созданы пользователем)
+  metadata?: ProjectMetadata;
+
+  // Legacy flat fields (для backwards compatibility, deprecated)
+  // TODO: Remove after migrating all components to use metadata structure
   description?: string;
   client?: string;
   tags?: string[];
@@ -156,15 +210,6 @@ export interface ProjectInfo {
   color?: string;
   notes?: string;
   updatedAt?: string;
-  metadata?: {                // Вложенный объект метаданных (для удобства)
-    description?: string;
-    client?: string;
-    tags?: string[];
-    status?: 'active' | 'completed' | 'archived';
-    color?: string;
-    notes?: string;
-    updatedAt?: string;
-  };
 }
 
 // ====================================================================

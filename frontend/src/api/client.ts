@@ -9,6 +9,8 @@ import type {
   EngineProject,
   ProjectMetadata,
   ProjectsListResponse,
+  IntakeSystem,
+  ExhaustSystem,
 } from '@/types';
 
 // Создаём axios instance с базовой конфигурацией
@@ -68,11 +70,26 @@ function handleApiError(error: unknown): never {
 // ====================================================================
 
 /**
- * Получить список всех проектов
+ * Фильтры для списка проектов (Metadata v1.0)
  */
-export async function getProjects(): Promise<ProjectInfo[]> {
+export interface ProjectFilters {
+  cylinders?: number[];                              // [3, 4, 6, 8]
+  type?: Array<'NA' | 'Turbo' | 'Supercharged'>;    // Тип двигателя
+  intake?: IntakeSystem[];                           // ['ITB', 'IM']
+  exhaust?: ExhaustSystem[];                         // ['4-2-1', '4-1', 'tri-y']
+  search?: string;                                   // Поиск по displayName/client
+  status?: Array<'active' | 'completed' | 'archived'>; // Статус проекта
+  tags?: string[];                                   // Теги проекта
+}
+
+/**
+ * Получить список всех проектов с опциональными фильтрами
+ */
+export async function getProjects(filters?: ProjectFilters): Promise<ProjectInfo[]> {
   try {
-    const { data } = await api.get<ProjectsListResponse>('/projects');
+    const { data } = await api.get<ProjectsListResponse>('/projects', {
+      params: filters,
+    });
     return data.data;
   } catch (error) {
     handleApiError(error);
