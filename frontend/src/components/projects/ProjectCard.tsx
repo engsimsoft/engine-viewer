@@ -5,6 +5,7 @@ import { Wrench, CheckCircle, Archive, Calendar, Cpu, FileText, Edit } from 'luc
 import type { ProjectInfo } from '@/types';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import EngineBadge from './EngineBadge';
 
 interface ProjectCardProps {
   project: ProjectInfo;
@@ -84,16 +85,21 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
           </div>
         )}
 
+        {/* Engine specification badges */}
+        <EngineBadge
+          type={metadata?.auto?.type}
+          cylinders={metadata?.auto?.cylinders || project.numCylinders}
+          configuration={metadata?.auto?.configuration}
+          intake={metadata?.auto?.intakeSystem}
+          exhaust={metadata?.auto?.exhaustSystem}
+        />
+
         {/* Engine info */}
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
-            <Cpu className="w-4 h-4 text-muted-foreground" />
-            <span>{project.metadata?.auto?.type || 'NA'}</span>
+            <Cpu className="w-4 h-4" />
+            <span>{project.calculationsCount} calculations</span>
           </div>
-          <span className="text-muted-foreground">•</span>
-          <span>{project.numCylinders} cyl.</span>
-          <span className="text-muted-foreground">•</span>
-          <span>{project.calculationsCount} calculations</span>
         </div>
 
         {/* Tags */}

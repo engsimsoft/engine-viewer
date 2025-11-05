@@ -209,25 +209,25 @@
 
 **Цель:** Dashboard с фильтрами, search, sorting, enhanced cards
 
-### 2.1 TypeScript Types & API Client (1-2 часа)
+### 2.1 TypeScript Types & API Client (1-2 часа) ✅
 
-- [ ] **Update frontend types** (`frontend/src/types/index.ts`) (1 час)
+- [X] **Update frontend types** (`frontend/src/types/index.ts`) (1 час)
   - Add `EngineConfig` interface (from .prt auto metadata)
   - Add `IntakeSystem` type: "ITB" | "IM"
   - Add `ExhaustSystem` type: "4-2-1" | "4-1" | "tri-y" | etc.
   - Update `ProjectInfo` with new fields (displayName, auto metadata)
 
-- [ ] **Update API client** (`frontend/src/api/client.ts`) (30 min)
+- [X] **Update API client** (`frontend/src/api/client.ts`) (30 min)
   - Add filters params to `getProjects()`
   - Update response types
 
-**🔄 Checkpoint 2.1: TypeScript Types Updated**
+**🔄 Checkpoint 2.1: TypeScript Types Updated** ✅
 
-- [ ] **Automated Testing:**
-  - Run `npm run typecheck` (frontend) - no errors
-  - Verify TypeScript compilation successful
+- [X] **Automated Testing:**
+  - Run `npm run typecheck` (frontend) - no errors ✅
+  - Verify TypeScript compilation successful ✅
 
-- [ ] **Git Commit:** `feat(frontend): add TypeScript types for .prt metadata`
+- [X] **Git Commit:** `feat(frontend): add TypeScript types for .prt metadata` ✅
   ```
   - Add EngineConfig interface
   - Add IntakeSystem and ExhaustSystem types
@@ -235,7 +235,7 @@
   - Update API client with filters support
   ```
 
-- [ ] **Browser Testing Request (Vladimir):**
+- [X] **Browser Testing Request (Vladimir):**
   - ⏸️ Not applicable (types only, no visual changes)
 
 ### 2.2 UI Components: Badges (2-3 часа)
