@@ -5,6 +5,7 @@
  * Поддерживаемые форматы:
  * - .det: 24 параметра (базовые характеристики)
  * - .pou: 71 параметр (расширенный набор)
+ * - .prt: Метаданные проекта (engine specs, intake/exhaust configuration)
  *
  * Пример использования:
  *   import { parseEngineFile } from './parsers/index.js';
@@ -18,6 +19,7 @@ import { readFile } from 'fs/promises';
 import { globalRegistry } from './ParserRegistry.js';
 import { DetParser } from './formats/detParser.js';
 import { PouParser } from './formats/pouParser.js';
+import { PrtParser } from './formats/prtParser.js';
 import { detectFormat } from './common/formatDetector.js';
 
 // Регистрируем парсеры при импорте модуля
@@ -25,6 +27,7 @@ function registerParsers() {
   try {
     globalRegistry.register('det', DetParser);
     globalRegistry.register('pou', PouParser);
+    globalRegistry.register('prt', PrtParser);
   } catch (error) {
     // Игнорируем ошибку если парсеры уже зарегистрированы
     if (!error.message.includes('уже зарегистрирован')) {

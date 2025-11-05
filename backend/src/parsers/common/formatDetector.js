@@ -5,6 +5,7 @@
  * Поддерживаемые форматы:
  * - .det: 24 параметра (базовые характеристики)
  * - .pou: 71 параметр (расширенный набор)
+ * - .prt: Метаданные проекта (engine specs, intake/exhaust configuration)
  */
 
 import { basename } from 'path';
@@ -13,7 +14,7 @@ import { cleanLine } from './calculationMarker.js';
 /**
  * Определяет формат файла по расширению
  * @param {string} filePath - Путь к файлу
- * @returns {string|null} - 'det', 'pou' или null если формат неизвестен
+ * @returns {string|null} - 'det', 'pou', 'prt' или null если формат неизвестен
  */
 function detectFormatByExtension(filePath) {
   const fileName = basename(filePath).toLowerCase();
@@ -24,6 +25,10 @@ function detectFormatByExtension(filePath) {
 
   if (fileName.endsWith('.pou')) {
     return 'pou';
+  }
+
+  if (fileName.endsWith('.prt')) {
+    return 'prt';
   }
 
   return null;
@@ -66,7 +71,7 @@ function detectFormatByContent(firstLine) {
  *
  * @param {string} filePath - Путь к файлу
  * @param {string} firstLine - Первая строка файла
- * @returns {string} - 'det' или 'pou'
+ * @returns {string} - 'det', 'pou' или 'prt'
  * @throws {Error} - Если формат не удалось определить
  */
 function detectFormat(filePath, firstLine) {
@@ -78,6 +83,7 @@ function detectFormat(filePath, firstLine) {
   }
 
   // Если расширение неизвестно, анализируем содержимое
+  // (для .prt файлов это не применимо, только для .det/.pou)
   format = detectFormatByContent(firstLine);
 
   if (format) {
@@ -87,17 +93,17 @@ function detectFormat(filePath, firstLine) {
   // Если не удалось определить формат
   throw new Error(
     `Не удалось определить формат файла: ${filePath}. ` +
-    `Поддерживаемые форматы: .det, .pou`
+    `Поддерживаемые форматы: .det, .pou, .prt`
   );
 }
 
 /**
  * Проверяет, поддерживается ли данный формат
- * @param {string} format - Формат файла ('det', 'pou', и т.д.)
+ * @param {string} format - Формат файла ('det', 'pou', 'prt', и т.д.)
  * @returns {boolean} - true если формат поддерживается
  */
 function isSupportedFormat(format) {
-  const supportedFormats = ['det', 'pou'];
+  const supportedFormats = ['det', 'pou', 'prt'];
   return supportedFormats.includes(format);
 }
 
