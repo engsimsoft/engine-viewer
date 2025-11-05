@@ -58,13 +58,16 @@
 
 ### 2️⃣ EngMod4T (Simulation Engine)
 
+**Developer:** Neels van Niekerk (Vannik Racing Developments)
+**Based on:** Professor Gordon P Blair's work (Queens University Belfast)
+
 **Purpose:** Run 1D gasdynamic thermodynamic simulation
 
 **Inputs:**
 - `.prt` file from DAT4T
 
 **Processing:**
-- 1D gasdynamic modeling
+- 1D gasdynamic modeling (Method of Characteristics)
 - Thermodynamic calculations
 - Combustion models (Vibe, Wiebe, etc.)
 - Turbo/Supercharger integration
@@ -73,12 +76,14 @@
 
 **Outputs:**
 - `.det` file (24 parameters: RPM, P-Av, Torque, PCylMax, etc.)
-- `.pou` file (71 parameters: IMEP, BMEP, BSFC, combustion efficiency, etc.)
-- ~12 trace files (Pressure, Temperature, Mass Flow, Combustion, etc.)
+- `.pou` file - Batch Mode (71 parameters: IMEP, BMEP, BSFC, combustion efficiency, etc.)
+- `.spo` file - Screen Mode (single RPM point, same parameters as .pou)
+- ~9 trace file types (Pressure, Temperature, Mach, Mass Flow, Wave, Combustion, etc.)
 
 **File Format:** Universal fixed-width ASCII (Delphi 7 `Format()` function)
 
 **Documentation:** [engmod4t-overview.md](engmod4t-overview.md)
+**Detailed Reference:** [_personal/EngMod4THelp-chapters/](../../_personal/EngMod4THelp-chapters/) (31 chapters, 2 MB with images)
 
 ---
 
@@ -383,15 +388,18 @@ line.split(' ');      // NO! Multiple spaces, not single
 ### Timeline
 
 ```
-~2000s    EngMod4T Suite development begins (CIS engineering community)
+~2000s    EngMod4T Suite development by Neels van Niekerk
+          (Vannik Racing Developments)
+          Based on Prof. Gordon P Blair's work (Queens University Belfast)
           ├─ DAT4T (pre-processor)
-          ├─ EngMod4T (simulation engine)
+          ├─ EngMod4T (simulation engine - Method of Characteristics)
           └─ Post4T (post-processor / visualizer)
 
 ~2010s    Suite matures, widely used in engine design
           • 15+ years of proven thermodynamic calculations
-          • Fixed-width ASCII file format standardized
+          • Fixed-width ASCII file format standardized (Delphi 7)
           • ~15 different file types supported
+          • Used in CIS engineering community and internationally
 
 2025      Engine Results Viewer development starts
           • Goal: Replace Post4T visualization layer

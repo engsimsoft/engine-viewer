@@ -153,7 +153,7 @@ This document explains:
 │  │ ├─ Deto[1..4] (detonation per cylinder)             │  │
 │  │ └─ Convergence[1..4] (convergence per cylinder)     │  │
 │  │                                                        │  │
-│  │ MyTurbo4Cyl.pou (71 parameters)                       │  │
+│  │ MyTurbo4Cyl.pou (Batch Mode - 71 parameters)          │  │
 │  │ ├─ All .det parameters (24)                          │  │
 │  │ ├─ Plus: IMEP, BMEP, FMEP, PMEP                      │  │
 │  │ ├─ BSFC (brake specific fuel consumption)           │  │
@@ -161,7 +161,10 @@ This document explains:
 │  │ ├─ Gas exchange parameters                           │  │
 │  │ └─ Fuel consumption                                  │  │
 │  │                                                        │  │
-│  │ MyTurbo4Cyl_*.trace (12+ trace files)                │  │
+│  │ MyTurbo4Cyl.spo (Screen Mode - single RPM point)     │  │
+│  │ └─ Same parameters as .pou, but only ONE RPM         │  │
+│  │                                                        │  │
+│  │ MyTurbo4Cyl_*.trace (9 trace file types)             │  │
 │  │ ├─ Pressure traces (.cbt, .pde)                      │  │
 │  │ ├─ Temperature traces                                │  │
 │  │ ├─ Combustion traces                                 │  │
@@ -170,9 +173,10 @@ This document explains:
 │  └───────────────────────────────────────────────────────┘  │
 │                                                              │
 │  OUTPUTS:                                                    │
-│  • MyTurbo4Cyl.det (performance data)                       │
-│  • MyTurbo4Cyl.pou (extended performance)                   │
-│  • MyTurbo4Cyl_*.trace (detailed traces)                    │
+│  • MyTurbo4Cyl.det (performance data - 24 params)           │
+│  • MyTurbo4Cyl.pou (Batch Mode - 71 params, power curve)    │
+│  • MyTurbo4Cyl.spo (Screen Mode - 71 params, single point)  │
+│  • MyTurbo4Cyl_*.trace (9 trace types, detailed traces)     │
 └──────────────────────────────────────────────────────────────┘
                             ↓
 ┌──────────────────────────────────────────────────────────────┐
@@ -278,7 +282,7 @@ This document explains:
 **Cannot do:**
 - ❌ Modify .prt files (configuration belongs to DAT4T)
 - ❌ Modify .det files (results belong to EngMod4T)
-- ❌ Modify .pou files (results belong to EngMod4T)
+- ❌ Modify .pou/.spo files (results belong to EngMod4T)
 - ❌ Modify trace files (results belong to EngMod4T)
 - ❌ Create new simulation runs (only EngMod4T can simulate)
 
@@ -388,9 +392,9 @@ User analyzes results           User analyzes results (better UX)
 
 **Key Points:**
 1. **DAT4T unchanged** - Still creates .prt files
-2. **EngMod4T unchanged** - Still creates .det/.pou/trace files
+2. **EngMod4T unchanged** - Still creates .det/.pou/.spo/trace files
 3. **Post4T replaced** - Desktop UI → Modern Web UI
-4. **Same data sources** - Engine Viewer reads SAME .det/.pou files
+4. **Same data sources** - Engine Viewer reads SAME .det/.pou/.spo files
 5. **Same constraints** - Read-only, fixed-width format, parameter names
 
 ### What Engine Viewer Replaces
