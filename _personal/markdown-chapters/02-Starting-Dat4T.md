@@ -2,11 +2,11 @@
 
 [ ]{lang="EN-US"}Start Dat4T by double clicking on the Dat4T icon.
 
-![](../Pictures/icon.jpg){border="0" width="33" height="34"}
+![](Pictures/icon.jpg){border="0" width="33" height="34"}
 
 [This will bring up a dialog box that will display the program version and with three command buttons.]{lang="EN-US" style="mso-ansi-language:EN-US"}
 
-[ ![](../Pictures/FrontPage.jpg){border="0" width="470" height="447"}]{lang="EN-US" style="mso-ansi-language:EN-US"}
+[ ![](Pictures/FrontPage.jpg){border="0" width="470" height="447"}]{lang="EN-US" style="mso-ansi-language:EN-US"}
 
 [Click on the **OK-button** to start the main program, the **Help-button** to open the help files or the **Exit Program-button** to quit the program.]{lang="EN-US" style="mso-ansi-language:EN-US"}
 
@@ -16,19 +16,19 @@
 
 Start Dat4T by double clicking on the program icon.
 
-![](../Pictures/icon.jpg){border="0" width="33" height="34"}
+![](Pictures/icon.jpg){border="0" width="33" height="34"}
 
 This will display the Start-Up page. After clicking on the **OK- button** on the start up page the following dialog box will appear:[ ]{lang="EN-US" style="mso-ansi-language:EN-US"}
 
-![](../Pictures/ProjectDialog.jpg){border="0" width="774" height="559"}
+![](Pictures/ProjectDialog.jpg){border="0" width="774" height="559"}
 
 Now click the top right hand button **\"Create New Project**\" and the following dialog will appear:
 
- ![](../Pictures/NewProjectOpenDialog.jpg){border="0" width="426" height="267"}
+ ![](Pictures/NewProjectOpenDialog.jpg){border="0" width="426" height="267"}
 
 The dialog box will list all the available projects in the start up folder. Type the name for the new project in the edit box and click on the **Save-button**. In this example we use NewProject as the project name. This will then create the new project subsystem files using the project name as the default names for the subsystem names:
 
-![](../Pictures/NewProjectDialog.jpg){border="0" width="774" height="559"}
+![](Pictures/NewProjectDialog.jpg){border="0" width="774" height="559"}
 
 Click the **Accept-button** on the project dialog if you are satisfied with the subsystem names.
 
@@ -40,23 +40,23 @@ It is possible to select alternative existing subsystems at this stage by clicki
 
 After clicking on the OK- button on the startup page the following dialog box will appear: [  ]{lang="EN-US" style="mso-ansi-language:EN-US"}
 
-![](../Pictures/ProjectDialog.jpg){border="0" width="774" height="559"}
+![](Pictures/ProjectDialog.jpg){border="0" width="774" height="559"}
 
 Click the \"**Select Existing Project**\" **button.** The dialog box will list all the available projects in the startup folder. To select an existing project click on the project name and click the \"**Open**\"- button or double click on the project name. In this case we select the G50 project.
 
-![](../Pictures/ExisttingProjectDialog.jpg){border="0" width="426" height="293"}
+![](Pictures/ExisttingProjectDialog.jpg){border="0" width="426" height="293"}
 
 The subsystems of project G50 is now displayed in the project dialog:
 
-![](../Pictures/OldProjectDialog.jpg){border="0" width="774" height="563"}
+![](Pictures/OldProjectDialog.jpg){border="0" width="774" height="563"}
 
 It is possible to select alternative existing subsystems at this stage by clicking on the name of the subsystem to be changed. This is described in more detail in [Changing or Creating New Subsystems.](../Contents/NewSubSystem.htm) Click on the \"**Accept**\" - button. This will bring up the main editing menu, if the engine is a non-turbocharged engine:
 
-![](../Pictures/MainMenu.jpg){border="0" width="830" height="525"}
+![](Pictures/MainMenu.jpg){border="0" width="830" height="525"}
 
 Or for a turbocharged engine:
 
-![](../Pictures/MainMenuTurbo.jpg){border="0" width="830" height="525"}
+![](Pictures/MainMenuTurbo.jpg){border="0" width="830" height="525"}
 
 Choose the subsystem to be modified by clicking on the button next to the relevant subsystem.
 
@@ -66,19 +66,19 @@ Choose the subsystem to be modified by clicking on the button next to the releva
 
 [When the filled project dialog is displayed (After opening a new or existing project) it lists the subsystems in the project file]{lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt"}
 
-![](../Pictures/OldProjectDialog.jpg){border="0" width="774" height="559"}
+![](Pictures/OldProjectDialog.jpg){border="0" width="774" height="559"}
 
 The subsystem is changed by clicking on one of the two buttons next to it. You can either create a new subsystem or select one from another project. In this example we will select an existing subsystem and particularly an exhaust system. By clicking on the **\"Select Existing Exhaust System\"** button a new dialog box with a list of the existing subsystem files in that folder is displayed:
 
-![](../Pictures/ExistSubsytemDialog.jpg){border="0" width="426" height="293"}
+![](Pictures/ExistSubsytemDialog.jpg){border="0" width="426" height="293"}
 
 An existing subsystem can be chosen by double clicking on it or by clicking on it and clicking the "**Open**"- button. In this case we select \'YZ_Diffuser.exl\' as the exhaust system:
 
-![](../Pictures/SubSystemDialog.jpg){border="0" width="426" height="293"}
+![](Pictures/SubSystemDialog.jpg){border="0" width="426" height="293"}
 
 This will return you to the project dialog box where the new subsystem name will now be displayed.
 
-![](../Pictures/ProjectDialogNewSub.jpg){border="0" width="774" height="559"}
+![](Pictures/ProjectDialogNewSub.jpg){border="0" width="774" height="559"}
 
 [Another subsystem can now be changed. Once you are satisfied with the selected subsystems click the "**Accept**"- button on the project dialog box. If a new subsystem was created for an existing project, the main menu will be bypassed and the program will go directly to the new subsystem input menu. For a subsystem that already exists the program will continue to the main editing menu.]{lang="EN-US"}
 
@@ -92,7 +92,7 @@ This will return you to the project dialog box where the new subsystem name will
 
 After accepting an existing Project the following dialog will open:
 
-![](../Pictures/EditSubSystemMenu.jpg){border="0" width="830" height="525"}
+![](Pictures/EditSubSystemMenu.jpg){border="0" width="830" height="525"}
 
 This dialog allows you to choose between editing the current subsystem, swopping it for an existing subsystem or creating a new subsystem. This will also update the project file to replace the previous subsystem name with the new name.
 
@@ -108,21 +108,21 @@ This facility allows project files to be archived or \"packed\" to either keep b
 
 After clicking on the OK- button on the start-up page the following dialog box will appear:
 
-![](../Pictures/EmptyProjectDialog.jpg){border="0"}
+![](Pictures/EmptyProjectDialog.jpg){border="0"}
 
 Click the \"**Unpack Archive**\" **button.** The dialog box will list all the available archived files in the working folder. To select an existing archive click on the archive name and click the \"**Open**\"- button or double click on the archive name. In this case we select the I4-Turbo archive.
 
 **Warning: During the unpack process any file that has the same name as a file in the archive will be over-written by the unpack process.**
 
-![](../Pictures/ExistingArchiveDialog.jpg){border="0"}
+![](Pictures/ExistingArchiveDialog.jpg){border="0"}
 
 If the unpack or extraction process was successful, the following message box is displayed:
 
-![](../Pictures/UnpackMessageBox.jpg){border="0"}
+![](Pictures/UnpackMessageBox.jpg){border="0"}
 
 The subsystems of project I4-Turbo are now displayed in the project dialog:
 
-![](../Pictures/FilledExistingProjectDialog.jpg){border="0"}
+![](Pictures/FilledExistingProjectDialog.jpg){border="0"}
 
 The unpacked project is now available and can be used as a normal project.
 
@@ -130,11 +130,11 @@ The unpacked project is now available and can be used as a normal project.
 
 The project edit dialog box is used to create or pack an archive file:
 
-![](../Pictures/EditDialog.jpg){border="0" width="830" height="525"}
+![](Pictures/EditDialog.jpg){border="0" width="830" height="525"}
 
 Click the \"**Pack Archive**\" **button.** This will create an archive file with the same name as the project file but with the \".pack\" file extension and will save it in the working folder if successful. On successful completion of the archiving process the following message box will be displayed:
 
-![](../Pictures/PackMessageBox.jpg){border="0" width="514" height="144"}
+![](Pictures/PackMessageBox.jpg){border="0" width="514" height="144"}
 
 **Warning: During the pack process any pack file that has the same name as the project file will be over-written by the pack process.**
 
@@ -163,31 +163,31 @@ Both the above examples will let the user continue until he wants to close the m
 
 The following dialog box is always there and not an error:
 
-![](../Pictures/FrontPage.jpg){border="0"}
+![](Pictures/FrontPage.jpg){border="0"}
 
 ## Example
 
 In this example we open the file selection dialog in the cam data dialog by clicking on the \"Select Cam Lift File 1 to Import\" button:
 
-![](../Pictures/CamSelectionError-01.jpg){border="0"}
+![](Pictures/CamSelectionError-01.jpg){border="0"}
 
 Before selecting a file we click on the main dialog and the file dialog disappears:
 
-![](../Pictures/CamSelectionError-02.jpg){border="0"}
+![](Pictures/CamSelectionError-02.jpg){border="0"}
 
 If we now click on the \"Select Cam Lift File 1 to Import\" button again the following message is displayed:
 
-![](../Pictures/CamSelectionError-03.jpg){border="0"}
+![](Pictures/CamSelectionError-03.jpg){border="0"}
 
 After cancelling this message neither the \"Accept and Save\" button or the \"Exit without saving\" button works. If we now drags the main dialog to one side the following is visible underneath it:
 
-![](../Pictures/CamSelectionError-04.jpg){border="0"}
+![](Pictures/CamSelectionError-04.jpg){border="0"}
 
 There are two dialogs visible behind the main dialog, the startup dialog that is always there and the file selection dialog that we opened but never closed. Clicking on its edge will bring it to the front and we can now either complete the file selection operation or cancel it. Once that is done we can now close the main dialog.
 
 Another way to find the errand dialog is to click on its icon in the task bar. There will be second icon behind the main icon in the task bar if a second dialog is open. Clicking on the edge of the rear icon will bring the hidden dialog to the front where it can be completed.
 
-![](../Pictures/CamSelectionError-05.jpg){border="0"}
+![](Pictures/CamSelectionError-05.jpg){border="0"}
 
 ## When an unsolved error occurs:
 
@@ -227,16 +227,16 @@ Please note the following:
 
 The following example illustrates what we are trying to achieve:
 
-![](../Pictures/ShortestPipeLength.bmp){border="0"}
+![](Pictures/ShortestPipeLength.bmp){border="0"}
 
 In this example, for a total length of 120mm the unmodified version would be divided into 12 meshes while the modified one will be 8 meshes, leading to approximately a 30% reduction reduction in run time.
 
 To facilitate this the pipe, duct or passage length tool has been added in Dat2T. It is accessed by clicking on the \"**Pipe, Duct & Passage Check**\" button on the main editing screen:
 
-![](../Pictures/PipeCheck01.jpg){border="0"}
+![](Pictures/PipeCheck01.jpg){border="0"}
 
 This brings up the following dialog with the duct and length value that is an issue plus the recommended length:
 
-![](../Pictures/PipeCheck02.jpg){border="0"}
+![](Pictures/PipeCheck02.jpg){border="0"}
 
 After changing the pipe length rerun the check until no more pipes are shown with a recommended length. This means that the pipe length is no longer influencing run times.

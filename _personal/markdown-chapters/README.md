@@ -1,174 +1,237 @@
-# EngMod4T Suite - Documentation (Markdown)
+# EngMod4T Suite - Documentation (Markdown + Images)
 
 **Источник:** Dat4THelp.chm (извлечено и конвертировано в Markdown)
 **Дата конвертации:** 5 ноября 2025
-**Формат:** Один файл на главу для удобства копирования в Claude Chat
+**Формат:** Markdown + изображения в одной папке - готово для Claude Chat!
 
 ---
 
-## 📚 Структура документации
+## 📚 Структура
 
-### Глава 1: [Introduction to Dat4T](01-Introduction-to-Dat4T.md) (16 KB)
-- Front Page - обзор Dat4T
-- License Agreement
-- Disclaimer
-- Folder Structure - структура папок C:\4Stroke
-- **Project Layout** - структура проекта (.pjt, .eng, .exp, .ipo, .exl, .ind, .cbd, .tmp, .trb, **`.prt`**)
-- Windows Nomenclature
-- Error Handling
-
-**👉 Для задачи с .prt версионированием - смотри этот раздел!**
-
----
-
-### Глава 2: [Starting Dat4T](02-Starting-Dat4T.md) (15 KB)
-- Starting the Program
-- Create a new Project
-- Open an existing Project
-- Creating New Subsystem
-- Editing a Subsystem
-- Creating or Extracting an Archive
-- Dialog Box Error
-- Factors affecting run time duration
-
----
-
-### Глава 3: [Engine Data](03-Engine-Data.md) (15 KB)
-- Create New Engine
-- Edit Existing Engine
-- Cylinder Numbering Sequence
-- Exhaust Trace Position
-- Inlet Trace Position
-
----
-
-### Глава 4: [Turbocharger or Supercharger Data](04-Turbocharger-Supercharger.md) (11 KB)
-- Turbocharger Modeling
-- Supercharger Modeling
-
----
-
-### Глава 5: [Ports, Valves and Lift Profiles](05-Ports-Valves-Lift-Profiles.md) (59 KB)
-- Flow modeling through Valves and Ports
-- Specifying VVT and/or VVL
-- Exhaust Cam, Ports and Valves
-  - Port and Valve data with Generated Cam Profile
-  - Port and Valve Data with Imported Cam Profile
-  - User Defined Cd-Map
-- Inlet Cam, Ports and Valves
-  - New User Defined Cam, Ports and Valves
-  - New Imported Cam, Port and Valves
-  - User Defined Cd-Map
-
----
-
-### Глава 6: [Exhaust Subsystem](06-Exhaust-Subsystem.md) (63 KB)
-- Exhaust Pipe Nomenclature and Boundaries
-- Exhaust Pipe Numbering Convention
-- Exhaust Collector Modeling
-- Stepped pipes
-- Exhaust Boxes
-- Types of Exhaust systems
-- Types of Turbocharger Exhaust Systems
-- Create New Exhaust System
-- Design new Exhaust System
-- Modeling Siamesed Exhaust Port System
-- Edit Existing Exhaust
-- Exhaust Modeling Error
-- Catalytic Converters
-- **Silencers** (7 типов глушителей)
-
----
-
-### Глава 7: [Intake Subsystem](07-Intake-Subsystem.md) (56 KB)
-- Intake Pipe Numbering Convention
-- Inlet Length Correction
-- Throttles
-- Inlet Collectors
-- Inlet Boxes or Plenums
-- Variable Inlet Length
-- Types of Intake systems
-- V8 Special Inlets
-- Types of Turbo- and Supercharger Inlet Systems
-- Intercooler Modeling
-- Create New Inlet System
-- Modeling Siamesed Inlet Port Systems
-- Edit Existing Inlet
-- Inlet System Modeling Error
-
----
-
-### Глава 8: [Combustion and Ignition Subsystem](08-Combustion-Ignition.md) (25 KB)
-- Turbulent Combustion
-- Spark Ignition Combustion Subsystem
-- Compression Ignition Combustion Subsystem
-- Edit Existing Combustion and Ignition Data
-
----
-
-### Глава 9: [Surface Temperatures and Atmospheric conditions](09-Temperatures-Atmospheric.md) (5.2 KB)
-- Create and Edit Temperatures
-
----
-
-### Глава 10: [Design Verification](10-Design-Verification.md) (4.3 KB)
-- Design Checking and STA
-
----
-
-### Глава 11: [References](11-References.md) (607 B)
-- References (Professor Emeritus Gordon P Blair)
-
----
-
-## 🎯 Как использовать для Claude Chat
-
-**Вариант 1: Копировать нужную главу целиком**
-```bash
-# Открой файл в VSCode
-code _personal/markdown-chapters/01-Introduction-to-Dat4T.md
-
-# Или прочитай в терминале
-cat _personal/markdown-chapters/01-Introduction-to-Dat4T.md
-
-# Скопируй всё содержимое и вставь в Claude Chat
+```
+markdown-chapters/
+├── 01-Introduction-to-Dat4T.md          # 16 KB
+├── 02-Starting-Dat4T.md                 # 15 KB
+├── 03-Engine-Data.md                    # 14 KB
+├── 04-Turbocharger-Supercharger.md      # 11 KB
+├── 05-Ports-Valves-Lift-Profiles.md     # 59 KB
+├── 06-Exhaust-Subsystem.md              # 62 KB
+├── 07-Intake-Subsystem.md               # 55 KB ⭐ Intake!
+├── 08-Combustion-Ignition.md            # 25 KB
+├── 09-Temperatures-Atmospheric.md       # 5 KB
+├── 10-Design-Verification.md            # 4 KB
+├── 11-References.md                     # 607 B
+├── Pictures/                            # 489 изображений
+│   ├── NewEngine.jpg
+│   ├── InThrot1.jpg
+│   ├── PlenumCollector.jpg
+│   └── ... (все диаграммы и схемы)
+└── README.md                            # Этот файл
 ```
 
-**Вариант 2: Ссылка на GitHub**
+**Общий размер:** ~36 MB (текст + картинки)
+
+---
+
+## ✅ Что изменилось?
+
+**Раньше:**
+- ❌ Текст в `markdown-chapters/`
+- ❌ Картинки в `extracted/Pictures/`
+- ❌ Ссылки не работают при копировании
+
+**Сейчас:**
+- ✅ **Всё в одной папке** `markdown-chapters/`
+- ✅ Ссылки исправлены: `Pictures/image.jpg`
+- ✅ Открываешь Markdown в VSCode/GitHub → **видишь картинки!**
+- ✅ Копируешь главу в Claude Chat → понятно о чём речь!
+
+---
+
+## 🎯 Как работать с главами (для Claude Chat)
+
+### Вариант 1: Открыть в VSCode (рекомендую)
+```bash
+# Открой папку в VSCode
+code _personal/markdown-chapters/
+
+# Или конкретную главу
+code _personal/markdown-chapters/07-Intake-Subsystem.md
+```
+
+**→ В VSCode:** нажми `Cmd+Shift+V` (Preview) - увидишь текст + картинки!
+
+### Вариант 2: Открыть на GitHub
+После push:
 ```
 https://github.com/engsimsoft/engine-viewer/tree/main/_personal/markdown-chapters
 ```
 
-**Вариант 3: Объединить несколько глав**
-```bash
-# Например, объединить главы 1-3
-cat 01-Introduction-to-Dat4T.md 02-Starting-Dat4T.md 03-Engine-Data.md > combined.md
+**→ На GitHub:** открой любую главу - картинки автоматически подгрузятся!
+
+### Вариант 3: Скопировать главу в Claude Chat
+1. Открой главу (например `07-Intake-Subsystem.md`)
+2. Скопируй весь текст
+3. Вставь в Claude Chat
+4. Скажи: "Смотри главу 7 про Intake System - там есть картинки, вот ссылки"
+
+Claude Chat увидит ссылки на картинки и сможет понять структуру!
+
+---
+
+## 📖 Описание глав
+
+### Глава 1: Introduction to Dat4T
+- Структура проекта (.pjt, .eng, .exp, .prt и т.д.)
+- Folder Structure (C:\4Stroke)
+- **Project Layout** ⭐ Важно для .prt версионирования!
+
+### Глава 2: Starting Dat4T
+- Создание нового проекта
+- Открытие существующего
+- Workflow работы
+
+### Глава 3: Engine Data
+- Bore, Stroke, CR, Cylinders
+- Cylinder Numbering
+- Trace Positions
+- **Картинки:** схемы двигателей (I4, V6, V8, Flat-6)
+
+### Глава 4: Turbocharger/Supercharger
+- Turbocharger Modeling
+- Supercharger Modeling
+- **Картинки:** схемы турбонаддува
+
+### Глава 5: Ports, Valves and Lift Profiles
+- VVT/VVL
+- Cam profiles (generated/imported)
+- Cd-Maps (flow coefficients)
+- **Картинки:** графики подъёма клапанов, Cd-кривые
+
+### Глава 6: Exhaust Subsystem
+- 4-into-1, 4-2-1 collectors
+- Stepped pipes
+- Silencers (7 типов!)
+- **Картинки:** десятки схем выпускных систем (4-cyl, V8, I6, turbo)
+
+### Глава 7: Intake Subsystem ⭐ Intake!
+- ITB (Individual Throttle Bodies)
+- IM (Intake Manifold) systems
+- Plenums, collectors
+- Variable length intake
+- Intercooler modeling
+- **Картинки:**
+  - ITB системы
+  - Plenum + collector схемы
+  - V8 dual-plane/single-plane
+  - Turbo + intercooler layouts
+
+### Глава 8: Combustion and Ignition
+- Spark ignition
+- Compression ignition
+- Turbulent combustion
+- **Картинки:** кривые сгорания, ignition timing
+
+### Глава 9: Temperatures
+- Wall temperatures
+- Atmospheric conditions
+
+### Глава 10: Design Verification
+- STA (Static Timing Analysis)
+
+### Глава 11: References
+- Gordon P Blair (автор методологии)
+
+---
+
+## 🔍 Примеры использования
+
+### Пример 1: Обсуждение Intake системы с Claude Chat
+
+**Ты:**
+```
+Привет Claude! Смотри главу 7 (Intake Subsystem) из EngMod4T документации.
+Мне нужно понять разницу между ITB и Plenum+Collector системами.
 ```
 
----
+*[Копируешь содержимое 07-Intake-Subsystem.md]*
 
-## 📋 Для задачи с .prt версионированием
-
-**Обязательно покажите Claude Chat:**
-1. ✅ **Глава 1: Introduction** (раздел "Project Layout") - структура файлов
-2. ✅ `_personal/prt-versioning-architecture.md` - техническая спецификация
-3. ✅ `_personal/Performance Output Data.md` - описание параметров .pou
-
-**Дополнительно (если нужно):**
-4. Глава 2: Starting Dat4T - как работает workflow
-5. Глава 3: Engine Data - параметры двигателя
+**Claude Chat:** Видит текст + ссылки на Pictures/In4in1.jpg, Pictures/PlenumCollector.jpg и т.д.
+→ Понимает о чём речь, отвечает со ссылками на конкретные диаграммы!
 
 ---
 
-## 🔍 Примечания
+### Пример 2: Работа над .prt версионированием
 
-- **Изображения:** Ссылки на изображения сохранены в формате `../Pictures/filename.jpg`
-- **Кодировка:** Некоторые HTML файлы были в Windows-1252 (latin1) - автоматически конвертировано
-- **Формат:** Markdown совместим с GitHub Flavored Markdown (GFM)
-- **Размер:** Общий размер всех глав: ~270 KB (текст)
+**Ты:**
+```
+Claude, вот структура проекта EngMod4T (глава 1):
+```
+
+*[Копируешь раздел "Project Layout" из 01-Introduction-to-Dat4T.md]*
+
+```
+Видишь что .prt - это "printable summary of all subsystems"?
+Хочу версионировать этот файл для каждого calculation marker.
+```
+
+**Claude Chat:** Видит структуру файлов, понимает роль .prt
+→ Может обсуждать архитектуру версионирования!
 
 ---
 
-**Документация готова к использованию!** 🚀
+## 📊 Технические детали
 
-Скопируй нужную главу в Claude Chat для обсуждения задачи по .prt версионированию.
+**Формат изображений:**
+- Markdown ссылки: `![](Pictures/image.jpg)`
+- VSCode Preview: показывает картинки автоматически
+- GitHub: рендерит картинки в браузере
+- Claude Chat: видит ссылки (можно описать "смотри схему X")
+
+**Кодировка:**
+- UTF-8 (с fallback на latin1 где нужно)
+- Совместимо с GitHub Flavored Markdown
+
+**Картинки:**
+- 489 файлов (JPG, GIF, BMP)
+- Диаграммы систем двигателя
+- Схемы intake/exhaust
+- Графики характеристик
+- Screenshots интерфейса Dat4T
+
+---
+
+## 🎯 Для задачи с .prt версионированием
+
+**Покажи Claude Chat в таком порядке:**
+
+1. ✅ **Глава 1** (раздел Project Layout)
+   - Структура файлов
+   - Роль .prt файла
+
+2. ✅ **Глава 2** (Starting Dat4T)
+   - Workflow создания проектов
+   - Как создаются subsystem файлы
+
+3. ✅ `_personal/prt-versioning-architecture.md`
+   - Твоя техническая спецификация
+
+4. ✅ `_personal/Performance Output Data.md`
+   - Описание параметров .pou
+
+---
+
+## 🚀 Готово к использованию!
+
+**Теперь:**
+- ✅ Текст + картинки в одном месте
+- ✅ Работает в VSCode Preview
+- ✅ Работает на GitHub
+- ✅ Удобно копировать в Claude Chat
+- ✅ Все ссылки корректные
+
+**Открывай любую главу и работай!** 📖
+
+---
+
+**Документация готова!** Можешь обсуждать с Claude Chat любую главу - мы друг друга понимаем! 🎉
