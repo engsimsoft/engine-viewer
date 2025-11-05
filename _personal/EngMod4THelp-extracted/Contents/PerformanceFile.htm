@@ -1,0 +1,184 @@
+<html>
+
+<head>
+<title>Performance Output Data</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+</head>
+
+<body>
+
+<h2><u>Performance Output Data (*.pou, *.spo)</u></h2>
+
+<p>The performance data is written in a
+appending file. It has the project name with the <b> .pou</b> or <b> .spo</b> extension. As an example the name
+for the performance file of project Honda will be: <b> Honda.pou</b> for batch jobs and
+<b>
+Honda.spo</b> for screen runs. The data in the performance
+file is per column (where there is more than one cylinder the columns per cylinder are
+repeated for each cylinder): 
+
+<ul>
+  <li><b>RPM</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Simulated engine rpm
+  </li>
+
+  <li><b>P-av</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  &nbsp;Average engine power over the last three cycles (kW)
+  </li>
+
+  <li><b>Torque</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The engine torque related to P-av.(Nm)
+  </li>
+
+  <li><b>Tex-AvC</b>&nbsp;&nbsp;
+  Average temperature in center of exhaust (ºC)
+  </li>
+
+  <li><b>Power</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Power per cylinder (kW)
+  </li>
+
+  <li><b>Imep</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Indicated mean effective pressure per cylinder (bar)
+  </li>
+
+  <li><b>Bmep</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Brake mean effective pressure per cylinder (bar)
+  </li>
+
+  <li><b>Pmep</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Pumping mean effective pressure per cylinder (bar)
+  </li>
+
+  <li><b>Fmep</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp;&nbsp;Friction mean effective pressure (bar)
+  </li>
+
+  <li><b>Dratio</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Delivery ratio per cylinder 
+  </li>
+
+  <li><b>Purc&nbsp;</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Purity of the mixture in the cylinder at inlet valve closure 
+  </li>
+
+  <li><b>Seff&nbsp;</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Purity of the mixture in the cylinder at exhaust valve closure
+  </li>
+
+  <li><b>Teff&nbsp;</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Trapping efficiency per cylinder 
+  </li>
+
+  <li><b>Ceff</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  &nbsp; Charging efficiency per cylinder 
+  </li>
+
+  <li><b>BSFC</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Brake specific fuel consumption per cylinder (kg/kWh) 
+  </li>
+
+  <li><b>TC-av</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Average maximum cylinder temperature per cylinder (ºC)
+  </li>
+
+  <li><b>TUBmax</b>&nbsp;&nbsp;&nbsp;
+  Maximum unburned mixture temperature per cylinder (ºC) 
+  </li>
+
+  <li><b>MaxDeg</b>&nbsp;&nbsp;&nbsp;&nbsp;
+  Degrees after TDC where maximum cylinder pressure occurs per cylinder
+  </li>
+  
+  <li><b>Timing</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Ignition timing (ºBTDC)
+  </li>
+
+  <li><b>Delay</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The user prescribed delay period in degrees (deg)
+  </li>
+
+  <li><b>Durat</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The user prescribed combustion duration (burn period) in degrees (deg)
+  </li>
+
+  <li><b>TAF</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Trapped Air/fuel ratio
+  </li>
+
+  <li><b>VibeDelay</b>&nbsp; The calculated delay 
+  period for a turbulent combustion model (for the prescribed combustion model 
+  it is the same as <b>&quot;Delay&quot;</b>)
+  </li>
+
+  <li><b>VibeDurat</b>&nbsp;&nbsp;The calculated burn period 
+  for a turbulent combustion model (for the prescribed combustion model it is 
+  the same as <b>&quot;Durat&quot;</b>)
+  </li>
+
+  <li><b>VibeA</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The calculated Vibe A value for a turbulent combustion model (for the prescribed 
+  combustion model it is the same as prescribed)
+  </li>
+
+  <li><b>VibeM</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The calculated Vibe M value for a turbulent   combustion model (for the prescribed 
+  combustion model it is the same as prescribed)
+  </li>
+
+</ul>
+
+<p>If the engine is turbocharged the following values are included:</p>
+
+<ul>
+
+  <li><b>Boost</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated boost pressure (bar guage) at the specified boost point
+  </li>
+
+  <li><b>BackPr</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated back pressure (bar guage)
+  </li>
+
+  <li><b>Pratio</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The ratio between the boost pressure and the back pressure.
+  </li>
+
+  <li><b>TBoost</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated inlet temperature (ºC) at the specified boost point
+  </li>
+
+  <li><b>TTurbine</b>&nbsp;&nbsp;
+  The simulated turbine inlet temperature (ºC)
+  </li>
+
+</ul>
+
+<p>If the engine is supercharged the following values are included:</p>
+
+<ul>
+
+  <li><b>Boost</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated boost pressure (bar guage) at the specified boost point
+  </li>
+
+  <li><b>BackPr</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated back pressure (bar guage)
+  </li>
+
+  <li><b>Pratio</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The ratio between the boost pressure and the back pressure.
+  </li>
+
+  <li><b>TBoost</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  The simulated inlet temperature (ºC) at the specified boost point
+  </li>
+
+</ul>
+
+<p>The units are standard SI units: kg, s, Nm, kW etc.</p>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

@@ -1,0 +1,84 @@
+<html>
+
+<head>
+<title>Purity Trace Output</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+</head>
+
+<body>
+
+<h2><u>Combustion Trace Output (*.cbt)</u></h2>
+
+<p><span lang="EN-UK" style="font-size:12.0pt">The combustion trace files are part of the new
+or over written files. They have the project name appended with the rpm value and the
+extension <b>.cbt</b>. The combustion traces for project Honda at 8000 rpm will be in the file: 
+<b>Honda8000.cbt</b>. This file will be in the project directory and over written each time a 
+simulation at its specific rpm is conducted.</p>
+
+<p>It has the following traces as output: 
+
+<ul>
+  <li><b>Deg&nbsp;</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Engine degrees using the last cylinder as reference.</li>
+  <li><b>HPistTDC</b>&nbsp; The piston height from the top of the
+    cylinder per cylinder.</li>
+  <li><b>Torque </b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The instantanious
+    torque produced or absorbed by the
+    cylinder per cylinder.</li>
+  <li><b>VSqshAc</b>&nbsp;&nbsp;&nbsp; The actual squish velocity in the
+    cylinder per cylinder taking density and combustion into account.</li>
+  <li><b>VSqshTh </b>&nbsp;&nbsp;&nbsp;The theoretical squish velocity
+    in the
+    cylinder per cylinder ignoring density and combustion effects.</li>
+  <li><b>Mun&nbsp; </b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+    The
+    unburnt air mass ratio in the cylinder per cylinder.</li>
+  <li><b>Men&nbsp; </b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+    The
+    entrained air mass ratio in the cylinder per cylinder (the mass ratio of
+    air, but not all burnt yet, inside the flame sphere).</li>
+  <li><b>Mbt&nbsp; </b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    The burnt air mass ratio in the cylinder per cylinder.</li>
+  <li><b>TurbInt</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The turbulent
+    intensity in the cylinder per cylinder.</li>
+  <li><b>TurbDis</b>&nbsp; &nbsp;&nbsp;&nbsp; The turbulent disipation
+    in the cylinder per cylinder.</li>
+  <li><b>Integral</b>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; The integral length
+    scale in the cylinder per cylinder.</li>
+  <li><b>Taylor&nbsp;</b>&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; The Taylor length
+    scale in the cylinder per cylinder.</li>
+  <li><b>RFlame</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The radius of the
+    flame sphere in the cylinder per cylinder.</li>
+  <li><b>AFlame</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The flame area of
+    the flame sphere in the cylinder per cylinder.</li>
+  <li><b>VFlame</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The volume of the
+    flame sphere in the cylinder per cylinder.</li>
+  <li><b>RBurnt</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; The radius of the
+    burnt sphere in the cylinder per cylinder.</li>
+  <li><b>ABurnt</b>&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; The flame area of
+    the burnt sphere in the cylinder per cylinder.</li>
+  <li><b>VBurnt</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; The volume of the
+    burnt sphere in the cylinder per cylinder.</li>
+  <li><b>AWallU</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The area of the
+    exposed wall in the unburnt portion of the cylinder per cylinder.</li>
+  <li><b>AWallB</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The area of the
+    exposed wall in the burnt portion of the cylinder per cylinder.</li>
+  <li><b>RoHR</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The rate of heat release 
+    per cylinder.</li>
+  <li><b>Work</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The work done  
+    by each cylinder.</li>
+  <li><b>MCyl</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The mass of 
+    the gas inside each cylinder.</li>
+  <li><b>MUCyl</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The mass of 
+    the unburnt gas inside each cylinder.</li>
+  <li><b>MBCyl</b>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The mass of 
+    the burnt gas inside each cylinder.</li>
+</ul>
+
+<p>The combustion trace file is mostly used for debugging and understanding of
+the combustion process. Using the prescribed burn rate model (Wiebe or Vibe
+function) will result in the entrained mass and the burnt mass having the same
+ratio.</p>
+</span>
+</body>
+</html>

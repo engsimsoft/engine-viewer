@@ -1,0 +1,41 @@
+<html>
+
+<head>
+<title>Efficiency Trace Output</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+</head>
+
+<body>
+
+<h2><u>Efficiency Trace Output (*.eff)</u></h2>
+
+<p>The efficiency trace files are part of the new
+or over written files. They have the project name appended with the rpm value and the
+extension .eff. The efficiency traces for project Honda at 8000 rpm will be in the file: <b>Honda8000.eff</b>.
+This file will be in the project directory and over written each time a simulation at its
+specific rpm is conducted.</p>
+
+<p>It has the following traces as output: 
+
+<ul>
+  <li><b>Deg&nbsp;</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Engine degrees using the last cylinder as reference.</li>
+  <li><b>DRatio</b>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; Delivery ratio trace at
+    the inlet port per cylinder.</li>
+  <li><b>PurCyl</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Purity trace in the
+    cylinder per cylinder.</li>
+  <li><b>Seff</b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Scavenging efficiency trace per cylinder where the scavening period is defined 
+	as the overlap period.</li>
+  <li><b>Teff</b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Trapping efficiency trace per cylinder.</li>
+  <li><b>Ceff</b>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Charging efficiency trace per cylinder.</li>
+</ul>
+
+<p>The purity traces has a value of 1 for pure air and a value of 0 for pure exhaust gas.
+Any mixture of the two will have a value between 0 and 1. The efficiencies and
+delivery ratio can exceed 1.</p>
+
+</body>
+</html>

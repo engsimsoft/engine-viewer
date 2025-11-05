@@ -3,6 +3,8 @@
 **Program Type:** 1D Gasdynamic & Thermodynamic Simulation Engine
 **Purpose:** Simulate 4-stroke ICE performance and dynamics
 **Platform:** Windows Desktop (Delphi 7)
+**Developer:** Neels van Niekerk (Vannik Racing Developments)
+**Based on:** Professor Gordon P Blair's work (Queens University Belfast)
 **Last Updated:** November 5, 2025
 
 ---
@@ -13,12 +15,12 @@
 1. **1D gasdynamic simulation** (intake/exhaust wave dynamics using Method of Characteristics)
 2. **Thermodynamic cycle analysis** (compression, combustion, expansion)
 3. **Performance prediction** (power, torque, BSFC, efficiencies)
-4. **Multi-cycle convergence** (iterative simulation until steady-state)
+4. **Multi-cycle convergence** (iterate until steady-state)
 5. **Trace data generation** (pressure, temperature, mass flow at every crank angle)
 
 **Input:** `.prt` file (engine configuration from DAT4T)
 
-**Output:** `.det`, `.pou`, trace files (results for Post4T or Engine Results Viewer)
+**Output:** `.det`, `.pou`, `.spo`, trace files (results for Post4T or Engine Results Viewer)
 
 **⚠️ CRITICAL:** EngMod4T is READ-ONLY for `.prt` files. It NEVER modifies the input configuration.
 
@@ -37,164 +39,243 @@
   - Atmospheric conditions (temperature, pressure, humidity)
   - Wall temperatures (cylinder head, piston, liner, ports)
 
-**From User (GUI or Batch Mode):**
-- RPM range (e.g., 2000-7000 RPM, step 200)
-- Number of cycles (convergence criteria)
-- Trace positions (where to measure pressure/temperature)
+**From User (GUI):**
+- **Screen Mode** (single RPM point) or **Batch Mode** (power curve)
+- RPM value(s): single point, range (start/stop/increment), or from `.txt` file
+- Display options: graphics on/off, port summary, beep after run
+- Output file: default project name or custom name
 
 ---
 
 ## 📤 OUTPUT
 
-**EngMod4T creates multiple output files:**
+### File Organization
 
-### 1. `.det` File (Detailed Results)
+**Working Directory:**
+- `.prt` file (input configuration, created by DAT4T)
+- RPM list file (`.txt`, optional for batch mode)
 
-**Purpose:** Main performance results for each RPM point
-
-**Contains:** 24 parameters per RPM:
-```
-RPM, P-Av, Torque, Tex-AvC, Power(1), Power(2), ..., Power(N),
-Imep(1), Bmep(1), Pmep(1), Fmep(1), Dratio(1), PurCyl(1),
-PCylMax(1), TCylMax(1), TUbMax(1), Deto(1), Convergence(1), ...
-```
-
-**Use Cases:**
-- Quick performance overview
-- Power/torque curves
-- Detonation risk check (TUbMax)
-- Convergence validation
+**Project Folder** (`ProjectName/`):
+- Created automatically on first simulation run
+- Contains ALL output files
 
 ---
 
-### 2. `.pou` File (Performance Output - Batch Runs)
+### 1. `.pou` File (Batch Mode - Power Curve)
 
-**Purpose:** Extended performance parameters for multiple RPM points
+**Purpose:** Performance data for multiple RPM points (power curve)
 
-**Contains:** 24-73 parameters per RPM (depends on engine type: NA/Turbo/Supercharged):
+**Created when:** Batch Mode is selected (RPM sweep)
+
+**Contains:** 24-73 parameters per RPM (depends on engine type: NA/Turbo/Supercharged)
+
+**File type:** Appending file (each new batch run ADDS rows with calculation marker)
+
+**Key Parameters:**
 ```
-RPM, P-Av, Torque, Tex-AvC, Power, Imep, Bmep, Pmep, Fmep,
-Dratio, Purc, Seff, Teff, Ceff, BSFC, TC-av, TUBmax, MaxDeg,
-Timing, Delay, Durat, TAF, VibeDelay, VibeDurat, VibeA, VibeM
+RPM          - Simulated engine speed
+P-av         - Average engine power over the last THREE cycles (kW)
+Torque       - Engine torque related to P-av (Nm)
+Tex-AvC      - Average temperature in center of exhaust (°C)
+Power        - Power per cylinder (kW)
+Imep         - Indicated mean effective pressure per cylinder (bar)
+Bmep         - Brake mean effective pressure per cylinder (bar)
+Pmep         - Pumping mean effective pressure per cylinder (bar)
+Fmep         - Friction mean effective pressure (bar)
+Dratio       - Delivery ratio (volumetric efficiency)
+Purc         - Purity at inlet valve closure (cylinder purity)
+Seff         - Purity at exhaust valve closure (scavenging efficiency)
+Teff         - Trapping efficiency
+Ceff         - Charging efficiency (shape follows torque curve!)
+BSFC         - Brake specific fuel consumption (kg/kWh)
+TC-av        - Average maximum cylinder temperature (°C)
+TUBmax       - Maximum unburned mixture temperature (°C) - DETONATION INDICATOR!
+MaxDeg       - Degrees after TDC where max cylinder pressure occurs
+Timing       - Ignition timing (BTDC)
+Delay        - Combustion delay period (degrees)
+Durat        - Combustion duration (burn period, degrees)
+TAF          - Trapped air/fuel ratio
+VibeDelay    - Calculated delay (turbulent model) or prescribed (Vibe model)
+VibeDurat    - Calculated duration (turbulent model) or prescribed (Vibe model)
+VibeA        - Vibe parameter A
+VibeM        - Vibe parameter M
 
 + Turbo params (if turbocharged):
-Boost, BackPr, Pratio, TBoost, TTurbine, RPMturb, WastRat
+Boost        - Boost pressure (bar gauge)
+BackPr       - Back pressure (bar gauge)
+Pratio       - Pressure ratio (boost/back)
+TBoost       - Inlet temperature at boost point (°C)
+TTurbine     - Turbine inlet temperature (°C)
 
 + Supercharger params (if supercharged):
-Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat
+Boost        - Boost pressure (bar gauge)
+BackPr       - Back pressure (bar gauge)
+Pratio       - Pressure ratio (boost/back)
+TBoost       - Inlet temperature at boost point (°C)
 ```
 
 **Use Cases:**
-- Comprehensive performance analysis
+- Power/torque curves vs RPM
 - Efficiency optimization (BSFC, Ceff, Teff)
-- Combustion analysis (Vibe parameters)
-- Turbo/supercharger analysis
+- Detonation risk analysis (TUBmax)
+- Combustion tuning (Vibe parameters)
 
 ---
 
-### 3. `.spo` File (Single Point Output)
+### 2. `.spo` File (Screen Mode - Single Point)
 
-**Purpose:** Same as `.pou`, but for single RPM calculation (not a curve)
+**Purpose:** Performance data for SINGLE RPM calculation
+
+**Created when:** Screen Mode (individual run) is selected
+
+**Contains:** Same parameters as `.pou`, but only ONE RPM point
+
+**File type:** Appending file (each screen run ADDS one row)
 
 **Use Cases:**
-- Quick what-if analysis
+- Quick what-if analysis at specific RPM
 - Parameter sensitivity study
-- Debug specific RPM point
+- Debug specific operating point
+
+---
+
+### 3. `.det` File (Detailed Results - Legacy Format)
+
+**Purpose:** Main performance results (24 parameters)
+
+**Contains:** Subset of `.pou` parameters
+
+**Note:** `.det` format is OLDER format. Modern workflow uses `.pou` instead.
 
 ---
 
 ### 4. Trace Files (Cycle-Resolved Data)
 
-**Purpose:** Detailed data at every crank angle (1° resolution, 720 points per cycle)
+**Purpose:** Detailed data at every crank angle (1° resolution)
+
+**File Naming:** `ProjectNameRPM.ext` (e.g., `Honda8000.tpt`)
+- Example: Temperature traces for project "Honda" at 8000 RPM → `Honda8000.tpt`
+
+**File Type:** OVERWRITE files (new run overwrites previous run!)
+- ⚠️ If you want to keep old run, manually rename trace files before re-running
+
+**Crank Angle Reference:**
+- **CRITICAL:** Uses crank angle of **LAST cylinder** as reference!
+- Only the LAST cylinder trace starts at TDC
+- Other cylinders are phase-shifted relative to last cylinder
 
 **Trace Types:**
-- **Pressure traces** - Cylinder and tract pressure vs crank angle
-- **Temperature traces** - Cylinder and gas temperature vs crank angle
-- **Mach traces** - Mach number in intake/exhaust tracts
-- **Mass flow traces** - Mass flow rate at trace positions
-- **Wave traces** - Pressure wave propagation
-- **Combustion traces** - Mass fraction burned, heat release rate
-- **Efficiency traces** - Scavenging, trapping efficiency
-- **Turbo traces** - Boost pressure, turbo RPM vs crank angle
-- **Purity traces** - Fresh charge purity
+- **`.ppt`** - Pressure traces (cylinder, intake, exhaust pressure vs crank angle)
+- **`.tpt`** - Temperature traces (cylinder, gas temperature vs crank angle)
+- **`.mat`** - Mach traces (Mach number in intake/exhaust tracts)
+- **`.mst`** - Mass flow traces (mass flow rate at trace positions)
+- **`.wat`** - Wave traces (pressure wave propagation)
+- **`.cbt`** - Combustion traces (mass fraction burned, heat release rate)
+- **`.eft`** - Efficiency traces (scavenging, trapping efficiency)
+- **`.tut`** - Turbo traces (boost pressure, turbo RPM vs crank angle)
+- **`.put`** - Purity traces (fresh charge purity vs crank angle)
 
-**Use Cases:**
-- Valve timing optimization
-- Exhaust tuning (resonance analysis)
-- Intake tuning (runner length optimization)
-- Combustion diagnosis
-- Turbo lag analysis
+**Import:**
+- Post4T (native visualizer)
+- Microsoft Excel: Import as "space delimited" text, start at line 16
+- Engine Results Viewer: Native support planned
 
 ---
 
 ## 🔧 KEY FEATURES
 
-### 1. 1D Gasdynamic Simulation (Method of Characteristics)
+### 1. Method of Characteristics (1D Gasdynamics)
 
-**Purpose:** Model pressure wave propagation in intake/exhaust tracts
+**Purpose:** Model pressure wave propagation in intake/exhaust system
+
+**Numerical Method:**
+- **Method of Characteristics** (MOC) - proven numerical scheme for 1D gas flow
+- Based on **Professor Gordon P Blair's work** (Queens University Belfast)
 
 **How it Works:**
-1. Divide intake/exhaust system into small elements (1D mesh)
-2. Solve unsteady gas flow equations (Method of Characteristics)
-3. Track pressure waves traveling through pipes
-4. Capture resonance effects (tuned runner lengths)
-5. Model wave reflections (open/closed ends, junctions, collectors)
+1. **Mesh control volumes:** Divide intake/exhaust ducts into small elements
+2. **Wave speed calculation:** Use assumed pipe temperature to calculate wave speed
+3. **Mesh length optimization:** Wave should travel ~1 mesh length per degree
+4. **Minimum mesh requirement:** At least 3 meshes in shortest pipe (numerical stability)
+5. **Iterate:** Solve unsteady gas flow equations at each time step (every degree)
 
-**Why 1D (not 3D CFD)?**
-- **Speed:** 1D simulation takes minutes, 3D CFD takes hours/days
-- **Accuracy:** 1D is sufficient for intake/exhaust tuning (95% accuracy vs 3D)
-- **Practicality:** Engineers need fast iterations for manifold design
+**Key Constraint:** Shortest Pipe Length
 
-**Key Phenomena Modeled:**
-- Pressure wave reflections (positive/negative)
-- Helmholtz resonance (plenum volume effects)
-- Tuned runner lengths (maximize volumetric efficiency at target RPM)
-- Exhaust scavenging (overlap period dynamics)
-- Turbo lag (inertia of turbocharger rotor)
+To minimize run time and maintain accuracy:
+
+| RPM   | Min Exhaust Length | Min Inlet Length |
+|-------|-------------------|------------------|
+| 6000  | 72 mm             | 36 mm            |
+| 8000  | 54 mm             | 27 mm            |
+| 10000 | 43 mm             | 22 mm            |
+| 12000 | 36 mm             | 18 mm            |
+| 14000 | 31 mm             | 15 mm            |
+| 16000 | 27 mm             | 13 mm            |
+| 18000 | 24 mm             | 12 mm            |
+
+**Why?** Shorter pipes require more meshes → longer run time (~30% increase for short pipes)
+
+**Trade-off:** Accuracy vs run time (lengthen shortest pipe to match table, shorten adjacent pipe to maintain total length)
+
+**Performance Killers:**
+- Very short pipes (< minimum length)
+- Silencer modeling (creates very short internal ducts)
+- Multiple collectors (pipe joint subroutine is slow)
+- Turbocharger (requires 100+ iterations to stabilize)
 
 ---
 
-### 2. Thermodynamic Cycle Analysis
+### 2. Five Efficiency Parameters (Understanding Engine Breathing)
 
-**Purpose:** Model in-cylinder processes (compression, combustion, expansion)
+**EngMod4T reports 5 key efficiencies to understand open cycle process:**
 
-**Cycle Steps:**
+#### 1. Delivery Ratio (Dratio)
 
-```
-1. INTAKE (BDC → IVC)
-   └─ Valve flow modeling (Cd maps, lift curves)
-   └─ Intake pressure/temperature from gasdynamic model
+**Definition:** Total mass of air inhaled compared to mass of air in swept volume at atmospheric conditions
 
-2. COMPRESSION (IVC → TDC)
-   └─ Polytropic compression
-   └─ Heat transfer to cylinder walls (convection)
+**What it measures:** How well engine "breathes"
 
-3. COMBUSTION (TDC → ~20° ATDC)
-   └─ Vibe/Wiebe model (prescribed burn rate)
-   └─ Turbulent combustion model (auto-ignition)
-   └─ Heat release rate calculation
-   └─ Pressure rise from combustion
+**Typical values:**
+- Industrial engine: 0.6 - 0.8
+- High-performance racing engine: up to 1.25
 
-4. EXPANSION (Combustion end → EVO)
-   └─ Polytropic expansion
-   └─ Heat transfer to piston/liner
-   └─ Work extraction
+**Note:** Also called "Volumetric Efficiency" in 4-stroke world (misleading - it's a MASS ratio, not volume!)
 
-5. EXHAUST BLOWDOWN (EVO → BDC)
-   └─ Pressure wave release to exhaust
-   └─ Valve flow modeling
+#### 2. Scavenging Efficiency (Seff)
 
-6. EXHAUST (BDC → EVC)
-   └─ Piston pushes burned gas out
-   └─ Overlap period (intake open + exhaust open)
-```
+**Definition:** Purity of gas inside cylinder **at exhaust valve closure** (end of overlap period)
 
-**Key Phenomena Modeled:**
-- Heat transfer to walls (cylinder head, piston, liner)
-- Combustion duration (Vibe model parameters)
-- Detonation prediction (unburned zone temperature)
-- Variable valve timing (VVT, VTEC)
-- Blow-by losses (piston rings)
+**What it measures:** How effective overlap period is at removing burned gas
+
+**Range:** 0 to 1.0 (varies with RPM and intake/exhaust tuning)
+
+**Note:** Differs from traditional definition (traditional uses inlet valve closure)
+
+**Use case:** If Seff is low when intake/exhaust are in tune → examine overlap flow (check inlet/exhaust pressure and mass flow traces)
+
+#### 3. Cylinder Purity (PurCyl)
+
+**Definition:** Purity of mixture **at inlet valve closure**
+
+**What it measures:** Combined effect of induction stroke flow and scavenging efficiency
+
+**Key insight:** Burned gas trapped at EVC will remain until combustion completes and exhaust valve opens
+
+#### 4. Trapping Efficiency (Teff)
+
+**Definition:** Ratio of trapped air (at IVC) to delivered air (Dratio)
+
+**What it measures:** How well intake system "plugs" (prevents backflow)
+
+**Key insight:** Indicates intake tuning effectiveness at trapping delivered charge
+
+#### 5. Charging Efficiency (Ceff)
+
+**Definition:** Ratio of trapped charge mass (at IVC) to mass cylinder can hold at atmospheric conditions (piston at BDC)
+
+**What it measures:** Actual cylinder filling
+
+**Key insight:** **Ceff curve shape = Torque curve shape** (directly related to performance!)
 
 ---
 
@@ -204,17 +285,14 @@ Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat
 
 **How it Works:**
 1. Start with initial conditions (atmospheric pressure in manifolds)
-2. Simulate first cycle → outputs differ from inputs
-3. Simulate second cycle with outputs from cycle 1
-4. Repeat until convergence:
-   - Cylinder pressure history repeats
-   - Manifold pressures stabilize
-   - Power output stabilizes (cyclic variability < 0.1%)
+2. Simulate cycle 1 → outputs differ from inputs
+3. Simulate cycle 2 with outputs from cycle 1 as new inputs
+4. Repeat until convergence (outputs ≈ inputs)
 
-**Convergence Criteria:**
-- **NA engines:** 3-6 cycles (fast convergence)
-- **Turbocharged engines:** 40+ cycles (turbo inertia delays convergence)
-- **Supercharged engines:** 3-6 cycles (mechanical drive → fast)
+**Convergence Criteria (Typical):**
+- **NA engines:** 3 cycles averaged for P-av ("last three cycles")
+- **Supercharged engines:** 3 cycles (mechanical drive → fast convergence)
+- **Turbocharged engines:** 100+ iterations required! (turbo model needs time to stabilize)
 
 **Convergence Indicator:** `Convergence` parameter in `.det` file
 ```
@@ -225,50 +303,54 @@ Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat
 
 ---
 
-### 4. Turbocharger Modeling
+### 4. Simulation Modes
 
-**Purpose:** Model boost pressure, turbo RPM, wastegate control
+#### Screen Mode (Single Point)
 
-**Components Modeled:**
-- **Compressor:** Map-based (pressure ratio vs mass flow, efficiency)
-- **Turbine:** Map-based (expansion ratio vs mass flow, efficiency)
-- **Wastegate:** Pressure-actuated or electronic (boost control)
-- **Intercooler:** Effectiveness model (air-to-air or air-to-water)
-- **Blow-off valve:** Prevents compressor surge (throttle close event)
+**Purpose:** Calculate single RPM point
 
-**Turbo Dynamics:**
-1. Exhaust gas spins turbine
-2. Turbine drives compressor (same shaft)
-3. Compressor pressurizes intake air
-4. Boost pressure increases cylinder charge
-5. Higher power → more exhaust energy → higher turbo RPM
-6. Wastegate opens to limit boost (prevent overboosting)
+**When to use:**
+- What-if analysis
+- Parameter sensitivity study
+- Debug specific operating point
+- Quick checks
 
-**Turbo Lag Modeling:**
-- Turbo rotor inertia (J = 0.0001-0.001 kg·m²)
-- Acceleration equation: `dω/dt = (Turbine Power - Compressor Power) / (J·ω)`
-- Simulation shows transient response (40+ cycles for convergence)
+**Output:** `.spo` file (single point output)
 
----
+**Workflow:**
+1. Start EngMod4T → Select project → Screen Mode
+2. Enter RPM value
+3. Configure display options (graphics on/off, port summary)
+4. Run simulation
+5. View graphics (if enabled) and output file
 
-### 5. Supercharger Modeling
+#### Batch Mode (Power Curve)
 
-**Purpose:** Model mechanically-driven boost
+**Purpose:** Calculate multiple RPM points (unattended RPM sweep)
 
-**Types Supported:**
-- **Roots:** Positive displacement (volumetric flow)
-- **Twin-screw:** Positive displacement with compression
-- **Centrifugal:** Compressor map-based (like turbo)
+**When to use:**
+- Generate power/torque curves
+- Efficiency analysis vs RPM
+- Performance optimization
 
-**Drive System:**
-- Belt/pulley drive ratio (e.g., 2.5:1 → supercharger spins 2.5× engine RPM)
-- Power absorbed from crankshaft (parasitic loss)
-- P-Av is NET power (Gross Power - Supercharger Power)
+**Output:** `.pou` file (power output - appending)
 
-**Bypass Valve:**
-- Mechanical boost control (spring-loaded)
-- Opens at target boost pressure
-- Reduces supercharger load (improves efficiency)
+**Two sub-modes:**
+
+**A. Generated RPM Sweep:**
+- Specify: Start RPM, Stop RPM, Increment
+- Example: 2000 RPM to 8000 RPM, step 200 RPM → 31 points
+- EngMod4T generates RPM list automatically
+
+**B. RPM from Text File:**
+- Create `ProjectName.txt` with RPM list (one per line)
+- Allows variable increments (e.g., 1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000, 6000, 8000)
+- Can edit file in Notepad or from EngMod4T GUI
+
+**Batch Options:**
+- Display graphics: Yes/No (default: No for speed)
+- Beep after each RPM: Yes/No (default: No)
+- Output file name: Default (project name) or Custom
 
 ---
 
@@ -277,43 +359,53 @@ Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat
 ### Typical EngMod4T Session
 
 ```
-1. PREPARE INPUT
-   └─ DAT4T creates .prt file (complete engine configuration)
+1. START ENGMOD4T
+   └─ Double-click EngMod4T icon
+   └─ Click "Continue"
 
-2. START ENGMOD4T
-   └─ Load .prt file (reads configuration)
-   └─ Configure simulation:
-      - RPM range (e.g., 2000-7000 RPM, step 200)
-      - Trace positions (cylinder, intake, exhaust)
-      - Number of cycles (convergence)
+2. SELECT PROJECT
+   └─ Browse list of available projects
+   └─ Select .prt file (created by DAT4T)
+   └─ Or "Use Previous Project"
 
-3. RUN SIMULATION
-   └─ Select run mode:
-      - Screen run (single RPM) → .spo file
-      - Batch run (multiple RPM) → .pou file
-   └─ Wait for simulation to complete:
-      - NA: ~1-5 minutes (fast)
-      - Turbo: ~10-30 minutes (slow, 40+ cycles)
+3. CONFIGURE SIMULATION
+   └─ Run Type: Screen Mode or Batch Mode
+   └─ Display options: Graphics, Port Summary, Beep
+   └─ Output file: Default or Custom name
 
-4. MONITOR CONVERGENCE
-   └─ Check "Convergence" indicator during simulation
-   └─ If poor convergence:
-      - Increase number of cycles
-      - Check for unrealistic inputs (.prt validation)
+4A. SCREEN MODE (Single RPM)
+    └─ Enter RPM value
+    └─ Run simulation
+    └─ View graphics (real-time display if enabled)
+    └─ Output: ProjectName.spo
 
-5. SIMULATION COMPLETES
-   └─ EngMod4T creates output files:
-      - ProjectName.det (main results)
-      - ProjectName.pou (extended parameters)
-      - Trace files (if requested)
+4B. BATCH MODE (Power Curve)
+    └─ Generated sweep: Enter start/stop/increment
+    └─ OR from file: Use ProjectName.txt with RPM list
+    └─ Run unattended (no graphics by default)
+    └─ Output: ProjectName.pou (appending file)
 
-6. VISUALIZE RESULTS
-   └─ Post4T (OLD): Load .det/.pou files → plot curves
-   └─ Engine Results Viewer (NEW): Load .det/.pou files → interactive charts
+5. SIMULATION RUNS
+   └─ EngMod4T calculates:
+      - Gasdynamic wave propagation (Method of Characteristics)
+      - Thermodynamic cycle (compression, combustion, expansion)
+      - Iterate until convergence (3 cycles NA, 100+ iterations turbo)
+   └─ Creates output files in ProjectName/ folder
 
-7. ITERATE DESIGN (if needed)
-   └─ Go back to DAT4T → modify configuration → save .prt
-   └─ Re-run EngMod4T with new .prt
+6. OUTPUT FILES CREATED
+   └─ ProjectName.pou or ProjectName.spo (performance data)
+   └─ ProjectNameRPM.ppt (pressure traces - if trace enabled)
+   └─ ProjectNameRPM.tpt (temperature traces - if trace enabled)
+   └─ ProjectNameRPM.mat, .mst, .wat, etc. (other traces)
+
+7. VISUALIZE RESULTS
+   └─ Post4T (OLD): Load .pou file → plot curves
+   └─ Engine Results Viewer (NEW): Load .pou file → interactive charts
+
+8. ITERATE DESIGN (if needed)
+   └─ Go back to DAT4T → modify configuration
+   └─ Save updated .prt file
+   └─ Re-run EngMod4T
    └─ Compare results (multiple calculations)
 ```
 
@@ -326,10 +418,14 @@ Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat
 DAT4T: Configure engine
     ↓ creates
 .prt file (complete configuration)
+    ↓ stored in
+Working Directory (C:/4Stroke/)
     ↓ read by
-EngMod4T: Run simulation
+EngMod4T: Load .prt, run simulation
     ↓ creates
-.det, .pou, trace files (results)
+ProjectName/ folder (first run)
+    ↓ writes output files
+.pou, .spo, trace files (ProjectName/)
     ↓ read by
 Post4T / Engine Results Viewer: Visualize
     ↓ export
@@ -338,9 +434,9 @@ Plots, reports, analysis
 
 **Key Points:**
 - **DAT4T → EngMod4T:** One-way data flow (DAT4T creates .prt, EngMod4T reads it)
-- **EngMod4T → Post4T:** One-way data flow (EngMod4T creates .det/.pou, Post4T reads it)
-- **No feedback loop:** EngMod4T cannot modify .prt, Post4T cannot modify .det/.pou
-- **Iterative design:** Engineer manually goes back to DAT4T to change configuration
+- **EngMod4T → Post4T:** One-way data flow (EngMod4T creates .pou, Post4T reads it)
+- **No feedback loop:** EngMod4T cannot modify .prt, Post4T cannot modify .pou
+- **File organization:** .prt in working directory, outputs in ProjectName/ folder
 
 ---
 
@@ -354,7 +450,7 @@ Plots, reports, analysis
 
 **Characteristics:**
 ```
-     RPM        P-Av       Torque    TexAv   Power( 1)
+     RPM        P-av       Torque    TexAv   Power( 1)
     3200       48.30      144.14     584.6      12.08
     3400       52.52      147.60     595.3      13.13
     ^^^^       ^^^^^      ^^^^^^
@@ -401,13 +497,14 @@ const dataColumns = columns; // Will break everything!
 **Original Names:**
 ```
 RPM          - engine speed (never "Обороты")
-P-Av         - average power (never "Мощность")
+P-av         - average power (never "Мощность")
 Torque       - torque (never "Момент")
-PCylMax      - max cylinder pressure (never "Давление")
-TCylMax      - max cylinder temperature (never "Температура")
-TUbMax       - max unburned zone temperature (never "Температура несгоревшей зоны")
-Deto         - detonation (never "Детонация")
-Convergence  - convergence (never "Сходимость")
+Dratio       - delivery ratio (never "Коэффициент наполнения")
+PurCyl       - cylinder purity (never "Чистота смеси")
+Seff         - scavenging efficiency (never "Эффективность продувки")
+Teff         - trapping efficiency (never "Эффективность улавливания")
+Ceff         - charging efficiency (never "Коэффициент заряда")
+TUBmax       - max unburned temp (never "Температура несгоревшей зоны")
 ```
 
 **Why Never Translate?**
@@ -438,7 +535,7 @@ Convergence  - convergence (never "Сходимость")
 - They come from the same Delphi 7 program
 - Same `WriteLn(F, Format(...))` code pattern
 - Same Windows platform
-- Same user base (CIS engineers)
+- Same developer (Neels van Niekerk, Vannik Racing Developments)
 
 **Implication:**
 When adding parsers for new file types, ALWAYS:
@@ -457,6 +554,20 @@ When adding parsers for new file types, ALWAYS:
 - [dat4t-overview.md](dat4t-overview.md) - Pre-processor
 - [post4t-overview.md](post4t-overview.md) - Post-processor
 
+**For EngMod4T detailed documentation:**
+- [../../_personal/EngMod4THelp-chapters/](../../_personal/EngMod4THelp-chapters/) - 31 chapters, detailed simulation engine documentation
+
+**Key chapters:**
+- **12-FrontPage** - About EngMod4T, developer, methodology
+- **27-StartUp** - How to start and configure simulation
+- **26-ScreenMode** - Single point simulation
+- **05-BatchMode** - Batch run (power curve)
+- **20-PerformanceFile** - .pou/.spo file format specification
+- **13-GeneralOutput** - Output files overview
+- **09-EfficiencyParameters** - Five efficiency definitions
+- **25-RunTimeDuration** - Mesh optimization, shortest pipe length
+- **Trace chapters (06,08,18-22,28,30-31)** - 9 trace types documentation
+
 **For file format specifications:**
 - [../file-formats/README.md](../file-formats/README.md) - All formats overview
 - [../file-formats/det-format.md](../file-formats/det-format.md) - .det specification
@@ -471,14 +582,18 @@ When adding parsers for new file types, ALWAYS:
 
 ## 🎓 KEY TAKEAWAYS
 
-1. **EngMod4T is the simulation engine** (DAT4T configures, EngMod4T simulates, Post4T visualizes)
-2. **1D gasdynamic simulation** (Method of Characteristics for wave dynamics)
-3. **Multi-cycle convergence** (NA: 3-6 cycles, Turbo: 40+ cycles)
-4. **Fixed-width ASCII format** (Delphi 7 origin, NOT CSV)
-5. **First column is service column** (ALWAYS skip when parsing!)
-6. **Parameter names ALWAYS English** (never translate)
-7. **Read-only .prt input** (only DAT4T modifies .prt)
-8. **Universal format for all outputs** (same parsing strategy for ~15 file types)
+1. **Developer:** Neels van Niekerk (Vannik Racing Developments), based on Prof. Gordon P Blair's work
+2. **Method of Characteristics** (1D gasdynamics for wave propagation)
+3. **P-av definition:** "last THREE cycles" (not 6 or 40)
+4. **Turbo convergence:** 100+ iterations required (not 40 cycles)
+5. **Five efficiency parameters:** Dratio, Seff, PurCyl, Teff, Ceff (Ceff curve = Torque curve!)
+6. **Mesh optimization:** Shortest pipe length critical for run time (see table)
+7. **Two modes:** Screen Mode (.spo) and Batch Mode (.pou)
+8. **Crank angle reference:** Uses LAST cylinder as reference (only last cylinder starts at TDC)
+9. **Trace files:** OVERWRITE on new run (manually rename to keep old runs!)
+10. **Fixed-width ASCII format** (Delphi 7 origin, NOT CSV)
+11. **First column is service column** (ALWAYS skip when parsing!)
+12. **Parameter names ALWAYS English** (never translate)
 
 ---
 
@@ -487,15 +602,17 @@ When adding parsers for new file types, ALWAYS:
 | Aspect | Details |
 |--------|---------|
 | **Purpose** | 1D gasdynamic & thermodynamic simulation engine |
+| **Developer** | Neels van Niekerk (Vannik Racing Developments) |
+| **Based on** | Professor Gordon P Blair's work (Queens University Belfast) |
 | **Input** | `.prt` file (engine configuration from DAT4T) |
-| **Output** | `.det`, `.pou`, `.spo`, trace files (results) |
+| **Output** | `.pou` (batch), `.spo` (screen), `.det` (legacy), trace files |
 | **Platform** | Windows Desktop (Delphi 7) |
-| **Simulation Method** | 1D Method of Characteristics + thermodynamic cycle analysis |
-| **Convergence** | Multi-cycle iteration (NA: 3-6, Turbo: 40+) |
+| **Simulation Method** | Method of Characteristics (MOC) + thermodynamic cycle analysis |
+| **Convergence** | 3 cycles (NA/Supercharged), 100+ iterations (Turbocharged) |
 | **File Format** | Fixed-width ASCII (Delphi `Format()` output) |
 | **Parsing Rule** | ALWAYS skip first column (service column) |
 | **Parameter Names** | ALWAYS English (never translate) |
-| **Integration** | Reads .prt (DAT4T), creates .det/.pou (Post4T/Engine Results Viewer) |
+| **Integration** | Reads .prt (DAT4T), creates .pou/.spo (Post4T/Engine Results Viewer) |
 
 ---
 
@@ -507,9 +624,10 @@ When adding parsers for new file types, ALWAYS:
 - [post4t-overview.md](post4t-overview.md) - Post-processor
 - [../file-formats/README.md](../file-formats/README.md) - File formats overview
 - [../PARAMETERS-REFERENCE.md](../PARAMETERS-REFERENCE.md) - 73 parameters reference
+- [../../_personal/EngMod4THelp-chapters/](../../_personal/EngMod4THelp-chapters/) - Detailed EngMod4T documentation (31 chapters)
 
 ---
 
 **Last Updated:** November 5, 2025
-**Version:** 1.0.0
+**Version:** 2.0.0 (Rewritten based on real EngMod4THelp documentation)
 **Status:** Active documentation
