@@ -9,7 +9,33 @@
 
 ## [2.0.0] - 2025-11-02
 
-### Fixed
+### Fixed (2025-11-06)
+- **ProjectCard design issues**:
+  - ✅ Removed irrelevant badges from cards (Configuration: inline, Exhaust: 4-2-1)
+  - ✅ Refactored `EngineBadge` component to show ONLY essential info: Type (NA/Turbo/Supercharged), Cylinders, Intake (ITB/IM)
+  - ✅ Client field now ALWAYS visible - shows "(No client)" when empty (user feedback: critical information was hidden)
+  - **Files**: `frontend/src/components/projects/EngineBadge.tsx`, `ProjectCard.tsx`
+  - **Result**: Cards display only relevant information, Client always visible
+
+- **Missing Status badge**:
+  - ✅ Restored Status badge in ProjectCard (removed by mistake during refactoring)
+  - ✅ Badge appears in top-right corner of CardHeader with icon and color coding:
+    - Active (blue, Wrench icon)
+    - Completed (green, CheckCircle icon)
+    - Archived (gray, Archive icon)
+  - **File**: `frontend/src/components/projects/ProjectCard.tsx` (lines 17-48, 61-65)
+  - **User feedback**: "очень важный лейбл" (very important label)
+  - **Result**: Project status clearly visible on all cards
+
+- **MetadataDialog not saving changes**:
+  - ❌ **Root Cause #1**: Status Select using `defaultValue` instead of `value` - not controlled by react-hook-form
+  - ❌ **Root Cause #2**: Frontend sending nested `manual: {...}` object, backend expects flat structure
+  - ✅ **Solution #1**: Changed Select to `value={field.value}` (fully controlled component)
+  - ✅ **Solution #2**: Flattened payload to match backend API: `{displayName, description, client, tags, status, notes, color}`
+  - **File**: `frontend/src/components/projects/MetadataDialog.tsx` (lines 112-124, 390)
+  - **Result**: All form fields now save correctly, changes persist after dialog close
+
+### Fixed (2025-11-02)
 - **CRITICAL: Fixed .det + .pou file merge** (2025-11-02):
   - ✅ Fixed incorrect merge logic that was losing critical parameters
   - ✅ Created proper `fileMerger.js` service with `mergeDetPouData()` function

@@ -109,20 +109,18 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
     if (!project) return;
 
     try {
-      // Prepare metadata v1.0 payload
+      // Prepare flat payload for backend (manual fields + displayName at top level)
       const payload = {
         displayName: values.displayName || undefined,
-        manual: {
-          description: values.description || undefined,
-          client: values.client || undefined,
-          tags: values.tags,
-          status: values.status,
-          notes: values.notes || undefined,
-          color: values.color || undefined,
-        },
+        description: values.description || undefined,
+        client: values.client || undefined,
+        tags: values.tags,
+        status: values.status,
+        notes: values.notes || undefined,
+        color: values.color || undefined,
       };
 
-      // Send to Backend API (only manual + displayName, NO auto metadata)
+      // Send to Backend API (flat structure, NO nested manual object)
       await axios.post(`/api/projects/${project.id}/metadata`, payload);
 
       // Success
@@ -387,7 +385,7 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
               render={({ field}) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />

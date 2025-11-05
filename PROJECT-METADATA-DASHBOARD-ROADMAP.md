@@ -469,17 +469,43 @@
   ```
   - Commit hash: 5c9cda6, 8265d59, 0d35ad4, c90763b
 
+### 2.7 Bug Fixes & Polish (2 часа) ✅
+
+- [X] **Bug Fix: ProjectCard design issues** ✅
+  - ❌ **Problem:** Showing irrelevant badges (Configuration: inline, Exhaust: 4-2-1)
+  - ❌ **Problem:** Client field hidden when empty (CRITICAL info missing)
+  - ✅ **Solution:** Refactored `EngineBadge` - show ONLY Type, Cylinders, Intake
+  - ✅ **Solution:** Client always visible - shows "(No client)" when empty
+  - File: `frontend/src/components/projects/EngineBadge.tsx`
+  - File: `frontend/src/components/projects/ProjectCard.tsx` (lines 77-85)
+
+- [X] **Bug Fix: Missing Status badge** ✅
+  - ❌ **Problem:** Status badge removed from card (user feedback: "очень важный лейбл")
+  - ✅ **Solution:** Restored status badge in CardHeader top-right corner
+  - ✅ **Config:** Active (blue/Wrench), Completed (green/CheckCircle), Archived (gray/Archive)
+  - File: `frontend/src/components/projects/ProjectCard.tsx` (lines 17-48, 61-65)
+
+- [X] **Bug Fix: MetadataDialog not saving** ✅
+  - ❌ **Problem:** Form fields editable but data not persisting after save
+  - ❌ **Root Cause #1:** Status Select using `defaultValue` instead of `value` (not controlled)
+  - ❌ **Root Cause #2:** Frontend sending nested `manual: {...}` object, backend expects flat structure
+  - ✅ **Solution #1:** Changed Select to `value={field.value}` (fully controlled by react-hook-form)
+  - ✅ **Solution #2:** Flattened payload structure to match backend API expectations
+  - File: `frontend/src/components/projects/MetadataDialog.tsx` (lines 112-124, 390)
+
 - [X] **Phase 2 Sign-off (Vladimir):** ✅
-  **✅ Phase 2 Complete:**
+  **✅ Phase 2 Complete + Bug Fixes:**
   1. Dashboard отображает все проекты с новыми полями ✅
   2. Фильтры работают (Type, Intake, Exhaust, Cylinders) ✅
   3. Search находит проекты по displayName и client ✅
-  4. ProjectCard показывает displayName, ID (мелко), badges ✅
-  5. MetadataDialog позволяет редактировать displayName и manual metadata ✅
-  6. Всё работает на mobile/tablet/desktop ✅
-  7. UI выглядит профессионально ("iPhone quality") ✅
+  4. ProjectCard показывает ТОЛЬКО важные badges (Type, Cylinders, Intake) ✅
+  5. Client ВСЕГДА отображается (критическая информация) ✅
+  6. Status badge восстановлен (Active/Completed/Archived) ✅
+  7. MetadataDialog сохраняет изменения корректно ✅
+  8. Всё работает на mobile/tablet/desktop ✅
+  9. UI выглядит профессионально ("iPhone quality") ✅
 
-  **➡️ Phase 2 COMPLETE! Ready for Phase 3 (Polish)**
+  **➡️ Phase 2 FULLY COMPLETE! Ready for Phase 3 (Polish)**
 
 ---
 

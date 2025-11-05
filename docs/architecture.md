@@ -858,6 +858,309 @@ async function migrateMetadata(oldMetadataPath) {
 
 ---
 
+## Frontend Components (Phase 2) ✅
+
+**Status:** ✅ Implemented (Phase 2.1-2.7 complete, Nov 2025)
+
+**Purpose:** Dashboard UI для управления проектами с метаданными, фильтрами и редактированием.
+
+### HomePage Dashboard Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         HomePage                                 │
+│  frontend/src/pages/HomePage.tsx                                 │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  FiltersBar (frontend/src/components/projects/FiltersBar)  │ │
+│  │                                                             │ │
+│  │  Search: [_____________]  [Type ▾] [Intake ▾] [Exhaust ▾]  │ │
+│  │          [Cylinders ▾]   [Sort: Date ▾]  [Clear all]       │ │
+│  │                                                             │ │
+│  │  Active filters: [Type: NA ×] [Intake: ITB ×]              │ │
+│  │  Showing 8 of 50 projects                                  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  Project Cards Grid (responsive 1/2/3 columns)            │  │
+│  │                                                            │  │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐      │  │
+│  │  │ ProjectCard  │ │ ProjectCard  │ │ ProjectCard  │      │  │
+│  │  │              │ │              │ │              │      │  │
+│  │  │ BMW M42    ⚙│ │ Vesta 1.6  ✓│ │ 4 Cyl ITB  📦│      │  │
+│  │  │ ID: bmw-m42  │ │ ID: vesta..  │ │ ID: 4-cyl..  │      │  │
+│  │  │ ────────────│ │ ────────────│ │ ────────────│      │  │
+│  │  │ 📊 24 calcs  │ │ 📊 18 calcs  │ │ 📊 32 calcs  │      │  │
+│  │  │ [NA][4][ITB] │ │ [NA][4][IM]  │ │ [NA][4][ITB] │      │  │
+│  │  │ 👤 BMW AG    │ │ 👤 (No clnt) │ │ 👤 Personal  │      │  │
+│  │  │ 📅 05 Nov 25 │ │ 📅 03 Nov 25 │ │ 📅 01 Nov 25 │      │  │
+│  │  │ [✏️] [Open]   │ │ [✏️] [Open]   │ │ [✏️] [Open]   │      │  │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘      │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  MetadataDialog (when Edit clicked)                        │ │
+│  │  frontend/src/components/projects/MetadataDialog.tsx       │ │
+│  │                                                             │ │
+│  │  [×] Edit Metadata                                          │ │
+│  │  Project: BMW M42.det                                       │ │
+│  │  ─────────────────────────────────────────────────────     │ │
+│  │  📋 Project Identity                                        │ │
+│  │     ID (readonly): bmw-m42                                  │ │
+│  │     Display Name: [BMW M42________________]                 │ │
+│  │                                                             │ │
+│  │  🔧 Engine Configuration (read-only from .prt)             │ │
+│  │     Cylinders: 4    Type: NA                               │ │
+│  │     Config: inline  Intake: ITB                            │ │
+│  │     Exhaust: 4-2-1  Bore×Stroke: 84×81mm                   │ │
+│  │                                                             │ │
+│  │  ✏️ Manual Metadata (user-editable)                        │ │
+│  │     Description: [___________________________]              │ │
+│  │     Client: [BMW AG_____________________]                   │ │
+│  │     Tags: [track-build] [dyno-tested]                       │ │
+│  │     Status: [Active ▾]                                      │ │
+│  │     Color: [🔵] 🔵🟢🟠🔴🟣🔷                                │ │
+│  │     Notes: [Dyno tested on 01.11.2025_______]               │ │
+│  │                                                             │ │
+│  │                            [Cancel] [Save]                  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ProjectCard Component
+
+**File:** `frontend/src/components/projects/ProjectCard.tsx`
+
+**Design Principles:**
+- Show ONLY essential information on card (user feedback: "Configuration and Exhaust are irrelevant")
+- Client field ALWAYS visible (user feedback: "CRITICAL information")
+- Status badge prominent (user feedback: "очень важный лейбл")
+
+**Layout Structure:**
+```typescript
+<Card>
+  <CardHeader>
+    <DisplayName>BMW M42</DisplayName>        // Large, bold
+    <ID>ID: bmw-m42</ID>                      // Small, muted
+    <StatusBadge>Active</StatusBadge>         // Top-right corner
+  </CardHeader>
+
+  <CardContent>
+    <CalculationsCount>24 calculations</CalculationsCount>
+
+    <EngineBadge>                              // ONLY essential badges
+      [NA]     // Type (blue/green/purple)
+      [4 Cyl]  // Cylinders (gray)
+      [ITB]    // Intake (orange/gray)
+    </EngineBadge>
+
+    <Client>BMW AG</Client>                    // ALWAYS show (or "(No client)")
+    <Date>Modified: 05 Nov 2025</Date>
+  </CardContent>
+
+  <CardFooter>
+    <EditButton />      // Icon button
+    <OpenButton />      // Full width button
+  </CardFooter>
+</Card>
+```
+
+**Status Badge Configuration:**
+```typescript
+const statusConfig = {
+  active: {
+    label: 'Active',
+    icon: Wrench,
+    color: 'bg-blue-600 text-white hover:bg-blue-700'
+  },
+  completed: {
+    label: 'Completed',
+    icon: CheckCircle,
+    color: 'bg-green-600 text-white hover:bg-green-700'
+  },
+  archived: {
+    label: 'Archived',
+    icon: Archive,
+    color: 'bg-gray-600 text-white hover:bg-gray-700'
+  }
+};
+```
+
+**EngineBadge Color Coding:**
+- **Type:** NA (green), Turbo (blue), Supercharged (purple)
+- **Intake:** ITB (orange), IM (gray)
+- **Cylinders:** Gray (neutral)
+
+### MetadataDialog Component
+
+**File:** `frontend/src/components/projects/MetadataDialog.tsx`
+
+**Form Management:**
+- **Library:** react-hook-form + zod validation
+- **State:** Fully controlled components (important: Select uses `value={field.value}`, NOT `defaultValue`)
+- **API:** Flat payload structure `{displayName, description, client, tags, status, notes, color}`
+
+**Sections:**
+```typescript
+1. Project Identity
+   - ID (readonly, disabled input)
+   - Display Name (editable)
+
+2. Engine Configuration (if .prt parsed)
+   - Cylinders, Type, Configuration (all readonly)
+   - Intake, Exhaust, Bore×Stroke, CR, Max RPM (all readonly)
+   - Source: metadata.auto (from .prt file)
+
+3. Manual Metadata (user-editable)
+   - Description, Client, Tags
+   - Status (Active/Completed/Archived)
+   - Color (hex picker + preset buttons)
+   - Notes (textarea)
+```
+
+**Critical Bug Fixes (Nov 6, 2025):**
+1. **Status Select not controlled:** Changed from `defaultValue` to `value={field.value}` to make it fully controlled by react-hook-form
+2. **Payload structure mismatch:** Backend expects flat structure, was sending nested `{manual: {...}}` - fixed to send flat `{displayName, client, ...}`
+
+### FiltersBar Component
+
+**File:** `frontend/src/components/projects/FiltersBar.tsx`
+
+**Filter Types:**
+```typescript
+interface ProjectFiltersState {
+  type: Array<'NA' | 'Turbo' | 'Supercharged'>;  // Multi-select
+  intake: IntakeSystem[];                         // Multi-select
+  exhaust: ExhaustSystem[];                       // Multi-select
+  cylinders: number[];                            // Multi-select
+  search: string;                                 // Text input
+  sortBy: 'date' | 'name' | 'cylinders';         // Single select
+}
+```
+
+**Filter Logic (AND):**
+```typescript
+// All filters must match (AND logic)
+if (filters.type.length > 0) {
+  filtered = filtered.filter(p =>
+    filters.type.includes(p.metadata?.auto?.type)
+  );
+}
+
+if (filters.search) {
+  filtered = filtered.filter(p =>
+    p.displayName.toLowerCase().includes(filters.search) ||
+    p.metadata?.manual?.client?.toLowerCase().includes(filters.search)
+  );
+}
+```
+
+**UI Consistency:**
+- All filters: `w-[160px]` width (unified after user feedback)
+- All filters: `h-10` height (40px, unified after user feedback)
+- Search input: flexible width with `flex-1 min-w-[200px]`
+
+### Data Flow: Edit Metadata
+
+```
+1. User clicks Edit button on ProjectCard
+   ↓
+   HomePage.handleEditProject(project)
+
+2. Open MetadataDialog with project data
+   ↓
+   <MetadataDialog open={true} project={project} />
+
+3. Form loads with existing metadata
+   ↓
+   useEffect: form.reset({
+     displayName: metadata?.displayName,
+     client: metadata?.manual?.client,
+     status: metadata?.manual?.status,
+     ...
+   })
+
+4. User edits fields (Status, Client, etc.)
+   ↓
+   react-hook-form tracks changes
+
+5. User clicks Save
+   ↓
+   onSubmit(values)
+
+6. Prepare flat payload
+   ↓
+   payload = {
+     displayName: values.displayName,
+     client: values.client,
+     status: values.status,
+     ...
+   }
+
+7. POST to Backend API
+   ↓
+   axios.post(`/api/projects/${id}/metadata`, payload)
+
+8. Backend updates .metadata/{id}.json
+   ↓
+   metadataService.updateManualMetadata(id, payload)
+   // Preserves auto section, updates manual section
+
+9. Success → Close dialog → Refetch projects
+   ↓
+   toast.success('Metadata saved')
+   onSuccess() → HomePage.refetch()
+
+10. ProjectCard updates with new data
+    ↓
+    New client name, status badge, etc. visible
+```
+
+### Loading States
+
+**Skeleton Cards:** Used during initial data fetch for "iPhone quality" UX
+```typescript
+if (loading) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
+    </div>
+  );
+}
+```
+
+**SkeletonCard:** `frontend/src/components/shared/SkeletonCard.tsx`
+- Animated pulse effect
+- Matches ProjectCard layout
+- Shows during: initial load, refetch after metadata save
+
+### Responsive Design
+
+**Grid Layout:**
+- Desktop (≥1024px): 3 columns
+- Tablet (768-1024px): 2 columns
+- Mobile (<768px): 1 column
+
+**Filter Layout:**
+- Desktop: All filters in single row with flex-wrap
+- Mobile: Filters wrap to multiple rows
+- Search input: Always takes available width with `flex-1`
+
+**Touch Targets:**
+- All buttons: minimum 44×44px (iOS HIG)
+- Filter dropdowns: h-10 (40px) for easy tapping
+- Card hover: Full card clickable area
+
+### See Also
+- [PROJECT-METADATA-DASHBOARD-ROADMAP.md](../PROJECT-METADATA-DASHBOARD-ROADMAP.md) - Phase 2.1-2.7 implementation details
+- [CHANGELOG.md](../CHANGELOG.md) - Bug fixes (2025-11-06)
+- Backend API: [routes/metadata.js](../../backend/src/routes/metadata.js)
+- Backend Service: [services/metadataService.js](../../backend/src/services/metadataService.js)
+
+---
+
 ## Компоненты визуализации (Этап 7) ✅
 
 ### Архитектура страницы ProjectPage

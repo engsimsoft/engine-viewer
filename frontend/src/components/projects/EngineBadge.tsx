@@ -2,17 +2,17 @@
  * EngineBadge Component
  *
  * Displays engine specification badges with color-coded variants
- * Used in ProjectCard to show engine configuration (type, intake, exhaust, cylinders)
+ * Used in ProjectCard to show ONLY essential engine info: Type, Cylinders, Intake
  *
  * Color coding:
  * - Type: NA = green, Turbo = blue, Supercharged = purple
  * - Intake: ITB = orange, IM = gray
- * - Exhaust/Cylinders = gray (neutral)
+ * - Cylinders = gray (neutral)
  */
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { IntakeSystem, ExhaustSystem } from '@/types';
+import type { IntakeSystem } from '@/types';
 
 interface EngineBadgeProps {
   /**
@@ -21,24 +21,14 @@ interface EngineBadgeProps {
   type?: 'NA' | 'Turbo' | 'Supercharged';
 
   /**
-   * Intake system (ITB, IM)
-   */
-  intake?: IntakeSystem;
-
-  /**
-   * Exhaust system (4-2-1, 4-1, tri-y, etc.)
-   */
-  exhaust?: ExhaustSystem;
-
-  /**
    * Number of cylinders
    */
   cylinders?: number;
 
   /**
-   * Engine configuration (inline, V, boxer, W)
+   * Intake system (ITB, IM)
    */
-  configuration?: 'inline' | 'V' | 'boxer' | 'W';
+  intake?: IntakeSystem;
 
   /**
    * Additional CSS classes
@@ -62,26 +52,14 @@ const badgeColors = {
     ITB: 'bg-orange-600 text-white hover:bg-orange-700',
     IM: 'bg-gray-600 text-white hover:bg-gray-700',
   },
-  // Exhaust/Cylinders/Configuration - neutral
+  // Cylinders - neutral
   neutral: 'bg-gray-600 text-white hover:bg-gray-700',
-};
-
-/**
- * Display labels for configuration types
- */
-const configurationLabels = {
-  inline: 'Inline',
-  V: 'V',
-  boxer: 'Boxer',
-  W: 'W',
 };
 
 export default function EngineBadge({
   type,
-  intake,
-  exhaust,
   cylinders,
-  configuration,
+  intake,
   className,
 }: EngineBadgeProps) {
   // Render badges only if props are provided
@@ -105,30 +83,12 @@ export default function EngineBadge({
     });
   }
 
-  // Configuration badge (Inline, V, Boxer, W)
-  if (configuration) {
-    badges.push({
-      key: `config-${configuration}`,
-      label: configurationLabels[configuration],
-      color: badgeColors.neutral,
-    });
-  }
-
   // Intake badge (ITB, IM)
   if (intake) {
     badges.push({
       key: `intake-${intake}`,
       label: intake,
       color: badgeColors.intake[intake],
-    });
-  }
-
-  // Exhaust badge (4-2-1, 4-1, tri-y, etc.)
-  if (exhaust) {
-    badges.push({
-      key: `exhaust-${exhaust}`,
-      label: exhaust,
-      color: badgeColors.neutral,
     });
   }
 
