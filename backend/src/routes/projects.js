@@ -104,21 +104,56 @@ router.get('/', async (req, res, next) => {
     // Load all metadata
     const allMetadata = await getAllMetadata();
 
-    // Transform projects to API response format
-    const projectsData = projects.map(project => ({
-      id: project.id,
-      name: project.name, // Display name (filename without extension)
-      fileName: project.fileName,
-      format: project.format || 'unknown', // File format ('det', 'pou', etc.)
-      numCylinders: project.numCylinders || 0,
-      engineType: project.engineType || 'UNKNOWN',
-      calculationsCount: project.calculationsCount || 0,
-      fileSize: project.fileSize,
-      fileSizeFormatted: formatFileSize(project.fileSize),
-      lastModified: project.modifiedAt,
-      created: project.createdAt,
-      metadata: allMetadata.get(project.id) || null // Use project.id instead of fileName
-    }));
+    // Transform projects to API response format with displayName support
+    let projectsData = projects.map(project => {
+      const metadata = allMetadata.get(project.id) || null;
+
+      // displayName: use metadata.displayName if set, otherwise fallback to project.name (ID)
+      const displayName = metadata?.displayName || project.name;
+
+      return {
+        id: project.id,
+        name: displayName, // Display name (from metadata or fallback to ID)
+        fileName: project.fileName,
+        format: project.format || 'unknown',
+        numCylinders: project.numCylinders || 0,
+        engineType: project.engineType || 'UNKNOWN',
+        calculationsCount: project.calculationsCount || 0,
+        fileSize: project.fileSize,
+        fileSizeFormatted: formatFileSize(project.fileSize),
+        lastModified: project.modifiedAt,
+        created: project.createdAt,
+        metadata // Include full metadata (auto + manual)
+      };
+    });
+
+    // Apply filters from query parameters
+    const { cylinders, type, intake, exhaust } = req.query;
+
+    if (cylinders) {
+      const cylindersNum = parseInt(cylinders, 10);
+      projectsData = projectsData.filter(p =>
+        p.metadata?.auto?.cylinders === cylindersNum
+      );
+    }
+
+    if (type) {
+      projectsData = projectsData.filter(p =>
+        p.metadata?.auto?.type?.toLowerCase() === type.toLowerCase()
+      );
+    }
+
+    if (intake) {
+      projectsData = projectsData.filter(p =>
+        p.metadata?.auto?.intakeSystem?.toLowerCase() === intake.toLowerCase()
+      );
+    }
+
+    if (exhaust) {
+      projectsData = projectsData.filter(p =>
+        p.metadata?.auto?.exhaustSystem?.toLowerCase() === exhaust.toLowerCase()
+      );
+    }
 
     // Sort by last modified date (newest first)
     projectsData.sort((a, b) =>

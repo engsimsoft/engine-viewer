@@ -7,7 +7,7 @@
  */
 
 import express from 'express';
-import { getMetadata, hasMetadata, saveMetadata, deleteMetadata } from '../services/metadataService.js';
+import { getMetadata, hasMetadata, saveMetadata, updateManualMetadata, deleteMetadata } from '../services/metadataService.js';
 
 const router = express.Router();
 
@@ -46,16 +46,18 @@ router.get('/:id/metadata', async (req, res) => {
 
 /**
  * POST /api/projects/:id/metadata
- * Сохранить/обновить метаданные проекта
+ * Сохранить/обновить MANUAL метаданные проекта
+ * Сохраняет AUTO section (не перезаписывает её)
  *
- * Request Body: ProjectMetadata (без projectId, createdAt, updatedAt)
+ * Request Body: Manual metadata + displayName
  * {
- *   description: string,
- *   client: string,
- *   tags: string[],
- *   notes: string,
- *   status: 'active' | 'completed' | 'archived',
- *   color: string
+ *   displayName?: string,
+ *   description?: string,
+ *   client?: string,
+ *   tags?: string[],
+ *   notes?: string,
+ *   status?: 'active' | 'completed' | 'archived' | 'testing',
+ *   color?: string
  * }
  *
  * Response:
@@ -66,30 +68,21 @@ router.get('/:id/metadata', async (req, res) => {
 router.post('/:id/metadata', async (req, res) => {
   try {
     const { id } = req.params;
-    const metadataInput = req.body;
+    const manualMetadata = req.body;
 
-    // Проверить что переданы обязательные поля
-    const requiredFields = ['description', 'client', 'tags', 'notes', 'status', 'color'];
-    const missingFields = requiredFields.filter(field => !(field in metadataInput));
-
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        error: 'Invalid metadata',
-        message: `Missing required fields: ${missingFields.join(', ')}`
-      });
+    // Валидация status (если передан)
+    if (manualMetadata.status) {
+      const validStatuses = ['active', 'completed', 'archived', 'testing'];
+      if (!validStatuses.includes(manualMetadata.status)) {
+        return res.status(400).json({
+          error: 'Invalid metadata',
+          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+        });
+      }
     }
 
-    // Валидация status
-    const validStatuses = ['active', 'completed', 'archived'];
-    if (!validStatuses.includes(metadataInput.status)) {
-      return res.status(400).json({
-        error: 'Invalid metadata',
-        message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-      });
-    }
-
-    // Валидация tags (должен быть массив)
-    if (!Array.isArray(metadataInput.tags)) {
+    // Валидация tags (должен быть массив, если передан)
+    if (manualMetadata.tags && !Array.isArray(manualMetadata.tags)) {
       return res.status(400).json({
         error: 'Invalid metadata',
         message: 'Tags must be an array'
@@ -99,8 +92,8 @@ router.post('/:id/metadata', async (req, res) => {
     // Проверить существовало ли уже
     const existed = await hasMetadata(id);
 
-    // Сохранить метаданные
-    const savedMetadata = await saveMetadata(id, metadataInput);
+    // Обновить ТОЛЬКО manual section (auto section сохраняется)
+    const savedMetadata = await updateManualMetadata(id, manualMetadata);
 
     res.json({
       metadata: savedMetadata,
