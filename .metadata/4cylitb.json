@@ -1,13 +1,17 @@
 {
-  "description": "Test File 4_Cyl_ITB",
-  "client": "Claude Code",
-  "tags": [
-    "Test"
-  ],
-  "status": "active",
-  "notes": "",
-  "color": "#3b82f6",
-  "projectId": "4cylitb",
-  "updatedAt": "2025-11-04T09:24:57.753Z",
-  "createdAt": "2025-11-04T09:24:57.753Z"
+  "version": "1.0",
+  "id": "4cylitb",
+  "displayName": "",
+  "manual": {
+    "description": "Test File 4_Cyl_ITB",
+    "client": "Claude Code",
+    "tags": [
+      "Test"
+    ],
+    "status": "active",
+    "notes": "",
+    "color": "#3b82f6"
+  },
+  "created": "2025-11-04T09:24:57.753Z",
+  "modified": "2025-11-04T09:24:57.753Z"
 }

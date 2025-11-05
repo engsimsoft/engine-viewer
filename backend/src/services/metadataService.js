@@ -1,8 +1,24 @@
 /**
- * Metadata Service
+ * Metadata Service (v1.0)
  *
  * Управление метаданными проектов
  * Хранение: .metadata/<projectId>.json
+ *
+ * Structure v1.0:
+ * {
+ *   "version": "1.0",
+ *   "id": "project-id",
+ *   "displayName": "",
+ *   "auto": { cylinders, type, bore, stroke, intakeSystem, exhaustSystem, ... },
+ *   "manual": { description, client, tags, status, notes, color },
+ *   "created": "ISO timestamp",
+ *   "modified": "ISO timestamp"
+ * }
+ *
+ * Rules:
+ * - "auto" section: readonly for users, updated from .prt file
+ * - "manual" section: editable by users
+ * - Backward compatibility: reads old format (pre-v1.0)
  */
 
 import fs from 'fs/promises';
@@ -33,6 +49,40 @@ export function getMetadataFilePath(projectId) {
 }
 
 /**
+ * Мигрирует старый формат metadata в новый (v1.0)
+ * Вызывается автоматически при чтении старого формата
+ * @param {Object} oldMetadata - Старая структура метаданных
+ * @param {string} projectId - ID проекта
+ * @returns {Object} - Новая структура (v1.0)
+ */
+function migrateOldFormat(oldMetadata, projectId) {
+  // Если уже v1.0 - вернуть как есть
+  if (oldMetadata.version === '1.0') {
+    return oldMetadata;
+  }
+
+  // Мигрируем старый формат → v1.0
+  const manual = {
+    description: oldMetadata.description || '',
+    client: oldMetadata.client || '',
+    tags: oldMetadata.tags || [],
+    status: oldMetadata.status || 'active',
+    notes: oldMetadata.notes || '',
+    color: oldMetadata.color || ''
+  };
+
+  return {
+    version: '1.0',
+    id: oldMetadata.projectId || projectId,
+    displayName: '', // По умолчанию пустой
+    // auto: будет добавлено fileScanner
+    manual,
+    created: oldMetadata.createdAt || new Date().toISOString(),
+    modified: oldMetadata.updatedAt || new Date().toISOString()
+  };
+}
+
+/**
  * Получить метаданные проекта
  * @param {string} projectId - ID проекта
  * @returns {Promise<Object|null>} Метаданные проекта или null если не найдены
@@ -41,7 +91,15 @@ export async function getMetadata(projectId) {
   try {
     const filePath = getMetadataFilePath(projectId);
     const fileContent = await fs.readFile(filePath, 'utf8');
-    const metadata = JSON.parse(fileContent);
+    let metadata = JSON.parse(fileContent);
+
+    // Backward compatibility: мигрируем старый формат
+    if (!metadata.version || metadata.version !== '1.0') {
+      metadata = migrateOldFormat(metadata, projectId);
+      // Сохраняем мигрированную версию
+      await saveMetadata(projectId, metadata);
+    }
+
     return metadata;
   } catch (error) {
     // Если файл не существует - это нормально (метаданные опциональные)
@@ -86,9 +144,9 @@ export async function ensureMetadataDir() {
 }
 
 /**
- * Сохранить метаданные проекта
+ * Сохранить метаданные проекта (v1.0)
  * @param {string} projectId - ID проекта
- * @param {Object} metadata - Метаданные для сохранения
+ * @param {Object} metadata - Метаданные для сохранения (полная структура v1.0)
  * @returns {Promise<Object>} Сохранённые метаданные (с обновлёнными timestamps)
  */
 export async function saveMetadata(projectId, metadata) {
@@ -96,17 +154,19 @@ export async function saveMetadata(projectId, metadata) {
     // Убедиться что директория существует
     await ensureMetadataDir();
 
-    // Проверить существование метаданных и получить createdAt если они уже есть
+    // Проверить существование метаданных
     const existingMetadata = await getMetadata(projectId);
     const now = new Date().toISOString();
 
-    // Подготовить данные для сохранения
+    // Подготовить данные для сохранения (v1.0 format)
     const dataToSave = {
-      ...metadata,
-      projectId, // Гарантируем что projectId совпадает
-      updatedAt: now,
-      // Если метаданные существуют - сохранить createdAt, иначе установить текущее время
-      createdAt: existingMetadata?.createdAt || now
+      version: '1.0',
+      id: projectId, // Гарантируем что ID совпадает
+      displayName: metadata.displayName || '',
+      auto: metadata.auto || existingMetadata?.auto, // Сохранить существующий auto
+      manual: metadata.manual || {},
+      created: existingMetadata?.created || now,
+      modified: now
     };
 
     // Сохранить в файл с красивым форматированием
@@ -117,6 +177,87 @@ export async function saveMetadata(projectId, metadata) {
     return dataToSave;
   } catch (error) {
     throw new Error(`Failed to save metadata for project ${projectId}: ${error.message}`);
+  }
+}
+
+/**
+ * Обновить только "auto" секцию метаданных (from .prt file)
+ * Сохраняет существующий "manual" section
+ * @param {string} projectId - ID проекта
+ * @param {Object} autoMetadata - Автоматические метаданные из .prt
+ * @returns {Promise<Object>} Обновлённые метаданные
+ */
+export async function updateAutoMetadata(projectId, autoMetadata) {
+  try {
+    await ensureMetadataDir();
+
+    // Получить существующие метаданные
+    const existingMetadata = await getMetadata(projectId);
+    const now = new Date().toISOString();
+
+    // Создать или обновить metadata
+    const dataToSave = {
+      version: '1.0',
+      id: projectId,
+      displayName: existingMetadata?.displayName || '',
+      auto: autoMetadata, // Обновляем auto section
+      manual: existingMetadata?.manual || {}, // Сохраняем manual section
+      created: existingMetadata?.created || now,
+      modified: now
+    };
+
+    // Сохранить
+    const filePath = getMetadataFilePath(projectId);
+    const jsonContent = JSON.stringify(dataToSave, null, 2);
+    await fs.writeFile(filePath, jsonContent, 'utf8');
+
+    return dataToSave;
+  } catch (error) {
+    throw new Error(`Failed to update auto metadata for project ${projectId}: ${error.message}`);
+  }
+}
+
+/**
+ * Обновить только "manual" секцию метаданных (user edits)
+ * Сохраняет существующий "auto" section
+ * @param {string} projectId - ID проекта
+ * @param {Object} manualMetadata - Пользовательские метаданные
+ * @returns {Promise<Object>} Обновлённые метаданные
+ */
+export async function updateManualMetadata(projectId, manualMetadata) {
+  try {
+    await ensureMetadataDir();
+
+    // Получить существующие метаданные
+    const existingMetadata = await getMetadata(projectId);
+    const now = new Date().toISOString();
+
+    // Создать или обновить metadata
+    const dataToSave = {
+      version: '1.0',
+      id: projectId,
+      displayName: manualMetadata.displayName ?? existingMetadata?.displayName ?? '',
+      auto: existingMetadata?.auto, // Сохраняем auto section
+      manual: {
+        description: manualMetadata.description || '',
+        client: manualMetadata.client || '',
+        tags: manualMetadata.tags || [],
+        status: manualMetadata.status || 'active',
+        notes: manualMetadata.notes || '',
+        color: manualMetadata.color || ''
+      },
+      created: existingMetadata?.created || now,
+      modified: now
+    };
+
+    // Сохранить
+    const filePath = getMetadataFilePath(projectId);
+    const jsonContent = JSON.stringify(dataToSave, null, 2);
+    await fs.writeFile(filePath, jsonContent, 'utf8');
+
+    return dataToSave;
+  } catch (error) {
+    throw new Error(`Failed to update manual metadata for project ${projectId}: ${error.message}`);
   }
 }
 
@@ -197,6 +338,8 @@ export default {
   hasMetadata,
   ensureMetadataDir,
   saveMetadata,
+  updateAutoMetadata,
+  updateManualMetadata,
   deleteMetadata,
   getAllMetadata
 };

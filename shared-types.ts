@@ -260,6 +260,106 @@ export interface SelectedCalculations {
 }
 
 // ====================================================================
+// Project Metadata Types (auto + manual)
+// ====================================================================
+
+/**
+ * Тип intake system
+ */
+export type IntakeSystem = 'ITB' | 'IM';
+
+/**
+ * Тип exhaust system
+ */
+export type ExhaustSystem = '4-2-1' | '4-1' | 'tri-y' | string;
+
+/**
+ * Engine configuration type
+ */
+export type EngineConfiguration = 'inline' | 'vee';
+
+/**
+ * Автоматически извлечённые метаданные из .prt файла (readonly для пользователя)
+ */
+export interface AutoMetadata {
+  /** Количество цилиндров */
+  cylinders: number;
+
+  /** Тип двигателя: NA (Naturally Aspirated), Turbo, Supercharged */
+  type: 'NA' | 'Turbo' | 'Supercharged';
+
+  /** Конфигурация цилиндров: inline (рядный), vee (V-образный) */
+  configuration: EngineConfiguration;
+
+  /** Диаметр цилиндра (bore) в мм */
+  bore: number;
+
+  /** Ход поршня (stroke) в мм */
+  stroke: number;
+
+  /** Степень сжатия */
+  compressionRatio: number;
+
+  /** Максимальные обороты для максимальной мощности (RPM) */
+  maxPowerRPM: number;
+
+  /** Тип intake system: ITB (Individual Throttle Bodies), IM (Intake Manifold) */
+  intakeSystem: IntakeSystem;
+
+  /** Паттерн exhaust system: "4-2-1", "4-1", "tri-y", etc. */
+  exhaustSystem: ExhaustSystem;
+}
+
+/**
+ * Пользовательские метаданные (редактируются пользователем)
+ */
+export interface ManualMetadata {
+  /** Описание проекта */
+  description?: string;
+
+  /** Клиент / заказчик */
+  client?: string;
+
+  /** Теги для поиска и фильтрации */
+  tags?: string[];
+
+  /** Статус проекта: active, completed, archived, testing */
+  status?: 'active' | 'completed' | 'archived' | 'testing';
+
+  /** Заметки / комментарии */
+  notes?: string;
+
+  /** Цвет карточки проекта (hex код) */
+  color?: string;
+}
+
+/**
+ * Полная структура метаданных проекта (v1.0)
+ */
+export interface ProjectMetadata {
+  /** Версия схемы метаданных */
+  version: '1.0';
+
+  /** ID проекта (из названия файла, readonly) */
+  id: string;
+
+  /** Display Name (опционально, по умолчанию = ID) */
+  displayName?: string;
+
+  /** Автоматические метаданные из .prt файла (readonly) */
+  auto?: AutoMetadata;
+
+  /** Пользовательские метаданные (editable) */
+  manual: ManualMetadata;
+
+  /** Дата создания метаданных */
+  created: string;
+
+  /** Дата последнего изменения */
+  modified: string;
+}
+
+// ====================================================================
 // Export Format Types
 // ====================================================================
 
