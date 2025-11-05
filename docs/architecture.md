@@ -429,6 +429,435 @@ interface DataPoint {
 
 ---
 
+## Metadata System (Project Metadata v1.0) 🔧
+
+**Status:** ✅ Implemented (Phase 1 complete, Nov 2025)
+
+**Purpose:** Автоматическое извлечение метаданных двигателя из `.prt` файлов и разделение на read-only (auto) и user-editable (manual) секции.
+
+### Архитектура Metadata System
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FILE SYSTEM (.prt files)                      │
+│  test-data/                                                      │
+│    ├── BMW M42/BMW M42.prt                                       │
+│    ├── 4_Cyl_ITB/4_Cyl_ITB.prt                                   │
+│    └── Vesta 1.6 IM/Vesta 1.6 IM.prt                             │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Parse .prt files
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRT PARSER                                    │
+│  backend/src/parsers/formats/prtParser.js                        │
+│                                                                  │
+│  Extract:                                                        │
+│  - Engine specs (cylinders, bore, stroke, CR, maxRPM)           │
+│  - Type detection (NA/Turbo/Supercharged)                       │
+│  - Intake system (ITB vs IM)                                    │
+│  - Exhaust pattern (4-2-1, 4-1, tri-y, etc.)                    │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Auto metadata
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  METADATA SERVICE                                │
+│  backend/src/services/metadataService.js                         │
+│                                                                  │
+│  updateAutoMetadata(projectId, autoData)                        │
+│  - Reads existing .metadata/{id}.json                            │
+│  - Updates "auto" section ONLY                                  │
+│  - Preserves "manual" section                                   │
+│  - Saves merged metadata                                         │
+│                                                                  │
+│  updateManualMetadata(projectId, manualData)                    │
+│  - Reads existing .metadata/{id}.json                            │
+│  - Updates "manual" section ONLY                                │
+│  - Preserves "auto" section                                     │
+│  - Saves merged metadata                                         │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Save to disk
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              METADATA STORAGE (.metadata/*.json)                 │
+│                                                                  │
+│  .metadata/bmw-m42.json:                                         │
+│  {                                                               │
+│    "version": "1.0",                                             │
+│    "id": "bmw-m42",                                              │
+│    "displayName": "BMW M42",                                     │
+│    "auto": {                                                     │
+│      "cylinders": 4,                                             │
+│      "type": "NA",                                               │
+│      "configuration": "inline",                                  │
+│      "intakeSystem": "ITB",                                      │
+│      "exhaustSystem": "4-2-1"                                    │
+│    },                                                            │
+│    "manual": {                                                   │
+│      "client": "Ivan Petrov",                                    │
+│      "tags": ["track-build"],                                    │
+│      "notes": "Dyno tested"                                      │
+│    }                                                             │
+│  }                                                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Metadata Structure v1.0
+
+**TypeScript Interface:**
+```typescript
+export interface AutoMetadata {
+  cylinders: number;                    // From .prt: number of cylinders
+  type: 'NA' | 'Turbo' | 'Supercharged'; // Engine type
+  configuration: EngineConfiguration;   // inline, V, boxer, etc.
+  bore: number;                         // Bore (mm)
+  stroke: number;                       // Stroke (mm)
+  compressionRatio: number;             // Compression ratio
+  maxPowerRPM: number;                  // Max power RPM
+  intakeSystem: IntakeSystem;           // ITB or IM
+  exhaustSystem: ExhaustSystem;         // 4-2-1, 4-1, tri-y, etc.
+}
+
+export interface ManualMetadata {
+  description?: string;     // User description
+  client?: string;          // Client name
+  tags?: string[];          // User tags
+  status?: ProjectStatus;   // active, completed, archived
+  notes?: string;           // User notes
+  color?: string;           // Project color (hex)
+}
+
+export interface ProjectMetadata {
+  version: '1.0';
+  id: string;
+  displayName?: string;
+  auto?: AutoMetadata;      // Read-only (from .prt)
+  manual: ManualMetadata;   // User-editable
+  created: string;          // ISO 8601
+  modified: string;         // ISO 8601
+}
+```
+
+### .prt Parser Implementation
+
+**File:** `backend/src/parsers/formats/prtParser.js`
+
+**Parsing Logic:**
+
+1. **Engine Specs Extraction:**
+   ```javascript
+   // Line 1: Header with engine name
+   // Line 2-10: Engine specifications
+   // Line ~50: "Maximum power obtained at _____ rpm" → maxPowerRPM
+   // Line ~100: Bore, stroke, compression ratio
+   ```
+
+2. **Intake System Detection:**
+   ```javascript
+   // Line 276: "N throttles - with no airboxes" → ITB
+   // Line 276: "N throttle - with a common airbox or plenum" → IM
+
+   if (line.includes('with no airboxes')) {
+     intakeSystem = 'ITB';
+   } else if (line.includes('with a common airbox or plenum')) {
+     intakeSystem = 'IM';
+   }
+   ```
+
+3. **Exhaust System Parsing:**
+   ```javascript
+   // Regex patterns for exhaust configuration
+   // "4into2into1 manifold" → "4-2-1"
+   // "4into1 manifold" → "4-1"
+   // "tri-y manifold" → "tri-y"
+
+   const patterns = [
+     { regex: /(\d+)into(\d+)into(\d+)/i, format: '$1-$2-$3' },
+     { regex: /(\d+)into(\d+)/i, format: '$1-$2' },
+     { regex: /tri-y/i, format: 'tri-y' }
+   ];
+   ```
+
+4. **Type Detection:**
+   ```javascript
+   // Based on turbocharger/supercharger count
+   if (turbochargers > 0) {
+     engineType = 'Turbo';
+   } else if (superchargers > 0) {
+     engineType = 'Supercharged';
+   } else {
+     engineType = 'NA';
+   }
+   ```
+
+**Registry Integration:**
+```javascript
+// backend/src/parsers/index.js
+import { PrtParser } from './formats/prtParser.js';
+import { globalRegistry } from './registry/FormatRegistry.js';
+
+globalRegistry.register('prt', PrtParser);
+```
+
+### Metadata Service
+
+**File:** `backend/src/services/metadataService.js`
+
+**Key Functions:**
+
+```javascript
+/**
+ * Update auto metadata (from .prt parser)
+ * - Preserves manual section
+ * - Overwrites auto section
+ */
+export async function updateAutoMetadata(projectId, autoData) {
+  const metadataPath = `.metadata/${projectId}.json`;
+
+  // Read existing metadata
+  let metadata = await readMetadata(projectId);
+
+  // Update auto section only
+  metadata.auto = autoData;
+  metadata.modified = new Date().toISOString();
+
+  // Save (preserves manual section)
+  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+}
+
+/**
+ * Update manual metadata (from user)
+ * - Preserves auto section
+ * - Overwrites manual section
+ */
+export async function updateManualMetadata(projectId, manualData) {
+  const metadataPath = `.metadata/${projectId}.json`;
+
+  // Read existing metadata
+  let metadata = await readMetadata(projectId);
+
+  // Update manual section only
+  metadata.manual = { ...metadata.manual, ...manualData };
+  metadata.modified = new Date().toISOString();
+
+  // Save (preserves auto section)
+  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+}
+```
+
+### File Scanner Integration
+
+**File:** `backend/src/services/fileScanner.js`
+
+**Recursive Directory Scanning:**
+```javascript
+async function scanDirectory(dirPath) {
+  const projects = [];
+
+  for (const entry of await fs.readdir(dirPath, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      // Recursively scan subdirectories
+      const subProjects = await scanDirectory(path.join(dirPath, entry.name));
+      projects.push(...subProjects);
+    } else if (entry.isFile()) {
+      // Check if .det or .pou file
+      if (entry.name.endsWith('.det') || entry.name.endsWith('.pou')) {
+        // Check for corresponding .prt file
+        const prtPath = entry.name.replace(/\.(det|pou)$/, '.prt');
+        const prtFullPath = path.join(dirPath, prtPath);
+
+        if (await fileExists(prtFullPath)) {
+          // Parse .prt for auto metadata
+          const autoMetadata = await prtParser.parse(prtFullPath);
+
+          // Update auto metadata (preserves manual)
+          await metadataService.updateAutoMetadata(projectId, autoMetadata);
+        }
+
+        projects.push({
+          id: projectId,
+          name: entry.name,
+          path: path.join(dirPath, entry.name),
+          metadata: await metadataService.readMetadata(projectId)
+        });
+      }
+    }
+  }
+
+  return projects;
+}
+```
+
+**New Directory Structure Support:**
+```
+test-data/
+  ├── BMW M42/
+  │   ├── BMW M42.det
+  │   ├── BMW M42.pou
+  │   └── BMW M42.prt          ← Auto metadata source
+  ├── 4_Cyl_ITB/
+  │   ├── 4_Cyl_ITB.det
+  │   ├── 4_Cyl_ITB.pou
+  │   └── 4_Cyl_ITB.prt
+  └── .metadata/
+      ├── bmw-m42.json         ← Combined auto + manual
+      └── 4-cyl-itb.json
+```
+
+### API Updates
+
+**GET /api/projects** - List projects with filters
+
+```javascript
+// routes/projects.js
+router.get('/api/projects', async (req, res) => {
+  const { cylinders, type, intake, exhaust } = req.query;
+
+  // Scan all projects
+  const projects = await fileScanner.scanFolder('./test-data');
+
+  // Apply filters on metadata.auto.*
+  let filtered = projects;
+
+  if (cylinders) {
+    filtered = filtered.filter(p => p.metadata?.auto?.cylinders === parseInt(cylinders));
+  }
+
+  if (type) {
+    filtered = filtered.filter(p => p.metadata?.auto?.type === type);
+  }
+
+  if (intake) {
+    filtered = filtered.filter(p => p.metadata?.auto?.intakeSystem === intake);
+  }
+
+  if (exhaust) {
+    filtered = filtered.filter(p => p.metadata?.auto?.exhaustSystem === exhaust);
+  }
+
+  res.json(filtered);
+});
+```
+
+**POST /api/projects/:id/metadata** - Update manual metadata only
+
+```javascript
+// routes/metadata.js
+router.post('/api/projects/:id/metadata', async (req, res) => {
+  const { id } = req.params;
+  const manualData = req.body;
+
+  // Update ONLY manual section (preserves auto)
+  await metadataService.updateManualMetadata(id, manualData);
+
+  res.json({ success: true });
+});
+```
+
+### Data Flow: Metadata Population
+
+```
+1. User adds new .det + .prt files to test-data/
+
+2. Backend scans test-data/ (recursive)
+   ↓
+   fileScanner.scanFolder()
+
+3. For each .det file found, check for .prt sibling
+   ↓
+   const prtPath = detPath.replace('.det', '.prt')
+
+4. If .prt exists, parse it
+   ↓
+   prtParser.parse(prtPath)
+
+5. Extract auto metadata from .prt
+   ↓
+   { cylinders, type, intake, exhaust, ... }
+
+6. Update auto metadata in .metadata/{id}.json
+   ↓
+   metadataService.updateAutoMetadata(id, autoData)
+
+7. Merge with existing manual metadata
+   ↓
+   metadata = { auto: {...}, manual: {...} }
+
+8. Return merged metadata to frontend
+   ↓
+   GET /api/projects → ProjectInfo[] with metadata
+```
+
+### Migration from Legacy Metadata
+
+**Script:** `backend/scripts/migrate-metadata.js`
+
+**Purpose:** Migrate old metadata files (no auto/manual split) to v1.0 structure
+
+```javascript
+async function migrateMetadata(oldMetadataPath) {
+  const oldMetadata = JSON.parse(await fs.readFile(oldMetadataPath, 'utf-8'));
+
+  const newMetadata = {
+    version: '1.0',
+    id: oldMetadata.id,
+    displayName: oldMetadata.displayName,
+
+    // Empty auto section (will be filled on first scan)
+    auto: {},
+
+    // Move user data to manual section
+    manual: {
+      description: oldMetadata.description,
+      client: oldMetadata.client,
+      tags: oldMetadata.tags,
+      status: oldMetadata.status,
+      notes: oldMetadata.notes,
+      color: oldMetadata.color
+    },
+
+    created: oldMetadata.created || new Date().toISOString(),
+    modified: new Date().toISOString()
+  };
+
+  await fs.writeFile(oldMetadataPath, JSON.stringify(newMetadata, null, 2));
+}
+```
+
+### Rules and Principles
+
+**Auto Metadata:**
+- ✅ Source of truth: `.prt` file
+- ✅ Read-only in frontend
+- ✅ Updated automatically on file scan
+- ✅ Never manually edited by user
+
+**Manual Metadata:**
+- ✅ Source of truth: `.metadata/{id}.json`
+- ✅ User-editable in frontend
+- ✅ Preserved during auto metadata updates
+- ✅ Created/updated via API
+
+**Re-parsing .prt files:**
+- When: File scanner runs (app startup, manual rescan)
+- Result: Auto section updated, manual section preserved
+- Safety: Explicit separation prevents accidental data loss
+
+**Benefits:**
+- ✅ Automation: ~5 min/project × 50 projects = 4 hours/year saved
+- ✅ Accuracy: 100% accurate auto metadata (source of truth)
+- ✅ Smart filters: Dashboard filters work automatically
+- ✅ Data integrity: Manual data never lost during re-parse
+
+**See Also:**
+- [ADR 005: .prt Parser and Metadata Separation](decisions/005-prt-parser-metadata-separation.md)
+- [PROJECT-METADATA-DASHBOARD-SPEC.md](../PROJECT-METADATA-DASHBOARD-SPEC.md)
+- [docs/file-formats/prt-format.md](file-formats/prt-format.md)
+
+---
+
 ## Компоненты визуализации (Этап 7) ✅
 
 ### Архитектура страницы ProjectPage
