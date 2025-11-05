@@ -12,7 +12,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { parseDetFile } from '../services/fileParser.js';
 import { getConfig, getDataFolderPath } from '../config.js';
-import { getFileInfo, normalizeFilenameToId } from '../services/fileScanner.js';
+import { getFileInfo, normalizeFilenameToId, scanDirectory } from '../services/fileScanner.js';
 
 const router = Router();
 
@@ -189,23 +189,20 @@ router.get('/:id', async (req, res, next) => {
     const config = getConfig();
     const dataFolderPath = getDataFolderPath(config);
 
-    // Scan directory to find matching file
-    const files = await fs.readdir(dataFolderPath);
-    const detFiles = files.filter(file =>
-      config.files.extensions.includes(path.extname(file))
-    );
+    // Recursively scan directory to find matching file (supports subdirectories)
+    const allFiles = await scanDirectory(dataFolderPath, config.files.extensions);
 
     // Find file matching the ID
-    let matchedFile = null;
-    for (const filename of detFiles) {
-      const fileId = normalizeFilenameToId(filename);
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
       if (fileId === id) {
-        matchedFile = filename;
+        matchedFileInfo = fileInfo;
         break;
       }
     }
 
-    if (!matchedFile) {
+    if (!matchedFileInfo) {
       console.warn(`[API] GET /api/project/${id} - Project not found`);
       return res.status(404).json({
         success: false,
@@ -217,7 +214,7 @@ router.get('/:id', async (req, res, next) => {
       });
     }
 
-    const filePath = path.join(dataFolderPath, matchedFile);
+    const filePath = matchedFileInfo.path;
 
     // Parse the .det file
     const startTime = Date.now();
@@ -242,7 +239,7 @@ router.get('/:id', async (req, res, next) => {
     );
 
     // Get project name (filename without extension)
-    const projectName = matchedFile.replace(/\.det$/i, '');
+    const projectName = matchedFileInfo.name.replace(/\.(det|pou)$/i, '');
 
     // Build response
     const response = {
@@ -250,7 +247,7 @@ router.get('/:id', async (req, res, next) => {
       data: {
         id: id,
         name: projectName,
-        fileName: matchedFile,
+        fileName: matchedFileInfo.name,
         metadata: projectData.metadata,
         calculations: calculationsWithMetadata,
         fileInfo: {

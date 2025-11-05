@@ -14,15 +14,13 @@
     "exhaustSystem": "4-2-1"
   },
   "manual": {
-    "description": "Lada Vesta 1600 CC, ",
-    "client": "Alex Alban",
-    "tags": [
-      "MOTEC"
-    ],
+    "description": "",
+    "client": "",
+    "tags": [],
     "status": "active",
-    "notes": "NoteLife Edition",
+    "notes": "",
     "color": "#3b82f6"
   },
   "created": "2025-10-22T13:22:11.623Z",
-  "modified": "2025-11-05T14:51:17.040Z"
+  "modified": "2025-11-05T15:20:31.349Z"
 }

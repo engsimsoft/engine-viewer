@@ -98,7 +98,34 @@ function isFileAllowed(fileName, allowedExtensions) {
 }
 
 /**
+ * Рекурсивно сканирует директорию и все подпапки
+ * @param {string} directoryPath - Путь к директории
+ * @param {string[]} extensions - Массив расширений файлов
+ * @param {FileInfo[]} fileList - Аккумулятор для найденных файлов
+ * @returns {Promise<FileInfo[]>} - Массив всех найденных файлов
+ */
+async function scanDirectoryRecursive(directoryPath, extensions, fileList = []) {
+  const entries = await readdir(directoryPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = join(directoryPath, entry.name);
+
+    if (entry.isDirectory()) {
+      // Рекурсивно сканируем подпапки
+      await scanDirectoryRecursive(fullPath, extensions, fileList);
+    } else if (entry.isFile() && isFileAllowed(entry.name, extensions)) {
+      // Добавляем файл в список
+      const fileInfo = await getFileInfo(fullPath);
+      fileList.push(fileInfo);
+    }
+  }
+
+  return fileList;
+}
+
+/**
  * Сканирует директорию и возвращает список файлов с заданными расширениями
+ * РЕКУРСИВНО сканирует все подпапки
  *
  * @param {string} directoryPath - Путь к директории для сканирования
  * @param {string[]} extensions - Массив расширений файлов (например, [".det", ".pou", ".prt"])
@@ -110,16 +137,8 @@ function isFileAllowed(fileName, allowedExtensions) {
  */
 export async function scanDirectory(directoryPath, extensions = ['.det', '.pou', '.prt']) {
   try {
-    // Читаем содержимое директории
-    const entries = await readdir(directoryPath, { withFileTypes: true });
-
-    // Фильтруем только файлы (не директории) с нужными расширениями
-    const filePromises = entries
-      .filter(entry => entry.isFile())
-      .filter(entry => isFileAllowed(entry.name, extensions))
-      .map(entry => getFileInfo(join(directoryPath, entry.name)));
-
-    const files = await Promise.all(filePromises);
+    // Рекурсивное сканирование всех подпапок
+    const files = await scanDirectoryRecursive(directoryPath, extensions);
 
     // Сортируем по дате изменения (новые сверху)
     files.sort((a, b) => b.modifiedAt - a.modifiedAt);
