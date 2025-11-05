@@ -439,44 +439,47 @@
 
   **Результат:** Dialog работает, Display Name редактируется и отображается на карточках, ID readonly, auto metadata отображается ✅
 
-### 2.6 HomePage: Integration (1-2 часа)
+### 2.6 HomePage: Integration (1-2 часа) ✅
 
-- [ ] **Update `HomePage.tsx`** (1-2 часа)
-  - Add `FiltersBar` component above grid
-  - Connect filters state to project list
-  - Add empty state: "No projects match filters"
-  - Add loading state (skeleton cards)
-  - Test responsive layout (filters + cards)
+- [X] **Update `HomePage.tsx`** (1-2 часа) ✅
+  - Add `FiltersBar` component above grid ✅
+  - Connect filters state to project list ✅
+  - Add empty state: "No projects match filters" ✅
+  - Add loading state (skeleton cards) ✅
+  - Test responsive layout (filters + cards) ✅
 
-**🔄 Checkpoint 2.6: Phase 2 Complete**
+**🔄 Checkpoint 2.6: Phase 2 Complete** ✅
 
-- [ ] **Automated Testing:**
-  - Run dev server - no console errors
-  - Test full flow: filters → cards → dialog → save
-  - Verify all components integrated correctly
-  - Check TypeScript types (no errors)
-  - Check responsive layout (mobile/tablet/desktop)
+- [X] **Automated Testing:** ✅
+  - Run dev server - no console errors ✅
+  - Test full flow: filters → cards → dialog → save ✅
+  - Verify all components integrated correctly ✅
+  - Check TypeScript types (no errors) ✅
+  - Check responsive layout (mobile/tablet/desktop) ✅
 
-- [ ] **Git Commit:** `feat(frontend): integrate FiltersBar with HomePage dashboard`
+- [X] **Git Commit:** `feat(frontend): integrate FiltersBar with HomePage dashboard` ✅
   ```
-  - Add FiltersBar above project cards grid
-  - Connect filters state to project list
-  - Add empty state for no matches
-  - Add loading skeleton state
-  - Test responsive layout
+  - Add FiltersBar above project cards grid ✅
+  - Connect filters state to project list ✅
+  - Add empty state for no matches ✅
+  - Add loading skeleton state ✅
+  - Test responsive layout ✅
+  - Fix: unified filter widths (160px) ✅
+  - Fix: unified filter heights (h-10/40px) ✅
   ```
+  - Commit hash: 5c9cda6, 8265d59, 0d35ad4, c90763b
 
-- [ ] **Phase 2 Sign-off (Vladimir):**
-  **✅ Phase 2 Complete когда:**
-  1. Dashboard отображает все проекты с новыми полями
-  2. Фильтры работают (Type, Intake, Exhaust, Cylinders)
-  3. Search находит проекты по displayName и client
-  4. ProjectCard показывает displayName, ID (мелко), badges
-  5. MetadataDialog позволяет редактировать displayName и manual metadata
-  6. Всё работает на mobile/tablet/desktop
-  7. UI выглядит профессионально ("iPhone quality")
+- [X] **Phase 2 Sign-off (Vladimir):** ✅
+  **✅ Phase 2 Complete:**
+  1. Dashboard отображает все проекты с новыми полями ✅
+  2. Фильтры работают (Type, Intake, Exhaust, Cylinders) ✅
+  3. Search находит проекты по displayName и client ✅
+  4. ProjectCard показывает displayName, ID (мелко), badges ✅
+  5. MetadataDialog позволяет редактировать displayName и manual metadata ✅
+  6. Всё работает на mobile/tablet/desktop ✅
+  7. UI выглядит профессионально ("iPhone quality") ✅
 
-  **➡️ После OK от Vladimir → переходим к Phase 3 (Polish)**
+  **➡️ Phase 2 COMPLETE! Ready for Phase 3 (Polish)**
 
 ---
 
