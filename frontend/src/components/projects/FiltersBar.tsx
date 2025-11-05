@@ -165,7 +165,7 @@ export default function FiltersBar({
           value={filters.cylinders}
           onChange={(value) => updateFilter('cylinders', value)}
           placeholder="All Cylinders"
-          className="w-[180px]"
+          className="w-[160px]"
         />
 
         {/* Sort Dropdown */}
