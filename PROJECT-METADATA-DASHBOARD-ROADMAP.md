@@ -493,6 +493,11 @@
   - ✅ **Solution #2:** Flattened payload structure to match backend API expectations
   - File: `frontend/src/components/projects/MetadataDialog.tsx` (lines 112-124, 390)
 
+- [X] **Git Commit:** `fix(frontend): Phase 2.7 bug fixes - ProjectCard, Status badge, MetadataDialog` ✅
+  - Commit hash: 5462ce9
+  - All 3 bug fixes committed
+  - Documentation updated (CHANGELOG.md, architecture.md, roadmap)
+
 - [X] **Phase 2 Sign-off (Vladimir):** ✅
   **✅ Phase 2 Complete + Bug Fixes:**
   1. Dashboard отображает все проекты с новыми полями ✅
