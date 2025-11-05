@@ -21,7 +21,7 @@
 
 ## ⚠️ КРИТИЧЕСКИ ВАЖНО: Universal EngMod4T Format
 
-**Перед написанием парсера ОБЯЗАТЕЛЬНО прочитайте:** [EngMod4T Overview](engmod4t-overview.md)
+**Перед написанием парсера ОБЯЗАТЕЛЬНО прочитайте:** [EngMod4T Overview](engmod4t-suite/engmod4t-overview.md)
 
 ### Все файлы имеют единый формат!
 
@@ -54,7 +54,7 @@ const values = line.split(' ');       // НЕТ! Множественные пр
 1. **Экономия времени:** Не нужно угадывать формат нового файла
 2. **Единообразие:** Все парсеры используют одинаковый подход
 3. **Надёжность:** Проверенный метод парсинга работает для всех типов
-4. **Документация:** Single Source of Truth в [EngMod4T Overview](engmod4t-overview.md)
+4. **Документация:** Single Source of Truth в [EngMod4T Overview](engmod4t-suite/engmod4t-overview.md)
 
 ---
 

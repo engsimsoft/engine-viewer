@@ -6,7 +6,7 @@
 **Формат:** Fixed-width ASCII text (**NOT** space-separated CSV)
 **Статус:** ✅ Реализовано
 
-**📖 См. также:** [EngMod4T Overview](../engmod4t-overview.md) - Single Source of Truth о программе-источнике и универсальном формате файлов.
+**📖 См. также:** [EngMod4T Overview](../engmod4t-suite/engmod4t-overview.md) - Single Source of Truth о программе-источнике и универсальном формате файлов.
 
 ---
 

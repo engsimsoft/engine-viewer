@@ -244,6 +244,7 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 
 **Техническая документация:**
 - **[docs/architecture.md](docs/architecture.md)** - архитектура системы, data flow, паттерны
+- **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly documentation о старых программах
 - **[docs/chart-presets.md](docs/chart-presets.md)** - документация по 6 пресетам графиков
 - **[docs/api.md](docs/api.md)** - API документация, endpoints
 - **[docs/setup.md](docs/setup.md)** - детальная установка, зависимости, запуск
@@ -260,6 +261,7 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 - **[docs/decisions/001-det-file-parsing.md](docs/decisions/001-det-file-parsing.md)** - парсинг .det (первая колонка служебная)
 - **[docs/decisions/002-multi-format-support.md](docs/decisions/002-multi-format-support.md)** - Registry pattern для парсеров
 - **[docs/decisions/003-color-palette-engineering-style.md](docs/decisions/003-color-palette-engineering-style.md)** - цветовая палитра графиков
+- **[docs/decisions/004-engmod4t-suite-documentation.md](docs/decisions/004-engmod4t-suite-documentation.md)** - AI-friendly документация для EngMod4T Suite
 
 **Управление проектом:**
 - **[scripts/README.md](scripts/README.md)** - документация shell скриптов (start, stop, status)

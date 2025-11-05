@@ -129,7 +129,7 @@ const values = line.split(' ');      // NO! Multiple spaces, not single
 
 **WHY This Matters:**
 - Future parsers (.prt, trace files) will use SAME format
-- Single Source of Truth: [docs/engmod4t-overview.md](docs/engmod4t-overview.md)
+- Single Source of Truth: [docs/engmod4t-suite/engmod4t-overview.md](docs/engmod4t-suite/engmod4t-overview.md)
 - All parsing logic should follow universal pattern
 - No need to guess format for new file types - it's always fixed-width ASCII
 
@@ -138,7 +138,7 @@ const values = line.split(' ');      // NO! Multiple spaces, not single
 2. Delphi `Format()` produces fixed-width output by design
 3. Same program creates all file types → same format approach
 
-**IMPACT:** When adding new parsers, ALWAYS refer to [EngMod4T Overview](docs/engmod4t-overview.md) first - the format is already documented.
+**IMPACT:** When adding new parsers, ALWAYS refer to [EngMod4T Overview](docs/engmod4t-suite/engmod4t-overview.md) first - the format is already documented.
 
 ---
 
@@ -862,6 +862,7 @@ Working Feature
 - [CLAUDE.md](CLAUDE.md) - Working rules for Claude Code (implementation agent)
 - [CHANGELOG.md](CHANGELOG.md) - Current version status (v2.0.0 complete)
 - [docs/architecture.md](docs/architecture.md) - System architecture, patterns, algorithms
+- [docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md) - 📚 EngMod4T Suite documentation (DAT4T, EngMod4T, Post4T) - AI-friendly overview of the old programs
 - [docs/chart-presets.md](docs/chart-presets.md) - Chart implementation details
 - [docs/decisions/](docs/decisions/) - Past architectural decisions (WHY)
 - [docs/PARAMETERS-REFERENCE.md](docs/PARAMETERS-REFERENCE.md) - All 73 parameters documented

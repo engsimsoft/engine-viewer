@@ -86,6 +86,7 @@ cd frontend && npm install && npm run dev
 - **[scripts/README.md](scripts/README.md)** - скрипты управления проектом
 - **[docs/architecture.md](docs/architecture.md)** - архитектура проекта
 - **[docs/api.md](docs/api.md)** - API документация
+- **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly documentation
 - **[docs/file-formats/README.md](docs/file-formats/README.md)** - форматы файлов (.det, .pou)
 - **[docs/PARAMETERS-REFERENCE.md](docs/PARAMETERS-REFERENCE.md)** - справочник всех 73 параметров двигателя
 - **[docs/parsers-guide.md](docs/parsers-guide.md)** - руководство по добавлению парсеров
