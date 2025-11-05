@@ -252,6 +252,25 @@ export function SettingsPopover({ children }: SettingsPopoverProps) {
             </Select>
           </div>
         </div>
+
+        <Separator className="my-4" />
+
+        {/* About Section */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">ℹ️</span>
+            <h4 className="font-medium text-sm">About</h4>
+          </div>
+          
+          <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              <strong className="text-foreground">Engine Viewer</strong> is a free and open-source application.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              No subscription or payment required. All features are available to everyone.
+            </p>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
