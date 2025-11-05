@@ -170,7 +170,7 @@ export default function FiltersBar({
 
         {/* Sort Dropdown */}
         <Select value={filters.sortBy} onValueChange={(value: any) => updateFilter('sortBy', value)}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="h-10 w-[160px]">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
           <SelectContent>
