@@ -10,7 +10,7 @@
 ## 📚 Структура
 
 ```
-markdown-chapters/
+Dat4THelp-chapters/
 ├── 01-Introduction-to-Dat4T.md          # 16 KB
 ├── 01-Pictures/                         # 424 KB (6 изображений)
 ├── 02-Starting-Dat4T.md                 # 15 KB
@@ -62,10 +62,10 @@ markdown-chapters/
 ### Вариант 1: Открыть в VSCode (рекомендую)
 ```bash
 # Открой папку в VSCode
-code _personal/markdown-chapters/
+code _personal/Dat4THelp-chapters/
 
 # Или конкретную главу
-code _personal/markdown-chapters/07-Intake-Subsystem.md
+code _personal/Dat4THelp-chapters/07-Intake-Subsystem.md
 ```
 
 **→ В VSCode:** нажми `Cmd+Shift+V` (Preview) - увидишь текст + картинки!
@@ -73,7 +73,7 @@ code _personal/markdown-chapters/07-Intake-Subsystem.md
 ### Вариант 2: Открыть на GitHub
 После push:
 ```
-https://github.com/engsimsoft/engine-viewer/tree/main/_personal/markdown-chapters
+https://github.com/engsimsoft/engine-viewer/tree/main/_personal/Dat4THelp-chapters
 ```
 
 **→ На GitHub:** открой любую главу - картинки автоматически подгрузятся!

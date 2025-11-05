@@ -9,7 +9,7 @@
 ## 📚 Структура
 
 ```
-post4t-chapters/
+Post4THelp-chapters/
 ├── 01-CombustionTrace.md                # 3.0 KB
 ├── 01-Pictures/                         # 1 изображение
 ├── 02-Detonation.md                     # 4.2 KB
@@ -145,10 +145,10 @@ post4t-chapters/
 ### Вариант 1: Открыть в VSCode (рекомендую)
 ```bash
 # Открой папку в VSCode
-code _personal/post4t-chapters/
+code _personal/Post4THelp-chapters/
 
 # Или конкретную главу
-code _personal/post4t-chapters/13-PerformanceAndEfficiency.md
+code _personal/Post4THelp-chapters/13-PerformanceAndEfficiency.md
 ```
 
 **→ В VSCode:** нажми `Cmd+Shift+V` (Preview) - увидишь текст + картинки!
@@ -156,7 +156,7 @@ code _personal/post4t-chapters/13-PerformanceAndEfficiency.md
 ### Вариант 2: Открыть на GitHub
 После push:
 ```
-https://github.com/engsimsoft/engine-viewer/tree/main/_personal/post4t-chapters
+https://github.com/engsimsoft/engine-viewer/tree/main/_personal/Post4THelp-chapters
 ```
 
 **→ На GitHub:** открой любую главу - картинки автоматически подгрузятся!
@@ -164,7 +164,7 @@ https://github.com/engsimsoft/engine-viewer/tree/main/_personal/post4t-chapters
 ### Вариант 3: Присоединить к Claude Chat
 1. В Claude Chat выбери "Add content from GitHub"
 2. Укажи: `engsimsoft/engine-viewer`
-3. Выбери папку: `_personal/post4t-chapters`
+3. Выбери папку: `_personal/Post4THelp-chapters`
 4. Теперь Claude Chat видит всю документацию Post4T!
 
 ---
