@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '@/hooks/useProjects';
 import ProjectCard from '@/components/projects/ProjectCard';
+import FiltersBar, { type ProjectFiltersState } from '@/components/projects/FiltersBar';
 import { MetadataDialog } from '@/components/projects/MetadataDialog';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
+import { filterAndSortProjects } from '@/utils/projectFilters';
 import type { ProjectInfo } from '@/types';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { projects, loading, error, refetch } = useProjects();
 
+  // Filters state
+  const [filters, setFilters] = useState<ProjectFiltersState>({
+    type: [],
+    intake: [],
+    exhaust: [],
+    cylinders: [],
+    search: '',
+    sortBy: 'date',
+  });
+
   // Диалог редактирования метаданных
   const [editingProject, setEditingProject] = useState<ProjectInfo | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Apply filters and sorting (client-side)
+  const filteredProjects = useMemo(() => {
+    return filterAndSortProjects(projects, filters);
+  }, [projects, filters]);
 
   const handleOpenProject = (id: string) => {
     navigate(`/project/${id}`);
@@ -27,6 +44,17 @@ export default function HomePage() {
   const handleDialogSuccess = () => {
     // Обновить список проектов после сохранения
     refetch();
+  };
+
+  const handleClearAllFilters = () => {
+    setFilters({
+      type: [],
+      intake: [],
+      exhaust: [],
+      cylinders: [],
+      search: '',
+      sortBy: 'date',
+    });
   };
 
   if (loading) {
@@ -56,15 +84,33 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Projects Count */}
-        <div className="mb-6">
-          <p className="text-lg">
-            Projects found: <span className="font-semibold">{projects.length}</span>
-          </p>
-        </div>
+        {/* Filters Bar */}
+        {projects.length > 0 && (
+          <FiltersBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearAll={handleClearAllFilters}
+            resultsCount={filteredProjects.length}
+            totalCount={projects.length}
+          />
+        )}
 
         {/* Projects Grid */}
-        {projects.length === 0 ? (
+        {filteredProjects.length === 0 && projects.length > 0 ? (
+          <div className="text-center py-16">
+            <div className="space-y-4">
+              <div className="text-6xl">🔍</div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium text-foreground">
+                  No Projects Match Filters
+                </p>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Try adjusting your filters or clearing all to see all projects
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : projects.length === 0 ? (
           <div className="text-center py-16">
             <div className="space-y-4">
               <div className="text-6xl">📂</div>
@@ -80,7 +126,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
