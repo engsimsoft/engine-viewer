@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "bmw-m42",
-  "displayName": "",
+  "displayName": "BMW Dudarev Motorsport",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -17,10 +17,10 @@
     "description": "",
     "client": "",
     "tags": [],
-    "status": "completed",
+    "status": "active",
     "notes": "",
-    "color": "#3b82f6"
+    "color": ""
   },
   "created": "2025-10-22T13:02:09.511Z",
-  "modified": "2025-11-05T15:21:25.067Z"
+  "modified": "2025-11-05T17:42:04.483Z"
 }

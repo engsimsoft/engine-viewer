@@ -16,6 +16,9 @@ interface ProjectCardProps {
 export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProps) {
   const metadata = project.metadata;
 
+  // Get displayName from metadata (metadata v1.0)
+  const displayName = metadata?.displayName || project.displayName;
+
   // Status icon and color mapping
   const statusConfig = {
     active: {
@@ -64,11 +67,11 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
           <div className="flex-1 min-w-0">
             {/* Display Name (large, bold) - fallback to name */}
             <CardTitle className="text-xl truncate">
-              {project.displayName || project.name}
+              {displayName || project.name}
             </CardTitle>
 
             {/* ID (small, muted) - shown below display name */}
-            {project.displayName && (
+            {displayName && (
               <p className="text-xs text-muted-foreground mt-0.5 truncate">
                 ID: {project.id}
               </p>
