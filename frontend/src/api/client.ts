@@ -49,7 +49,15 @@ export class ApiError extends Error {
 function handleApiError(error: unknown): never {
   if (axios.isAxiosError(error)) {
     const statusCode = error.response?.status;
-    const message = error.response?.data?.error || error.message;
+    const errorData = error.response?.data?.error;
+
+    // Если error это объект с message, берем message
+    const message = typeof errorData === 'object' && errorData !== null && 'message' in errorData
+      ? String(errorData.message)
+      : typeof errorData === 'string'
+      ? errorData
+      : error.message;
+
     throw new ApiError(message, statusCode, error);
   }
   throw new ApiError('Неизвестная ошибка при запросе к API');

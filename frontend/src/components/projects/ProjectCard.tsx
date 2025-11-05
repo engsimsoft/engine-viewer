@@ -34,7 +34,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
     },
   };
 
-  const status = metadata?.status || 'active';
+  const status = metadata?.manual?.status || 'active';
   const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
 
   const handleCardClick = () => {
@@ -51,7 +51,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
   return (
     <Card
       className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      style={{ borderLeftColor: metadata?.color || '#3b82f6' }}
+      style={{ borderLeftColor: metadata?.manual?.color || '#3b82f6' }}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -62,8 +62,8 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <CardTitle className="text-xl truncate">{project.name}</CardTitle>
-            {metadata?.description && (
-              <CardDescription className="mt-1">{metadata.description}</CardDescription>
+            {metadata?.manual?.description && (
+              <CardDescription className="mt-1">{metadata.manual.description}</CardDescription>
             )}
           </div>
           <Badge
@@ -77,10 +77,10 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
 
       <CardContent className="space-y-3">
         {/* Metadata info */}
-        {metadata?.client && (
+        {metadata?.manual?.client && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <FileText className="w-4 h-4" />
-            <span>Client: {metadata.client}</span>
+            <span>Client: {metadata.manual.client}</span>
           </div>
         )}
 
@@ -88,7 +88,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1">
             <Cpu className="w-4 h-4 text-muted-foreground" />
-            <span>{project.engineType}</span>
+            <span>{project.metadata?.auto?.type || 'NA'}</span>
           </div>
           <span className="text-muted-foreground">•</span>
           <span>{project.numCylinders} cyl.</span>
@@ -97,9 +97,9 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         </div>
 
         {/* Tags */}
-        {metadata?.tags && metadata.tags.length > 0 && (
+        {metadata?.manual?.tags && metadata.manual.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {metadata.tags.map((tag) => (
+            {metadata.manual.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
               </Badge>
