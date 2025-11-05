@@ -39,7 +39,7 @@
 
 ### 1.2 Backend: .prt Parser (5-7 часов)
 
-- [ ] **Создать `backend/src/parsers/formats/prtParser.js`** (2-3 часа)
+- [X] **Создать `backend/src/parsers/formats/prtParser.js`** (2-3 часа)
   - Parse project name (line 8: "4_Cyl_ITB engine")
   - Parse creation date/time (lines 12-13)
   - Parse Dat4T version (line 15)
@@ -48,22 +48,22 @@
   - Parse configuration: "INLINE TYPE" → "inline" (line 39)
   - Parse specs: bore, stroke, compression ratio, max power RPM (lines 46-55)
 
-- [ ] **Implement Intake System detection** (1-2 часа)
+- [X] **Implement Intake System detection** (1-2 часа)
   - Logic: parse "with no airboxes" → ITB
   - Logic: parse "with a common airbox or plenum" → IM
   - Extract throttles count (line 276)
   - Extract boxes/plenums count (line 277)
 
-- [ ] **Implement Exhaust System detection** (1 час)
+- [X] **Implement Exhaust System detection** (1 час)
   - Parse pattern: "4into2into1 manifold" (line 215)
   - Format output: "4into2into1" → "4-2-1"
   - Support: 4-2-1, 4-1, tri-y, 8-4-2-1
 
-- [ ] **Register parser in Registry** (30 min)
+- [X] **Register parser in Registry** (30 min)
   - Update `backend/src/parsers/index.js`
   - Add: `globalRegistry.register('prt', PrtParser);`
 
-- [ ] **Test parser with all 4 .prt files** (1 час)
+- [X] **Test parser with all 4 .prt files** (1 час)
   - Test: 4_Cyl_ITB.prt (ITB detection)
   - Test: Vesta 1.6 IM.prt (IM detection)
   - Test: BMW M42.prt (exhaust pattern)
@@ -71,98 +71,85 @@
 
 **🔄 Checkpoint 1.2: .prt Parser Complete**
 
-- [ ] **Automated Testing:**
+- [X] **Automated Testing:**
   - Run backend server (no errors)
   - Test parser manually with all 4 .prt files
   - Verify console output (all fields parsed correctly)
 
-- [ ] **Git Commit:** `feat: implement .prt parser with intake/exhaust detection`
-  ```
-  - Add prtParser.js with full .prt file parsing
-  - Implement intake system detection (ITB vs IM)
-  - Implement exhaust pattern detection (4-2-1, etc.)
-  - Register parser in ParserRegistry
-  - Tested with 4 test .prt files
-  ```
+- [X] **Git Commit:** `feat: implement .prt parser with intake/exhaust detection`
+  - Commit hash: 1efaa37
+  - Phase 1.2 + 1.3 + 1.4 combined
 
 - [ ] **Browser Testing Request (Vladimir):**
   - ⏸️ Not applicable (backend only, no UI changes yet)
 
 ### 1.3 Backend: Metadata Structure Update (3-4 часа)
 
-- [ ] **Update metadata schema** (1 час)
+- [X] **Update metadata schema** (1 час)
   - Split into "auto" (from .prt) + "manual" (user edits)
   - Add "version": "1.0"
   - Add "displayName" field (optional, default = ID)
   - Update TypeScript types in `shared-types.ts`
 
-- [ ] **Create migration script** (1-2 часа)
+- [X] **Create migration script** (1-2 часа)
   - Script: `backend/src/scripts/migrateMetadata.js`
   - Read existing `.metadata/*.json` files
   - Convert to new structure (old → manual section)
   - Preserve user data (description, client, tags, status, notes, color)
   - Add backward compatibility (read old format if "manual" missing)
 
-- [ ] **Update `metadataService.js`** (1 час)
+- [X] **Update `metadataService.js`** (1 час)
   - Implement merge logic: update "auto", preserve "manual"
   - Add timestamp "modified" on any change
   - Add validation for new structure
 
 **🔄 Checkpoint 1.3: Metadata Structure Updated**
 
-- [ ] **Automated Testing:**
+- [X] **Automated Testing:**
   - Run backend server (no errors)
   - Run migration script on test data
   - Verify new metadata structure in .metadata/ files
   - Test backward compatibility (read old format)
 
-- [ ] **Git Commit:** `feat: implement auto/manual metadata separation`
-  ```
-  - Update metadata schema (auto + manual sections)
-  - Add displayName field
-  - Create migration script for existing metadata
-  - Update shared-types.ts with new interfaces
-  - Add backward compatibility
-  ```
+- [X] **Git Commit:** `feat: implement auto/manual metadata separation`
+  - Commit hash: 1efaa37 (combined with Phase 1.2 + 1.4)
 
 - [ ] **Browser Testing Request (Vladimir):**
   - ⏸️ Not applicable (backend only, no UI changes yet)
 
 ### 1.4 Backend: File Scanner & API Updates (2-3 часа)
 
-- [ ] **Update `fileScanner.js`** (1 час)
+- [X] **Update `fileScanner.js`** (1 час)
   - Include `.prt` files in scan (add to extensions array)
   - Parse .prt → extract "auto" metadata
   - Create/update `.metadata/<projectId>.json` with "auto" section
+  - Add recursive directory scanning for subdirectory structure
 
-- [ ] **Update `GET /api/projects` endpoint** (1 час)
+- [X] **Update `GET /api/projects` endpoint** (1 час)
   - Merge "auto" + "manual" metadata
   - Return displayName (or ID if displayName empty)
   - Add filters support (query params: cylinders, type, intake, exhaust)
 
-- [ ] **Update `PATCH /api/projects/:id/metadata` endpoint** (1 час)
+- [X] **Update `PATCH /api/projects/:id/metadata` endpoint** (1 час)
   - Only update "manual" section
   - Preserve "auto" section
   - Update "modified" timestamp
 
 **🔄 Checkpoint 1.4: Backend APIs Updated**
 
-- [ ] **Automated Testing:**
-  - Run backend server (no errors)
-  - Test GET /api/projects (verify auto+manual merge)
-  - Test GET /api/projects with filters (cylinders, type, intake, exhaust)
-  - Test PATCH /api/projects/:id/metadata (manual section only)
-  - Verify .prt files are scanned on startup
+- [X] **Automated Testing:**
+  - Run backend server (no errors) ✅
+  - Test GET /api/projects (verify auto+manual merge) ✅
+  - Test GET /api/projects with filters (cylinders, type, intake, exhaust) ✅
+  - Test PATCH /api/projects/:id/metadata (manual section only) ✅
+  - Verify .prt files are scanned on startup ✅
+  - Verify recursive scanning works with subdirectories ✅
 
-- [ ] **Git Commit:** `feat: update API endpoints with .prt metadata support`
-  ```
-  - Update fileScanner to include .prt files
-  - Update GET /api/projects (merge auto+manual, add filters)
-  - Update PATCH endpoint (preserve auto section)
-  - Add displayName support (fallback to ID)
-  ```
+- [X] **Git Commit:** `feat: update API endpoints with .prt metadata support`
+  - Commit hash: 1efaa37 (combined with Phase 1.2 + 1.3)
+  - Additional bugfixes: f3f5975
 
-- [ ] **Browser Testing Request (Vladimir):**
+- [X] **Browser Testing Request (Vladimir):**
   **Чек-лист для тестирования:**
   1. Открыть http://localhost:5173
   2. Проверить что Dashboard загружается без ошибок
@@ -175,46 +162,47 @@
   6. Проверить что "manual" данные обновились, "auto" не изменились
 
   **Ожидаемый результат:** API работает, metadata структура правильная, изменения сохраняются
+  **✅ TESTED BY VLADIMIR** - Working, но недостаёт engine badges на карточках
 
-### 1.5 Backend Testing (1-2 часа)
+### 1.5 Backend Testing & Documentation (1-2 часа)
 
-- [ ] **Test API endpoints** (1 час)
-  - Test: GET /api/projects with filters
-  - Test: PATCH metadata (manual section only)
-  - Verify "auto" metadata preserved
+- [X] **Test API endpoints** (1 час)
+  - Test: GET /api/projects with filters ✅
+  - Test: PATCH metadata (manual section only) ✅
+  - Verify "auto" metadata preserved ✅
 
-- [ ] **Run migration script on test data** (30 min)
-  - Migrate existing 3 metadata files
-  - Verify backward compatibility
+- [X] **Run migration script on test data** (30 min)
+  - Migrate existing metadata files ✅
+  - Verify backward compatibility ✅
 
-- [ ] **Document changes** (30 min)
+- [ ] **Document changes** (30 min) ⚠️ MISSING
   - Update `docs/architecture.md` (metadata structure)
   - Create ADR: `docs/decisions/005-prt-parser-metadata-separation.md`
 
 **🔄 Checkpoint 1.5: Phase 1 Complete**
 
-- [ ] **Automated Testing:**
-  - Run full test suite (if exists)
-  - Check all backend endpoints working
-  - Verify no console errors
-  - Check TypeScript compilation
+- [X] **Automated Testing:**
+  - Run full test suite (if exists) ✅
+  - Check all backend endpoints working ✅
+  - Verify no console errors ✅
+  - Check TypeScript compilation ✅
 
-- [ ] **Git Commit:** `docs: add .prt parser documentation and ADR`
-  ```
+- [ ] **Git Commit:** `docs: add .prt parser documentation and ADR` ⚠️ MISSING
   - Update docs/architecture.md with new metadata structure
   - Create ADR-005: .prt parser and metadata separation
   - Document intake/exhaust detection logic
-  ```
 
 - [ ] **Phase 1 Sign-off (Vladimir):**
-  **✅ Phase 1 Complete когда:**
-  1. Backend работает без ошибок
-  2. .prt файлы парсятся корректно
-  3. Metadata структура auto+manual работает
-  4. API endpoints возвращают правильные данные
-  5. Можно откатиться на любой commit если что-то сломается
+  **✅ Phase 1 ALMOST Complete:**
+  1. Backend работает без ошибок ✅
+  2. .prt файлы парсятся корректно ✅
+  3. Metadata структура auto+manual работает ✅
+  4. API endpoints возвращают правильные данные ✅
+  5. Можно откатиться на любой commit ✅
 
-  **➡️ После OK от Vladimir → переходим к Phase 2**
+  **⚠️ MISSING: Documentation (ADR-005, docs/architecture.md update)**
+
+  **➡️ Следующий шаг: Phase 2.4 - Engine badges на карточках**
 
 ---
 
