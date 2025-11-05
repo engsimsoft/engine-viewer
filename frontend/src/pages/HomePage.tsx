@@ -4,7 +4,7 @@ import { useProjects } from '@/hooks/useProjects';
 import ProjectCard from '@/components/projects/ProjectCard';
 import FiltersBar, { type ProjectFiltersState } from '@/components/projects/FiltersBar';
 import { MetadataDialog } from '@/components/projects/MetadataDialog';
-import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import SkeletonCard from '@/components/shared/SkeletonCard';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import { filterAndSortProjects } from '@/utils/projectFilters';
 import type { ProjectInfo } from '@/types';
@@ -60,7 +60,22 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <LoadingSpinner />
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Engine Results Viewer</h1>
+            <p className="text-muted-foreground">
+              View and analyze internal combustion engine calculation results
+            </p>
+          </div>
+
+          {/* Skeleton Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

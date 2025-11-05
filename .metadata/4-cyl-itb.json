@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "4-cyl-itb",
-  "displayName": "",
+  "displayName": "Tetst ITB",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -13,7 +13,14 @@
     "intakeSystem": "ITB",
     "exhaustSystem": "4-2-1"
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "",
+    "tags": [],
+    "status": "active",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-05T14:51:17.039Z"
+  "modified": "2025-11-05T17:45:33.062Z"
 }
