@@ -340,30 +340,30 @@
 
   **Результат:** Фильтры работают корректно, можно комбинировать, UI плавный ✅
 
-### 2.4 Dashboard: Enhanced ProjectCard (2-3 часа)
+### 2.4 Dashboard: Enhanced ProjectCard (2-3 часа) ✅
 
-- [ ] **Update `ProjectCard.tsx`** (2 часа)
-  - Display: displayName (large, bold)
-  - Display: ID (small, gray, muted) - below displayName
-  - Add: Engine badges (NA, ITB, 4 Cyl, 4-2-1)
-  - Update layout for new fields
-  - Keep existing: client, calculations count, date, status
+- [X] **Update `ProjectCard.tsx`** (2 часа)
+  - Display: displayName (large, bold) ✅
+  - Display: ID (small, gray, muted) - below displayName ✅
+  - Add: Engine badges (NA, ITB, 4 Cyl, 4-2-1) ✅ Already done in Phase 2.2
+  - Update layout for new fields ✅
+  - Keep existing: client, calculations count, date, status ✅
 
-- [ ] **Test ProjectCard** (1 час)
-  - Test with all 4 test projects
-  - Test with/without displayName (fallback to ID)
-  - Test with/without client
-  - Test color coding
+- [X] **Test ProjectCard** (1 час)
+  - Test with all 4 test projects ✅
+  - Test with/without displayName (fallback to ID) ✅
+  - Test with/without client ✅
+  - Test color coding ✅
 
-**🔄 Checkpoint 2.4: ProjectCard Enhanced**
+**🔄 Checkpoint 2.4: ProjectCard Enhanced** ✅
 
-- [ ] **Automated Testing:**
-  - Run dev server - no console errors
-  - Verify all 4 test projects render correctly
-  - Check displayName fallback to ID works
-  - Verify badges display correctly
+- [X] **Automated Testing:**
+  - Run dev server - no console errors ✅
+  - Verify all 4 test projects render correctly ✅
+  - Check displayName fallback to ID works ✅
+  - Verify badges display correctly ✅
 
-- [ ] **Git Commit:** `feat(frontend): enhance ProjectCard with displayName and badges`
+- [X] **Git Commit:** `feat(frontend): enhance ProjectCard with displayName and badges` ✅
   ```
   - Add displayName display (large, bold)
   - Add ID display (small, gray, muted)

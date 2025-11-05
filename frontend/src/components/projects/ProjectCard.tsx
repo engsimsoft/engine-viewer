@@ -62,7 +62,19 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-xl truncate">{project.name}</CardTitle>
+            {/* Display Name (large, bold) - fallback to name */}
+            <CardTitle className="text-xl truncate">
+              {project.displayName || project.name}
+            </CardTitle>
+
+            {/* ID (small, muted) - shown below display name */}
+            {project.displayName && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                ID: {project.id}
+              </p>
+            )}
+
+            {/* Description */}
             {metadata?.manual?.description && (
               <CardDescription className="mt-1">{metadata.manual.description}</CardDescription>
             )}
