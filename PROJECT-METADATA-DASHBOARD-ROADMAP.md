@@ -187,20 +187,19 @@
   - Verify no console errors ✅
   - Check TypeScript compilation ✅
 
-- [ ] **Git Commit:** `docs: add .prt parser documentation and ADR` ⚠️ MISSING
-  - Update docs/architecture.md with new metadata structure
-  - Create ADR-005: .prt parser and metadata separation
-  - Document intake/exhaust detection logic
+- [X] **Git Commit:** `docs: add .prt parser documentation and ADR` ✅ `dab96e5`
+  - Update docs/architecture.md with new metadata structure ✅
+  - Create ADR-005: .prt parser and metadata separation ✅
+  - Document intake/exhaust detection logic ✅
 
 - [ ] **Phase 1 Sign-off (Vladimir):**
-  **✅ Phase 1 ALMOST Complete:**
+  **✅ Phase 1 COMPLETE:**
   1. Backend работает без ошибок ✅
   2. .prt файлы парсятся корректно ✅
   3. Metadata структура auto+manual работает ✅
   4. API endpoints возвращают правильные данные ✅
   5. Можно откатиться на любой commit ✅
-
-  **⚠️ MISSING: Documentation (ADR-005, docs/architecture.md update)**
+  6. Documentation complete (ADR-005, docs/architecture.md) ✅
 
   **➡️ Следующий шаг: Phase 2.4 - Engine badges на карточках**
 
