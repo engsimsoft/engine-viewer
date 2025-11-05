@@ -8,7 +8,7 @@
 
 The following figure shows the input required to model an inlet port:
 
-![](Pictures/InPortInputData.jpg){border="0" width="712" height="577"}
+![](05-Pictures/InPortInputData.jpg){border="0" width="712" height="577"}
 
 [**Number of Valves:** This is the number of valves per cylinder and can vary from 1 to 3 for inlet valves and 1 or 2 for exhaust valves.]{lang="EN-US"}
 
@@ -18,23 +18,23 @@ The following figure shows the input required to model an inlet port:
 
 The software uses the smallest available flow area through the valve open apperture times the Cd-value as the area through which the gas flows. This area is dependent on the seat dimensions on the valve and in the head. The two major controlling dimensions are the seat inside diameter on the valve and the seat outside diameter in the head. The next figure shows the possible combinations of these \"major\" dimensions:
 
-![](Pictures/SeatOptions.jpg){border="0" width="500" height="526"}
+![](05-Pictures/SeatOptions.jpg){border="0" width="500" height="526"}
 
 The next graph shows the effect on flow area by having first only the inner seat diameter on the valve decreased by 3mm, then the effect of increasing only the outer diameter of the seat in the head by 3mm and finally doing both. The graph goes from the valve opening point to the fully open point:
 
-![](Pictures/Seat%20effects.jpg){border="0" width="779" height="541"}
+![](05-Pictures/Seat%20effects.jpg){border="0" width="779" height="541"}
 
 ## Description of the Cd maps
 
 [During the flow through a valve the flow is less than what the flow theoretical flow through the open area would have been. The ratio of the measured flow to the theoretical flow is known as the "coefficient of discharge" and is usually abbreviated as Cd. This Cd value is a function of how far the valve is open and the pressure ratio across the valve. If we create a map of the Cd as a function of both the valve open ratio and the pressure ratio we end up with a typical Cd map as shown in the next figure (the often used 28" of water pressure used on a flow bench gives a pressure ratio of 1.07 which is very slightly above the x axis). (from SAE2001-01-1798): ]{lang="EN-US"}
 
-![](Pictures/Cd-Map.jpg){border="0" width="451" height="402"}
+![](05-Pictures/Cd-Map.jpg){border="0" width="451" height="402"}
 
 The Cd value is actually of the complete port and takes the losses through the "venturi", the flow around the short side radius and around the valve guide and valve stem into consideration as well as the valve seat and valve masking effects. This map is one of the inputs into EngMod4T and that is why it is stated EngMod4T takes the flow loss into of the smallest cross sectional area into consideration irrespective of where it is.
 
 The following figure shows how the flow through the valve opening migrates as a function of pressure ratio, lift and engine rpm. It is clear that the flow on an engine spends very little time at the 28" line (1.07).
 
-![](Pictures/Cd-MapMigration.jpg){border="0" width="451" height="418"}
+![](05-Pictures/Cd-MapMigration.jpg){border="0" width="451" height="418"}
 
 [Very few people have the facilities to measure a port to construct a Cd map. Getting just the Cd value at a specific pressure ratio (i.e. at 28" of water on a flow bench) is a lot more common. Because of this there are three ways in EngMod4T to describe the flow through a port and valve combination:]{lang="EN-US"}
 
@@ -48,15 +48,15 @@ The following figure shows how the flow through the valve opening migrates as a 
 
 [**Severely Masked** is defined where the combustion chamber and/or cylinder wall restricts the flow through the valve open aperture over more than 90 degrees of its circumference and with a clearance of less than half the valve lift. The following figure shows it schematically:]{lang="EN-US"}
 
-![](Pictures/ValveMaskingSevere.jpg){border="0" width="451" height="264"}
+![](05-Pictures/ValveMaskingSevere.jpg){border="0" width="451" height="264"}
 
 [**Partially Masked** is defined where the combustion chamber and/or cylinder wall restricts the flow through the valve open aperture over less than 90 degrees of its circumference with a clearance bigger than half the valve lift but smaller than the full valve lift. Almost all 4 and 5 valve heads fall in this category. The following figure shows it schematically:]{lang="EN-US"}
 
-![](Pictures/ValveMaskingPartial.jpg){border="0" width="470" height="264"}
+![](05-Pictures/ValveMaskingPartial.jpg){border="0" width="470" height="264"}
 
 [**Free Flowing** is where the combustion chamber and cylinder walls have almost no detrimental effect on the flow through the valve aperture. The following figure shows it schematically:]{lang="EN-US"}
 
-![](Pictures/ValveMaskingFree.jpg){border="0" width="450" height="264"}
+![](05-Pictures/ValveMaskingFree.jpg){border="0" width="450" height="264"}
 
 [To allow further fine tuning of the Cd-map there are multipliers. A severely masked Cd map multiplied with a factor of 1.2 is roughly the same as a partially masked Cd map multiplied by 0.8, and the same way a partially masked Cd map multiplied by 1.2 flows roughly the same as a free flowing Cd map multiplied by 0.8. Using this together with good judgement and experience the effect of flow improvements in the chamber can be modeled.]{lang="EN-US"}
 
@@ -85,21 +85,21 @@ Both methods of lift profile specification, generated and imported can be used f
 
 By selecting the **Variable Valve Timing (VVT) and/or Lift (VVL)** radio button additional input boxes opens. The first set requires the control rpm values. The first value is the rpm value up to which the lift profile 1 is used. The second value is the rpm value from where the second lift profile is used.
 
-![](Pictures/VVT-RPM-Ex.jpg){border="0" width="360" height="323"}
+![](05-Pictures/VVT-RPM-Ex.jpg){border="0" width="360" height="323"}
 
 If a step change is required specify the second value as 1 rpm more for example rpm1 = 6000 and rpm2 = 6001.
 
 The next figure shows the data required for the two lift profiles to be generated:
 
-![](Pictures/VVT-Gen-Ex.jpg){border="0" width="637" height="454"}
+![](05-Pictures/VVT-Gen-Ex.jpg){border="0" width="637" height="454"}
 
 After the data has been entered and the **Accept and Save** button was clicked the graphics plus timing data for Lift Profile 1 is diaplayed:
 
-![](Pictures/VVT-Gen-Cam1.jpg){border="0" width="919" height="697"}
+![](05-Pictures/VVT-Gen-Cam1.jpg){border="0" width="919" height="697"}
 
 Clicking the **OK** button displays the graphics and timing data for Lift Profile 2:
 
-![](Pictures/VVT-Gen-Cam2.jpg){border="0" width="919" height="697"}
+![](05-Pictures/VVT-Gen-Cam2.jpg){border="0" width="919" height="697"}
 
 ## Using an Imported Lift Profile
 
@@ -107,7 +107,7 @@ Clicking the **OK** button displays the graphics and timing data for Lift Profil
 
 By selecting the **Variable Valve Timing (VVT) and/or Lift (VVL)** radio button additional input boxes opens. The first set requires the control rpm values. The first value is the rpm value up to which the lift profile 1 is used. The second value is the rpm value from where the second lift profile is used.
 
-![](Pictures/VVT-RPM-In.jpg){border="0" width="392" height="324"}
+![](05-Pictures/VVT-RPM-In.jpg){border="0" width="392" height="324"}
 
 If a step change is required specify the second value as 1 rpm more for example rpm1 = 6000 and rpm2 = 6001.
 
@@ -119,25 +119,25 @@ By selecting the **Variable Valve Timing and Lift (VVT and VVL)** radio button a
 - The second set requires the control rpm and timing values for lift profile 2. The first value is the rpm value up to which the lift profile 2 first timing value is used and the timing value. The second value is the rpm value from where the second timing value is used.
 - The rpm value where the lift changes from profile 1 to profile 2 is also supplied
 
-![](Pictures/VTEC-RPM-In.jpg){border="0" width="390" height="319"}
+![](05-Pictures/VTEC-RPM-In.jpg){border="0" width="390" height="319"}
 
 ### Importing the two Lift Profiles
 
 The next figure shows the data required for the two lift profiles to be imported. Note that only one method of specifying the timing for both profiles can be used.
 
-![](Pictures/VVT-Imp-In.jpg){border="0" width="332" height="497"}
+![](05-Pictures/VVT-Imp-In.jpg){border="0" width="332" height="497"}
 
 After the data has been entered and the **Accept and Save** button was clicked the graphics plus timing data for Lift Profile 1 is diaplayed:
 
-![](Pictures/VVT-Imp-Cam1.jpg){border="0" width="919" height="697"}
+![](05-Pictures/VVT-Imp-Cam1.jpg){border="0" width="919" height="697"}
 
 Clicking the **OK** button displays the graphics and timing data for Lift Profile 2:
 
-![](Pictures/VVT-Imp-Cam2.jpg){border="0" width="919" height="697"}
+![](05-Pictures/VVT-Imp-Cam2.jpg){border="0" width="919" height="697"}
 
 After saving the inlet and exhaust port, valve and lift profile data the combination can be seen by clicking on the [\"**STA**\"](STA.htm) button:
 
-![](Pictures/VVT-STA.jpg){border="0" width="954" height="325"}
+![](05-Pictures/VVT-STA.jpg){border="0" width="954" height="325"}
 
 ---
 
@@ -149,7 +149,7 @@ Port and Valve Data
 
 This section of the input data is identical for all the valves and cams.
 
-![](Pictures/ExPortLayout.jpg){border="0" width="315" height="244"}
+![](05-Pictures/ExPortLayout.jpg){border="0" width="315" height="244"}
 
 ### Number of valves
 
@@ -172,11 +172,11 @@ By choosing the amount of valve masking (interference to the flow by the proximi
 
 Sometimes the engine starts off unmodified with a specific map and because it is modified the flow improves but not so much as to use the next map, the user can adjust the map to the new better flow conditions by multiplying the map by a factor. The maximum a map can be improved is 10% (factor = 1.1) before the next map should be used. The user can also start by using a better map and adjust it downward by up to 10% (factor = 0.9) to simulate the unmodified engine and the progressively adjust the map upward as the flow is improved. See also the help topic on [Cd-maps](PortFlowModeling.htm).
 
-![](Pictures/ExValve4T.jpg){border="0" width="466" height="466"}
+![](05-Pictures/ExValve4T.jpg){border="0" width="466" height="466"}
 
 The next shows the required input data on the valve and port.
 
-![](Pictures/ExValvePassage.jpg){border="0" width="323" height="328"}
+![](05-Pictures/ExValvePassage.jpg){border="0" width="323" height="328"}
 
 ### Outer Seat Diameter on Valve
 
@@ -244,7 +244,7 @@ By specifying a non-central lobe centre and/or different opening and closing ram
 
 The generated cam profile is stored in a file with the same name as this subsystem but with the .eco extension. It is a normal ASCI file and can be view with a standard spreadsheet program.
 
-![](Pictures/CamGenPicAnnotated.jpg){border="0" width="571" height="774"}
+![](05-Pictures/CamGenPicAnnotated.jpg){border="0" width="571" height="774"}
 
 ### Valve Opening before BDC
 
@@ -287,11 +287,11 @@ The cam lobe centre is defined as the centre point of the dwell period or as the
 
 At the end of this the screen will display typically the following data:
 
-![](Pictures/ExCamGenerate.jpg){border="0" width="1347" height="708"}
+![](05-Pictures/ExCamGenerate.jpg){border="0" width="1347" height="708"}
 
 Clicking on \"Accept and Save\" a summary and graphics will follow that looks as follows:
 
-![](Pictures/ExCamGenGraph.jpg){border="0" width="919" height="697"}
+![](05-Pictures/ExCamGenGraph.jpg){border="0" width="919" height="697"}
 
 At this point in time it is possible to edit the data if you are not satisfied with the results. Clicking on \"OK\" will accept the results while clicking on \"Edit Cam\" will take you back to the previous dialog.
 
@@ -305,7 +305,7 @@ This section of the help pages describes how to import an existing valve lift fi
 
 This section of the input data is identical for all the valves and cams.
 
-![](Pictures/ExPortLayout.jpg){border="0" width="315" height="244"}
+![](05-Pictures/ExPortLayout.jpg){border="0" width="315" height="244"}
 
 ### Number of valves
 
@@ -328,11 +328,11 @@ By choosing the amount of valve masking (interference to the flow by the proximi
 
 Sometimes the engine starts off unmodified with a specific map and because it is modified the flow improves but not so much as to use the next map, the user can adjust the map to the new better flow conditions by multiplying the map by a factor. The maximum a map can be improved is 10% (factor = 1.1) before the next map should be used. The user can also start by using a better map and adjust it downward by up to 10% (factor = 0.9) to simulate the unmodified engine and the progressively adjust the map upward as the flow is improved. See also the help topic on [Cd-maps](PortFlowModeling.htm).
 
-  ![](Pictures/ExValve4T.jpg){border="0" width="466" height="466"}
+  ![](05-Pictures/ExValve4T.jpg){border="0" width="466" height="466"}
 
 The next shows the required input data on the valve and port.
 
-![](Pictures/ExValvePassage.jpg){border="0" width="323" height="328"}
+![](05-Pictures/ExValvePassage.jpg){border="0" width="323" height="328"}
 
 ### Outer Seat Diameter on Valve
 
@@ -380,7 +380,7 @@ The software can model variable valve lift combined with variable valve timing. 
 
 ## Cam Data
 
-![](Pictures/ExCamImpHelp.jpg){border="0" width="327" height="543"}
+![](05-Pictures/ExCamImpHelp.jpg){border="0" width="327" height="543"}
 
 The cam, or more accurately, the valve lift data is imported as a file. This data can be generated by another application all together. This file must have the following format:
 
@@ -394,7 +394,7 @@ The degrees must increase in steps of one degree per lift value and must start a
 
 The following picture shows a typical 4stHEAD static valve lift file, column one is the degrees, column two the lift, three the velocity and four the acceleration.
 
-![](Pictures/ExValveLiftFile.jpg){border="0" width="640" height="533"}
+![](05-Pictures/ExValveLiftFile.jpg){border="0" width="640" height="533"}
 
 ### Imported File Name
 
@@ -406,7 +406,7 @@ The name of the imported file with its extension. The maximum total length inclu
 4.  Comma separated file (\*.csv)
 5.  A general lift file (\*.\*)
 
-![](Pictures/ExProfileFileSelect.jpg){border="0" width="429" height="350"}
+![](05-Pictures/ExProfileFileSelect.jpg){border="0" width="429" height="350"}
 
 ### Line Number Where Lift Data Starts
 
@@ -427,17 +427,17 @@ To index the imported data to have the correct valve timing is not always simple
 
 The following picture demonstrates the difference between **lobe centre** and **lift or dwell centre** (for illustrative purposes a large offset is used):
 
-![](Pictures/Lift-Lobe-Centre.jpg){border="0" width="905" height="424"}
+![](05-Pictures/Lift-Lobe-Centre.jpg){border="0" width="905" height="424"}
 
 Whatever the method the user might have to make adjustments to the indexing degrees and tappet clearance to obtain the correct timing and duration.
 
 At the end of this the screen will display typically the following data:
 
-![](Pictures/ExCamImport.jpg){border="0" width="1062" height="726"}
+![](05-Pictures/ExCamImport.jpg){border="0" width="1062" height="726"}
 
 Clicking on \"Accept and Save\" a summary and graphics will follow that looks as follows:
 
-![](Pictures/ExCamImpGraph.jpg){border="0" width="919" height="697"}
+![](05-Pictures/ExCamImpGraph.jpg){border="0" width="919" height="697"}
 
 At this point in time it is possible to edit the data if you are not satisfied with the results. Clicking on \"OK\" will accept the results while clicking on \"Edit Cam\" will take you back to the previous dialog.
 
@@ -449,23 +449,23 @@ At this point in time it is possible to edit the data if you are not satisfied w
 
 The software uses [Cd-maps](../Cd-Maps/Cd-Map.htm) for the port flows based on measured data for typical head and valve configurations. Sometimes it is necessary for the user to modify these maps based on data obtained on a flowbench. To do this, the user selects the \"**User Defined from Flowbench Data**\" radio button on the cam and inlet port dialog:
 
-![](Pictures/ExCd-MapRadio.jpg){border="0"}
+![](05-Pictures/ExCd-MapRadio.jpg){border="0"}
 
 Which then changes to show the following dialog:
 
-![](Pictures/ExCd-mapDialog.jpg){border="0"}
+![](05-Pictures/ExCd-mapDialog.jpg){border="0"}
 
 The next step is to either select or create new flow bench and Cd-map files by clicking first the \"**New Flow Bench File**\" button and selecting a file name and then the \"**New Cd-map File**\" button to create or select the Cd-map file:
 
-![](Pictures/ExCd-mapFiles.jpg){border="0"}
+![](05-Pictures/ExCd-mapFiles.jpg){border="0"}
 
 Next we click on the \"**Calculate Cd-Map**\" button and the following dialog opens if it is a new file that already exists:
 
-![](Pictures/Cd-MapFlowBenchEmpty.jpg){border="0"}
+![](05-Pictures/Cd-MapFlowBenchEmpty.jpg){border="0"}
 
 Click on the \"**OK**\" button to open the following dialog:
 
-![](Pictures/Cd-MapBenchDialogBlank.jpg){border="0"}
+![](05-Pictures/Cd-MapBenchDialogBlank.jpg){border="0"}
 
 The user has to complete the form before continuing:
 
@@ -548,7 +548,7 @@ As a flowbench records data only at one pressure ratio and a Cd-map covers a ran
 
 The flowbench data is now filled in:
 
-![](Pictures/ExCd-MapBenchDialogFilled.jpg){border="0"}
+![](05-Pictures/ExCd-MapBenchDialogFilled.jpg){border="0"}
 
 ### **[Display Flow Curve]{.underline}**
 
@@ -558,7 +558,7 @@ Selecting the \"**Display Flow Curve**\" button calculates the corrected [Cd-val
 
 Select the \"**Calculate Cd-Map and save Flowbench File and Cd-Map**\" button which also calculates the corrected Cd value and displays it but then on \"**Continue**\" it updates and saves the Cd-map and the flowbench input file, then it returns to the inlet port dialog.
 
-![](Pictures/ExCd-Curve.jpg){border="0"}
+![](05-Pictures/ExCd-Curve.jpg){border="0"}
 
 The software will automatically calculate the corrections from the chosen Cd-map to be used as the base map and when running the simulation the new Cd-map will be used.
 
@@ -570,7 +570,7 @@ Quits the Cd-Map dialog box without calculating a Cd-map or saving the flowbench
 
 Sometimes the following error message will be displayed:
 
-![](Pictures/Cd-Error.jpg){border="0"}
+![](05-Pictures/Cd-Error.jpg){border="0"}
 
 This error message means that for the specified values of the port and the test conditions the calculated mass flow is more than what is physically possible. The following is an indication of the possible error:
 
@@ -592,7 +592,7 @@ This section of the help pages describes how to create a generic valve lift prof
 
 This section of the input data is identical for all the valves and cams.
 
-![](Pictures/InPortLayout.jpg){border="0" width="321" height="162"}
+![](05-Pictures/InPortLayout.jpg){border="0" width="321" height="162"}
 
 ### Number of valves
 
@@ -611,11 +611,11 @@ By choosing the amount of valve masking (interference to the flow by the proximi
 
 Sometimes the engine starts off unmodified with a specific map and because it is modified the flow improves but not so much as to use the next map, the user can adjust the map to the new better flow conditions by multiplying the map by a factor. The maximum a map can be improved is 20% (factor = 1.2) before the next map should be used. The user can also start by using a better map and adjust it downward by up to 20% (factor = 0.8) to simulate the unmodified engine and the progressively adjust the map upward as the flow is improved. See also the help topic on [Cd-maps](PortFlowModeling.htm).
 
-![](Pictures/InValve4T.jpg){border="0" width="515" height="458"}
+![](05-Pictures/InValve4T.jpg){border="0" width="515" height="458"}
 
 The next shows the required input data on the valve and port.
 
-![](Pictures/InValvePassage.jpg){border="0" width="324" height="369"}
+![](05-Pictures/InValvePassage.jpg){border="0" width="324" height="369"}
 
 ### Outer Seat Diameter on Valve
 
@@ -683,7 +683,7 @@ By specifying a non-central lobe centre and/or different opening and closing ram
 
 The generated cam profile is stored in a file with the same name as this subsystem but with the .ipo extension. It is a normal ASCI file and can be view with a standard spreadsheet program.
 
-![](Pictures/CamGenPicAnnotated.jpg){border="0" width="571" height="774"}
+![](05-Pictures/CamGenPicAnnotated.jpg){border="0" width="571" height="774"}
 
 ### Valve Opening before TDC
 
@@ -726,11 +726,11 @@ The cam lobe centre is defined as the centre point of the dwell period or as the
 
 At the end of this the screen will display typically the following data:
 
-![](Pictures/InCamGenerate.jpg){border="0" width="1344" height="694"}
+![](05-Pictures/InCamGenerate.jpg){border="0" width="1344" height="694"}
 
 Clicking on \"Accept and Save\" a summary and graphics will follow that looks as follows:
 
-![](Pictures/InCamGenGraph.jpg){border="0" width="919" height="697"}
+![](05-Pictures/InCamGenGraph.jpg){border="0" width="919" height="697"}
 
 At this point in time it is possible to edit the data if you are not satisfied with the results. Clicking on \"OK\" will accept the results while clicking on \"Edit Cam\" will take you back to the previous dialog.
 
@@ -744,7 +744,7 @@ This section of the help pages describes how to import an existing valve lift fi
 
 This section of the input data is identical for all the valves and cams.\<
 
-![](Pictures/InPortLayout.jpg){border="0" width="321" height="162"}
+![](05-Pictures/InPortLayout.jpg){border="0" width="321" height="162"}
 
 ### Number of valves
 
@@ -763,11 +763,11 @@ By choosing the amount of valve masking (interference to the flow by the proximi
 
 Sometimes the engine starts off unmodified with a specific map and because it is modified the flow improves but not so much as to use the next map, the user can adjust the map to the new better flow conditions by multiplying the map by a factor. The maximum a map can be improved is 20% (factor = 1.2) before the next map should be used. The user can also start by using a better map and adjust it downward by up to 20% (factor = 0.8) to simulate the unmodified engine and the progressively adjust the map upward as the flow is improved. See also the help topic on [Cd-maps](PortFlowModeling.htm).
 
-  ![](Pictures/InValve4T.jpg){border="0" width="515" height="458"}
+  ![](05-Pictures/InValve4T.jpg){border="0" width="515" height="458"}
 
 The next shows the required input data on the valve and port.
 
-![](Pictures/InValvePassage.jpg){border="0" width="324" height="369"}
+![](05-Pictures/InValvePassage.jpg){border="0" width="324" height="369"}
 
 ### Outer Seat Diameter on Valve
 
@@ -815,7 +815,7 @@ The software can model variable valve lift combined with variable valve timing. 
 
 ## Cam Data
 
-![](Pictures/InCamImpHelp.jpg){border="0" width="328" height="501"}
+![](05-Pictures/InCamImpHelp.jpg){border="0" width="328" height="501"}
 
 The cam, or more accurately, the valve lift data is imported as a file. This data can be generated by another application all together. This file must have the following format:
 
@@ -829,7 +829,7 @@ The degrees must increase in steps of one degree per lift value and must start a
 
 The following picture shows a typical Cams4T static valve lift file, column one is the degrees and column two the lift.
 
-![](Pictures/InValveLiftFile.jpg){border="0" width="592" height="499"}
+![](05-Pictures/InValveLiftFile.jpg){border="0" width="592" height="499"}
 
 ### Imported File Name
 
@@ -841,7 +841,7 @@ The name of the imported file with its extension. The maximum total length inclu
 4.  Comma separated file (\*.csv)
 5.  A general lift file (\*.\*)
 
-![](Pictures/InProfileFileSelect.jpg){border="0" width="430" height="348"}
+![](05-Pictures/InProfileFileSelect.jpg){border="0" width="430" height="348"}
 
 ### Line Number Where Lift Data Starts
 
@@ -862,17 +862,17 @@ To index the imported data to have the correct valve timing is not always simple
 
 The following picture demonstrates the difference between **lobe centre** and **lift or dwell centre** (for illustrative purposes a large offset is used):
 
-![](Pictures/Lift-Lobe-Centre.jpg){border="0" width="905" height="424"}
+![](05-Pictures/Lift-Lobe-Centre.jpg){border="0" width="905" height="424"}
 
 Whatever the method the user might have to make adjustments to the indexing degrees and tappet clearance to obtain the correct timing and duration.
 
 At the end of this the screen will display typically the following data:
 
-![](Pictures/InCamImport.jpg){border="0" width="1071" height="702"}
+![](05-Pictures/InCamImport.jpg){border="0" width="1071" height="702"}
 
 Clicking on \"Accept and Save\" a summary and graphics will follow that looks as follows:
 
-![](Pictures/InCamImpGraph.jpg){border="0" width="919" height="697"}
+![](05-Pictures/InCamImpGraph.jpg){border="0" width="919" height="697"}
 
 At this point in time it is possible to edit the data if you are not satisfied with the results. Clicking on \"OK\" will accept the results while clicking on \"Edit Cam\" will take you back to the previous dialog.
 
@@ -884,23 +884,23 @@ At this point in time it is possible to edit the data if you are not satisfied w
 
 The software uses [Cd-maps](../Cd-Maps/Cd-Map.htm) for the port flows based on measured data for typical head and valve configurations. Sometimes it is necessary for the user to modify these maps based on data obtained on a flowbench. To do this, the user selects the \"**User Defined from Flowbench Data**\" radio button on the cam and inlet port dialog:
 
-![](Pictures/InCd-MapRadio.jpg){border="0"}
+![](05-Pictures/InCd-MapRadio.jpg){border="0"}
 
 Which then changes to show the following dialog:
 
-![](Pictures/InCd-mapDialog.jpg){border="0"}
+![](05-Pictures/InCd-mapDialog.jpg){border="0"}
 
 The next step is to either select or create new flow bench and Cd-map files by clicking first the \"**New Flow Bench File**\" button and selecting a file name and then the \"**New Cd-map File**\" button to create or select the Cd-map file:
 
-![](Pictures/InCd-mapFiles.jpg){border="0"}
+![](05-Pictures/InCd-mapFiles.jpg){border="0"}
 
 Next we click on the \"**Calculate Cd-Map**\" button and the following dialog opens if it is a new file and the name already exists:
 
-![](Pictures/Cd-MapFlowBenchEmpty.jpg){border="0"}
+![](05-Pictures/Cd-MapFlowBenchEmpty.jpg){border="0"}
 
 Click on the \"**OK**\" button to open the following dialog:
 
-![](Pictures/Cd-MapBenchDialogBlank.jpg){border="0"}
+![](05-Pictures/Cd-MapBenchDialogBlank.jpg){border="0"}
 
 The user has to complete the form before continuing:
 
@@ -983,7 +983,7 @@ As a flowbench records data only at one pressure ratio and a Cd-map covers a ran
 
 The flowbench data is now filled in:
 
-![](Pictures/InCd-MapBenchDialogFilled.jpg){border="0"}
+![](05-Pictures/InCd-MapBenchDialogFilled.jpg){border="0"}
 
 ### **[Display Flow Curve]{.underline}**
 
@@ -993,7 +993,7 @@ Selecting the \"**Display Flow Curve**\" button calculates the corrected [Cd-val
 
 Select the \"**Calculate Cd-Map and save Flowbench File and Cd-Map**\" button which also calculates the corrected Cd value and displays it but then on \"**Continue**\" it updates and saves the Cd-map and the flowbench input file, then it returns to the inlet port dialog.
 
-![](Pictures/InCd-Curve.jpg){border="0"}
+![](05-Pictures/InCd-Curve.jpg){border="0"}
 
 The software will automatically calculate the corrections from the chosen Cd-map to be used as the base map and when running the simulation the new Cd-map will be used.
 
@@ -1005,7 +1005,7 @@ Quits the Cd-Map dialog box without calculating a Cd-map or saving the flowbench
 
 Sometimes the following error message will be displayed:
 
-![](Pictures/Cd-Error.jpg){border="0"}
+![](05-Pictures/Cd-Error.jpg){border="0"}
 
 This error message means that for the specified values of the port and the test conditions the calculated mass flow is more than what is physically possible. The following is an indication of the possible error:
 

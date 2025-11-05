@@ -32,7 +32,7 @@ EngMod4T uses models of type 2 and 3. The user has the choice between the two ty
 
 There are several Prescribed Burn Rate Models available of which the most popular one is the Vibe or Wiebe function model. The Vibe model is used as the prescribed burn rate model in EngMod4T. This model uses the following equation as its basis:
 
-![](Pictures/VibeFunction.jpg){border="0" width="240" height="60" align="left"}
+![](08-Pictures/VibeFunction.jpg){border="0" width="240" height="60" align="left"}
 
  
 
@@ -42,19 +42,19 @@ There are several Prescribed Burn Rate Models available of which the most popula
 
  
 
-![](Pictures/VibeParameters.jpg){border="0" width="350" height="207"}
+![](08-Pictures/VibeParameters.jpg){border="0" width="350" height="207"}
 
 This equation results in an S-shaped function of which the shape is controlled by the Vibe parameters.
 
 ### The effect of VibeA
 
-![](Pictures/VibeA.jpg){border="0" width="375" height="413"}
+![](08-Pictures/VibeA.jpg){border="0" width="375" height="413"}
 
 Increasing the \"slope\" shape factor increases the burn rate slope as shown in the figure.
 
 ### The effect of VibeM {#the-effect-of-vibem align="left"}
 
-![](Pictures/VibeM.jpg){border="0" width="383" height="423"}
+![](08-Pictures/VibeM.jpg){border="0" width="383" height="423"}
 
 Increasing the \"distribution\" shape factor means more of the mass is burnt later.
 
@@ -96,11 +96,11 @@ However, to enable the user to select between the two models the following value
 
 When using this model the user must verify that the model is calculating realistic results. To do this the model calculates the previous 4 values, (delay period, burn duration, vibeA and vibeM) after each rpm point and stores the results in the power output file. After a run the user can then plot them using Post4T and inspect them for realism. The following figures show a comparison between using the prescribed values as published, then using the turbulent entrainment model and then the calculated values as input for a simulation:
 
-![](Pictures/turbulentvibepower.jpg){border="0" width="813" height="597"}
+![](08-Pictures/turbulentvibepower.jpg){border="0" width="813" height="597"}
 
-![](Pictures/delayduration.jpg){border="0" width="825" height="585"}
+![](08-Pictures/delayduration.jpg){border="0" width="825" height="585"}
 
-![](Pictures/vibeavibem.jpg){border="0" width="824" height="587"}
+![](08-Pictures/vibeavibem.jpg){border="0" width="824" height="587"}
 
  
 
@@ -138,7 +138,7 @@ This model is based on the classical turbulent entrainment model first proposed 
 
 The following dialog will appear when creating a new combustion subsystem:
 
-![](Pictures/NewCombustion.jpg){border="0"}
+![](08-Pictures/NewCombustion.jpg){border="0"}
 
 The user selects the type of combustion model by selecting one of the radio buttons in the group box labelled: **Combustion Model**. Selecting the **Burn Rate Prescribed** radio button selects the Vibe function based model. Selecting the **Turbulent Entrainment** radio button selects the turbulent combustion model. **Even though this model calculates its own delay and duration periods and combustion rates, the user must still prescribe them using realistic values to allow toggling between the two types of models.**
 
@@ -164,11 +164,11 @@ The current version of the software allows a choice of 10 different type of fuel
 
 9.  Propane and Butane mix. Selecting this fuel will open the following edit box:
 
-    ![](Pictures/Propane.jpg){border="0"}
+    ![](08-Pictures/Propane.jpg){border="0"}
 
 10. Unleaded and Ethanol mix (E85 is 85% ethanol). Selecting this fuel will open the following edit box:
 
-    ![](Pictures/E85.jpg){border="0"}
+    ![](08-Pictures/E85.jpg){border="0"}
 
 Depending on the chosen fuel the stochiometric AFR will appear in the edit box. Depending on the AFR, the mixture purity and the cylinder pressure and temperature the laminar burn rate for the chosen fuel will be calculated during turbulent combustion.
 
@@ -243,7 +243,7 @@ This model is based on the classical turbulent entrainment model as proposed by 
 
 The following dialog will appear when creating a new combustion subsystem:
 
-![](Pictures/NewCombComp.jpg){border="0"}
+![](08-Pictures/NewCombComp.jpg){border="0"}
 
 The user selects the type of combustion model by selecting one of the radio buttons in the group box labelled: **Combustion Model**. Selecting the **Burn Rate Prescribed** radio button selects the Vibe function based model. Selecting the **Turbulent Entrainment** radio button selects the turbulent combustion model.
 
@@ -287,7 +287,7 @@ This is the start of injection timing (SOI) in degrees before TDC.
 
 This field prescribes the mixture strength. The user have to choose between prescribing the air/fuel ratio or prescribing the volume of fuel injected in the **Mixture Model** field:
 
-![](Pictures/NewCombComp1.jpg){border="0"}
+![](08-Pictures/NewCombComp1.jpg){border="0"}
 
 ### Air / Fuel Ratio (AFR)
 
@@ -319,18 +319,18 @@ The second Vibe constant. It has a typical value of 1.25.
 
 When editing an existing combustion subsystem the following dialog will appear :
 
-![](Pictures/EditCombustion.jpg){border="0" width="888" height="710"}
+![](08-Pictures/EditCombustion.jpg){border="0" width="888" height="710"}
 
 To add a row to the combustion map simply increment the value in the \"Number of RPM points in the map\" edit box by the required number of rows to be added. The maximum number of rows is 15 and the minimum number 1. The rpm values does not have to be in sequence, the software will automatically re-arrange them in the correct sequence. To remove a row click on the \"**Remove a Row**\" button and the following dialog will appear:
 
-![](Pictures/CombRemoveRow.jpg){border="0" width="285" height="95"}
+![](08-Pictures/CombRemoveRow.jpg){border="0" width="285" height="95"}
 
 After the required changes have been made the user can see the effect of the changes by selecting the \"Plot Timing Curves\" button. For the example shown here the following curves will be displayed:
 
-![](Pictures/IgnitionCurves.jpg){border="0" width="837" height="559"}
+![](08-Pictures/IgnitionCurves.jpg){border="0" width="837" height="559"}
 
-![](Pictures/CombustionCurves.jpg){border="0" width="837" height="559"}
+![](08-Pictures/CombustionCurves.jpg){border="0" width="837" height="559"}
 
-![](Pictures/VibeCurves.jpg){border="0" width="837" height="559"}
+![](08-Pictures/VibeCurves.jpg){border="0" width="837" height="559"}
 
 Clicking the \"**OK**\" button will return the user to the combustion dialog box where more changes can be made, the changes can be discarded by selecting the \"**Exit without saving**\" button or the changes can be saved by selecting the \"**Save and Exit**\" button.

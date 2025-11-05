@@ -67,17 +67,17 @@ During the installation process the installer software creates the program folde
 
 Only the first folder is of any interest if everything is normal. The other folders are only accessed if there are issues with the software, most often when Windows decides to install the license file somewhere else. A typical executable folder looks as follows:
 
-![](Pictures/SuiteFolder-07.jpg){border="0"}
+![](01-Pictures/SuiteFolder-07.jpg){border="0"}
 
 ## Working Folder - \"C:\\4Stroke\"
 
 The working folder is the one we are interested in. It is created when the software is installed and populated with some examples to supply a starting point for the new user to get up to speed.
 
-![](Pictures/SuiteFolder-01.jpg){border="0"}
+![](01-Pictures/SuiteFolder-01.jpg){border="0"}
 
 Double clicking on the \"C:\\4Stroke\" icon opens the working folder. Normally there would be a large number of files in this folder but to make it easier to explain there is only one Project loaded: Blast. The folder shown below is after running a single simulation:
 
-![](Pictures/SuiteFolder-02.jpg){border="0"}
+![](01-Pictures/SuiteFolder-02.jpg){border="0"}
 
 There are a number of files in this folder other than directly Project related files and they are as follows with the following functions:
 
@@ -95,7 +95,7 @@ There are a number of files in this folder other than directly Project related f
 
 Once a simulation of a Project is run a folder is created with the name of the Project and all the result files are stored in this folder. We double click on the \"Blast\" folder icon in the Project folder to open it:
 
-![](Pictures/SuiteFolder-03.jpg){border="0"}
+![](01-Pictures/SuiteFolder-03.jpg){border="0"}
 
 In this folder is a list of all the simulation results at 8000rpm, they are the files with the \"8000\" appended to the name but before the extention. These are the files used by Post4T to display the \"Trace\" values. There are also three new files without the \"8000\" in the name. They are the following and is used for specific outputs:
 
@@ -109,7 +109,7 @@ Note that both the last two files are appended during each batch run so the perf
 
 After a \"Batch\" run there are a lot more files with the results for each rpm point in the batch run. There are now two new files which we are interested in.
 
-![](Pictures/SuiteFolder-04.jpg){border="0"}
+![](01-Pictures/SuiteFolder-04.jpg){border="0"}
 
 The following two files are of interest:
 
@@ -189,7 +189,7 @@ A project contains additional files, some are currently being used and others ar
 
 The software uses a Windows Dialog Box based user interface. To understand the descriptions in the help files it is helpful to know the Windows names of the controls. The following is an example of a dialog box with some of the major controls shown:
 
-![](Pictures/DialogBoxAnnotated.jpg){border="0" width="679" height="496"}
+![](01-Pictures/DialogBoxAnnotated.jpg){border="0" width="679" height="496"}
 
 ## Radio Buttons
 

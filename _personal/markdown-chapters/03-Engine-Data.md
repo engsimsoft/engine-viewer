@@ -2,7 +2,7 @@
 
 When creating a new engine the following dialog will appear:
 
-![](Pictures/NewEngine.jpg){border="0"}
+![](03-Pictures/NewEngine.jpg){border="0"}
 
 ### **[Engine Induction]{.underline}**
 
@@ -24,7 +24,7 @@ If the number of cylinders are larger than 1 the type of engine layout has to be
 
 The user can choose between \"**Plain**\" or  \"**Roller**\" bearings or a \"**User Defined**\" friction loss model. The type of bearing is used in the friction loss calculations. Most other engines use the plain bearing type. The \"**User Defined**\" model requires the user to supply two or three values, a static component that stays the same through the rpm sweep, a dynamic component that is the slope of the loss characteristic that is rpm dependent and a speed loss component that is a function of the rpm squared. The user can by manipulating these values take the loss of a rear wheel dyno into consideration.
 
-![](Pictures/FrictionModel.jpg){border="0"}
+![](03-Pictures/FrictionModel.jpg){border="0"}
 
 **Loss Coefficient:** This is a value that is independent of engine speed, seal friction, plain bearings etc. contribute to this value. Seals have a value of around 1000 while plain bearings a value of around 100 000.
 
@@ -134,7 +134,7 @@ The user also has to specify the included angle between the inlet and exhaust va
 
 [When choosing to edit the engine from the main menu an engine submenu is displayed with the current engine characteristics. Choose the value to be changed and implement the change.]{lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt"}
 
-![](Pictures/EditEngine.jpg){border="0" width="1020" height="660"}
+![](03-Pictures/EditEngine.jpg){border="0" width="1020" height="660"}
 
 [Once the values have been changed enter "Accept and Save" to return to the main menu. Refer to [New Engine](NewEngine.htm) for an explanation of the variables.]{lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt"}
 
@@ -146,15 +146,15 @@ The cylinders are numbered using DIN 73021 as guideline. It basically states tha
 
 The following figures show the layout and numbering sequence for typical engines as modeled by Dat4T:
 
-![](Pictures/cylindernumbering-i.jpg){border="0" width="315" height="242"}
+![](03-Pictures/cylindernumbering-i.jpg){border="0" width="315" height="242"}
 
 **Straight Engines**
 
-![](Pictures/cylindernumbering-v.jpg){border="0" width="353" height="225"}
+![](03-Pictures/cylindernumbering-v.jpg){border="0" width="353" height="225"}
 
 **Vee Engines**
 
-![](Pictures/cylindernumbering-f.jpg){border="0" width="334" height="177"}
+![](03-Pictures/cylindernumbering-f.jpg){border="0" width="334" height="177"}
 
 **Flat or Boxer Engines**
 
@@ -170,13 +170,13 @@ For the header/tuned pipes this dimension is the distance the transducer is plac
 
 For the other pipes this dimension is the distance from the start of that particular pipe. If the dimension is greater than the length of that pipe it is placed at the end of the pipe. In the next figure this is illustrated for a single cylinder pipe.
 
-![](Pictures/ExTraceSingle-4T.jpg){border="0"}
+![](03-Pictures/ExTraceSingle-4T.jpg){border="0"}
 
 In this example the trace distance is shown to be almost halfway down the pipe 1. If the distance was shorter than the exhaust port length the trace position would have been in the exhaust port. For the pipe 2, the specified trace position is shorter than the pipe and the trace is placed at the trace length from the start of this pipe.
 
 Note that the trace number corresponds to the pipe number and that all the traces is the same distance from the start of the pipe, unless the specified distance is greater than the pipe length, then the trace is at the end of the pipe. The next figure shows the trace positions for a multi-cylinder exhaust system.
 
-![](Pictures/Ex4in1Trace-4T.jpg){border="0"}
+![](03-Pictures/Ex4in1Trace-4T.jpg){border="0"}
 
  
 
@@ -194,12 +194,12 @@ For the inlet port this dimension is the distance the transducer is placed from 
 
 For the other pipes this dimension is the distance from the end of that particular pipe. If the dimension is greater than the length of that pipe it is placed at the start of the pipe. In the next figure this is illustrated for a single cylinder inlet with a throttle and boost bottle.
 
-![](Pictures/InThrot1BoostTrace-4T.jpg){border="0"}
+![](03-Pictures/InThrot1BoostTrace-4T.jpg){border="0"}
 
 In this example the trace distance is shown to be almost halfway down the cylinder pipe, pipe 1. In the throttle body pipe, pipe 3, and the boost bottle pipe, pipe 4, this places the trace almost at the start of each pipe. For the connector pipe, pipe 2, the specified trace position is longer than the pipe and the trace is placed at the start of this pipe.
 
 The next figure shows the positions of the inlet traces on a multi-cylinder engine. Note that the trace number corresponds to the pipe number and that all the traces is the same distance from the end of the pipe, unless the specified distance is greater than the pipe length, then the trace is at the start of the pipe.
 
-![](Pictures/InColThrot4Trace-4T.jpg){border="0"}
+![](03-Pictures/InColThrot4Trace-4T.jpg){border="0"}
 
  

@@ -2,11 +2,11 @@
 
 When creating a new temperature subsystem the program will display a dialog box with default engine cooling systems to select from:
 
-![](Pictures/TemperatureModelSelection.jpg){border="0"}
+![](09-Pictures/TemperatureModelSelection.jpg){border="0"}
 
 After selecting an option the program will display a dialog box with default values for the engine (based on the cooling system, combustion system and whether it has forced induction or not) already filled in:
 
-![](Pictures/NewTemperature.jpg){border="0"}
+![](09-Pictures/NewTemperature.jpg){border="0"}
 
 The user can then accept these values as is if no better info is available or the values can be edited to represent more correct value for the engine being modeled.
 
@@ -72,15 +72,15 @@ There is a facility to simulate a turbocharged or supercharged engine by specify
 
 ### Turbocharger simulated with same boosted inlet and outlet conditions, cold exhaust and no back pressure.
 
-![](Pictures/TemperatureSameBoostBackPressure.jpg){border="0"}
+![](09-Pictures/TemperatureSameBoostBackPressure.jpg){border="0"}
 
 ### Turbocharger simulated with different inlet and outlet conditions, hot exhaust and with back pressure.
 
-![](Pictures/TemperatureDeltaBoostBackPressure.jpg){border="0"}
+![](09-Pictures/TemperatureDeltaBoostBackPressure.jpg){border="0"}
 
 ### Supercharger simulated with boosted inlet and atmospheric outlet conditions and no back pressure.
 
-![](Pictures/TemperatureSuperBoostBackPressure.jpg){border="0"}
+![](09-Pictures/TemperatureSuperBoostBackPressure.jpg){border="0"}
 
 ------------------------------------------------------------------------
 

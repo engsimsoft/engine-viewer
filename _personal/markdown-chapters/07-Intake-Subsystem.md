@@ -24,7 +24,7 @@ Pipes are numbered in the **opposite** direction of major flow starting at the c
 
 This example shows the layout and pipe numbering for a four-cylinder engine fitted with a 4into1 pipe system fitted with a box. Each cylinder pipe has one throttle in it and the box has 3 inlet pipes. The numbering is shown in the following figure (also take note of what each pipe is called):
 
-![](Pictures/InColThrot4.jpg)
+![](07-Pictures/InColThrot4.jpg)
 
 The pipes connecting directly to the cylinder head (called cylinder pipes) are numbered first, followed by the throttle body pipes (the pipes leading up to the throttles), then the collector pipe followed by the box inlet pipes.
 
@@ -34,7 +34,7 @@ The exception to this rule is when a boost bottle is employed. The pipes on an e
 
 Note how the pipes are numbered from the cylinder up to the atmospheric inlet and only then the boost bottle pipe is numbered.
 
-![](Pictures/InThrot1Boost.jpg)
+![](07-Pictures/InThrot1Boost.jpg)
 
 ## Pipe Section Numbering
 
@@ -44,7 +44,7 @@ Pipes with gradual area changes are subdivided into sections. These sections are
 
 A single cylinder engine fitted with a bell mouth and throttle system is shown. The throttle body is fitted with a small cone, the bell mouth or velocity stack. To model this engine one uses two inlet pipes with the throttle body pipe, pipe 2, divided into three sections, a tapered pipe, a parallel pipe and another tapered pipe.
 
-![](Pictures/InThrot1.jpg)
+![](07-Pictures/InThrot1.jpg)
 
 The first tapered pipe, pipe2 section 1, simulates the bell mouth. The second tapered pipe, pipe2 section 3, simulates the venturi. The pipe connecting the venturi to the cylinder head, pipe 1, is modelled here as a gradually tapering pipe.
 
@@ -56,7 +56,7 @@ The user is free to model each pipe with as many sections as required (with a ma
 
 This example shows the same basic pipe configuration as used in Example 1 but with the throttles replaced with short tapered sections. This results in a reduction in the number of pipes. Notice how the pipes are numbered against the flow direction but the sections in the direction of flow.
 
-![](Pictures/InColNoThrot4.jpg)
+![](07-Pictures/InColNoThrot4.jpg)
 
 ## Section Diameter Numbering Convention
 
@@ -66,7 +66,7 @@ A section has only one length but it has two diameters; the starting diameter an
 
 A similar pipe as in Example 3 is used but with the diameter numbers added.
 
-![](Pictures/ThrottleDia.jpg)
+![](07-Pictures/ThrottleDia.jpg)
 
 ---
 
@@ -76,7 +76,7 @@ A similar pipe as in Example 3 is used but with the diameter numbers added.
 
 [The reflection from the open end of a pipe is not really from the end of the pipe but from a point a short distance outside the pipe because of 3-dimensional effects. This effect is usually ignored on longish pipes but can cause large errors in the phasing of the pulses in short pipes. The main concern here is the tuning of the primary inlet pipe(s), the one(s) connected to a cylinder(s) and only if they end in an air box or are open to the atmosphere. It is standard practice [(refer to reference \[2\])](references.htm) to use a point a distance of half the inlet diameter outside the entry as the reflection point. It is left to the modeler to add this extra length to the primary intake length.]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
-![](Pictures/EndCorrection.jpg){border="0" width="384" height="298"}
+![](07-Pictures/EndCorrection.jpg){border="0" width="384" height="298"}
 
 The exact reflection point can vary with inlet edge configuration and might require some experimentation to get right but will seldom be less than 0.3 times the inlet diameter or more than 0.7 times the inlet diameter. The following shows typical length corrections added for inlet edge configurations:
 
@@ -140,15 +140,15 @@ The throttles can be used in the following three positions (note the pipe and se
 
 - **In the cylinder pipes:** This is the most conventional layout for high performance competition engines with either a carburettor or a fuel injection system per cylinder.
 
-  ![](Pictures/Throttle.jpg){width="638" height="272"}
+  ![](07-Pictures/Throttle.jpg){width="638" height="272"}
 
 - **In the collector pipe:** Some engines use a collector type inlet manifold connected to a single carburettor.
 
-  ![](Pictures/ThrottleCollector.jpg){width="525" height="414"}
+  ![](07-Pictures/ThrottleCollector.jpg){width="525" height="414"}
 
 - **In the plenum intake pipe(s):** Certain engines have an intake system where all the cylinder pipes are connected to a small plenum with a multi-barrel carburettor feeding the plenum.
 
-  ![](Pictures/ThrottlePlenum.jpg){width="481" height="427"}
+  ![](07-Pictures/ThrottlePlenum.jpg){width="481" height="427"}
 
 ---
 
@@ -167,7 +167,7 @@ During the creation of a pipe system the software will query the user for the in
 
 If the pipes exiting the collector are arranged to make the same angle with the center line of the incoming pipe (a symmetrical collector junction) it is possible to generate the angles by just supplying the angle between the center line of the incoming pipe and the outgoing pipes:
 
-![](Pictures/SymmetricalCollectorModeling-Inlet.jpg){border="0"}
+![](07-Pictures/SymmetricalCollectorModeling-Inlet.jpg){border="0"}
 
 ### Collector Areas
 
@@ -179,17 +179,17 @@ There are typically three standard types of collectors and one special type. The
 
 **It is important to note that it is up to the user to decide what type of collector is being modelled and where in the pipe junction the collector boundary is.**
 
-![](Pictures/Collector%20-%20Straight%20vs%20Merge%20vs%20Tee%20vs%20Internal.jpg){border="0"}
+![](07-Pictures/Collector%20-%20Straight%20vs%20Merge%20vs%20Tee%20vs%20Internal.jpg){border="0"}
 
 ### **1. Y Collector**
 
 This is a more economic collector and is formed by deforming a piece of tube or by fabricating it from a piece of plate. The incoming pipes are usually parallel (zero included angle) but they might be at a slight angle to each other. This fabricated piece usually tapers down to section 2 of the collector pipe, from there they are the same. Refer to Figure.
 
-![](Pictures/CollectorTaper-Inlet.jpg){border="0"}
+![](07-Pictures/CollectorTaper-Inlet.jpg){border="0"}
 
-![](Pictures/CollectorTaperDisplay-Inlet.jpg){border="0"}
+![](07-Pictures/CollectorTaperDisplay-Inlet.jpg){border="0"}
 
-![](Pictures/CollectorTaperColAng.jpg){border="0"}
+![](07-Pictures/CollectorTaperColAng.jpg){border="0"}
 
 ### **2. Merge Collector**
 
@@ -197,11 +197,11 @@ This collector is the most expensive and is usually only seen on high performanc
 
 For a collector with a steep angle between the incoming pipes the incoming pipes go directly into the collector pipe and is modelled as shown:
 
-![](Pictures/CollectorMergedSteepAngle-Inlet.jpg){border="0"}
+![](07-Pictures/CollectorMergedSteepAngle-Inlet.jpg){border="0"}
 
-![](Pictures/CollectorMergedSteepAngleDisplay-inlet.jpg){border="0"}
+![](07-Pictures/CollectorMergedSteepAngleDisplay-inlet.jpg){border="0"}
 
-![](Pictures/CollectorMergedSteepAngleColAng.jpg){border="0"}
+![](07-Pictures/CollectorMergedSteepAngleColAng.jpg){border="0"}
 
 ### **3. T-collectors**
 
@@ -209,11 +209,11 @@ For a collector with a steep angle between the incoming pipes the incoming pipes
 
 T-collectors are just a special case of a straight collector but with one or more pipes at a steep angle and / or with a much smaller pipe diameter, requiring the addition of a Cd-value to the pipe end. This is used to model a typical log manifold junction and an example is shown in the next figure.
 
-![](Pictures/T-collector2T.jpg)
+![](07-Pictures/T-collector2T.jpg)
 
 This collector is basically a pipe with a side branch \"T-ed\" into it. Thus the angle between pipe 1 and pipe 3 is 180° (it is a straight pipe). The angle between pipe 1 and pipe 2 is usually somewhere between 60° and 90°. Typical angle sizes are as follows and the pipe ends that are forming the collector junction all blend into each other so the **\"Blend\"** pipe end configuration is selected:
 
-![](Pictures/CollectorTAngleBlend.jpg){border="0"}
+![](07-Pictures/CollectorTAngleBlend.jpg){border="0"}
 
 Please note that these angles are an approximation of the physical case and should be tested by the user to simulate reality as close as possible.
 
@@ -221,7 +221,7 @@ Please note that these angles are an approximation of the physical case and shou
 
 This type of junction usually have the T-pipe or T-pipes at or close to 90° to the major pipes in the junction. It is usually used for boost bottle junctions or for the pipes joining a plenum-collector manifold:
 
-![](Pictures/InThrotBoost-Collector.jpg){border="0"}
+![](07-Pictures/InThrotBoost-Collector.jpg){border="0"}
 
 ---
 
@@ -233,7 +233,7 @@ This type of junction usually have the T-pipe or T-pipes at or close to 90° to 
 
 [ An inlet box can be used to simulate an air cleaner box, a resonating chamber (called a boost bottle) or a collector with a large volume (typically the cavity under the carburetor of a V-engine intake manifold to which the cylinder pipes connect).]{lang="EN-US" style="font-size:12.0pt;mso-bidi-font-size:10.0pt"}
 
-![](Pictures/airboxflow.jpg){border="0" width="483" height="357"}
+![](07-Pictures/airboxflow.jpg){border="0" width="483" height="357"}
 
 ---
 
@@ -241,11 +241,11 @@ This type of junction usually have the T-pipe or T-pipes at or close to 90° to 
 
 The inlet length can be modeled as varying in length with RPM. This can be defined on the inlet creation dialog box:
 
-![](Pictures/InletCreateVariable.jpg){border="0" width="912" height="657"}
+![](07-Pictures/InletCreateVariable.jpg){border="0" width="912" height="657"}
 
 It can also later be defined on the inlet edit dialog box:
 
-![](Pictures/InletEditVariable.jpg){border="0" width="1003" height="677"}
+![](07-Pictures/InletEditVariable.jpg){border="0" width="1003" height="677"}
 
 The variable length is subject to the following:
 
@@ -255,7 +255,7 @@ The variable length is subject to the following:
 
 The next figure shows an example of where the length in a throttle body will be varied:
 
-![](Pictures/InletDisplayVariable.jpg){border="0" width="848" height="429"}
+![](07-Pictures/InletDisplayVariable.jpg){border="0" width="848" height="429"}
 
 The length will be varied as follows:
 
@@ -286,7 +286,7 @@ All the pipes can have one of two types of \"atmospheric inlets\":
 
 When creating an inlet system for the first time or when redefining it the main inlet selection dialog box opens. Depending on the engine layout only some options will be displayed. The next picture shows all the possible options for all the possible engine layouts:
 
-![](Pictures/InletSelectionDialog.jpg){border="0"}
+![](07-Pictures/InletSelectionDialog.jpg){border="0"}
 
 ## Description of Main Intake types
 
@@ -296,11 +296,11 @@ These are the more common types of intake systems. They are general to any engin
 
 This system has a pipe for each cylinder. These pipes can each have a box or plenum attached or can be directly open to the atmosphere. The pipes can have throttles and boost bottles. Figure 1 shows a two-cylinder engine with throttles, with ram tubes and box inlets.
 
-![](Pictures/Twin2In.jpg){border="0"}
+![](07-Pictures/Twin2In.jpg){border="0"}
 
 To select this inlet layout the following selections were made (The engine is an inline twin, \"I2\", and only the options for an I2 were available):
 
-![](Pictures/Twin2InDialog.jpg){border="0"}
+![](07-Pictures/Twin2InDialog.jpg){border="0"}
 
 ## 1intoN Branch Manifolds
 
@@ -308,49 +308,49 @@ These are usually a cheaper type of intake manifold with a single carburetor. Th
 
 Figure 2 shows a typical 4into1 manifold.
 
-![](Pictures/In4in1.jpg){border="0"}
+![](07-Pictures/In4in1.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/In4in1Dialog.jpg)
+![](07-Pictures/In4in1Dialog.jpg)
 
 ## Double Collector Manifolds
 
 On some older inline 4 cylinder engines the inlet was often made up from two Y-collectors that connected two adjacent cylinders to a carburator. Some times these manifolds were interconnected. Both types are shown in the next figures:
 
-![](Pictures/I4-TwoYmanifoldColThrot.jpg)
+![](07-Pictures/I4-TwoYmanifoldColThrot.jpg)
 
-![](Pictures/I4-TwoYmanifoldInterconnectedColThrot.jpg)
+![](07-Pictures/I4-TwoYmanifoldInterconnectedColThrot.jpg)
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/I4-TwoYmanifoldColThrotDialog.jpg)
+![](07-Pictures/I4-TwoYmanifoldColThrotDialog.jpg)
 
 ## Log Manifolds
 
 With a log manifold each cylinder is connected to a common pipe. This is usually not found on a high performance engine except on turbo-charged engines. This type is still under development and will be described in detail once development is completed. Figure 3 shows a four-cylinder engine with a side inlet log manifold. Note the direction of flow.
 
-![](Pictures/In4Log.jpg){border="0"}
+![](07-Pictures/In4Log.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/In4LogDialog.jpg){border="0"}
+![](07-Pictures/In4LogDialog.jpg){border="0"}
 
 The next figure shows a log pipe layout on and inline engine with a central inlet. This example shows a collector throttle.
 
-![](Pictures/In6Log-Center.jpg){border="0"}
+![](07-Pictures/In6Log-Center.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/In6Log-CenterDialog.jpg){border="0"}
+![](07-Pictures/In6Log-CenterDialog.jpg){border="0"}
 
 The next figure shows a log pipe layout on a V or F engine with one manifold per cylinder bank and side inlets. This example is shown with two air boxes.
 
-![](Pictures/InV8Log2Box4T.jpg){border="0"}
+![](07-Pictures/InV8Log2Box4T.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/InV8Log2BoxDialog.jpg){border="0"}
+![](07-Pictures/InV8Log2BoxDialog.jpg){border="0"}
 
 ## [Special Manifolds]{.underline}
 
@@ -364,83 +364,83 @@ A plenum or a box is modeled as a 0D element and should only be used if the tran
 
 This manifold is currently active for inline, Vee and Flat engines and models the typical plenum-collector as found on most fuel injected engines with a single throttle body at the entrance to the plenum. It is modelled as a series of short pipes simulating the plenum, joined to the cylinder pipes by collector junctions. The following picture is of such a manifold but the throttle body is not shown:
 
-![](Pictures/Edelbrock_SportCompactManifoldDim.jpg){border="0"}
+![](07-Pictures/Edelbrock_SportCompactManifoldDim.jpg){border="0"}
 
 The plenum is usually too long and narrow to be modelled as a box so it is modelled as a log manifold with a blind pipe on the closed end and 4 3into1 junctions as shown in the next figure:
 
-![](Pictures/PlenumCollector.jpg){border="0"}
+![](07-Pictures/PlenumCollector.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollectorDialog.jpg){border="0"}
+![](07-Pictures/PlenumCollectorDialog.jpg){border="0"}
 
 ### Plenum-Collector, Y-Inlet
 
 This figure shows a special plenum collector on an I4 engine (7 3into1 junctions) with Y-shaped central inlet:
 
-![](Pictures/PlenumCollector%20Yinlet.jpg){border="0"}
+![](07-Pictures/PlenumCollector%20Yinlet.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollector%20YinletDialog.jpg){border="0"}
+![](07-Pictures/PlenumCollector%20YinletDialog.jpg){border="0"}
 
 ### Plenum-Collector, End Inlet, V or F engine
 
 The next figure shows the common plenum collector on a V8 engine (4 4into1 junctions) with side inlet:
 
-![](Pictures/PlenumCollector_VorF.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorF.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollector_VorFDialog.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorFDialog.jpg){border="0"}
 
 ### Plenum-Collector, Center Inlet
 
 The next figure shows the common plenum collector on a V8 engine (4 4into1 plus 1 3into1 junctions) with center inlet:
 
-![](Pictures/PlenumCollector_VorF%20CenterInlet.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorF%20CenterInlet.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollector_VorF%20CenterInletDialog.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorF%20CenterInletDialog.jpg){border="0"}
 
 ### Double Plenum-Collectors, 2 End Inlets, 2 Air Boxes
 
 In the examples shown there is also an airbox. The following figure shows the use of double plenum-collectors on a V8 or F8 engine, with individual plenum throttles and air boxes.
 
-![](Pictures/PlenumCollectorV8.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollectorV8Dialog.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8Dialog.jpg){border="0"}
 
 ### Double Plenum-Collectors, Single End Inlet
 
-![](Pictures/PlenumCollectorV8-1Throt.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8-1Throt.jpg){border="0"}
 
 ### Double Plenum-Collectors, Single End Inlet, Interconnected Plenums
 
-![](Pictures/PlenumCollectorInterV8-1Throt.jpg){border="0"}
+![](07-Pictures/PlenumCollectorInterV8-1Throt.jpg){border="0"}
 
 ### Double Plenum-Collectors, Two End Inlets
 
-![](Pictures/PlenumCollectorV8-2Throt.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8-2Throt.jpg){border="0"}
 
 ### Double Plenum-Collectors, Two End Inlets, Interconnected Plenums
 
-![](Pictures/PlenumCollectorInterV8-2Throt.jpg){border="0"}
+![](07-Pictures/PlenumCollectorInterV8-2Throt.jpg){border="0"}
 
 ### Porsche 964 Inlet System
 
 The next picture shows the Porsche 964 inlet system modeled as a plenum-collector (This is only available for an F6 engine):
 
-![](Pictures/Porsche964.jpg){border="0"}
+![](07-Pictures/Porsche964.jpg){border="0"}
 
-![](Pictures/PlenumCollectorInterF6-Porsche964.jpg){border="0"}
+![](07-Pictures/PlenumCollectorInterF6-Porsche964.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/PlenumCollectorInterF6-Porsche964Dialog.jpg){border="0"}
+![](07-Pictures/PlenumCollectorInterF6-Porsche964Dialog.jpg){border="0"}
 
 ## [Plain Plenums]{.underline}
 
@@ -448,25 +448,25 @@ The next picture shows the options selected to create this inlet system:
 
 This manifold is currently only active for I2, I4, I6, I8, I10, I12 and I16 engines.
 
-![](Pictures/I4-2Plenum2Throttle4T.jpg){border="0"}
+![](07-Pictures/I4-2Plenum2Throttle4T.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/I4-2Plenum2ThrottleDialog.jpg){border="0"}
+![](07-Pictures/I4-2Plenum2ThrottleDialog.jpg){border="0"}
 
 ### Resonant Collector Box
 
 This manifold is currently only active for 4 cylinder engines and models the system as described in US Patent 5,379,735 Jan. 10,1995. The idea behind the layout is to lengthen the inlet pipes by using its opposite pipe as part of the tuned length as shown in the next figure:
 
-![](Pictures/ResonantInlet.jpg){border="0"}
+![](07-Pictures/ResonantInlet.jpg){border="0"}
 
 To model the two \"connecting\" pipes a collector is used with a very short collector pipe as shown in the next figure:
 
-![](Pictures/ResonantInletModel.jpg){border="0"}
+![](07-Pictures/ResonantInletModel.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/ResonantInletModelDialog.jpg){border="0"}
+![](07-Pictures/ResonantInletModelDialog.jpg){border="0"}
 
 ## [Special Box or Plenum Pipes]{.underline}
 
@@ -481,51 +481,51 @@ It is important to keep in mind that these boxes or plenums should only be used 
 
 All the cylinder pipes go directly into a common box. The box can have multiple inlet pipes. A typical collector type inlet manifold on a V-8 with a four barrel down draught carburetor can be modeled using this manifold with a small plenum volume.
 
-![](Pictures/In8_1BoxThrot.jpg){border="0"}
+![](07-Pictures/In8_1BoxThrot.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/In8_1BoxThrotDialog.jpg){border="0"}
+![](07-Pictures/In8_1BoxThrotDialog.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a separate intakes
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are separate and has separate intakes that can be fitted with a throttles.
 
-![](Pictures/In8_2BoxThrot.jpg){border="0"}
+![](07-Pictures/In8_2BoxThrot.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/In8_2BoxThrotDialog.jpg){border="0"}
+![](07-Pictures/In8_2BoxThrotDialog.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a common intake
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a common intake that can be fitted with a throttle.
 
-![](Pictures/In8_2Box.jpg){border="0"}
+![](07-Pictures/In8_2Box.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with separate intakes and an inter connector pipe between the two plenums
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a separate intakes that can be fitted with a throttles. The two plenums are connected through a connecting pipe.
 
-![](Pictures/In8_2BoxInterThrot.jpg){border="0"}
+![](07-Pictures/In8_2BoxInterThrot.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a common intake and an inter connector pipe between the two plenums
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a common intake that can be fitted with a throttle. The two plenums are connected through a connecting pipe.
 
-![](Pictures/In8_2BoxInter.jpg){border="0"}
+![](07-Pictures/In8_2BoxInter.jpg){border="0"}
 
 ### Twin Plane Manifold - Two common plenum, cross connected on a Vee or Flat engine, with an intake(s) on each of the two plenums
 
 Cylinders 1, 4, 6 and 7 go directly into one of the plenums and cylinders 2, 3, 5 and 8 go directly into the other plenum. The intake is a typical two-plane manifold used as standard on many older V8 engines.
 
-![](Pictures/In8-TwoPlane.jpg){border="0"}
+![](07-Pictures/In8-TwoPlane.jpg){border="0"}
 
 ### Twin Plane Manifold - Two common plenum, cross connected on a Vee or Flat engine, with a siamesed intake and the two plenums interconnected
 
 Cylinders 1, 4, 6 and 7 go directly into one of the plenums and cylinders 2, 3, 5 and 8 go directly into the other plenum. This intake is a typical two-plane manifold used as standard on the Porsche 928 V8 engines.
 
-![](Pictures/In8_2BoxInter_1Throt_2Plane.jpg){border="0"}
+![](07-Pictures/In8_2BoxInter_1Throt_2Plane.jpg){border="0"}
 
 ---
 
@@ -539,105 +539,105 @@ The following shows some examples of inlet systems and how they are modeled in D
 
 There is no ambiguity in modeling this inlet.
 
-![](Pictures/In8_IndependentRunners.jpg)
+![](07-Pictures/In8_IndependentRunners.jpg)
 
 To model this inlet the following manifold type and manifold layout is selected:
 
-![](Pictures/Menu-IndependentRunners.jpg)
+![](07-Pictures/Menu-IndependentRunners.jpg)
 
 ## Independent Runners connected to a Plenum per bank - Cross Ram
 
 In this case it is clearly required to model the two plenums as a combination of pipes. If the plenum was much larger the choice is no longer so obvious and might require modeling it using either method and comparing the results.
 
-![](Pictures/V8-CrossRam.jpg)
+![](07-Pictures/V8-CrossRam.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-IndependentRunners-CommonLogPlenumPerBank.jpg)
+![](07-Pictures/Menu-IndependentRunners-CommonLogPlenumPerBank.jpg)
 
 In the case where the plenums are much larger in diameter to the extent where the wave action in the plenum is so small as to be negligable it can be modeled as two plenums:
 
-![](Pictures/In8_2Box2Throt.jpg)
+![](07-Pictures/In8_2Box2Throt.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-IndependentRunners-CommonBoxPerBank.jpg)
+![](07-Pictures/Menu-IndependentRunners-CommonBoxPerBank.jpg)
 
 ## Single Plane Manifold
 
 A single plane manifold typically has a very small \"plenum\" where all the runners collect to the inlet pipe (Which is the effective diameter of all the carburettor pipes combined).
 
-![](Pictures/InV8in1-SinglePlane.jpg)
+![](07-Pictures/InV8in1-SinglePlane.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-SinglePlane-Collector.jpg)
+![](07-Pictures/Menu-SinglePlane-Collector.jpg)
 
 If the plenum is very large or the inlet wave action not important the single plane manifold can be modeled as a plenum into which the inlets and runners connect:
 
-![](Pictures/In8_1BoxThrot.jpg)
+![](07-Pictures/In8_1BoxThrot.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-IndependentRunners-CommonBox.jpg)
+![](07-Pictures/Menu-IndependentRunners-CommonBox.jpg)
 
 ## Dual Plane Manifold
 
 A dual plane manifold typically has two very small \"plenums\" where the runners collect to the inlet pipes (Which is the effective diameters of the connected carburettor pipes).
 
-![](Pictures/V8_DualPlaneUpdate.jpg)
+![](07-Pictures/V8_DualPlaneUpdate.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-DualPlane-Collector.jpg)
+![](07-Pictures/Menu-DualPlane-Collector.jpg)
 
 If the plenums are very large or the inlet wave action not important the dual plane manifold can be modeled as two plenums into which the inlet pipes and runners connect:
 
-![](Pictures/V8_DualPlanePlenumUpdated.jpg)
+![](07-Pictures/V8_DualPlanePlenumUpdated.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-DualPlane-Plenum.jpg)
+![](07-Pictures/Menu-DualPlane-Plenum.jpg)
 
 ## Tunnel Ram Manifold with One Inlet - Spaced Runners
 
 There is a single effective inlet into the tunnel. This inlet can be the sum of a single barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel with a space between them requiring extra \"collector joints\" to model.
 
-![](Pictures/V8-TunnelRam_1Inlet.jpg)
+![](07-Pictures/V8-TunnelRam_1Inlet.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-TunnelRam-SeperateRunners-1Inlet.jpg)
+![](07-Pictures/Menu-TunnelRam-SeperateRunners-1Inlet.jpg)
 
 ## Tunnel Ram Manifold with One Inlet - Adjacent Runners
 
 There is a single effective inlet into the tunnel. This inlet can be the sum of a single barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel in adjacent pairs requiring two 6 pipe collector joints.
 
-![](Pictures/V8-TunnelRam_1Inlet_Small%20Plenum.jpg)
+![](07-Pictures/V8-TunnelRam_1Inlet_Small%20Plenum.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-TunnelRam-AdjacentRunners-1Inlet.jpg)
+![](07-Pictures/Menu-TunnelRam-AdjacentRunners-1Inlet.jpg)
 
 ## Tunnel Ram Manifold with Two Inlets - Spaced Runners
 
 There are two effective inlets into the tunnel. These inlet can be the sum of a single barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel with a space between them requiring extra \"collector joints\" to model.
 
-![](Pictures/V8-TunnelRam_2Inlets.jpg)
+![](07-Pictures/V8-TunnelRam_2Inlets.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-TunnelRam-SeperateRunners-2Inlets.jpg)
+![](07-Pictures/Menu-TunnelRam-SeperateRunners-2Inlets.jpg)
 
 ## Tunnel Ram Manifold with Two Inlets - Adjacent Runners
 
 There are two effective inlets into the tunnel. These inlet can be the sum of a single barrel, two barrel or four barrel carburetor or throttle body. The runners join the tunnel in adjacent pairs requiring two 7 pipe collector joints.
 
-![](Pictures/V8-TunnelRam_2Inlets_Small%20Plenum.jpg)
+![](07-Pictures/V8-TunnelRam_2Inlets_Small%20Plenum.jpg)
 
 To model this inlet the following manifold type and inlet configurations are selected:
 
-![](Pictures/Menu-TunnelRam-AdjacentRunners-2Inlets.jpg)
+![](07-Pictures/Menu-TunnelRam-AdjacentRunners-2Inlets.jpg)
 
 ---
 
@@ -661,7 +661,7 @@ All the pipes can have one of two types of atmospheric inlets:
 
 The next picture shows the dialog box with all the options. The actual options shown for the engine being simulated will depend firstly on the engine layout and secondly on the \"Type of Inlet Manifold\" and \"Manifold Layout\" options selected by the user.
 
-![](Pictures/TurboInletOptionsDialog.jpg){border="0"}
+![](07-Pictures/TurboInletOptionsDialog.jpg){border="0"}
 
 ## Description of Main Intake types
 
@@ -671,21 +671,21 @@ These are the more common types of intake systems. They are general to any engin
 
 This system has completely separate pipes and turbo for each cylinder and is primarily used on a single cylinder engine.
 
-![](Pictures/In-Separate-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In-Separate-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In-Separate-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In-Separate-TurboIntercooler.jpg){border="0"}
 
 ## Individual Pipes - With a Common Plenum
 
 This system has a pipe for each cylinder. These pipes end in a plenum which can be attached directly to the compressor or first to a charge air cooler (intercooler) and from the compressor open to the atmosphere. The next figures show this layout, with and without a charge air cooler.
 
-![](Pictures/In4_1Box-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In4_1Box-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In4_1Box-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In4_1Box-TurboIntercooler.jpg){border="0"}
 
 There is also a special version that combines the intercooler outlet tank with the inlet plenum:
 
-![](Pictures/In-Separate-TurboIntercoolerTankBox.jpg){border="0"}
+![](07-Pictures/In-Separate-TurboIntercoolerTankBox.jpg){border="0"}
 
 ## 1intoN Branch Manifolds
 
@@ -693,23 +693,23 @@ All the inlet ports are connected to a single collector pipe. This collector pip
 
 The figures show typical 4into1 manifolds with and without an intercooler.
 
-![](Pictures/In4in1-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In4in1-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In4in1-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In4in1-TurboIntercooler.jpg){border="0"}
 
 ## Log Manifolds
 
 With a log manifold each cylinder is connected to a common pipe. This is usually not found on a high performance engine except on turbo-charged engines. The next figures show a four-cylinder engine with a log manifold with and without charge air cooler. Note the direction of flow.
 
-![](Pictures/In4Log-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In4Log-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In4Log-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In4Log-TurboIntercooler.jpg){border="0"}
 
 The next figure shows a log pipe layout on a V or F engine with one manifold per cylinder bank. This example is shown with two air boxes.
 
-![](Pictures/InV8Log2TurboNoIntercooler4T.jpg){border="0"}
+![](07-Pictures/InV8Log2TurboNoIntercooler4T.jpg){border="0"}
 
-![](Pictures/InV8Log2TurboIntercooler4T.jpg){border="0"}
+![](07-Pictures/InV8Log2TurboIntercooler4T.jpg){border="0"}
 
 ## [Special Manifolds]{.underline}
 
@@ -717,27 +717,27 @@ The next figure shows a log pipe layout on a V or F engine with one manifold per
 
 This manifold is currently active for inline, Vee and Flat engines and models the typical plenum-collector as found on most fuel injected engines with a single throttle body at the entrance to the plenum. It is modelled as a series of short pipes simulating the plenum, joined to the cylinder pipes by collector junctions. The following picture is of such a manifold but the throttle body is not shown:
 
-![](Pictures/Edelbrock_SportCompactManifoldTurboDim.jpg){border="0"}
+![](07-Pictures/Edelbrock_SportCompactManifoldTurboDim.jpg){border="0"}
 
 The plenum is usually too long and narrow to be modelled as a box so it is modelled as a log manifold with a blind pipe on the closed end and 4 3into1 junctions as shown in the next figure:
 
-![](Pictures/PlenumCollector-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollector-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/PlenumCollector-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollector-TurboIntercooler.jpg){border="0"}
 
 The next figure shows the common plenum collector on a V8 engine (4 4into1 junctions):
 
-![](Pictures/PlenumCollector_VorF-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorF-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/PlenumCollector_VorF-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollector_VorF-TurboIntercooler.jpg){border="0"}
 
 In the example shown there is also an airbox. The following figure shows the use of double plenum-collectors on a V8 or F8 engine, with individual turbochargers.
 
-![](Pictures/PlenumCollectorV8-2TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8-2TurboNoIntercooler.jpg){border="0"}
 
  
 
-![](Pictures/PlenumCollectorV8-2TurboIntercooler.jpg){border="0"}
+![](07-Pictures/PlenumCollectorV8-2TurboIntercooler.jpg){border="0"}
 
  
 
@@ -749,61 +749,61 @@ There are three special Box pipes depending on the engine layout:
 
 This manifold is currently only active for 4 cylinder engines and models the system as described in US Patent 5,379,735 Jan. 10,1995. The idea behind the layout is to lengthen the inlet pipes by using its opposite pipe as part of the tuned length as shown in the next figure:
 
-![](Pictures/ResonantInlet_TurboIntercoolerThrot.jpg){border="0"}
+![](07-Pictures/ResonantInlet_TurboIntercoolerThrot.jpg){border="0"}
 
 To model the two \"connecting\" pipes a collector is used with a very short collector pipe as shown in the next figure:
 
-![](Pictures/ResonantInletModel_TurboIntercoolerThrot.jpg){border="0"}
+![](07-Pictures/ResonantInletModel_TurboIntercoolerThrot.jpg){border="0"}
 
 The next picture shows the options selected to create this inlet system:
 
-![](Pictures/ResonantInletModelTurboDialog.jpg){border="0"}
+![](07-Pictures/ResonantInletModelTurboDialog.jpg){border="0"}
 
 ### One common box on a multi-cylinder engine with individual cylinder pipes (Single Plane Manifold)
 
 All the cylinder pipes go directly into a common box.
 
-![](Pictures/In8_1Box-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In8_1Box-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In8_1Box-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In8_1Box-TurboIntercooler.jpg){border="0"}
 
-![](Pictures/In8_1Box-2Turbo2in2Intercooler.jpg){border="0"}
+![](07-Pictures/In8_1Box-2Turbo2in2Intercooler.jpg){border="0"}
 
-![](Pictures/In6_1Box-2Turbo2Intercooler1Inlet.jpg){border="0"}
+![](07-Pictures/In6_1Box-2Turbo2Intercooler1Inlet.jpg){border="0"}
 
-![](Pictures/In6_1Box-2Turbo1Intercooler1InletPlenThrot.jpg){border="0"}
+![](07-Pictures/In6_1Box-2Turbo1Intercooler1InletPlenThrot.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a separate turbochargers
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are separate and has separate intakes that can be fitted with a throttles.
 
-![](Pictures/In8_2Box-2TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-2TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In8_2Box-2TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-2TurboIntercooler.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a single turbocharger
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a common intake that can be fitted with a charge air cooler.
 
-![](Pictures/In8_2Box-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In8_2Box-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-TurboIntercooler.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with two separate turbochargers and an inter connector pipe between the two plenums
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a separate intakes that can be fitted with a throttles. The two plenums are connected through a connecting pipe.
 
-![](Pictures/In8_2Box-Connected-2TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-Connected-2TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In8_2Box-Connected-2TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-Connected-2TurboIntercooler.jpg){border="0"}
 
 ### Two common boxes, one per bank on a Vee or Flat engine, with a common turbocharger and an inter connector pipe between the two plenums
 
 All the cylinder pipes per bank go directly into one of the boxes. The intake to the two boxes are joined and has a common intake that can be fitted with a throttle. The two plenums are connected through a connecting pipe.
 
-![](Pictures/In8_2Box-Connected-TurboNoIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-Connected-TurboNoIntercooler.jpg){border="0"}
 
-![](Pictures/In8_2Box-Connected-TurboIntercooler.jpg){border="0"}
+![](07-Pictures/In8_2Box-Connected-TurboIntercooler.jpg){border="0"}
 
 ---
 
@@ -811,7 +811,7 @@ All the cylinder pipes per bank go directly into one of the boxes. The intake to
 
 When modeling a turbo or supercharged inlet system there is an option to use an intercooler or more correctly, a charge air cooler. If selecting the \"Yes\" radio button for intercooler a new field opens that requires the cooler data:
 
-![](Pictures/TurboSuperInlet.jpg){border="0"}
+![](07-Pictures/TurboSuperInlet.jpg){border="0"}
 
 The input data required is the following:
 
@@ -836,7 +836,7 @@ A single pass cooler is more efficient as the whole cooler is exposed to cold co
 
 This is the volume of each of the two tanks that is on the inlet and outlet side of the cooler.
 
-![](Pictures/CAC-13.jpg){border="0"}
+![](07-Pictures/CAC-13.jpg){border="0"}
 
 ## Center Tank Volume (cc)
 
@@ -858,25 +858,25 @@ This is the ratio between the actual temperature drop of the inlet air and the t
 
 This is the total number of tubes in the core that the inlet air flows through. There can be one or more rows of tubes. The next picture shows an example of the number of rows in a single row cooler (If this was a double row intercooler there would be 48 tubes):
 
-![](Pictures/CAC-01.jpg){border="0"}
+![](07-Pictures/CAC-01.jpg){border="0"}
 
 ## Tube Major Dimension (Of Tubes flowing from Header Tank to Header Tank)
 
 This is the inside width of each tube, as shown in the next picture (Note that the intercooler shown in the picture has a single row of tubes):
 
-![](Pictures/CAC-05.jpg){border="0"}
+![](07-Pictures/CAC-05.jpg){border="0"}
 
 ## Tube Minor Dimension (Of Tubes flowing from Header Tank to Header Tank)
 
 This is the inside breedth of each inner tube that flows from tank to tank, as shown in the next picture:
 
-![](Pictures/CAC-08.jpg){border="0"}
+![](07-Pictures/CAC-08.jpg){border="0"}
 
 ## Tube Length (Of Tubes flowing from Header Tank to Header Tank)
 
 This is the cooling length of each tube, as shown in the next picture:
 
-![](Pictures/CAC-02.jpg){border="0"}
+![](07-Pictures/CAC-02.jpg){border="0"}
 
 ## Tube Wall Thickness (Of Tubes flowing from Header Tank to Header Tank)
 
@@ -897,33 +897,33 @@ When a new inlet system is created the user choose firstly the type of manifold 
 
 The example shown in the following figure is a four-cylinder engine fitted with an air box and a throttle in the collector pipe.
 
-![](Pictures/throttlecollectorbox.jpg){\"=""}
+![](07-Pictures/throttlecollectorbox.jpg){\"=""}
 
 The first screen looks as follows:
 
-![](Pictures/NewIn1.jpg)
+![](07-Pictures/NewIn1.jpg)
 
 The choices were a collector type pipe, a box type collector, a throttle in the collector pipe, a butterfly throttle with a 6mm spindle and no boost bottles. The atmospheric and air box pipe ends are selected as well as the number of air box entry pipes and box volume.
 
 On the following dialog the user is starts inputting the data for each pipe:.
 
-![](Pictures/NewIn2.jpg)
+![](07-Pictures/NewIn2.jpg)
 
 Entering the data and selecting \"Save and Display\" displays the pipe:
 
-![](Pictures/NewIn3.jpg)
+![](07-Pictures/NewIn3.jpg)
 
 Clicking the \"Exit\" button displays the following dialog if the pipe is the first of the cylinder pipes:
 
-![](Pictures/NewIn4.jpg)
+![](07-Pictures/NewIn4.jpg)
 
 If the cylinder pipes are identical the user clicks \"Yes\" and continue inputting the data for the rest of the pipes. If \"No\" each cylinder pipe\'s data must also be entered. After the data for all the pipes have been entered the dialog for the collector appears:
 
-![](Pictures/NewIn5.jpg)
+![](07-Pictures/NewIn5.jpg)
 
 The user can now enter the angle for each pipe pair for a non-symmetrical collector or select the axisymetric radio button and only enters the outflow pipe angle with the collector centre line after which the program calculates all the angles:
 
-![](Pictures/NewIn6.jpg)
+![](07-Pictures/NewIn6.jpg)
 
 At this point the system is fully specified but can be further modified or updated in the Edit dialog.
 
@@ -933,7 +933,7 @@ At this point the system is fully specified but can be further modified or updat
 
 Currently this capability exists only for 4 and 6 cylinder engines where the inlet ports of cylinder 1 is siamesed with that of cylinder 2 and the inlet port of cylinder 3 is siamesed with that of cylinder 4 (and 5 with 6 in an I6 engine). The siamesed port is modeled by firstly modeling the inlet ports on the cylinders very short - half the distance from the centre of the valve head to the effective split between the two ports. The other half of this length is modeled as part of the intake manifold as shown in the next figure:
 
-![](Pictures/InSiamesedPort4T.bmp){border="0"}
+![](07-Pictures/InSiamesedPort4T.bmp){border="0"}
 
 ## Basic manifold layouts
 
@@ -947,11 +947,11 @@ There are two basic manifold layouts available:
 
 In this layout the two siamesed inlet ports are joined into a single inlet pipe through a collector as shown in the next figure:
 
-![](Pictures/insiamesedcol4t.jpg){border="0"}
+![](07-Pictures/insiamesedcol4t.jpg){border="0"}
 
 To select this version the \"4in2in1 manifold for siamesed inlet ports\" radio button is selected as shown on the next figure:
 
-![](Pictures/4in2in1SiamInletMenu.jpg){border="0"}
+![](07-Pictures/4in2in1SiamInletMenu.jpg){border="0"}
 
 This layout can be used with:
 
@@ -967,13 +967,13 @@ This layout can be used with:
 
 In this layout the two siamesed port pairs stay as separate inlet manifolds although they can be joined to a common box:
 
-![](Pictures/insiamesed4t.jpg){border="0"}
+![](07-Pictures/insiamesed4t.jpg){border="0"}
 
-![](Pictures/in6siamesed4t.jpg){border="0"}
+![](07-Pictures/in6siamesed4t.jpg){border="0"}
 
 To select this version the \"NumCyl/2 2in1 manifolds for siamesed inlet ports\" radio button is selected as shown on the next figure:
 
-![](Pictures/2_2in1SiamInletMenu.jpg){border="0"}
+![](07-Pictures/2_2in1SiamInletMenu.jpg){border="0"}
 
 #### Typical layouts:
 
@@ -989,21 +989,21 @@ To select this version the \"NumCyl/2 2in1 manifolds for siamesed inlet ports\" 
 
 A typical configuration this system is used to model is where a single twin barrel carburetor is used. The two manifolds are joined by a common plenum as shown in the next figure:
 
-![](Pictures/insiamesedplenthrot4t.jpg){border="0"}
+![](07-Pictures/insiamesedplenthrot4t.jpg){border="0"}
 
 To model the layout as shown the following selection was made on the inlet dialog and 2 air box inlets were chosen:
 
-![](Pictures/TwinBarrelMenu.jpg){border="0"}
+![](07-Pictures/TwinBarrelMenu.jpg){border="0"}
 
 #### Using option 2 to model a typical 40DCOE carburetor layout
 
 A typical configuration this layout is used for is for a manifold that connects each port pair to a barrel of a twin choke carburetor. The basic layout is shown in the next figure:
 
-![](Pictures/insiamesedthot4t.jpg){border="0"}
+![](07-Pictures/insiamesedthot4t.jpg){border="0"}
 
 To model this layout the following selection was made on the inlet dialog:
 
-![](Pictures/SideDraftMenu.jpg){border="0"}
+![](07-Pictures/SideDraftMenu.jpg){border="0"}
 
 If an air box need to be added the \"Common box on Cylinder pipes\" radio button is selected.
 
@@ -1015,23 +1015,23 @@ If an air box need to be added the \"Common box on Cylinder pipes\" radio button
 
 [The pipe length file and pipe diameter contains the pipe lengths and also the type of pipe system, the collector angles and the box volumes, the pipe end characteristics and all the diameters. Selecting to edit an existing inlet system opens the following dialog:]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
-![](Pictures/EditInletDialog.jpg){border="0" width="1020" height="689"}
+![](07-Pictures/EditInletDialog.jpg){border="0" width="1020" height="689"}
 
 [The type of inlet system is displayed in the top left hand and the number of pipes and how they connect in the bottom left hand. When an inlet system is edited the user can choose to create a new system by clicking the \"Create a new Inlet Manifold\" button. To edit a pipe the number is entered in the bottom edit box labelled: \"Give pipe number to edit:\' As an example pipe number 7 is entered and that opens the following dialog box:]{lang="EN-AU"}
 
-[ ![](Pictures/EditInPipeDialog.jpg){border="0" width="429" height="454"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
+[ ![](07-Pictures/EditInPipeDialog.jpg){border="0" width="429" height="454"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
 [After making the required changes and selecting the \"Save and Display\" button the following appears:]{lang="en-au"}
 
-[ ![](Pictures/EditInPipeDisplay.jpg){border="0" width="864" height="436"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
+[ ![](07-Pictures/EditInPipeDisplay.jpg){border="0" width="864" height="436"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
 [Clicking the \"Exit\" button we return to the main inlet system dialog:]{style="font-family: Times New Roman" lang="en-au"}
 
-[ ![](Pictures/EditInletDialog.jpg){border="0" width="1020" height="689"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
+[ ![](07-Pictures/EditInletDialog.jpg){border="0" width="1020" height="689"}]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
 [ The collector angles can be changed by entering the collector number in the edit box in the collector group and clicking the \"Edit\" button. The collector edit dialog then appears:]{lang="EN-AU" style="font-family:\"Times New Roman\""}
 
-![](Pictures/EditColectorIn.jpg){border="0" width="677" height="655"}
+![](07-Pictures/EditColectorIn.jpg){border="0" width="677" height="655"}
 
 [On this dialog we can individually edit each angle as required or if the collector is symmetrical about the centre line we select the relevant radio button and enter the axisymetric angle in the edit box. selecting the \"OK\" button returns us to the main exhaust system editing dialog.]{style="font-family: Times New Roman" lang="en-au"}
 
@@ -1043,7 +1043,7 @@ If an air box need to be added the \"Common box on Cylinder pipes\" radio button
 
 Sometimes there is an error in the way the software connects pipes to each other and to other boundaries like cylinder heads, turbochargers, intercoolers etc. When this happens the boundary conditions displayed on the pipe graphics will either be two or more over each other or missing altogether. The next figure shows an example of two boundaries connected to one side and nothing to the other side:
 
-![](Pictures/InletPipeError.jpg){border="0" width="864" height="440"}
+![](07-Pictures/InletPipeError.jpg){border="0" width="864" height="440"}
 
 ## When an error occurs:
 
