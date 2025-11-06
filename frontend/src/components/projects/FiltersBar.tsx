@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 export interface ProjectFiltersState {
-  type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>;
+  type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM' | 'Carb'>;
   valves: number[]; // Valves per cylinder (2, 3, 4, 5)
   cylinders: number[];
   tags: string[]; // User tags only
@@ -49,12 +49,13 @@ interface FiltersBarProps {
 }
 
 // Filter options configuration
-const TYPE_OPTIONS: MultiSelectOption<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>[] = [
+const TYPE_OPTIONS: MultiSelectOption<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM' | 'Carb'>[] = [
   { value: 'NA', label: 'NA' },
   { value: 'Turbo', label: 'Turbo' },
   { value: 'Supercharged', label: 'Supercharged' },
   { value: 'ITB', label: 'ITB', section: 'Intake (NA only)' },
   { value: 'IM', label: 'IM' },
+  { value: 'Carb', label: 'Carb' },
 ];
 
 const VALVES_OPTIONS: MultiSelectOption<number>[] = [
