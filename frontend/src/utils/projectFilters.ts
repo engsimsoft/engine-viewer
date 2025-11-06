@@ -58,13 +58,23 @@ export function filterProjects(
       }
     }
 
-    // Tags filter (OR logic: project must have at least one of selected tags)
+    // Tags filter (user tags only)
     if (filters.tags.length > 0) {
       const projectTags = project.metadata?.manual?.tags || [];
-      const hasMatchingTag = filters.tags.some(filterTag =>
-        projectTags.includes(filterTag)
-      );
-      if (!hasMatchingTag) {
+
+      // Check if any selected filter matches user tags
+      const hasMatch = filters.tags.some(filterTag => projectTags.includes(filterTag));
+
+      if (!hasMatch) {
+        return false;
+      }
+    }
+
+    // Status filter (separate from tags)
+    if (filters.status.length > 0) {
+      const projectStatus = project.metadata?.manual?.status || 'active';
+
+      if (!filters.status.includes(projectStatus as 'active' | 'completed' | 'archived')) {
         return false;
       }
     }
@@ -107,14 +117,6 @@ export function sortProjects(
         const nameA = (a.displayName || a.name).toLowerCase();
         const nameB = (b.displayName || b.name).toLowerCase();
         return nameA.localeCompare(nameB);
-      });
-
-    case 'cylinders':
-      // Sort by cylinders (descending)
-      return sorted.sort((a, b) => {
-        const cylA = a.metadata?.auto?.cylinders || a.numCylinders;
-        const cylB = b.metadata?.auto?.cylinders || b.numCylinders;
-        return cylB - cylA;
       });
 
     case 'created':
@@ -212,6 +214,20 @@ export function calculateTagCounts(projects: ProjectInfo[]): Record<string, numb
     tags.forEach(tag => {
       counts[tag] = (counts[tag] || 0) + 1;
     });
+  });
+
+  return counts;
+}
+
+/**
+ * Count projects by status (active, completed, archived)
+ */
+export function calculateStatusCounts(projects: ProjectInfo[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+
+  projects.forEach(project => {
+    const status = project.metadata?.manual?.status || 'active';
+    counts[status] = (counts[status] || 0) + 1;
   });
 
   return counts;

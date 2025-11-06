@@ -11,7 +11,8 @@ import {
   calculateCylinderCounts,
   calculateValvesCounts,
   calculateTypeCounts,
-  calculateTagCounts
+  calculateTagCounts,
+  calculateStatusCounts
 } from '@/utils/projectFilters';
 import type { ProjectInfo } from '@/types';
 
@@ -25,6 +26,7 @@ export default function HomePage() {
     valves: [],
     cylinders: [],
     tags: [],
+    status: [],
     search: '',
     sortBy: 'date',
   });
@@ -50,6 +52,7 @@ export default function HomePage() {
       valves: calculateValvesCounts(projects),
       types: calculateTypeCounts(projects),
       tags: calculateTagCounts(projects),
+      status: calculateStatusCounts(projects),
     };
   }, [projects]);
 
@@ -78,6 +81,7 @@ export default function HomePage() {
       valves: [],
       cylinders: [],
       tags: [],
+      status: [],
       search: '',
       sortBy: 'date',
     });
@@ -168,7 +172,7 @@ export default function HomePage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
