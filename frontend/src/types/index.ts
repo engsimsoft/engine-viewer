@@ -151,7 +151,9 @@ export interface AutoMetadata {
   compressionRatio: number;
   maxPowerRPM: number;
   intakeSystem: IntakeSystem;
-  exhaustSystem: ExhaustSystem;
+  valvesPerCylinder: number;  // Total valves per cylinder (2, 3, 4, 5)
+  inletValves: number;        // Number of inlet valves per cylinder
+  exhaustValves: number;      // Number of exhaust valves per cylinder
 }
 
 /**

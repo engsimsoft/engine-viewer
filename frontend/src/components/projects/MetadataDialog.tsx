@@ -255,11 +255,17 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
                       />
                     </FormItem>
 
-                    {/* Exhaust System */}
+                    {/* Valves */}
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Exhaust</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">Valves</FormLabel>
                       <Input
-                        value={project.metadata.auto.exhaustSystem || '—'}
+                        value={
+                          project.metadata.auto.valvesPerCylinder &&
+                          project.metadata.auto.inletValves &&
+                          project.metadata.auto.exhaustValves
+                            ? `${project.metadata.auto.valvesPerCylinder} (${project.metadata.auto.inletValves} In + ${project.metadata.auto.exhaustValves} Ex)`
+                            : '—'
+                        }
                         disabled
                         className="bg-muted text-sm h-9"
                       />

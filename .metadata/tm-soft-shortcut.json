@@ -17,7 +17,6 @@
     "description": "",
     "client": "DK Racing",
     "tags": [
-      "Race",
       "CN"
     ],
     "status": "active",
@@ -25,5 +24,5 @@
     "color": ""
   },
   "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-06T08:08:05.161Z"
+  "modified": "2025-11-06T08:40:43.474Z"
 }

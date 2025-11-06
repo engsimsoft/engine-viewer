@@ -46,7 +46,7 @@ async function testPrtParser() {
       console.log(`  Max Power RPM:    ${result.engine.maxPowerRPM}`);
       console.log(`\n💨 Systems:`);
       console.log(`  Intake System:    ${result.engine.intakeSystem}`);
-      console.log(`  Exhaust System:   ${result.engine.exhaustSystem}`);
+      console.log(`  Valves:           ${result.engine.valvesPerCylinder} (${result.engine.inletValves} In + ${result.engine.exhaustValves} Ex)`);
 
     } catch (error) {
       console.error(`\n❌ ERROR parsing ${fileName}:`);

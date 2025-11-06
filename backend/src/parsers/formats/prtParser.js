@@ -253,7 +253,10 @@ class PrtParser {
           compressionRatio: null,
           maxPowerRPM: null,
           intakeSystem: null, // ITB, IM
-          exhaustSystem: null // 4-2-1, 4-1, tri-y, etc.
+          exhaustSystem: null, // 4-2-1, 4-1, tri-y, etc.
+          valvesPerCylinder: null, // Total valves per cylinder (2, 3, 4, 5)
+          inletValves: null, // Number of inlet valves per cylinder
+          exhaustValves: null // Number of exhaust valves per cylinder
         }
       };
 
@@ -338,7 +341,32 @@ class PrtParser {
           }
         }
 
-        // 11. Intake system section
+        // 11. Valves per cylinder (line ~44)
+        // Формат: "The Cylinder head is of Tumble Flow type with 4 valves"
+        if (line.includes('Cylinder head') && line.includes('valves') && !metadata.engine.valvesPerCylinder) {
+          const match = line.match(/with\s+(\d+)\s+valves/i);
+          if (match) {
+            metadata.engine.valvesPerCylinder = parseInt(match[1], 10);
+          }
+        }
+
+        // 12. Number of exhaust valves (in EXHAUST section, line ~73)
+        if (line.includes('Number of exhaust valves') && !metadata.engine.exhaustValves) {
+          const value = this.extractValue(line);
+          if (value) {
+            metadata.engine.exhaustValves = parseInt(value, 10);
+          }
+        }
+
+        // 13. Number of inlet valves (in INLET section, line ~140)
+        if (line.includes('Number of inlet valves') && !metadata.engine.inletValves) {
+          const value = this.extractValue(line);
+          if (value) {
+            metadata.engine.inletValves = parseInt(value, 10);
+          }
+        }
+
+        // 14. Intake system section
         if (line.includes('The INTAKE system has the following Characteristics')) {
           inIntakeSection = true;
           inExhaustSection = false;
@@ -399,7 +427,8 @@ class PrtParser {
 
       console.log(`[PrtParser] Успешно распарсен файл: ${basename(filePath)}`);
       console.log(`[PrtParser] Engine: ${metadata.engine.name}, Type: ${metadata.engine.type}, ` +
-                  `Intake: ${metadata.engine.intakeSystem}, Exhaust: ${metadata.engine.exhaustSystem}`);
+                  `Intake: ${metadata.engine.intakeSystem}, ` +
+                  `Valves: ${metadata.engine.valvesPerCylinder} (${metadata.engine.inletValves} In + ${metadata.engine.exhaustValves} Ex)`);
 
       return metadata;
 
