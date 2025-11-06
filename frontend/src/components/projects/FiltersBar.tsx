@@ -130,7 +130,7 @@ export default function FiltersBar({
   };
 
   // Generate tags options: User Tags only (Status moved to Sort & Status dropdown)
-  const userTagsOptions: MultiSelectOption<string>[] = availableTags.map(tag => ({
+  const userTagsOptions: MultiSelectOption<string>[] = (availableTags || []).map(tag => ({
     value: tag,
     label: tag,
   }));
