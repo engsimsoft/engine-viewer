@@ -18,9 +18,9 @@ export function filterProjects(
   return projects.filter((project) => {
     // Engine filter (Type + Intake combined)
     if (filters.type.length > 0) {
-      // Separate engine types (NA, Turbo, Supercharged) from intake systems (ITB, IM)
+      // Separate engine types (NA, Turbo, Supercharged) from intake systems (ITB, IM, Carb)
       const engineTypes = filters.type.filter(t => ['NA', 'Turbo', 'Supercharged'].includes(t));
-      const intakeSystems = filters.type.filter(t => ['ITB', 'IM'].includes(t));
+      const intakeSystems = filters.type.filter(t => ['ITB', 'IM', 'Carb'].includes(t));
 
       const projectType = project.metadata?.auto?.type;
       const projectIntake = project.metadata?.auto?.intakeSystem;
