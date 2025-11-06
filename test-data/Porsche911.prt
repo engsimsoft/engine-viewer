@@ -1,0 +1,396 @@
+   
+   
+ ********************************************************************
+   
+   
+    This File lists the input data as set up for the:
+   
+              Porsche911                engine 
+   
+    for use by the EngMod4T engine simulation program.
+   
+    This dataFile was constructed on: 28- 2-2025
+                                  at: 17h: 1min
+ 
+    using Dat4T Version: V7.1.9       
+ 
+ ********************************************************************
+ 
+  The PROJECT File contains the following subsystem Files:  
+ 
+  Engine:                   Porsche911.eng           
+  Exhaust port:             Porsche911.exp           
+  Intake port:              Porsche911.ipo           
+  Exhaust type and lengths: Porsche911.exl           
+  Exhaust diameters:        Porsche911.exd           
+  Intake type and lengths:  Porsche911.inl           
+  Intake diameters:         Porsche911.ind           
+  Combustion data:          Porsche911.cbd           
+  Temperature data:         Porsche911.tmp           
+ 
+ ********************************************************************
+ 
+ General engine data:  
+ --------------------
+ 
+  This is a Naturally Aspirated Spark Ignition Engine.
+ 
+ Number of cylinders                                 6
+ The engine is a                           : FLAT TYPE
+ 
+ The friction loss model uses the following:
+  The following user defined values:
+    Static Loss Coefficient:    83593.20    
+    Dynamic Loss Slope:         13.76000    
+    Dynamic Loss Exponent:     1.6380000E-03
+ 
+ The Cylinder head is of Tumble Flow type with 2 valves
+ 
+ Bore                                        95.00000      mm
+ Stroke                                      70.40000      mm
+ Conrod length                               127.0000      mm
+ Gudgeon pin and/or cylinder offset         0.0000000E+00  mm
+ Geometric Compression Ratio                 10.30000    
+ Piston Dome radius                          130.0000      mm
+ Squish Clearence                            1.000000      mm
+ Squish Area ratio                          0.1000000    
+ Included Valve Angle                        65.00000      deg
+ RPM for Maximum Power                       8000.000    
+ Exhaust Pressure Transducer                 60.00000      mm
+ Inlet Pressure Transducer                   68.00000      mm
+ Number of Cycles (Not Less than 8)                  8
+ Throttle open ratio                         1.000000    
+  
+ The Crankshaft Firing order is: 
+  6 throw/ 3 plane crank for a Flat 6  : 1-6-2-4-3-5
+ 
+ ********************************************************************
+   
+  
+ The EXHAUST port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of exhaust valves                      1
+ The valve(s) is/are partially masked 
+ Exhaust Cd Map Multiplier is          1.000000    
+ Outer valve seat diameter             41.50000      mm
+ Inner valve seat diameter             39.15000      mm
+ Outer head seat diameter              41.50000      mm
+ Inner head seat diameter              39.15000      mm
+ Port throat diameter                  38.10000      mm
+ Port diameter at manifold             37.20000      mm
+ Valve stem diameter                   9.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                60.00000      mm
+ Exhaust valve tappet clearance       0.1000000      mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Exhaust cam data File                     GE40_E1.VLD (HMB) OUTPUT.SVL                                                    
+ Line number where lift data starts               0
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Exhaust valve Dwell center is at: (BTDC)    100.0000      deg
+ 
+   
+ ********************************************************************
+   
+  
+ The INLET port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of inlet valves                        1
+ The valve(s) is/are partially masked 
+ Inlet Cd Map Multiplier is            1.000000    
+ Outer valve seat diameter             48.86000      mm
+ Inner valve seat diameter             47.00000      mm
+ Port throat diameter                  45.60000      mm
+ Port diameter at manifold             38.00000      mm
+ Valve stem diameter                   9.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                68.00000      mm
+ Intake valve tappet clearance        0.1000000      mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Intake cam data File                      GE40_I1.VLD (HMB) OUTPUT.SVL                                                    
+ Line number where lift data starts               0
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Inlet valve Dwell center is at: (ATDC)    102.0000      deg
+ 
+   
+ ********************************************************************
+   
+  
+ The EXHAUST system has the following Characteristics:
+  ----------------------------------------------------
+   
+  
+ The exhaust system layout has: 
+   
+           9  Pipes
+           4  Collectors
+           1  Boxes
+           1  Silencers
+           2  Steps in total
+           0  Steps per header pipe
+           0  Steps per connector pipe
+           0  Steps per collector pipe
+           0  Steps per silencer
+   
+ The exhaust system is a 6into2into1 manifold with an outflow collector 
+  
+ It connects cylinder 1 to 3 into connector one and 4 to 6 into connector two,
+ and Then the two connectors into the collector
+  with an exhaust silencer.
+  
+  Total number of pipes (excluding internal silencer pipes) :  9
+  
+  There are  6 header pipe(s), numbering from 1 to  6,
+  and two connector pipes, numbering from  7 to  8,
+  and one collector pipe, number  9,
+  
+ Pipe No   Section No  Section length   Start diameter   End diameter
+    1           1           780.0            35.0            35.0
+    2           1           780.0            35.0            35.0
+    3           1           780.0            35.0            35.0
+    4           1           780.0            35.0            35.0
+    5           1           780.0            35.0            35.0
+    6           1           780.0            35.0            35.0
+    7           1            55.0            60.6            43.0
+                2           470.0            43.0            43.0
+    8           1            55.0            60.6            43.0
+                2           470.0            43.0            43.0
+    9           1            50.0            60.8            55.0
+                2           350.0            55.0            55.0
+  
+  The angles for collector:           1
+  
+  1 The angle between pipe  1 and pipe  2 =  30.0 deg
+  2 The angle between pipe  1 and pipe  3 =  30.0 deg
+  3 The angle between pipe  1 and pipe  7 = 150.0 deg
+  4 The angle between pipe  2 and pipe  3 =  30.0 deg
+  5 The angle between pipe  2 and pipe  7 = 180.0 deg
+  6 The angle between pipe  3 and pipe  7 = 150.0 deg
+  
+  The angles for collector:           2
+  
+  1 The angle between pipe  4 and pipe  5 =  30.0 deg
+  2 The angle between pipe  4 and pipe  6 =  30.0 deg
+  3 The angle between pipe  4 and pipe  8 = 150.0 deg
+  4 The angle between pipe  5 and pipe  6 =  30.0 deg
+  5 The angle between pipe  5 and pipe  8 = 180.0 deg
+  6 The angle between pipe  6 and pipe  8 = 150.0 deg
+  
+  The angles for collector:           3
+  
+  1 The angle between pipe  7 and pipe  8 =  30.0 deg
+  2 The angle between pipe  7 and pipe  9 = 150.0 deg
+  3 The angle between pipe  8 and pipe  9 = 150.0 deg
+  
+  The angles for collector:           4
+  
+  1 The angle between pipe 10 and pipe 12 =  90.0 deg
+  2 The angle between pipe 10 and pipe 11 = 180.0 deg
+  3 The angle between pipe 12 and pipe 11 =  90.0 deg
+ 
+ Exhaust Atmospheric Outlet Data: 
+ 
+  The Atmospheric Outlet pipe(s) has a SHARP edge.
+  
+ SILENCER TYPE :   Side-Resonant
+  
+  There are 1 silencer(s) 
+  
+  Overall length of the outer tube      : 600.00 (mm)
+  Internal diameter of the outer tube   : 125.00 (mm)
+  Perforated length of the inner tube   : 500.00 (mm)
+  Internal diameter of the inner tube   :  65.00 (mm)
+  Overall length of the outlet tube     : 300.00 (mm)
+  Internal diameter of the outlet tube  :  58.00 (mm)
+  Internal tube wall thickness          :   2.00 (mm)
+  Spacing of the perforatian holes      :   8.00 (mm)
+  Diameter of the perforatian holes     :   5.00 (mm)
+  
+ This silencer has the following values: 
+   
+  An opacity value of                   : 0.3068
+  Number of plenums                     : 1
+  Volume of each plenum                 : 5119.5 (cc)
+  A branch pipe diameter of             : 199.71 (mm)
+   
+ 
+ ********************************************************************
+   
+  
+ The INTAKE system has the following Characteristics:
+  ---------------------------------------------------
+   
+          12  Intake pipes
+           0  Collectors
+           6  Throttles
+           0  Boxes/Plenums/Boost bottles in total
+           0  Number of closed ends
+  
+  This is an intake system with seperate intake pipes,
+     with no airboxes
+     and no boost bottles but with throttles.
+  
+     The throttle is of the : BUTTERFLY type
+     with spindle diameter of:  6.00mm
+
+ There are  6 cylinder pipes, numbering from 1 to  6
+    6 throttle body pipe(s), numbering from  7 to 12
+ 
+ Number of segments in pipe  1 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    1           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  2 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    2           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  3 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    3           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  4 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    4           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  5 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    5           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  6 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    6           1            12.0            46.5            46.5
+                2           100.0            46.5            38.0
+ 
+ Number of segments in pipe  7 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    7           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+ Number of segments in pipe  8 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    8           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+ Number of segments in pipe  9 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    9           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+ Number of segments in pipe 10 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+   10           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+ Number of segments in pipe 11 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+   11           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+ Number of segments in pipe 12 is:  8
+ Pipe No   Section No  Section length   Start diameter  End diameter
+   12           1             2.0            75.5            69.0
+                2             3.0            69.0            64.0
+                3             5.0            64.0            60.0
+                4           110.0            60.0            46.5
+                5             3.0            46.5            40.0
+                6            40.0            40.0            40.0
+                7             3.0            40.0            46.5
+                8            12.0            46.5            46.5
+ 
+  Atmospheric inlet details :
+ 
+  The inlet pipe(s) from the atmosphere has a BELL edge.
+ 
+ ********************************************************************
+ 
+  The Ignition model data: 
+  ------------------------
+ 
+  
+ The Combustion Model uses Wiebe Curves for prescribed burn rate
+ Type of Fuel          =    PREMIUM
+ Nitromethane Ratio   =   0.000
+ 
+        Ignition, AFR and Combustion curves 
+ 
+   RPM     Timing    AFR    Delay Duration  VibeA  VibeB  Beff
+  8000.00   28.00   12.00    9.00   50.00    6.00  1.250  0.850
+   
+ ********************************************************************
+   
+   
+   
+  The wall temperature and atmospheric data: 
+  -------------------------------------------
+  
+   Inlet System Wall Temperature              25.00000      C
+   Inlet Plenum Wall Temperature              150.0000      C
+   Inlet Port Wall Temperature                150.0000      C
+   Exhaust Port Wall Temperature              250.0000      C
+   Exhaust Wall temp at Max Power             450.0000      C
+   Exhaust Plenum Wall Temperature            450.0000      C
+   Piston Crown Temperature                   250.0000      C
+   Combustion Chamber Wall Temperature        250.0000      C
+   Cylinder Liner temperature                 150.0000      C
+   Atmospheric Temperature (Std=20)           20.00000      C
+   Atmospheric Pressure (Std=101.325)         101.3250      kPA
+   Exit Atmospheric Temperature (Std=20)      20.00000      C
+   Exit Atmospheric Pressure (Std=101.325)    101.3250      kPa
+ 
+ ********************************************************************
+ 
+ 

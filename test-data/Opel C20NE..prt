@@ -1,0 +1,410 @@
+   
+   
+ ********************************************************************
+   
+   
+    This File lists the input data as set up for the:
+   
+              Opel C20NE.               engine 
+   
+    for use by the EngMod4T engine simulation program.
+   
+    This dataFile was constructed on: 24- 6-2025
+                                  at: 12h:59min
+ 
+    using Dat4T Version: V7.1.9       
+ 
+ ********************************************************************
+ 
+  The PROJECT File contains the following subsystem Files:  
+ 
+  Engine:                   Opel C20NE..eng          
+  Exhaust port:             Opel C20NE..exp          
+  Intake port:              Opel C20NE..ipo          
+  Exhaust type and lengths: Opel C20NE_4_1..exl      
+  Exhaust diameters:        Opel C20NE_4_1..exd      
+  Intake type and lengths:  ITB Opel C20NE.inl       
+  Intake diameters:         ITB Opel C20NE.ind       
+  Combustion data:          Opel C20NE..cbd          
+  Temperature data:         Opel C20NE..tmp          
+ 
+ ********************************************************************
+ 
+ General engine data:  
+ --------------------
+ 
+  This is a Naturally Aspirated Spark Ignition Engine.
+ 
+ Number of cylinders                                 4
+ The engine is an                          : INLINE TYPE
+ 
+ The friction loss model uses the following:
+  Default values for crankshaft bearings of the PLAIN type
+ 
+ The Cylinder head is of Side Valve Flow type with 2 valves
+ 
+ Bore                                        87.00000      mm
+ Stroke                                      86.00000      mm
+ Conrod length                               143.5000      mm
+ Gudgeon pin and/or cylinder offset         0.0000000E+00  mm
+ Geometric Compression Ratio                 12.00000    
+ Piston Dome radius                          85.45000      mm
+ Squish Clearence                            1.300000      mm
+ Squish Area ratio                          0.3000000    
+ Included Valve Angle                        38.00000      deg
+ RPM for Maximum Power                       6800.000    
+ Exhaust Pressure Transducer                 100.0000      mm
+ Inlet Pressure Transducer                   95.00000      mm
+ Number of Cycles (Not Less than 8)                 11
+ Throttle open ratio                         1.000000    
+  
+ The Crankshaft Firing order is: 
+ Single plane inline four or one bank of a V8: 1-3-4-2
+ 
+ ********************************************************************
+   
+  
+ The EXHAUST port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of exhaust valves                      1
+ 
+ The Cd-map is user specified: 
+ 
+   FlowFileEx  = Opel C20NE_Ex.ecd
+   CdMapUserEx = Opel C20NE_Ex.emp
+ 
+ Exhaust Cd Map Multiplier is          1.000000    
+ Outer valve seat diameter             36.50000      mm
+ Inner valve seat diameter             32.50000      mm
+ Outer head seat diameter              36.50000      mm
+ Inner head seat diameter              32.50000      mm
+ Port throat diameter                  32.50000      mm
+ Port diameter at manifold             33.00000      mm
+ Valve stem diameter                   7.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                72.50000      mm
+ Exhaust valve tappet clearance       0.0000000E+00  mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Exhaust cam data File                     Opel C20NE_Cam_Ex.mjp                                                           
+ Line number where lift data starts               1
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Exhaust valve Dwell center is at: (BTDC)    107.0000      deg
+ 
+  The Flowbench data is:
+  ----------------------
+ FlowFileEx  = Opel C20NE_Ex.ecd
+ 
+ Ambient Temperature units: Celcius
+ Ambient Pressure units:    bar
+ Flowbench Pressure units:  inch H2O
+ Flowbench Flow units:      cubic feet per minute (cfm)
+ Valve Lift units:          millimeter
+ Ambient Temperature:        20.00000    
+ Ambient Pressure:           1.000000    
+ Flowbench Test Pressure:    28.00000    
+ Number of Lift Points:             13
+ 
+  Valve Lift    Bench Flow
+   1.000000       16.00000    
+   2.000000       41.00000    
+   3.000000       63.00000    
+   4.000000       75.80000    
+   5.000000       87.00000    
+   6.000000       97.80000    
+   7.000000       107.0000    
+   8.000000       114.8000    
+   9.000000       122.7000    
+   10.00000       128.5000    
+   11.00000       133.5000    
+   12.00000       138.6000    
+   13.00000       143.3000    
+ 
+   
+ ********************************************************************
+   
+  
+ The INLET port has the following Characteristics:
+  --------------------------------------------------
+   
+  
+  Port and valve data 
+  
+ Number of inlet valves                        1
+ 
+ The Cd-map is user specified: 
+ 
+   FlowFileIn  = Opel C20NE_In.icd
+   CdMapUserIn = Opel C20NE_In.imp
+ 
+ Inlet Cd Map Multiplier is            1.000000    
+ Outer valve seat diameter             41.80000      mm
+ Inner valve seat diameter             37.15000      mm
+ Port throat diameter                  36.36000      mm
+ Port diameter at manifold             35.00000      mm
+ Valve stem diameter                   7.000000      mm
+ Valve seat angle (half of included)   45.00000      deg
+ Length of port passage                88.50000      mm
+ Intake valve tappet clearance        0.0000000E+00  mm
+ 
+  Valve Lift Data
+ 
+  Valve Lift Profile 1
+ 
+ The current cam proFile is:               IMPORTED
+ Intake cam data File                      Opel C20NE_Cam_In.mjp                                                           
+ Line number where lift data starts               1
+ The data in the File is per cam degrees
+ The timing is referenced to Dwell center
+ Inlet valve Dwell center is at: (ATDC)    103.0000      deg
+ 
+  The Flowbench data is:
+  ----------------------
+ FlowFileIn  = Opel C20NE_In.icd
+ 
+ Ambient Temperature units: Celcius
+ Ambient Pressure units:    bar
+ Flowbench Pressure units:  inch H2O
+ Flowbench Flow units:      cubic feet per minute (cfm)
+ Valve Lift units:          millimeter
+ Ambient Temperature:        20.00000    
+ Ambient Pressure:           1.000000    
+ Flowbench Test Pressure:    28.00000    
+ Number of Lift Points:             13
+ 
+  Valve Lift    Bench Flow
+   1.000000       24.00000    
+   2.000000       43.90000    
+   3.000000       66.50000    
+   4.000000       86.30000    
+   5.000000       106.6000    
+   6.000000       121.5000    
+   7.000000       136.0000    
+   8.000000       150.0000    
+   9.000000       160.0000    
+   10.00000       170.0000    
+   11.00000       179.0000    
+   12.00000       184.0000    
+   13.00000       188.0000    
+ 
+   
+ ********************************************************************
+   
+  
+ The EXHAUST system has the following Characteristics:
+  ----------------------------------------------------
+   
+  
+ The exhaust system layout has: 
+   
+           6  Pipes
+           1  Collectors
+           1  Boxes
+           0  Silencers
+           0  Steps in total
+           0  Steps per header pipe
+           0  Steps per connector pipe
+           0  Steps per collector pipe
+           0  Steps per silencer
+   
+  
+ This is a 4 into 1 collector exhaust system
+  with an exhaust box.
+  
+  Total number of pipes (excluding internal silencer pipes) :  6
+  
+  There are  4 header pipe(s), numbering from 1 to  4,
+  and one collector pipe, number  5,
+  and  1 box outlet pipes,  numbering from  6 to  6,
+  
+ Pipe No   Section No  Section length   Start diameter   End diameter
+    1           1           950.0            39.0            39.0
+    2           1           950.0            39.0            39.0
+    3           1           950.0            39.0            39.0
+    4           1           950.0            39.0            39.0
+    5           1           100.0            72.0            60.5
+                2           450.0            60.5            60.5
+    6           1          2200.0            60.5            60.5
+  
+  The angles for collector:           1
+  
+  1 The angle between pipe  1 and pipe  2 = 170.0 deg
+  2 The angle between pipe  1 and pipe  3 =  95.0 deg
+  3 The angle between pipe  1 and pipe  4 =   0.0 deg
+  4 The angle between pipe  1 and pipe  5 =   0.0 deg
+  5 The angle between pipe  2 and pipe  3 =  95.0 deg
+  6 The angle between pipe  2 and pipe  4 =   0.0 deg
+  7 The angle between pipe  2 and pipe  5 =   0.0 deg
+  8 The angle between pipe  3 and pipe  4 =   0.0 deg
+  9 The angle between pipe  3 and pipe  5 =   0.0 deg
+ 10 The angle between pipe  4 and pipe  5 =   0.0 deg
+ 
+ Exhaust Atmospheric Outlet Data: 
+ 
+  The Atmospheric Outlet pipe(s) has a SHARP edge.
+ 
+ ***Exhaust Box Data***
+ 
+  The Box inlet pipe(s) has a SHARP edge.
+  The Box outlet pipe(s) has a RADIUSED edge. 
+  
+  The Exhaust Box volumes:
+  
+  The volume of Exhaust Box  1 is  9000.00 (cc)
+ 
+ ********************************************************************
+   
+  
+ The INTAKE system has the following Characteristics:
+  ---------------------------------------------------
+   
+           8  Intake pipes
+           0  Collectors
+           4  Throttles
+           0  Boxes/Plenums/Boost bottles in total
+           0  Number of closed ends
+  
+  This is an intake system with seperate intake pipes,
+     with no airboxes
+     and no boost bottles but with throttles.
+  
+     The throttle is of the : BUTTERFLY type
+     with spindle diameter of:  4.00mm
+
+ There are  4 cylinder pipes, numbering from 1 to  4
+    4 throttle body pipe(s), numbering from  5 to  8
+ 
+ Number of segments in pipe  1 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    1           1            42.5            43.0            42.0
+                2           185.0            42.0            34.5
+ 
+ Number of segments in pipe  2 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    2           1            42.5            43.0            42.0
+                2           185.0            42.0            34.5
+ 
+ Number of segments in pipe  3 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    3           1            42.5            43.0            42.0
+                2           185.0            42.0            34.5
+ 
+ Number of segments in pipe  4 is:  2
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    4           1            42.5            43.0            42.0
+                2           185.0            42.0            34.5
+ 
+ Number of segments in pipe  5 is: 11
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    5           1             3.3            75.2            68.2
+                2             3.3            68.2            62.7
+                3             3.3            62.7            58.3
+                4             3.3            58.3            55.0
+                5             3.3            55.0            52.6
+                6             3.3            52.6            50.8
+                7             3.3            50.8            49.1
+                8             3.3            49.1            47.7
+                9             3.3            47.7            47.0
+               10            30.0            47.0            47.0
+               11            42.5            47.0            43.0
+ 
+ Number of segments in pipe  6 is: 11
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    6           1             3.3            75.2            68.2
+                2             3.3            68.2            62.7
+                3             3.3            62.7            58.3
+                4             3.3            58.3            55.0
+                5             3.3            55.0            52.6
+                6             3.3            52.6            50.8
+                7             3.3            50.8            49.1
+                8             3.3            49.1            47.7
+                9             3.3            47.7            47.0
+               10            30.0            47.0            47.0
+               11            42.5            47.0            43.0
+ 
+ Number of segments in pipe  7 is: 11
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    7           1             3.3            75.2            68.2
+                2             3.3            68.2            62.7
+                3             3.3            62.7            58.3
+                4             3.3            58.3            55.0
+                5             3.3            55.0            52.6
+                6             3.3            52.6            50.8
+                7             3.3            50.8            49.1
+                8             3.3            49.1            47.7
+                9             3.3            47.7            47.0
+               10            30.0            47.0            47.0
+               11            42.5            47.0            43.0
+ 
+ Number of segments in pipe  8 is: 11
+ Pipe No   Section No  Section length   Start diameter  End diameter
+    8           1             3.3            75.2            68.2
+                2             3.3            68.2            62.7
+                3             3.3            62.7            58.3
+                4             3.3            58.3            55.0
+                5             3.3            55.0            52.6
+                6             3.3            52.6            50.8
+                7             3.3            50.8            49.1
+                8             3.3            49.1            47.7
+                9             3.3            47.7            47.0
+               10            30.0            47.0            47.0
+               11            42.5            47.0            43.0
+ 
+  Atmospheric inlet details :
+ 
+  The inlet pipe(s) from the atmosphere has a BELL edge.
+ 
+ ********************************************************************
+ 
+  The Ignition model data: 
+  ------------------------
+ 
+  
+ The Combustion Model uses Wiebe Curves for prescribed burn rate
+ Type of Fuel          =    100 UNLEADED
+ Nitromethane Ratio   =   0.000
+ 
+        Ignition, AFR and Combustion curves 
+ 
+   RPM     Timing    AFR    Delay Duration  VibeA  VibeB  Beff
+  2000.00   14.00   12.50    4.34   43.40   10.00  2.000  0.870
+  3000.00   16.00   12.50    4.77   47.70   10.00  2.000  0.870
+  4000.00   18.60   12.45    5.21   52.10   10.00  2.000  0.870
+  5000.00   20.80   12.40    5.65   56.50   10.00  2.000  0.870
+  6000.00   23.00   12.35    6.08   60.80   10.00  2.000  0.870
+  7000.00   25.30   12.30    6.52   65.20   10.00  2.000  0.870
+  8000.00   27.50   12.30    6.96   69.60   10.00  2.000  0.870
+   
+ ********************************************************************
+   
+   
+   
+  The wall temperature and atmospheric data: 
+  -------------------------------------------
+  
+   Inlet System Wall Temperature              25.00000      C
+   Inlet Plenum Wall Temperature              150.0000      C
+   Inlet Port Wall Temperature                150.0000      C
+   Exhaust Port Wall Temperature              250.0000      C
+   Exhaust Wall temp at Max Power             400.0000      C
+   Exhaust Plenum Wall Temperature            400.0000      C
+   Piston Crown Temperature                   221.1270      C
+   Combustion Chamber Wall Temperature        221.1270      C
+   Cylinder Liner temperature                 181.1270      C
+   Atmospheric Temperature (Std=20)           20.00000      C
+   Atmospheric Pressure (Std=101.325)         101.3250      kPA
+   Exit Atmospheric Temperature (Std=20)      20.00000      C
+   Exit Atmospheric Pressure (Std=101.325)    101.3250      kPa
+ 
+ ********************************************************************
+ 
+ 
