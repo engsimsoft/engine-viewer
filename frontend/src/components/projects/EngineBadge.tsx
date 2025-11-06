@@ -2,12 +2,13 @@
  * EngineBadge Component
  *
  * Displays engine specification badges with color-coded variants
- * Used in ProjectCard to show ONLY essential engine info: Type, Cylinders, Intake
+ * Used in ProjectCard to show essential engine info: Type, Cylinders, Valves, Intake
  *
  * Color coding:
  * - Type: NA = green, Turbo = blue, Supercharged = purple
- * - Intake: ITB = orange, IM = gray
  * - Cylinders = gray (neutral)
+ * - Valves = cyan (total valves: cylinders × valvesPerCylinder)
+ * - Intake: ITB = orange, IM = gray
  */
 
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,12 @@ interface EngineBadgeProps {
    * Intake system (ITB, IM)
    */
   intake?: IntakeSystem;
+
+  /**
+   * Valves per cylinder (will display total valves: cylinders × valvesPerCylinder)
+   * Example: 4 cylinders × 4 valves = "16V"
+   */
+  valvesPerCylinder?: number;
 
   /**
    * Additional CSS classes
@@ -54,12 +61,15 @@ const badgeColors = {
   },
   // Cylinders - neutral
   neutral: 'bg-gray-600 text-white hover:bg-gray-700',
+  // Valves - cyan/teal color for distinction
+  valves: 'bg-cyan-600 text-white hover:bg-cyan-700',
 };
 
 export default function EngineBadge({
   type,
   cylinders,
   intake,
+  valvesPerCylinder,
   className,
 }: EngineBadgeProps) {
   // Render badges only if props are provided
@@ -80,6 +90,16 @@ export default function EngineBadge({
       key: `cylinders-${cylinders}`,
       label: `${cylinders} Cyl`,
       color: badgeColors.neutral,
+    });
+  }
+
+  // Valves badge (16V, 24V, etc.) - Total valves = cylinders × valvesPerCylinder
+  if (cylinders !== undefined && valvesPerCylinder !== undefined) {
+    const totalValves = cylinders * valvesPerCylinder;
+    badges.push({
+      key: `valves-${totalValves}`,
+      label: `${totalValves}V`,
+      color: badgeColors.valves,
     });
   }
 

@@ -256,9 +256,9 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
                       />
                     </FormItem>
 
-                    {/* Valves */}
+                    {/* Valves per Cylinder */}
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Valves</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">Valves per Cylinder</FormLabel>
                       <Input
                         value={
                           project.metadata.auto.valvesPerCylinder &&
