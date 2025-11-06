@@ -276,16 +276,62 @@ This document explains:
                          └──────────────────────┘
 ```
 
-### Critical Constraint: READ-ONLY Data
+### Critical Constraint: File Access Levels
 
-**RULE:** Visualizers (Post4T / Engine Results Viewer) can ONLY read files.
+**RULE:** Engine Results Viewer has different access levels for different file types.
+
+---
+
+#### 🔒 READ-ONLY (cannot modify at all)
 
 **Cannot do:**
-- ❌ Modify .prt files (configuration belongs to DAT4T)
-- ❌ Modify .det files (results belong to EngMod4T)
-- ❌ Modify .pou/.spo files (results belong to EngMod4T)
+- ❌ Modify .prt files (configuration belongs to DAT4T, breaks EngMod4T)
 - ❌ Modify trace files (results belong to EngMod4T)
+- ❌ Modify calculation data in .det/.pou files (RPM, power, torque, etc.)
 - ❌ Create new simulation runs (only EngMod4T can simulate)
+
+**WHY:** Data integrity. Only EngMod4T can create simulation results.
+
+---
+
+#### ⚠️ LIMITED WRITE (marker names only)
+
+**Can modify:**
+- ✅ **Marker names** in .det files (e.g., `$1` → `$1 Best Config`)
+- ✅ **Marker names** in .pou files (e.g., `$2` → `$2 VVT +10°`)
+
+**Cannot modify:**
+- ❌ Calculation data (RPM, power, torque, temperatures, pressures - READ-ONLY!)
+- ❌ Number of data rows or structure
+
+**Example - What you CAN change:**
+```
+Before:  $1
+After:   $1 Best Torque Setup
+
+Before:  $3
+After:   $3 VVT +10° @ 3000 RPM
+```
+
+**Example - What you CANNOT change:**
+```javascript
+// ❌ WRONG - Changing calculation data
+const detData = parseDetFile('project.det');
+detData.calculations[0].rows[0].RPM = 2000;  // NEVER DO THIS!
+detData.calculations[0].rows[0]['P-Av'] = 150; // NEVER DO THIS!
+
+// ✅ CORRECT - Only changing marker name
+detData.calculations[0].marker = '$1 Best Config';  // OK!
+```
+
+**WHY marker names are editable:**
+- User labels for organization (doesn't affect simulation data)
+- Helps identify calculations (e.g., "$3 intake manifold test")
+- Safe to modify (no impact on EngMod4T or calculation integrity)
+
+---
+
+#### ✅ FULL ACCESS
 
 **Can do:**
 - ✅ Read all files
@@ -294,8 +340,7 @@ This document explains:
 - ✅ Compare calculations from different projects
 - ✅ Convert units for display
 - ✅ Cache parsed data (local only, not saved to source files)
-
-**WHY:** Data integrity. Only source programs can create/modify their outputs.
+- ✅ Create/modify `.metadata/` folder (Engine Viewer's own data)
 
 ---
 
