@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -137,11 +138,9 @@ export function PrimarySelectionModal() {
         {/* Header */}
         <DialogHeader>
           <DialogTitle>Select Primary Calculation</DialogTitle>
-          {project && (
-            <p className="text-sm text-muted-foreground">
-              Project: {project.fileName}
-            </p>
-          )}
+          <DialogDescription>
+            {project ? `Project: ${project.fileName}` : 'Choose a calculation from the current project'}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Search Input + Sort Toggle */}

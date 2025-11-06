@@ -26,6 +26,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -149,6 +150,9 @@ export function ParameterSelectorModal() {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Select Parameters</DialogTitle>
+          <DialogDescription>
+            Choose parameters to visualize on the custom chart
+          </DialogDescription>
         </DialogHeader>
 
         {/* Search Bar */}

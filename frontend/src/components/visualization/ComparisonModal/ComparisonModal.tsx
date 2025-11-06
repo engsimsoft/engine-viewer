@@ -26,6 +26,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/stores/appStore';
 import { ProjectListStep } from './ProjectListStep';
@@ -102,6 +103,9 @@ export function ComparisonModal({ currentProjectId }: ComparisonModalProps) {
         {/* Header */}
         <DialogHeader>
           <DialogTitle>Add for Comparison</DialogTitle>
+          <DialogDescription>
+            {step === 1 ? 'Select a project' : 'Select a calculation to compare'}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Step 1: Project List */}
