@@ -17,11 +17,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSelect';
-import type { IntakeSystem } from '@/types';
 
 export interface ProjectFiltersState {
-  type: Array<'NA' | 'Turbo' | 'Supercharged'>;
-  intake: IntakeSystem[];
+  type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>;
   createdYear: number[];
   cylinders: number[];
   tags: string[];
@@ -39,14 +37,11 @@ interface FiltersBarProps {
 }
 
 // Filter options configuration
-const TYPE_OPTIONS: MultiSelectOption<'NA' | 'Turbo' | 'Supercharged'>[] = [
+const TYPE_OPTIONS: MultiSelectOption<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>[] = [
   { value: 'NA', label: 'NA' },
   { value: 'Turbo', label: 'Turbo' },
   { value: 'Supercharged', label: 'Supercharged' },
-];
-
-const INTAKE_OPTIONS: MultiSelectOption<IntakeSystem>[] = [
-  { value: 'ITB', label: 'ITB' },
+  { value: 'ITB', label: 'ITB', section: 'Intake (NA only)' },
   { value: 'IM', label: 'IM' },
 ];
 
@@ -116,7 +111,6 @@ export default function FiltersBar({
   // Count active filters
   const activeFiltersCount =
     filters.type.length +
-    filters.intake.length +
     filters.createdYear.length +
     filters.cylinders.length +
     filters.tags.length +
@@ -150,20 +144,11 @@ export default function FiltersBar({
 
         {/* Multi-Select Filters */}
         <MultiSelect
-          label="Type"
+          label="Engine"
           options={TYPE_OPTIONS}
           value={filters.type}
           onChange={(value) => updateFilter('type', value)}
-          placeholder="All Types"
-          className="w-[160px]"
-        />
-
-        <MultiSelect
-          label="Intake"
-          options={INTAKE_OPTIONS}
-          value={filters.intake}
-          onChange={(value) => updateFilter('intake', value)}
-          placeholder="All Intakes"
+          placeholder="All Engines"
           className="w-[160px]"
         />
 
@@ -214,7 +199,7 @@ export default function FiltersBar({
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Active filters:</span>
 
-          {/* Type filters */}
+          {/* Engine filters (Type + Intake combined) */}
           {filters.type.map((type) => (
             <Badge
               key={type}
@@ -222,20 +207,7 @@ export default function FiltersBar({
               className="gap-1 cursor-pointer hover:bg-secondary/80"
               onClick={() => removeFilter('type', type)}
             >
-              Type: {type}
-              <X className="h-3 w-3" />
-            </Badge>
-          ))}
-
-          {/* Intake filters */}
-          {filters.intake.map((intake) => (
-            <Badge
-              key={intake}
-              variant="secondary"
-              className="gap-1 cursor-pointer hover:bg-secondary/80"
-              onClick={() => removeFilter('intake', intake)}
-            >
-              Intake: {intake}
+              {type}
               <X className="h-3 w-3" />
             </Badge>
           ))}

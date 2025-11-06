@@ -16,19 +16,29 @@ export function filterProjects(
   filters: ProjectFiltersState
 ): ProjectInfo[] {
   return projects.filter((project) => {
-    // Type filter (NA, Turbo, Supercharged)
+    // Engine filter (Type + Intake combined)
     if (filters.type.length > 0) {
-      const projectType = project.metadata?.auto?.type;
-      if (!projectType || !filters.type.includes(projectType)) {
-        return false;
-      }
-    }
+      // Separate engine types (NA, Turbo, Supercharged) from intake systems (ITB, IM)
+      const engineTypes = filters.type.filter(t => ['NA', 'Turbo', 'Supercharged'].includes(t));
+      const intakeSystems = filters.type.filter(t => ['ITB', 'IM'].includes(t));
 
-    // Intake filter (ITB, IM)
-    if (filters.intake.length > 0) {
+      const projectType = project.metadata?.auto?.type;
       const projectIntake = project.metadata?.auto?.intakeSystem;
-      if (!projectIntake || !filters.intake.includes(projectIntake)) {
-        return false;
+
+      // If intake systems selected: must be NA + matching intake
+      if (intakeSystems.length > 0) {
+        const matchesIntake = intakeSystems.includes(projectIntake as any);
+        const isNA = projectType === 'NA';
+        if (!matchesIntake || !isNA) {
+          return false;
+        }
+      }
+
+      // If engine types selected: must match type
+      if (engineTypes.length > 0 && intakeSystems.length === 0) {
+        if (!projectType || !engineTypes.includes(projectType as any)) {
+          return false;
+        }
       }
     }
 
