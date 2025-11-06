@@ -106,12 +106,13 @@ This document explains:
 │                                                              │
 │  ┌─ SAVE PROJECT ─────────────────────────────────────────┐  │
 │  │ • Click "Save Project"                                │  │
-│  │ • Creates: C:/4Stroke/MyTurbo4Cyl/MyTurbo4Cyl.prt    │  │
+│  │ • Creates: C:/4Stroke/MyTurbo4Cyl.prt (in ROOT!)     │  │
+│  │ • Also creates: C:/4Stroke/MyTurbo4Cyl/ (folder)     │  │
 │  │ • File format: Fixed-width ASCII                      │  │
 │  │ • Encoding: Windows-1251 (Cyrillic metadata)         │  │
 │  └───────────────────────────────────────────────────────┘  │
 │                                                              │
-│  OUTPUT: MyTurbo4Cyl.prt (complete engine configuration)    │
+│  OUTPUT: MyTurbo4Cyl.prt (in C:/4Stroke/ root)              │
 └──────────────────────────────────────────────────────────────┘
                             ↓
 ┌──────────────────────────────────────────────────────────────┐
@@ -305,8 +306,12 @@ This document explains:
 ```
 C:/4Stroke/                          # Production data root (Windows)
 │
-├── MyTurbo4Cyl/                     # Project 1
-│   ├── MyTurbo4Cyl.prt              # DAT4T: Engine configuration
+├── MyTurbo4Cyl.prt                  # ✅ DAT4T: Engine configuration (in ROOT!)
+├── Vesta 1.6 IM.prt                 # ✅ DAT4T: Engine configuration (in ROOT!)
+├── BMW_M3_S55.prt                   # ✅ DAT4T: Engine configuration (in ROOT!)
+│   ... (50+ .prt files in root)
+│
+├── MyTurbo4Cyl/                     # Project 1 results folder
 │   ├── MyTurbo4Cyl.det              # EngMod4T: Performance (24 params)
 │   ├── MyTurbo4Cyl.pou              # EngMod4T: Extended (71 params)
 │   ├── MyTurbo4Cyl_Pressure.cbt     # EngMod4T: Pressure trace
@@ -314,14 +319,12 @@ C:/4Stroke/                          # Production data root (Windows)
 │   ├── MyTurbo4Cyl_Combustion.trace # EngMod4T: Combustion trace
 │   └── MyTurbo4Cyl_*.trace          # EngMod4T: Other traces
 │
-├── Vesta 1.6 IM/                    # Project 2
-│   ├── Vesta 1.6 IM.prt
+├── Vesta 1.6 IM/                    # Project 2 results folder
 │   ├── Vesta 1.6 IM.det
 │   ├── Vesta 1.6 IM.pou
 │   └── Vesta 1.6 IM_*.trace
 │
-├── BMW_M3_S55/                      # Project 3
-│   ├── BMW_M3_S55.prt
+├── BMW_M3_S55/                      # Project 3 results folder
 │   ├── BMW_M3_S55.det
 │   ├── BMW_M3_S55.pou
 │   └── BMW_M3_S55_*.trace
@@ -332,24 +335,42 @@ C:/4Stroke/                          # Production data root (Windows)
     └── ...
 ```
 
+**Key Structure Rules:**
+- `.prt` files are stored in **ROOT** of `C:/4Stroke/` (NOT inside project folders!)
+- Project folders contain ONLY results: `.det`, `.pou`, and trace files
+- Naming matches: `ProjectName.prt` (root) ↔ `ProjectName/` (folder)
+- `.prt` files are READ-ONLY for Engine Viewer (only DAT4T can modify)
+
 ### Development/Test Environment
 
 ```
 engine-viewer/                       # Git repository root (macOS)
 │
-├── test-data/                       # Mirrors C:/4Stroke/ structure
-│   ├── Vesta 1.6 IM/
+├── test-data/                       # Mirrors C:/4Stroke/ structure EXACTLY
+│   ├── Vesta 1.6 IM.prt             # ✅ DAT4T: Config file (in ROOT!)
+│   ├── 4_Cyl_ITB.prt                # ✅ DAT4T: Config file (in ROOT!)
+│   ├── TM Soft ShortCut.prt         # ✅ DAT4T: Config file (in ROOT!)
+│   │   ... (70+ .prt files in root)
+│   │
+│   ├── Vesta 1.6 IM/                # Project 1 results folder
 │   │   ├── Vesta 1.6 IM.det
 │   │   └── Vesta 1.6 IM.pou
-│   ├── BMW_M3_S55/
-│   │   └── BMW_M3_S55.det
-│   └── Mazda_Skyactiv-G/
-│       └── Mazda_Skyactiv-G.pou
+│   ├── 4_Cyl_ITB/                   # Project 2 results folder
+│   │   ├── 4_Cyl_ITB.det
+│   │   └── 4_Cyl_ITB.pou
+│   └── TM Soft ShortCut/            # Project 3 results folder
+│       ├── TM Soft ShortCut.det
+│       └── TM Soft ShortCut.pou
 │
 ├── frontend/                        # React app
 ├── backend/                         # Node.js server
 └── docs/                            # Documentation
 ```
+
+**Key Points:**
+- `test-data/` EXACTLY mirrors `C:/4Stroke/` structure
+- All `.prt` files in **ROOT** of `test-data/` (same as production)
+- Project folders contain ONLY `.det`, `.pou` files (same as production)
 
 **Path Configuration:**
 ```yaml
@@ -363,16 +384,19 @@ dataPath:
 
 **Pattern:** `ProjectName.extension`
 
-**Examples:**
-- `Vesta 1.6 IM.prt` - Configuration
-- `Vesta 1.6 IM.det` - Performance data
-- `Vesta 1.6 IM.pou` - Extended performance
-- `Vesta 1.6 IM_Pressure.cbt` - Trace file
+**Examples (with full paths):**
+- `C:/4Stroke/Vesta 1.6 IM.prt` - Configuration (in ROOT)
+- `C:/4Stroke/Vesta 1.6 IM/Vesta 1.6 IM.det` - Performance data (in folder)
+- `C:/4Stroke/Vesta 1.6 IM/Vesta 1.6 IM.pou` - Extended performance (in folder)
+- `C:/4Stroke/Vesta 1.6 IM/Vesta 1.6 IM_Pressure.cbt` - Trace file (in folder)
+
+**Critical:** `.prt` file is in ROOT, while `.det/.pou/.trace` are INSIDE project folder!
 
 **Rules:**
 - Project name can contain spaces (wrapped in quotes when needed)
 - Extensions: `.prt`, `.det`, `.pou`, `_*.trace`
 - SAME project name across all files (consistency)
+- Naming matches: `ProjectName.prt` (root) ↔ `ProjectName/` (folder)
 
 ---
 
@@ -585,6 +609,66 @@ if (line.trim().startsWith('$')) {
 // ❌ WRONG - Only extract number
 const marker = line.match(/\$(\d+)/)[1];  // "3" ← Lost ".1 R 0.86"!
 ```
+
+### 7. Why .prt Files Are in Root (Critical Architecture)
+
+**Rule:** `.prt` files MUST be stored in ROOT of `C:/4Stroke/`, NOT inside project folders.
+
+**Actual Structure:**
+```
+C:/4Stroke/
+├── ProjectName.prt         ✅ Configuration file (in ROOT!)
+├── ProjectName/            ✅ Results folder
+│   ├── ProjectName.det
+│   └── ProjectName.pou
+```
+
+**WHY This Design:**
+
+1. **Single Source of Truth** - One `.prt` file per project (not duplicated)
+2. **EngMod4T Expects Root Location** - Simulator reads config files from `C:/4Stroke/` root
+3. **Results Folder is Output-Only** - `ProjectName/` folder contains ONLY simulation outputs
+4. **Prevents Accidental Modification** - `.prt` files isolated from frequent file operations
+5. **Historical Design** - EngMod4T Suite has used this structure for 15 years (non-negotiable)
+6. **File Locking Safety** - DAT4T locks `.prt` in root, EngMod4T writes to separate folder (no conflicts)
+
+**IMPACT on Engine Viewer:**
+
+**Must Do:**
+- ✅ Scan `C:/4Stroke/*.prt` for project list (root level)
+- ✅ Load metadata from `C:/4Stroke/ProjectName.prt`
+- ✅ Load results from `C:/4Stroke/ProjectName/ProjectName.det`
+- ✅ Maintain separate paths: `.prt` (root) ≠ `.det/.pou` (subfolder)
+
+**Must NOT Do:**
+- ❌ Look for `.prt` inside project folders (`C:/4Stroke/ProjectName/ProjectName.prt` does NOT exist!)
+- ❌ Modify `.prt` files (READ-ONLY for Engine Viewer)
+- ❌ Assume all files in same directory
+
+**Correct File Discovery:**
+```javascript
+// ✅ CORRECT - Scan root for .prt files
+const prtFiles = await fs.readdir('C:/4Stroke/')
+  .then(files => files.filter(f => f.endsWith('.prt')));
+
+// For each project:
+const projectName = 'Vesta 1.6 IM';
+const prtPath = `C:/4Stroke/${projectName}.prt`;           // Root!
+const detPath = `C:/4Stroke/${projectName}/${projectName}.det`;  // Subfolder!
+
+// ❌ WRONG - Looking for .prt inside folder
+const wrongPath = `C:/4Stroke/${projectName}/${projectName}.prt`;  // Does NOT exist!
+```
+
+**WHY This Matters:**
+
+Violating this constraint will cause:
+- ❌ Project discovery fails (can't find `.prt` files)
+- ❌ Metadata loading fails (wrong path)
+- ❌ Auto-population of ProjectCard fails
+- ❌ File path resolution errors throughout the app
+
+**This is a FUNDAMENTAL architectural constraint** - not a design choice. The structure is dictated by EngMod4T Suite and cannot be changed.
 
 ---
 
