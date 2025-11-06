@@ -8,6 +8,7 @@
     "configuration": "inline",
     "bore": 86,
     "stroke": 86,
+    "displacement": 2,
     "compressionRatio": 11,
     "maxPowerRPM": 8500,
     "intakeSystem": "ITB",
@@ -17,5 +18,5 @@
   },
   "manual": {},
   "created": "2025-11-06T12:59:56.845Z",
-  "modified": "2025-11-06T13:40:52.757Z"
+  "modified": "2025-11-06T14:19:23.875Z"
 }

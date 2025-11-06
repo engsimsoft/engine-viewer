@@ -226,6 +226,7 @@ async function parsePrtFileAndUpdateMetadata(file) {
       configuration: result.engine.configuration,
       bore: result.engine.bore,
       stroke: result.engine.stroke,
+      displacement: result.engine.displacement,
       compressionRatio: result.engine.compressionRatio,
       maxPowerRPM: result.engine.maxPowerRPM,
       intakeSystem: result.engine.intakeSystem,

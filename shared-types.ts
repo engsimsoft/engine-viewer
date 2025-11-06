@@ -266,7 +266,7 @@ export interface SelectedCalculations {
 /**
  * Тип intake system
  */
-export type IntakeSystem = 'ITB' | 'IM';
+export type IntakeSystem = 'ITB' | 'IM' | 'Carb';
 
 /**
  * Тип exhaust system
@@ -297,13 +297,16 @@ export interface AutoMetadata {
   /** Ход поршня (stroke) в мм */
   stroke: number;
 
+  /** Объем двигателя (displacement) в литрах - рассчитывается из bore, stroke, cylinders */
+  displacement?: number;
+
   /** Степень сжатия */
   compressionRatio: number;
 
   /** Максимальные обороты для максимальной мощности (RPM) */
   maxPowerRPM: number;
 
-  /** Тип intake system: ITB (Individual Throttle Bodies), IM (Intake Manifold) */
+  /** Тип intake system: ITB (Individual Throttle Bodies), IM (Intake Manifold), Carb (Carburetor/Collector) */
   intakeSystem: IntakeSystem;
 
   /** Паттерн exhaust system: "4-2-1", "4-1", "tri-y", etc. */

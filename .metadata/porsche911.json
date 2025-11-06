@@ -8,6 +8,7 @@
     "configuration": "inline",
     "bore": 95,
     "stroke": 70.4,
+    "displacement": 2.99,
     "compressionRatio": 10.3,
     "maxPowerRPM": 8000,
     "intakeSystem": "ITB",
@@ -15,7 +16,14 @@
     "inletValves": 1,
     "exhaustValves": 1
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "",
+    "tags": [],
+    "status": "archived",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-06T10:03:52.174Z",
-  "modified": "2025-11-06T13:40:52.764Z"
+  "modified": "2025-11-06T14:19:23.882Z"
 }

@@ -8,6 +8,7 @@
     "configuration": null,
     "bore": 90,
     "stroke": 78,
+    "displacement": 0.5,
     "compressionRatio": 11.2,
     "maxPowerRPM": 7250,
     "intakeSystem": "ITB",
@@ -17,5 +18,5 @@
   },
   "manual": {},
   "created": "2025-11-06T12:59:56.845Z",
-  "modified": "2025-11-06T13:40:52.721Z"
+  "modified": "2025-11-06T14:19:23.831Z"
 }

@@ -8,6 +8,7 @@
     "configuration": "inline",
     "bore": 88.4,
     "stroke": 84.4,
+    "displacement": 2.07,
     "compressionRatio": 10.2,
     "maxPowerRPM": 6100,
     "intakeSystem": "IM",
@@ -17,5 +18,5 @@
   },
   "manual": {},
   "created": "2025-11-06T12:59:56.845Z",
-  "modified": "2025-11-06T13:40:52.684Z"
+  "modified": "2025-11-06T14:19:23.798Z"
 }

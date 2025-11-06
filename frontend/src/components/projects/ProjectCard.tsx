@@ -112,11 +112,12 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
           </div>
         </div>
 
-        {/* Engine specification badges (Type, Cylinders, Valves, Intake) */}
+        {/* Engine specification badges (Type, Cylinders, Valves, Displacement, Intake) */}
         <EngineBadge
           type={metadata?.auto?.type}
           cylinders={metadata?.auto?.cylinders || project.numCylinders}
           valvesPerCylinder={metadata?.auto?.valvesPerCylinder}
+          displacement={metadata?.auto?.displacement}
           intake={metadata?.auto?.intakeSystem}
         />
 

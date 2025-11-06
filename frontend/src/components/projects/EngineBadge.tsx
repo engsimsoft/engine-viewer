@@ -2,13 +2,14 @@
  * EngineBadge Component
  *
  * Displays engine specification badges with color-coded variants
- * Used in ProjectCard to show essential engine info: Type, Cylinders, Valves, Intake
+ * Used in ProjectCard to show essential engine info: Type, Cylinders, Valves, Displacement, Intake
  *
  * Color coding:
  * - Type: NA = green, Turbo = blue, Supercharged = purple
  * - Cylinders = gray (neutral)
  * - Valves = cyan (total valves: cylinders × valvesPerCylinder)
- * - Intake: ITB = orange, IM = gray
+ * - Displacement = zinc (engine volume in liters - engineering style)
+ * - Intake: ITB = orange, IM = gray, Carb = amber
  */
 
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +28,7 @@ interface EngineBadgeProps {
   cylinders?: number;
 
   /**
-   * Intake system (ITB, IM)
+   * Intake system (ITB, IM, Carb)
    */
   intake?: IntakeSystem;
 
@@ -36,6 +37,12 @@ interface EngineBadgeProps {
    * Example: 4 cylinders × 4 valves = "16V"
    */
   valvesPerCylinder?: number;
+
+  /**
+   * Engine displacement in liters (calculated from bore, stroke, cylinders)
+   * Example: 1.6, 2.0, 3.5
+   */
+  displacement?: number;
 
   /**
    * Additional CSS classes
@@ -58,11 +65,14 @@ const badgeColors = {
   intake: {
     ITB: 'bg-orange-600 text-white hover:bg-orange-700',
     IM: 'bg-gray-600 text-white hover:bg-gray-700',
+    Carb: 'bg-amber-600 text-white hover:bg-amber-700',
   },
   // Cylinders - neutral
   neutral: 'bg-gray-600 text-white hover:bg-gray-700',
   // Valves - cyan/teal color for distinction
   valves: 'bg-cyan-600 text-white hover:bg-cyan-700',
+  // Displacement - zinc (dark metallic gray, engineering style)
+  displacement: 'bg-zinc-600 text-white hover:bg-zinc-700',
 };
 
 export default function EngineBadge({
@@ -70,6 +80,7 @@ export default function EngineBadge({
   cylinders,
   intake,
   valvesPerCylinder,
+  displacement,
   className,
 }: EngineBadgeProps) {
   // Render badges only if props are provided
@@ -103,12 +114,21 @@ export default function EngineBadge({
     });
   }
 
-  // Intake badge (ITB, IM)
+  // Displacement badge (1.6L, 2.0L, etc.) - Engine volume in liters
+  if (displacement !== undefined && displacement > 0) {
+    badges.push({
+      key: `displacement-${displacement}`,
+      label: `${displacement.toFixed(1)}L`,
+      color: badgeColors.displacement,
+    });
+  }
+
+  // Intake badge (ITB, IM, Carb)
   if (intake) {
     badges.push({
       key: `intake-${intake}`,
       label: intake,
-      color: badgeColors.intake[intake],
+      color: badgeColors.intake[intake] || badgeColors.neutral,
     });
   }
 

@@ -260,9 +260,10 @@ class PrtParser {
           type: null, // NA, Turbo, Supercharged
           bore: null,
           stroke: null,
+          displacement: null, // Engine displacement in liters (calculated from bore, stroke, cylinders)
           compressionRatio: null,
           maxPowerRPM: null,
-          intakeSystem: null, // ITB, IM
+          intakeSystem: null, // ITB, IM, Carb
           exhaustSystem: null, // 4-2-1, 4-1, tri-y, etc.
           valvesPerCylinder: null, // Total valves per cylinder (2, 3, 4, 5)
           inletValves: null, // Number of inlet valves per cylinder
@@ -435,8 +436,25 @@ class PrtParser {
         console.warn(`[PrtParser] Не удалось извлечь количество цилиндров из ${filePath}`);
       }
 
+      // Рассчитываем displacement (объем двигателя) в литрах
+      // Формула: displacement = π/4 × bore² × stroke × cylinders / 1000000
+      // bore и stroke в мм, результат в литрах
+      if (metadata.engine.bore && metadata.engine.stroke && metadata.engine.cylinders) {
+        const bore = metadata.engine.bore; // мм
+        const stroke = metadata.engine.stroke; // мм
+        const cylinders = metadata.engine.cylinders;
+
+        // Объем одного цилиндра в мм³: π/4 × bore² × stroke
+        // Затем переводим в литры: мм³ → см³ (÷1000) → литры (÷1000) = ÷1000000
+        const displacementLiters = (Math.PI / 4) * Math.pow(bore, 2) * stroke * cylinders / 1000000;
+
+        // Округляем до 2 знаков после запятой
+        metadata.engine.displacement = Math.round(displacementLiters * 100) / 100;
+      }
+
       console.log(`[PrtParser] Успешно распарсен файл: ${basename(filePath)}`);
       console.log(`[PrtParser] Engine: ${metadata.engine.name}, Type: ${metadata.engine.type}, ` +
+                  `${metadata.engine.displacement ? metadata.engine.displacement + 'L, ' : ''}` +
                   `Intake: ${metadata.engine.intakeSystem}, ` +
                   `Valves: ${metadata.engine.valvesPerCylinder} (${metadata.engine.inletValves} In + ${metadata.engine.exhaustValves} Ex)`);
 

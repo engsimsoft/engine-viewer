@@ -72,6 +72,26 @@
   - **Result**: All form fields now save correctly, changes persist after dialog close
 
 ### Added (2025-11-06)
+- **Engine displacement (volume) badge on ProjectCard** (2025-11-06):
+  - ✅ Added automatic displacement calculation in prtParser.js: `π/4 × bore² × stroke × cylinders / 1000000`
+  - ✅ Formula converts bore and stroke (mm) → mm³ → cm³ → liters (÷1000000)
+  - ✅ Updated AutoMetadata interface: added optional `displacement?: number` field
+  - ✅ Updated fileScanner.js: extracts displacement from parser and saves to `.metadata/<project>.json`
+  - ✅ Added displacement badge to EngineBadge component (zinc color - engineering style)
+  - ✅ Badge displays between Valves and Intake: "1.3L", "1.6L", "1.9L", etc. (one decimal place)
+  - ✅ Testing results:
+    - Lada 1300 Carb: bore=80mm, stroke=66mm, 4cyl → 1.33L ✓
+    - BMW M42: bore=86mm, stroke=83.5mm, 4cyl → 1.94L ✓
+    - Vesta 1.6 IM: bore=82mm, stroke=75.6mm, 4cyl → 1.60L ✓
+  - **Files**:
+    - Backend: `backend/src/parsers/formats/prtParser.js` (lines 263, 439-453, 456-460)
+    - Backend: `backend/src/services/fileScanner.js` (line 229 - added displacement extraction)
+    - Shared: `shared-types.ts` (lines 300-301 - AutoMetadata interface)
+    - Frontend: `frontend/src/components/projects/EngineBadge.tsx` (displacement badge, zinc color)
+    - Frontend: `frontend/src/components/projects/ProjectCard.tsx` (line 120 - pass displacement prop)
+  - **User feedback**: "не хватает одной информации которое было бы актуально при первом взгляде на карточку это объем двигателя"
+  - **Result**: All project cards now display engine displacement at first glance
+
 - **Carb (Carburetor/Collector) intake system support** (2025-11-06):
   - ✅ Added third intake system type: "Carb" (for carburetor and collector systems like 4into1, 1intoN manifolds)
   - ✅ Research phase: Analyzed all 35 .prt files in test-data to understand exact intake descriptions from EngMod4T

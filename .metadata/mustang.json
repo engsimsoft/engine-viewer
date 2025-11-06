@@ -8,6 +8,7 @@
     "configuration": null,
     "bore": 90.2,
     "stroke": 90,
+    "displacement": 4.6,
     "compressionRatio": 10.5,
     "maxPowerRPM": 6600,
     "intakeSystem": "IM",
@@ -15,7 +16,14 @@
     "inletValves": 2,
     "exhaustValves": 1
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "",
+    "tags": [],
+    "status": "archived",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-06T12:59:56.845Z",
-  "modified": "2025-11-06T13:40:52.684Z"
+  "modified": "2025-11-06T14:19:23.798Z"
 }

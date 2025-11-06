@@ -8,6 +8,7 @@
     "configuration": "inline",
     "bore": 80,
     "stroke": 66,
+    "displacement": 1.33,
     "compressionRatio": 10.8,
     "maxPowerRPM": 8200,
     "intakeSystem": "Carb",
@@ -16,6 +17,6 @@
     "exhaustValves": 1
   },
   "manual": {},
-  "created": "2025-11-06T12:59:56.845Z",
-  "modified": "2025-11-06T13:40:52.730Z"
+  "created": "2025-11-06T14:06:58.823Z",
+  "modified": "2025-11-06T14:19:23.843Z"
 }
