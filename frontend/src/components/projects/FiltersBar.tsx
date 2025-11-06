@@ -144,11 +144,11 @@ export default function FiltersBar({
         />
 
         <MultiSelect
-          label="Valves"
+          label="Valves per Cylinder"
           options={VALVES_OPTIONS}
           value={filters.valves}
           onChange={(value) => updateFilter('valves', value)}
-          placeholder="All Valves"
+          placeholder="Valves/Cyl"
           className="w-[160px]"
         />
 
