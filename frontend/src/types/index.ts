@@ -197,6 +197,7 @@ export interface ProjectInfo {
   numCylinders: number;       // Количество цилиндров (legacy field из .det)
   calculationsCount: number;  // Количество расчетов
   lastModified: string;       // ISO дата последнего изменения файла
+  created: string;            // ISO дата создания файла (birthtime)
 
   // Metadata v1.0 (опциональные, если не созданы пользователем)
   metadata?: ProjectMetadata;

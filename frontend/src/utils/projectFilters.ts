@@ -32,10 +32,11 @@ export function filterProjects(
       }
     }
 
-    // Exhaust filter (4-2-1, 4-1, tri-y, etc.)
-    if (filters.exhaust.length > 0) {
-      const projectExhaust = project.metadata?.auto?.exhaustSystem;
-      if (!projectExhaust || !filters.exhaust.includes(projectExhaust)) {
+    // Created Year filter (2020, 2021, 2022, etc.)
+    if (filters.createdYear.length > 0) {
+      const createdDate = new Date(project.created);
+      const createdYear = createdDate.getFullYear();
+      if (!filters.createdYear.includes(createdYear)) {
         return false;
       }
     }
@@ -95,6 +96,13 @@ export function sortProjects(
         const cylB = b.metadata?.auto?.cylinders || b.numCylinders;
         return cylB - cylA;
       });
+
+    case 'created':
+      // Sort by created date (oldest first)
+      return sorted.sort(
+        (a, b) =>
+          new Date(a.created).getTime() - new Date(b.created).getTime()
+      );
 
     default:
       return sorted;

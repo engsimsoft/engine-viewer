@@ -11,8 +11,8 @@
  * @module fileScanner
  */
 
-import { readdir, stat } from 'fs/promises';
-import { join, extname, basename } from 'path';
+import { readdir, stat, access } from 'fs/promises';
+import { join, extname, basename, dirname } from 'path';
 import { watch } from 'chokidar';
 import { parseDetFile, getProjectSummary } from './fileParser.js';
 import { PrtParser } from '../parsers/formats/prtParser.js';
@@ -156,6 +156,60 @@ export async function scanDirectory(directoryPath, extensions = ['.det', '.pou',
 }
 
 /**
+ * Получает даты создания/модификации из .prt файла проекта
+ *
+ * .prt файл - главный файл проекта, создается ОДИН РАЗ при создании проекта.
+ * birthtime .prt файла = истинная дата создания проекта
+ * mtime .prt файла = дата последнего изменения конфигурации двигателя
+ *
+ * @param {string} detOrPouFilePath - Путь к .det или .pou файлу
+ * @returns {Promise<{createdAt: Date, modifiedAt: Date}|null>} - Даты из .prt файла или null если не найден
+ */
+async function getPrtFileDates(detOrPouFilePath) {
+  try {
+    // Структура:
+    // .prt файл: test-data/Vesta 1.6 IM.prt
+    // .det/.pou: test-data/Vesta 1.6 IM/Vesta 1.6 IM.det
+
+    const fileName = basename(detOrPouFilePath, extname(detOrPouFilePath)); // "Vesta 1.6 IM"
+    const projectFolder = dirname(detOrPouFilePath); // "test-data/Vesta 1.6 IM"
+    const dataFolder = dirname(projectFolder); // "test-data"
+
+    // Путь к .prt файлу в корне data folder
+    const prtFilePath = join(dataFolder, `${fileName}.prt`);
+
+    // Проверяем существует ли .prt файл
+    try {
+      await access(prtFilePath);
+    } catch {
+      // .prt файл не найден
+      return null;
+    }
+
+    // Получаем даты из .prt файла
+    const prtStats = await stat(prtFilePath);
+
+    // Проверка для старых проектов (скопированных/перемещенных):
+    // Если birthtime > mtime, значит файл был скопирован, используем mtime как дату создания.
+    // Для новых проектов (созданных после сегодняшнего дня) birthtime будет правильным.
+    let createdAt = prtStats.birthtime;
+    if (prtStats.birthtime > prtStats.mtime) {
+      // Файл был скопирован - используем mtime как дату создания
+      createdAt = prtStats.mtime;
+      console.log(`[Scanner] 📅 Old project detected (copied file): ${basename(prtFilePath)} - using mtime as created date`);
+    }
+
+    return {
+      createdAt: createdAt,
+      modifiedAt: prtStats.mtime
+    };
+  } catch (error) {
+    console.error(`[Scanner] ⚠️  Error reading .prt file dates:`, error.message);
+    return null;
+  }
+}
+
+/**
  * Парсит .prt файл и обновляет auto metadata
  * @param {FileInfo} file - Информация о файле
  * @returns {Promise<Object|null>} - Auto metadata или null если ошибка
@@ -233,14 +287,22 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou', 
       const project = await parseDetFile(file.path);
       const summary = getProjectSummary(project);
 
+      // Получаем даты из .prt файла проекта (если существует)
+      // .prt файл - главный файл проекта, его birthtime = дата создания проекта
+      const prtDates = await getPrtFileDates(file.path);
+
+      // Используем даты из .prt файла если найден, иначе fallback на .det/.pou
+      const createdAt = prtDates?.createdAt || file.createdAt;
+      const modifiedAt = prtDates?.modifiedAt || file.modifiedAt;
+
       return {
         id: normalizeFilenameToId(file.name), // Normalized ID (slug)
         name: file.name.replace(/\.(det|pou)$/i, ''), // Display name (filename without extension)
         fileName: file.name,
         filePath: file.path,
         fileSize: file.size,
-        modifiedAt: file.modifiedAt.toISOString(),
-        createdAt: file.createdAt.toISOString(),
+        modifiedAt: modifiedAt.toISOString(),
+        createdAt: createdAt.toISOString(),
         format: summary.format,           // Формат файла ('det' или 'pou')
         numCylinders: summary.numCylinders,
         engineType: summary.engineType,
@@ -254,6 +316,11 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou', 
         return null;
       }
 
+      // Даже при ошибке парсинга пытаемся получить даты из .prt файла
+      const prtDates = await getPrtFileDates(file.path);
+      const createdAt = prtDates?.createdAt || file.createdAt;
+      const modifiedAt = prtDates?.modifiedAt || file.modifiedAt;
+
       // Возвращаем базовую информацию даже если парсинг не удался
       return {
         id: normalizeFilenameToId(file.name), // Normalized ID (slug)
@@ -261,8 +328,8 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou', 
         fileName: file.name,
         filePath: file.path,
         fileSize: file.size,
-        modifiedAt: file.modifiedAt.toISOString(),
-        createdAt: file.createdAt.toISOString(),
+        modifiedAt: modifiedAt.toISOString(),
+        createdAt: createdAt.toISOString(),
         format: file.name.endsWith('.pou') ? 'pou' : 'det', // Определяем по расширению
         numCylinders: 0,
         engineType: 'UNKNOWN',

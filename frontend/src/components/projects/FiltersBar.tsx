@@ -5,9 +5,9 @@
  * Used in HomePage to filter ProjectCard grid
  *
  * Features:
- * - Multi-select filters: Type, Intake, Exhaust, Cylinders
+ * - Multi-select filters: Type, Intake, Created Year, Cylinders
  * - Search input: displayName, client
- * - Sort dropdown: date, name, cylinders
+ * - Sort dropdown: date modified, date created, name, cylinders
  * - Active filters display with remove chips
  * - Clear all button
  */
@@ -18,15 +18,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSelect';
-import type { IntakeSystem, ExhaustSystem } from '@/types';
+import type { IntakeSystem } from '@/types';
 
 export interface ProjectFiltersState {
   type: Array<'NA' | 'Turbo' | 'Supercharged'>;
   intake: IntakeSystem[];
-  exhaust: ExhaustSystem[];
+  createdYear: number[];
   cylinders: number[];
   search: string;
-  sortBy: 'date' | 'name' | 'cylinders';
+  sortBy: 'date' | 'created' | 'name' | 'cylinders';
 }
 
 interface FiltersBarProps {
@@ -49,13 +49,21 @@ const INTAKE_OPTIONS: MultiSelectOption<IntakeSystem>[] = [
   { value: 'IM', label: 'IM' },
 ];
 
-const EXHAUST_OPTIONS: MultiSelectOption<ExhaustSystem>[] = [
-  { value: '4-2-1', label: '4-2-1' },
-  { value: '4-1', label: '4-1' },
-  { value: 'tri-y', label: 'tri-y' },
-  { value: '4-1-2', label: '4-1-2' },
-  { value: '8-4-2-1', label: '8-4-2-1' },
-];
+/**
+ * Generate year options dynamically from current year back to 2020
+ * (can be adjusted based on actual project dates)
+ */
+function getYearOptions(): MultiSelectOption<number>[] {
+  const currentYear = new Date().getFullYear();
+  const startYear = 2020;
+  const years: MultiSelectOption<number>[] = [];
+
+  for (let year = currentYear; year >= startYear; year--) {
+    years.push({ value: year, label: year.toString() });
+  }
+
+  return years;
+}
 
 const CYLINDERS_OPTIONS: MultiSelectOption<number>[] = [
   { value: 1, label: '1 Cyl' },
@@ -101,7 +109,7 @@ export default function FiltersBar({
   const activeFiltersCount =
     filters.type.length +
     filters.intake.length +
-    filters.exhaust.length +
+    filters.createdYear.length +
     filters.cylinders.length +
     (filters.search ? 1 : 0);
 
@@ -151,11 +159,11 @@ export default function FiltersBar({
         />
 
         <MultiSelect
-          label="Exhaust"
-          options={EXHAUST_OPTIONS}
-          value={filters.exhaust}
-          onChange={(value) => updateFilter('exhaust', value)}
-          placeholder="All Exhausts"
+          label="Created"
+          options={getYearOptions()}
+          value={filters.createdYear}
+          onChange={(value) => updateFilter('createdYear', value)}
+          placeholder="All Years"
           className="w-[160px]"
         />
 
@@ -174,7 +182,8 @@ export default function FiltersBar({
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date">Date (newest)</SelectItem>
+            <SelectItem value="date">Modified (newest)</SelectItem>
+            <SelectItem value="created">Created (oldest)</SelectItem>
             <SelectItem value="name">Name (A-Z)</SelectItem>
             <SelectItem value="cylinders">Cylinders</SelectItem>
           </SelectContent>
@@ -221,15 +230,15 @@ export default function FiltersBar({
             </Badge>
           ))}
 
-          {/* Exhaust filters */}
-          {filters.exhaust.map((exhaust) => (
+          {/* Created Year filters */}
+          {filters.createdYear.map((year) => (
             <Badge
-              key={exhaust}
+              key={year}
               variant="secondary"
               className="gap-1 cursor-pointer hover:bg-secondary/80"
-              onClick={() => removeFilter('exhaust', exhaust)}
+              onClick={() => removeFilter('createdYear', year)}
             >
-              Exhaust: {exhaust}
+              Created: {year}
               <X className="h-3 w-3" />
             </Badge>
           ))}

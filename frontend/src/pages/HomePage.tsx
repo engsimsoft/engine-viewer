@@ -17,7 +17,7 @@ export default function HomePage() {
   const [filters, setFilters] = useState<ProjectFiltersState>({
     type: [],
     intake: [],
-    exhaust: [],
+    createdYear: [],
     cylinders: [],
     search: '',
     sortBy: 'date',
@@ -50,7 +50,7 @@ export default function HomePage() {
     setFilters({
       type: [],
       intake: [],
-      exhaust: [],
+      createdYear: [],
       cylinders: [],
       search: '',
       sortBy: 'date',

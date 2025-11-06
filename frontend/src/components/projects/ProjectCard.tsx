@@ -118,12 +118,20 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
           )}
         </div>
 
-        {/* Date */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Calendar className="w-3 h-3" />
-          <span>
-            Modified: {format(new Date(project.lastModified), 'dd MMM yyyy', { locale: enUS })}
-          </span>
+        {/* Dates */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Calendar className="w-3 h-3" />
+            <span>
+              Created: {format(new Date(project.created), 'dd MMM yyyy', { locale: enUS })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Calendar className="w-3 h-3" />
+            <span>
+              Modified: {format(new Date(project.lastModified), 'dd MMM yyyy', { locale: enUS })}
+            </span>
+          </div>
         </div>
       </CardContent>
 
