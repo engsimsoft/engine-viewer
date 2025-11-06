@@ -8,9 +8,11 @@
  */
 
 import { Router } from 'express';
-import { scanProjects, getDirectoryStats, formatFileSize } from '../services/fileScanner.js';
+import { scanProjects, getDirectoryStats, formatFileSize, detectProjectErrors } from '../services/fileScanner.js';
 import { getConfig, getDataFolderPath } from '../config.js';
 import { getAllMetadata } from '../services/metadataService.js';
+import { access } from 'fs/promises';
+import { join } from 'path';
 
 const router = Router();
 
@@ -105,11 +107,34 @@ router.get('/', async (req, res, next) => {
     const allMetadata = await getAllMetadata();
 
     // Transform projects to API response format with displayName support
-    let projectsData = projects.map(project => {
+    // Check for errors in each project (async operation)
+    const projectsDataPromises = projects.map(async (project) => {
       const metadata = allMetadata.get(project.id) || null;
 
       // displayName: use metadata.displayName if set, otherwise fallback to project.name (ID)
       const displayName = metadata?.displayName || project.name;
+
+      // Check if .prt file exists for this project
+      // .prt files are located in data folder root with project name
+      // Example: test-data/Vesta 1.6 IM.prt (for test-data/Vesta 1.6 IM/Vesta 1.6 IM.det)
+      const projectBaseName = project.name; // Original filename without extension
+      const prtFilePath = join(dataFolderPath, `${projectBaseName}.prt`);
+
+      let prtFileExists = false;
+      try {
+        await access(prtFilePath);
+        prtFileExists = true;
+      } catch {
+        // .prt file does not exist
+        prtFileExists = false;
+      }
+
+      // Detect project errors
+      const errors = detectProjectErrors(
+        project,
+        metadata,
+        prtFileExists ? prtFilePath : null
+      );
 
       return {
         id: project.id,
@@ -123,9 +148,12 @@ router.get('/', async (req, res, next) => {
         fileSizeFormatted: formatFileSize(project.fileSize),
         lastModified: project.modifiedAt,
         created: project.createdAt,
-        metadata // Include full metadata (auto + manual)
+        metadata, // Include full metadata (auto + manual)
+        errors: errors.length > 0 ? errors : undefined // Only include if errors exist
       };
     });
+
+    let projectsData = await Promise.all(projectsDataPromises);
 
     // Apply filters from query parameters
     const { cylinders, type, intake, exhaust } = req.query;

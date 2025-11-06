@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "opel-c20ne",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 87,
+    "stroke": 86,
+    "compressionRatio": 12,
+    "maxPowerRPM": 6800,
+    "intakeSystem": "ITB",
+    "valvesPerCylinder": 2,
+    "inletValves": 1,
+    "exhaustValves": 1
+  },
+  "manual": {},
+  "created": "2025-11-06T10:03:52.171Z",
+  "modified": "2025-11-06T10:04:20.435Z"
+}

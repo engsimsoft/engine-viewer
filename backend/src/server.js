@@ -6,10 +6,12 @@
 
 import express from 'express';
 import cors from 'cors';
-import { loadConfig, validateConfig } from './config.js';
+import { loadConfig, validateConfig, getDataFolderPath } from './config.js';
 import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
 import metadataRouter from './routes/metadata.js';
+import { scanProjects, createFileWatcher } from './services/fileScanner.js';
+import { basename } from 'path';
 
 // Инициализация Express
 const app = express();
@@ -129,6 +131,8 @@ app.use((err, req, res, next) => {
 /**
  * Server Startup
  */
+let fileWatcher = null; // Store file watcher reference for cleanup
+
 async function startServer() {
   try {
     // Загрузить конфигурацию
@@ -138,6 +142,71 @@ async function startServer() {
 
     // Сохранить config в app.locals для доступа из routes
     app.locals.config = config;
+
+    // Get data folder path
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Startup scan: process all existing files (including .prt files)
+    console.log('\n🔍 Performing startup scan...');
+    const startTime = Date.now();
+    const projects = await scanProjects(
+      dataFolderPath,
+      config.files.extensions,
+      config.files.maxSize
+    );
+    const scanDuration = Date.now() - startTime;
+    console.log(`✅ Startup scan complete: ${projects.length} projects found (${scanDuration}ms)`);
+
+    // Start file watcher for real-time updates
+    console.log('\n👀 Starting file watcher...');
+    fileWatcher = createFileWatcher(
+      dataFolderPath,
+      config.files.extensions,
+      {
+        onAdd: async (filePath) => {
+          const fileName = basename(filePath);
+          console.log(`[Watcher] 📄 New file detected: ${fileName}`);
+
+          // If it's a .prt file, trigger metadata extraction
+          if (fileName.endsWith('.prt')) {
+            console.log(`[Watcher] Processing .prt file: ${fileName}`);
+            try {
+              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize);
+              console.log(`[Watcher] ✅ Metadata updated for: ${fileName}`);
+            } catch (error) {
+              console.error(`[Watcher] ❌ Error processing ${fileName}:`, error.message);
+            }
+          }
+        },
+
+        onChange: async (filePath) => {
+          const fileName = basename(filePath);
+          console.log(`[Watcher] 📝 File modified: ${fileName}`);
+
+          // If it's a .prt file, re-process it
+          if (fileName.endsWith('.prt')) {
+            console.log(`[Watcher] Re-processing .prt file: ${fileName}`);
+            try {
+              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize);
+              console.log(`[Watcher] ✅ Metadata re-generated for: ${fileName}`);
+            } catch (error) {
+              console.error(`[Watcher] ❌ Error re-processing ${fileName}:`, error.message);
+            }
+          }
+        },
+
+        onRemove: (filePath) => {
+          const fileName = basename(filePath);
+          console.log(`[Watcher] 🗑️  File removed: ${fileName}`);
+          // Note: Metadata files are not automatically deleted when .prt is removed
+          // This allows manual metadata to persist even if .prt is temporarily missing
+        },
+
+        onError: (error) => {
+          console.error('[Watcher] ❌ File watcher error:', error);
+        }
+      }
+    );
 
     // Запустить сервер
     const PORT = process.env.PORT || config.server.port;
@@ -158,13 +227,19 @@ async function startServer() {
 }
 
 // Handle graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('\n📴 SIGTERM received, shutting down gracefully...');
+  if (fileWatcher) {
+    await fileWatcher.close();
+  }
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('\n📴 SIGINT received, shutting down gracefully...');
+  if (fileWatcher) {
+    await fileWatcher.close();
+  }
   process.exit(0);
 });
 

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Wrench, CheckCircle, Archive, Calendar, Cpu, User, Edit } from 'lucide-react';
+import { Wrench, CheckCircle, Archive, Calendar, Cpu, User, Edit, AlertTriangle } from 'lucide-react';
 import type { ProjectInfo } from '@/types';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -83,11 +83,22 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
             )}
           </div>
 
-          {/* Status Badge */}
-          <Badge className={`gap-1 shrink-0 ${statusInfo.color}`}>
-            <StatusIcon className="w-3 h-3" />
-            {statusInfo.label}
-          </Badge>
+          {/* Badges Container */}
+          <div className="flex flex-col gap-1 shrink-0">
+            {/* Status Badge */}
+            <Badge className={`gap-1 ${statusInfo.color}`}>
+              <StatusIcon className="w-3 h-3" />
+              {statusInfo.label}
+            </Badge>
+
+            {/* Error Badge (only if errors exist) */}
+            {project.errors && project.errors.length > 0 && (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {project.errors.length} issue{project.errors.length > 1 ? 's' : ''}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Separator after ID */}

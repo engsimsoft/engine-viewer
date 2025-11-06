@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Lock } from 'lucide-react';
+import { Lock, AlertTriangle, AlertCircle, Info } from 'lucide-react';
 
 import {
   Dialog,
@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { TagInput } from '@/components/shared/TagInput';
 import type { ProjectInfo } from '@/types';
 
@@ -312,6 +313,69 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
                         className="bg-muted text-sm h-9"
                       />
                     </FormItem>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ========== Section: Project Errors (if any) ========== */}
+            {project?.errors && project.errors.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      Project Issues
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Detected issues with this project
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {project.errors.map((error, index) => {
+                      // Определяем иконку и цвет на основе severity
+                      const severityConfig = {
+                        critical: {
+                          icon: AlertTriangle,
+                          variant: 'destructive' as const,
+                        },
+                        error: {
+                          icon: AlertCircle,
+                          variant: 'destructive' as const,
+                        },
+                        warning: {
+                          icon: Info,
+                          variant: 'default' as const,
+                        },
+                      };
+
+                      const config = severityConfig[error.severity];
+                      const ErrorIcon = config.icon;
+
+                      return (
+                        <Alert key={index} variant={config.variant}>
+                          <ErrorIcon className="h-4 w-4" />
+                          <AlertTitle className="text-sm font-medium">
+                            {error.type.replace(/_/g, ' ').toUpperCase()}
+                          </AlertTitle>
+                          <AlertDescription className="text-xs mt-1">
+                            {error.message}
+                            {error.details && (
+                              <details className="mt-2 text-xs">
+                                <summary className="cursor-pointer font-medium hover:underline">
+                                  Technical details
+                                </summary>
+                                <div className="mt-1 p-2 bg-muted/50 rounded text-xs font-mono">
+                                  {error.details}
+                                </div>
+                              </details>
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      );
+                    })}
                   </div>
                 </div>
               </>

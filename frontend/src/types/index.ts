@@ -140,6 +140,31 @@ export type ExhaustSystem = '4-2-1' | '4-1' | 'tri-y' | '4-1-2' | '8-4-2-1';
 export type EngineConfiguration = 'inline' | 'V' | 'boxer' | 'W';
 
 /**
+ * Error Severity Levels
+ */
+export type ErrorSeverity = 'warning' | 'error' | 'critical';
+
+/**
+ * Project Error Types
+ */
+export type ProjectErrorType =
+  | 'missing_prt'           // Project has .det/.pou but NO .prt file
+  | 'parsing_failed'        // .prt file exists but parsing threw error
+  | 'incomplete_metadata'   // Critical fields are null
+  | 'corrupted_files';      // Files exist but can't be read
+
+/**
+ * Single Error Object
+ */
+export interface ProjectError {
+  type: ProjectErrorType;
+  severity: ErrorSeverity;
+  message: string;          // User-friendly error message
+  details?: string;         // Technical details (for developers)
+  timestamp: string;        // ISO date when error was detected
+}
+
+/**
  * Automatic Metadata (read-only, extracted from .prt file)
  */
 export interface AutoMetadata {
@@ -203,6 +228,9 @@ export interface ProjectInfo {
 
   // Metadata v1.0 (опциональные, если не созданы пользователем)
   metadata?: ProjectMetadata;
+
+  // Project Errors (опциональные, только если есть ошибки)
+  errors?: ProjectError[];
 
   // Legacy flat fields (для backwards compatibility, deprecated)
   // TODO: Remove after migrating all components to use metadata structure

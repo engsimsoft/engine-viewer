@@ -11,7 +11,9 @@
     "compressionRatio": 11.2,
     "maxPowerRPM": 7800,
     "intakeSystem": "IM",
-    "exhaustSystem": "4-2-1"
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
   },
   "manual": {
     "description": "",
@@ -24,5 +26,5 @@
     "color": ""
   },
   "created": "2025-10-22T13:02:09.511Z",
-  "modified": "2025-11-06T08:11:00.840Z"
+  "modified": "2025-11-06T10:04:20.435Z"
 }

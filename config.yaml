@@ -15,6 +15,7 @@ files:
   extensions:
     - ".det"
     - ".pou"
+    - ".prt"
 
   # Сканировать папку при старте сервера
   scan_on_startup: true

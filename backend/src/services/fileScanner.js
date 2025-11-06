@@ -229,7 +229,9 @@ async function parsePrtFileAndUpdateMetadata(file) {
       compressionRatio: result.engine.compressionRatio,
       maxPowerRPM: result.engine.maxPowerRPM,
       intakeSystem: result.engine.intakeSystem,
-      exhaustSystem: result.engine.exhaustSystem
+      valvesPerCylinder: result.engine.valvesPerCylinder,
+      inletValves: result.engine.inletValves,
+      exhaustValves: result.engine.exhaustValves
     };
 
     // Получаем projectId из имени файла
@@ -245,6 +247,81 @@ async function parsePrtFileAndUpdateMetadata(file) {
     console.error(`[Scanner] ❌ Error parsing .prt file ${file.name}:`, error.message);
     return null;
   }
+}
+
+/**
+ * @typedef {Object} ProjectError
+ * @property {'missing_prt' | 'parsing_failed' | 'incomplete_metadata' | 'corrupted_files'} type
+ * @property {'warning' | 'error' | 'critical'} severity
+ * @property {string} message
+ * @property {string} [details]
+ * @property {string} timestamp
+ */
+
+/**
+ * Detects errors in project data and metadata
+ * @param {Object} project - Project object from scanProjects
+ * @param {Object|null} metadata - Metadata object (auto/manual) or null
+ * @param {string|null} prtFilePath - Path to .prt file or null if not exists
+ * @returns {ProjectError[]} - Array of detected errors
+ */
+export function detectProjectErrors(project, metadata, prtFilePath) {
+  const errors = [];
+  const timestamp = new Date().toISOString();
+
+  // Critical fields that must be present in auto metadata
+  const criticalFields = ['cylinders', 'type', 'intakeSystem', 'valvesPerCylinder'];
+
+  // 1. Check for missing .prt file (CRITICAL)
+  if (!prtFilePath) {
+    errors.push({
+      type: 'missing_prt',
+      severity: 'critical',
+      message: 'No .prt file found - engine metadata cannot be auto-generated',
+      details: 'Add a .prt file with the same name as the project to enable automatic metadata extraction',
+      timestamp
+    });
+  }
+
+  // 2. Check for parsing failure (ERROR)
+  // If .prt file exists but metadata.auto is missing/null, parsing likely failed
+  if (prtFilePath && (!metadata || !metadata.auto)) {
+    errors.push({
+      type: 'parsing_failed',
+      severity: 'error',
+      message: 'Failed to parse .prt file',
+      details: '.prt file exists but parsing failed - check file format and integrity',
+      timestamp
+    });
+  }
+
+  // 3. Check for incomplete metadata (WARNING)
+  if (metadata && metadata.auto) {
+    const missingFields = criticalFields.filter(field => !metadata.auto[field]);
+
+    if (missingFields.length > 0) {
+      errors.push({
+        type: 'incomplete_metadata',
+        severity: 'warning',
+        message: `Incomplete engine data: missing ${missingFields.join(', ')}`,
+        details: `The .prt file is missing critical engine specifications. ${missingFields.length} field(s) need to be added.`,
+        timestamp
+      });
+    }
+  }
+
+  // 4. Check for corrupted files (CRITICAL)
+  if (project.error) {
+    errors.push({
+      type: 'corrupted_files',
+      severity: 'critical',
+      message: 'Project files cannot be read or parsed',
+      details: project.error,
+      timestamp
+    });
+  }
+
+  return errors;
 }
 
 /**
@@ -276,6 +353,7 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou', 
     try {
       // Если это .prt файл - парсим и обновляем auto metadata
       if (file.name.endsWith('.prt')) {
+        console.log(`[Scanner] Processing .prt file: ${file.name}`);
         await parsePrtFileAndUpdateMetadata(file);
 
         // Для .prt файлов не создаём проект (они только обновляют metadata)
