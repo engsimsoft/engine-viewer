@@ -213,8 +213,13 @@ class DetParser {
         // Проверяем, является ли строка маркером расчёта
         if (isCalculationMarker(line)) {
           // Сохраняем предыдущий расчёт (если был)
-          if (currentCalculation && currentCalculation.dataPoints.length > 0) {
+          if (currentCalculation && currentCalculation.dataPoints.length >= 2) {
             calculations.push(currentCalculation);
+          } else if (currentCalculation && currentCalculation.dataPoints.length === 1) {
+            console.warn(
+              `[DetParser] Skipping calculation "${currentCalculation.name}" - ` +
+              `only 1 data point (minimum 2 required for visualization)`
+            );
           }
 
           // Начинаем новый расчёт
@@ -235,8 +240,13 @@ class DetParser {
       }
 
       // Добавляем последний расчёт
-      if (currentCalculation && currentCalculation.dataPoints.length > 0) {
+      if (currentCalculation && currentCalculation.dataPoints.length >= 2) {
         calculations.push(currentCalculation);
+      } else if (currentCalculation && currentCalculation.dataPoints.length === 1) {
+        console.warn(
+          `[DetParser] Skipping calculation "${currentCalculation.name}" - ` +
+          `only 1 data point (minimum 2 required for visualization)`
+        );
       }
 
       // Формируем результат

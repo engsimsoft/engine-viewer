@@ -206,14 +206,24 @@ export function PrimarySelectionModal() {
               </div>
             ) : (
               <div className="space-y-1">
-                {filteredCalculations.map((calc) => {
+                {filteredCalculations
+                  .filter((calc) => calc.dataPoints.length >= 2)
+                  .map((calc) => {
                   // Calculate RPM metadata for display
                   const rpmValues = calc.dataPoints.map((p) => p.RPM);
                   const rpmRange: [number, number] = [
                     Math.min(...rpmValues),
                     Math.max(...rpmValues),
                   ];
-                  const avgStep = calculateAverageStep(calc.dataPoints);
+
+                  let avgStep: number;
+                  try {
+                    avgStep = calculateAverageStep(calc.dataPoints);
+                  } catch (error) {
+                    console.error(`[PrimarySelectionModal] Error calculating RPM step for "${calc.name}":`, error);
+                    return null; // Skip this calculation
+                  }
+
                   const rpmInfo = formatRPMRange(rpmRange, avgStep);
 
                   // Check if this calculation is currently selected as primary

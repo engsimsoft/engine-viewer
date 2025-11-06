@@ -21,6 +21,31 @@
   - **Commit**: e784850 (also referenced as 463ab92)
   - **Result**: All projects now load correctly without undefined errors
 
+- **UI crash for projects with single-point calculations** (2025-11-06):
+  - ✅ Fixed error "Cannot calculate average step: need at least 2 data points" in rpmCalculator.ts
+  - ✅ Root cause: Parsers (detParser.js, pouParser.js) accepted calculations with only 1 data point
+  - ✅ RPM step calculation requires minimum 2 points to calculate step between points
+  - ✅ Incomplete calculations cause UI crash when trying to display in PrimarySelectionModal
+  - ✅ **Solution: Defense in Depth validation (two layers)**:
+    1. **Backend filtering** (Primary): detParser.js and pouParser.js now filter calculations with < 2 points
+       - Changed validation from `> 0` to `>= 2` data points
+       - Added console.warn for skipped calculations (developer visibility)
+    2. **Frontend filtering** (Defensive): PrimarySelectionModal.tsx filters calculations before rendering
+       - Added `.filter(calc => calc.dataPoints.length >= 2)` before map
+       - Added try-catch around calculateAverageStep() for edge cases
+  - **Files**:
+    - Backend: `backend/src/parsers/formats/detParser.js` (lines 216-223, 243-250)
+    - Backend: `backend/src/parsers/formats/pouParser.js` (lines 317-324, 344-351)
+    - Frontend: `frontend/src/components/visualization/PrimarySelectionModal.tsx` (lines 209-225)
+    - Library: `frontend/src/lib/rpmCalculator.ts` (validation logic - no changes needed)
+  - **Testing results** (granta-turbo project):
+    - ✅ 67 valid calculations loaded (all with >= 2 points)
+    - ✅ 0 calculations with < 2 points (all filtered)
+    - ✅ Min data points: 3, Max data points: 31
+    - ✅ Backend logs show 8 calculations skipped (3 from .det, 5 from .pou)
+  - **Affected projects**: granta-turbo (3 calculations with 1 point filtered), potentially other projects with incomplete simulations
+  - **Result**: UI no longer crashes, invalid calculations silently filtered with developer warnings
+
 - **ProjectCard design issues**:
   - ✅ Removed irrelevant badges from cards (Configuration: inline, Exhaust: 4-2-1)
   - ✅ Refactored `EngineBadge` component to show ONLY essential info: Type (NA/Turbo/Supercharged), Cylinders, Intake (ITB/IM)
