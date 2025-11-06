@@ -1,21 +1,21 @@
 {
   "version": "1.0",
-  "id": "v6-2gr-im",
+  "id": "zmz-pro",
   "displayName": "",
   "auto": {
-    "cylinders": 6,
+    "cylinders": 4,
     "type": "NA",
-    "configuration": null,
-    "bore": 94,
-    "stroke": 83,
-    "compressionRatio": 11.8,
-    "maxPowerRPM": 6600,
+    "configuration": "inline",
+    "bore": 95.5,
+    "stroke": 94,
+    "compressionRatio": 10,
+    "maxPowerRPM": 5200,
     "intakeSystem": "IM",
     "valvesPerCylinder": 4,
     "inletValves": 2,
     "exhaustValves": 2
   },
   "manual": {},
-  "created": "2025-11-06T10:14:38.376Z",
+  "created": "2025-11-06T12:59:56.845Z",
   "modified": "2025-11-06T13:40:52.684Z"
 }

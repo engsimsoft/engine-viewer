@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "shortcut-turbo",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "Turbo",
+    "configuration": "inline",
+    "bore": 82.5,
+    "stroke": 75.6,
+    "compressionRatio": 9,
+    "maxPowerRPM": 8000,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.845Z",
+  "modified": "2025-11-06T13:40:52.736Z"
+}

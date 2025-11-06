@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "g50",
+  "displayName": "",
+  "auto": {
+    "cylinders": 1,
+    "type": "NA",
+    "configuration": null,
+    "bore": 90,
+    "stroke": 78,
+    "compressionRatio": 11.2,
+    "maxPowerRPM": 7250,
+    "intakeSystem": "ITB",
+    "valvesPerCylinder": 2,
+    "inletValves": 1,
+    "exhaustValves": 1
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.845Z",
+  "modified": "2025-11-06T13:40:52.721Z"
+}

@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "zmz-pro-test",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 95.5,
+    "stroke": 94,
+    "compressionRatio": 10,
+    "maxPowerRPM": 6200,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.849Z",
+  "modified": "2025-11-06T13:40:52.771Z"
+}

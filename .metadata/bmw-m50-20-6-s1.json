@@ -1,19 +1,19 @@
 {
   "version": "1.0",
-  "id": "lada-1300-carb",
+  "id": "bmw-m50-20-6-s1",
   "displayName": "",
   "auto": {
-    "cylinders": 4,
+    "cylinders": 6,
     "type": "NA",
     "configuration": "inline",
     "bore": 80,
     "stroke": 66,
-    "compressionRatio": 10.8,
-    "maxPowerRPM": 8200,
-    "intakeSystem": "Carb",
-    "valvesPerCylinder": 2,
-    "inletValves": 1,
-    "exhaustValves": 1
+    "compressionRatio": 11,
+    "maxPowerRPM": 8000,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
   },
   "manual": {},
   "created": "2025-11-06T12:59:56.845Z",

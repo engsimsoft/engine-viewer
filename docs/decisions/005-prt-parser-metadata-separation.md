@@ -370,8 +370,94 @@ Line 276: "1 throttle - with a common airbox"  → IM
 /tri-y/i                   → "tri-y"
 ```
 
+### Update: Carb Intake System Support (2025-11-06)
+
+**Проблема:** Добавлен новый проект "Lada 1300 Carb" с карбюраторной системой впуска, но parser определил его как "ITB" вместо правильного типа.
+
+**Исследование:**
+- Проанализированы все 35 .prt файлов в test-data для поиска точных описаний intake systems
+- Найдены 3 различных паттерна в .prt файлах:
+  1. "seperate intake pipes, with no airboxes and no boost bottles but with throttles" → **ITB**
+  2. "seperate intake pipes, with a common airbox or plenum" → **IM**
+  3. "collected intake pipes, with no airboxes" → **Carb** (НОВЫЙ ТИП!)
+
+**Решение:** Добавлен третий тип intake system - "Carb" (Carburetor/Collector)
+
+**Что такое Carb:**
+- Карбюраторные системы впуска
+- Коллекторные системы (4into1, 1intoN manifolds)
+- Характеристика: "**collected** intake pipes" (не "seperate"!)
+
+**Обновлённая логика detection в prtParser.js:**
+
+```javascript
+parseIntakeSystem(intakeLines, numCylinders) {
+  const intakeText = intakeLines.join('\n').toLowerCase();
+
+  // 1. ПЕРВЫМ проверяем "collected intake pipes" → Carburetor/Collector
+  if (intakeText.includes('collected intake pipes')) {
+    return 'Carb';
+  }
+
+  // 2. Проверяем "seperate intake pipes"
+  if (intakeText.includes('seperate intake pipes')) {
+    // 2a. ITB: separate + no airboxes + throttles
+    if (intakeText.includes('with no airboxes') && intakeText.includes('but with throttles')) {
+      return 'ITB';
+    }
+
+    // 2b. IM: separate + common airbox/plenum
+    if (intakeText.includes('with a common airbox') || intakeText.includes('with a common plenum')) {
+      return 'IM';
+    }
+  }
+
+  // Fallback: Дополнительная проверка по throttles count
+  // ...
+
+  return 'IM'; // Default
+}
+```
+
+**Важность порядка проверки:**
+- ❌ **Старая логика:** Проверка "with no airboxes" ПЕРВОЙ → возвращал "ITB" для Carb проектов
+- ✅ **Новая логика:** Проверка "collected" vs "seperate" ПЕРВОЙ → правильное определение всех типов
+
+**Причина ошибки:**
+- Файл "Lada 1300 Carb.prt" содержит: `"collected intake pipes, with no airboxes"`
+- Старая логика: нашла "with no airboxes" → вернула "ITB" ❌
+- Правильная логика: сначала проверить "collected" → вернуть "Carb" ✅
+
+**Тестирование (6 проектов):**
+- ✅ lada-1300-carb → Carb (карбюратор)
+- ✅ 4-cyl-itb → ITB (individual throttle bodies)
+- ✅ vesta-16-im → IM (intake manifold)
+- ✅ tm-soft-shortcut → IM
+- ✅ bmw-m42 → ITB
+- ✅ lada-1300-weber → Carb
+
+**Frontend изменения:**
+- Добавлен тип 'Carb' в TypeScript union type (FiltersBar.tsx)
+- Добавлена опция "Carb" в Engine filter dropdown
+- Обновлена логика фильтрации (projectFilters.ts) для включения Carb в intakeSystems array
+
+**Commits:**
+- `463ab92` - backend: updated prtParser.js parseIntakeSystem() logic
+- `875fea7` - frontend: added Carb to FiltersBar type options
+- `2b2c782` - frontend: fixed filter logic to include Carb
+
+**Результат:** Система теперь правильно определяет и фильтрует карбюраторные/коллекторные системы впуска.
+
+**Обновлённая типизация:**
+
+```typescript
+export type IntakeSystem = 'ITB' | 'IM' | 'Carb';
+```
+
+---
+
 ### Future Improvements
 
-- [ ] Support для custom intake types (Ram Air, Velocity Stacks)
+- [X] ~~Support для custom intake types (Ram Air, Velocity Stacks)~~ → Добавлен "Carb" (2025-11-06)
 - [ ] Auto detection: Forced Induction (Turbo vs Supercharger) by parsing turbochargers/superchargers count
 - [ ] Validation: cross-check auto metadata with .det file metadata (cylinders match?)

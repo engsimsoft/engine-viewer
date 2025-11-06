@@ -5,7 +5,7 @@
   "auto": {
     "cylinders": 6,
     "type": "NA",
-    "configuration": null,
+    "configuration": "inline",
     "bore": 95,
     "stroke": 70.4,
     "compressionRatio": 10.3,
@@ -17,5 +17,5 @@
   },
   "manual": {},
   "created": "2025-11-06T10:03:52.174Z",
-  "modified": "2025-11-06T10:33:41.886Z"
+  "modified": "2025-11-06T13:40:52.764Z"
 }

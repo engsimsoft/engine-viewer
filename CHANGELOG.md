@@ -10,6 +10,17 @@
 ## [2.0.0] - 2025-11-02
 
 ### Fixed (2025-11-06)
+- **500 Internal Server Error for some projects** (2025-11-06):
+  - ✅ Fixed error "Cannot read properties of undefined (reading 'map')" in data.js:228
+  - ✅ Root cause: Backend was loading .prt files instead of .det/.pou files via scanDirectory()
+  - ✅ .prt files contain only metadata (cylinders, bore, stroke) without calculations array → undefined.map() error
+  - ✅ Solution: Restricted file scanning to ONLY .det and .pou files, excluding .prt
+  - ✅ .prt files now used exclusively for metadata extraction, not for calculations data
+  - **File**: `backend/src/routes/data.js` (line 194)
+  - **Affected projects**: tm-soft-shortcut and any project without .det/.pou files
+  - **Commit**: e784850 (also referenced as 463ab92)
+  - **Result**: All projects now load correctly without undefined errors
+
 - **ProjectCard design issues**:
   - ✅ Removed irrelevant badges from cards (Configuration: inline, Exhaust: 4-2-1)
   - ✅ Refactored `EngineBadge` component to show ONLY essential info: Type (NA/Turbo/Supercharged), Cylinders, Intake (ITB/IM)
@@ -36,6 +47,33 @@
   - **Result**: All form fields now save correctly, changes persist after dialog close
 
 ### Added (2025-11-06)
+- **Carb (Carburetor/Collector) intake system support** (2025-11-06):
+  - ✅ Added third intake system type: "Carb" (for carburetor and collector systems like 4into1, 1intoN manifolds)
+  - ✅ Research phase: Analyzed all 35 .prt files in test-data to understand exact intake descriptions from EngMod4T
+  - ✅ Discovered new pattern: "collected intake pipes" indicates carburetor/collector intake systems
+  - ✅ Existing patterns: "seperate intake pipes" with context → ITB or IM
+  - ✅ Updated prtParser.js parseIntakeSystem() with proper detection priority:
+    1. Check "collected intake pipes" FIRST → returns "Carb"
+    2. Check "seperate intake pipes" + "with no airboxes" + "but with throttles" → returns "ITB"
+    3. Check "seperate intake pipes" + "with a common airbox or plenum" → returns "IM"
+    4. Fallback: throttle count check for older .prt files
+  - ✅ Added "Carb" to TypeScript type definitions (FiltersBar.tsx line 26)
+  - ✅ Added "Carb" option to Engine filter dropdown (FiltersBar.tsx TYPE_OPTIONS)
+  - ✅ Updated filter logic to include 'Carb' in intakeSystems array (projectFilters.ts line 23)
+  - ✅ Tested on 6 diverse projects - all intake systems correctly identified:
+    - lada-1300-carb → Carb ✓
+    - 4-cyl-itb → ITB ✓
+    - vesta-16-im → IM ✓
+    - tm-soft-shortcut → IM ✓
+    - bmw-m42 → ITB ✓
+    - lada-1300-weber → Carb ✓
+  - **Files**:
+    - Backend: `backend/src/parsers/formats/prtParser.js` (lines 159-208 - parseIntakeSystem function)
+    - Frontend: `frontend/src/components/projects/FiltersBar.tsx` (lines 26, 52-58)
+    - Frontend: `frontend/src/utils/projectFilters.ts` (line 23)
+  - **Commits**: 463ab92 (parser), 875fea7 (UI filter), 2b2c782 (filter logic)
+  - **Result**: Users can now filter and identify carburetor/collector intake systems correctly
+
 - **Valves filter and badge** (Phase 2.8):
   - ✅ Replaced "Created Year" filter with "Valves per Cylinder" filter (2, 3, 4, 5 valves)
   - ✅ Added valves badge to ProjectCard showing total valves (16V, 24V, etc.) in cyan color

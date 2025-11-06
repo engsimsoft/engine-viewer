@@ -1,21 +1,21 @@
 {
   "version": "1.0",
-  "id": "v6-2gr-im",
+  "id": "gimura",
   "displayName": "",
   "auto": {
-    "cylinders": 6,
+    "cylinders": 3,
     "type": "NA",
-    "configuration": null,
-    "bore": 94,
-    "stroke": 83,
-    "compressionRatio": 11.8,
-    "maxPowerRPM": 6600,
+    "configuration": "inline",
+    "bore": 76.5,
+    "stroke": 73,
+    "compressionRatio": 11.2,
+    "maxPowerRPM": 7500,
     "intakeSystem": "IM",
     "valvesPerCylinder": 4,
     "inletValves": 2,
     "exhaustValves": 2
   },
   "manual": {},
-  "created": "2025-11-06T10:14:38.376Z",
+  "created": "2025-11-06T12:59:56.845Z",
   "modified": "2025-11-06T13:40:52.684Z"
 }

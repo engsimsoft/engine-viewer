@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "moto-250-v1",
+  "displayName": "",
+  "auto": {
+    "cylinders": 1,
+    "type": "NA",
+    "configuration": null,
+    "bore": 77,
+    "stroke": 53.6,
+    "compressionRatio": 12,
+    "maxPowerRPM": 11000,
+    "intakeSystem": "ITB",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.845Z",
+  "modified": "2025-11-06T13:40:52.721Z"
+}

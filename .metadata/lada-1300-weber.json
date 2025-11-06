@@ -1,21 +1,21 @@
 {
   "version": "1.0",
-  "id": "itb-8v",
+  "id": "lada-1300-weber",
   "displayName": "",
   "auto": {
     "cylinders": 4,
     "type": "NA",
     "configuration": "inline",
-    "bore": 82,
-    "stroke": 80,
-    "compressionRatio": 11,
-    "maxPowerRPM": 6600,
+    "bore": 80,
+    "stroke": 66,
+    "compressionRatio": 11.8,
+    "maxPowerRPM": 8200,
     "intakeSystem": "ITB",
     "valvesPerCylinder": 2,
     "inletValves": 1,
     "exhaustValves": 1
   },
   "manual": {},
-  "created": "2025-11-06T10:03:52.191Z",
+  "created": "2025-11-06T12:59:56.845Z",
   "modified": "2025-11-06T13:40:52.684Z"
 }

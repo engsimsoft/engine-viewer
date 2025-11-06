@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "c20xe-itb",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 86,
+    "stroke": 86,
+    "compressionRatio": 11,
+    "maxPowerRPM": 8500,
+    "intakeSystem": "ITB",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.845Z",
+  "modified": "2025-11-06T13:40:52.757Z"
+}
