@@ -10,7 +10,6 @@ import { Check, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export interface MultiSelectOption<T = string> {
@@ -85,9 +84,13 @@ export default function MultiSelect<T = string>({
           className={cn('h-10 justify-between', className)}
         >
           <span className="truncate">
-            {value.length > 0
-              ? `${label}: ${value.length} selected`
-              : placeholder}
+            {value.length === 0
+              ? placeholder
+              : selectedLabels.length === 1
+              ? selectedLabels[0]
+              : selectedLabels.length === 2
+              ? selectedLabels.join(', ')
+              : `${selectedLabels[0]} +${selectedLabels.length - 1} more`}
           </span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

@@ -14,7 +14,6 @@
 
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSelect';
@@ -25,6 +24,7 @@ export interface ProjectFiltersState {
   intake: IntakeSystem[];
   createdYear: number[];
   cylinders: number[];
+  tags: string[];
   search: string;
   sortBy: 'date' | 'created' | 'name' | 'cylinders';
 }
@@ -35,6 +35,7 @@ interface FiltersBarProps {
   onClearAll: () => void;
   resultsCount: number;
   totalCount: number;
+  availableTags: string[]; // All unique tags from all projects
 }
 
 // Filter options configuration
@@ -81,6 +82,7 @@ export default function FiltersBar({
   onClearAll,
   resultsCount,
   totalCount,
+  availableTags,
 }: FiltersBarProps) {
   const updateFilter = <K extends keyof ProjectFiltersState>(
     key: K,
@@ -105,12 +107,19 @@ export default function FiltersBar({
     }
   };
 
+  // Generate tags options from available tags
+  const tagsOptions: MultiSelectOption<string>[] = availableTags.map(tag => ({
+    value: tag,
+    label: tag,
+  }));
+
   // Count active filters
   const activeFiltersCount =
     filters.type.length +
     filters.intake.length +
     filters.createdYear.length +
     filters.cylinders.length +
+    filters.tags.length +
     (filters.search ? 1 : 0);
 
   const hasActiveFilters = activeFiltersCount > 0 || filters.sortBy !== 'date';
@@ -176,6 +185,15 @@ export default function FiltersBar({
           className="w-[160px]"
         />
 
+        <MultiSelect
+          label="Tags"
+          options={tagsOptions}
+          value={filters.tags}
+          onChange={(value) => updateFilter('tags', value)}
+          placeholder="All Tags"
+          className="w-[160px]"
+        />
+
         {/* Sort Dropdown */}
         <Select value={filters.sortBy} onValueChange={(value: any) => updateFilter('sortBy', value)}>
           <SelectTrigger className="h-10 w-[160px]">
@@ -188,14 +206,6 @@ export default function FiltersBar({
             <SelectItem value="cylinders">Cylinders</SelectItem>
           </SelectContent>
         </Select>
-
-        {/* Clear All Button */}
-        {hasActiveFilters && (
-          <Button variant="outline" onClick={onClearAll} className="gap-2">
-            <X className="h-4 w-4" />
-            Clear all
-          </Button>
-        )}
       </div>
 
       {/* Active Filters Row */}
@@ -256,6 +266,19 @@ export default function FiltersBar({
             </Badge>
           ))}
 
+          {/* Tags filters */}
+          {filters.tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="gap-1 cursor-pointer hover:bg-secondary/80"
+              onClick={() => removeFilter('tags', tag)}
+            >
+              {tag}
+              <X className="h-3 w-3" />
+            </Badge>
+          ))}
+
           {/* Search badge */}
           {filters.search && (
             <Badge
@@ -267,6 +290,16 @@ export default function FiltersBar({
               <X className="h-3 w-3" />
             </Badge>
           )}
+
+          {/* Clear all badge (iPhone style - consistent with other filters) */}
+          <Badge
+            variant="secondary"
+            className="gap-1 cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            onClick={onClearAll}
+          >
+            Clear all
+            <X className="h-3 w-3" />
+          </Badge>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "tm-soft-shortcut",
-  "displayName": "",
+  "displayName": "ShortCut",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -13,7 +13,17 @@
     "intakeSystem": "ITB",
     "exhaustSystem": "4-2-1"
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "DK Racing",
+    "tags": [
+      "Race",
+      "CN"
+    ],
+    "status": "active",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-05T14:51:17.039Z"
+  "modified": "2025-11-06T08:08:05.161Z"
 }

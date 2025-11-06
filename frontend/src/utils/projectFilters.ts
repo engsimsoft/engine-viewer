@@ -49,6 +49,17 @@ export function filterProjects(
       }
     }
 
+    // Tags filter (OR logic: project must have at least one of selected tags)
+    if (filters.tags.length > 0) {
+      const projectTags = project.metadata?.manual?.tags || [];
+      const hasMatchingTag = filters.tags.some(filterTag =>
+        projectTags.includes(filterTag)
+      );
+      if (!hasMatchingTag) {
+        return false;
+      }
+    }
+
     // Search filter (displayName, client)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();

@@ -48,7 +48,6 @@ const metadataFormSchema = z.object({
   tags: z.array(z.string()),
   status: z.enum(['active', 'completed', 'archived']),
   notes: z.string().optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format (must be HEX)').optional(),
 });
 
 type MetadataFormValues = z.infer<typeof metadataFormSchema>;
@@ -80,7 +79,6 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
       tags: [],
       status: 'active',
       notes: '',
-      color: '#3b82f6',
     },
   });
 
@@ -99,7 +97,6 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
         tags: metadata?.manual?.tags || [],
         status: metadata?.manual?.status || 'active',
         notes: metadata?.manual?.notes || '',
-        color: metadata?.manual?.color || '#3b82f6',
       });
     }
   }, [project, open, form]);
@@ -117,7 +114,6 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
         tags: values.tags,
         status: values.status,
         notes: values.notes || undefined,
-        color: values.color || undefined,
       };
 
       // Send to Backend API (flat structure, NO nested manual object)
@@ -137,17 +133,6 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
       toast.error('Failed to save metadata');
     }
   };
-
-  // Color options
-  const colorOptions = [
-    { value: '#3b82f6', label: 'Blue' },
-    { value: '#10b981', label: 'Green' },
-    { value: '#f59e0b', label: 'Orange' },
-    { value: '#ef4444', label: 'Red' },
-    { value: '#8b5cf6', label: 'Purple' },
-    { value: '#ec4899', label: 'Pink' },
-    { value: '#64748b', label: 'Gray' },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -397,35 +382,6 @@ export function MetadataDialog({ open, onOpenChange, project, onSuccess }: Metad
                       <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Label Color */}
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Label Color</FormLabel>
-                  <div className="flex gap-2 items-center">
-                    <FormControl>
-                      <Input type="color" className="w-16 h-10" {...field} />
-                    </FormControl>
-                    <div className="flex gap-1">
-                      {colorOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => field.onChange(option.value)}
-                          className="w-8 h-8 rounded-full border-2 border-border hover:border-primary transition-colors"
-                          style={{ backgroundColor: option.value }}
-                          title={option.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}

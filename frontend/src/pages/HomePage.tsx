@@ -19,6 +19,7 @@ export default function HomePage() {
     intake: [],
     createdYear: [],
     cylinders: [],
+    tags: [],
     search: '',
     sortBy: 'date',
   });
@@ -26,6 +27,16 @@ export default function HomePage() {
   // Диалог редактирования метаданных
   const [editingProject, setEditingProject] = useState<ProjectInfo | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Extract all unique tags from projects (for Tags filter options)
+  const availableTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    projects.forEach(project => {
+      const projectTags = project.metadata?.manual?.tags || [];
+      projectTags.forEach(tag => tagsSet.add(tag));
+    });
+    return Array.from(tagsSet).sort();
+  }, [projects]);
 
   // Apply filters and sorting (client-side)
   const filteredProjects = useMemo(() => {
@@ -52,6 +63,7 @@ export default function HomePage() {
       intake: [],
       createdYear: [],
       cylinders: [],
+      tags: [],
       search: '',
       sortBy: 'date',
     });
@@ -107,6 +119,7 @@ export default function HomePage() {
             onClearAll={handleClearAllFilters}
             resultsCount={filteredProjects.length}
             totalCount={projects.length}
+            availableTags={availableTags}
           />
         )}
 
