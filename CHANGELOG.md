@@ -119,6 +119,38 @@
   - **Commits**: 463ab92 (parser), 875fea7 (UI filter), 2b2c782 (filter logic)
   - **Result**: Users can now filter and identify carburetor/collector intake systems correctly
 
+- **Phase 3: UI Polish & Animations** (2025-11-06):
+  - ✅ **Card hover animations**: Enhanced from shadow-lg to shadow-xl with scale(1.02) on hover
+  - ✅ **Transition duration**: Increased from 200ms to 300ms for smoother "iPhone quality" feel
+  - ✅ **Badge hover effects**: Added transition-all and hover:scale-105 for subtle interactive feedback
+  - ✅ **Search debounce**: Implemented 300ms debounce to prevent excessive re-renders during typing
+    - Local searchInput state for immediate visual feedback
+    - Debounced filter update after 300ms of no typing
+    - Syncs with external filter changes (e.g., clear all)
+    - Improves performance for large project lists (50+ projects)
+  - **Files**:
+    - `frontend/src/components/projects/ProjectCard.tsx` - card hover animations
+    - `frontend/src/components/ui/badge.tsx` - badge hover effects
+    - `frontend/src/components/projects/FiltersBar.tsx` - search debounce logic
+  - **Commit**: d443629
+  - **Result**: Smooth, professional animations matching "iPhone quality" standard
+
+- **Phase 3: Accessibility Improvements (WCAG 2.1 AA)** (2025-11-06):
+  - ✅ **Empty states**: Added role="status" and aria-live="polite" for screen reader announcements
+  - ✅ **Decorative emojis**: Added aria-hidden="true" to prevent screen reader confusion
+  - ✅ **Projects grid**: Added role="list" and aria-label="Projects list" for semantic structure
+  - ✅ **Keyboard navigation**: Verified all interactive elements accessible via keyboard
+    - Tab through filters ✓
+    - Tab through project cards ✓
+    - Enter/Space to open projects ✓
+  - ✅ **Color contrast**: Verified WCAG 2.1 AA compliance (contrast ratio > 4.5:1)
+    - All badge colors meet accessibility standards
+    - Text on colored backgrounds readable
+  - **Files**:
+    - `frontend/src/pages/HomePage.tsx` - empty states, projects grid
+  - **Commit**: e143fdd
+  - **Result**: Fully accessible interface for screen readers and keyboard-only users
+
 - **Valves filter and badge** (Phase 2.8):
   - ✅ Replaced "Created Year" filter with "Valves per Cylinder" filter (2, 3, 4, 5 valves)
   - ✅ Added valves badge to ProjectCard showing total valves (16V, 24V, etc.) in cyan color
