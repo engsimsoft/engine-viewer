@@ -16,7 +16,7 @@ export default function HomePage() {
   // Filters state
   const [filters, setFilters] = useState<ProjectFiltersState>({
     type: [],
-    createdYear: [],
+    valves: [],
     cylinders: [],
     tags: [],
     search: '',
@@ -59,7 +59,7 @@ export default function HomePage() {
   const handleClearAllFilters = () => {
     setFilters({
       type: [],
-      createdYear: [],
+      valves: [],
       cylinders: [],
       tags: [],
       search: '',

@@ -42,11 +42,10 @@ export function filterProjects(
       }
     }
 
-    // Created Year filter (2020, 2021, 2022, etc.)
-    if (filters.createdYear.length > 0) {
-      const createdDate = new Date(project.created);
-      const createdYear = createdDate.getFullYear();
-      if (!filters.createdYear.includes(createdYear)) {
+    // Valves filter (2, 3, 4, 5)
+    if (filters.valves.length > 0) {
+      const projectValves = project.metadata?.auto?.valvesPerCylinder;
+      if (!projectValves || !filters.valves.includes(projectValves)) {
         return false;
       }
     }

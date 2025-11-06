@@ -20,7 +20,7 @@ import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSe
 
 export interface ProjectFiltersState {
   type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>;
-  createdYear: number[];
+  valves: number[]; // Valves per cylinder (2, 3, 4, 5)
   cylinders: number[];
   tags: string[];
   search: string;
@@ -45,21 +45,12 @@ const TYPE_OPTIONS: MultiSelectOption<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 
   { value: 'IM', label: 'IM' },
 ];
 
-/**
- * Generate year options dynamically from current year back to 2020
- * (can be adjusted based on actual project dates)
- */
-function getYearOptions(): MultiSelectOption<number>[] {
-  const currentYear = new Date().getFullYear();
-  const startYear = 2020;
-  const years: MultiSelectOption<number>[] = [];
-
-  for (let year = currentYear; year >= startYear; year--) {
-    years.push({ value: year, label: year.toString() });
-  }
-
-  return years;
-}
+const VALVES_OPTIONS: MultiSelectOption<number>[] = [
+  { value: 2, label: '2V' },
+  { value: 3, label: '3V' },
+  { value: 4, label: '4V' },
+  { value: 5, label: '5V' },
+];
 
 const CYLINDERS_OPTIONS: MultiSelectOption<number>[] = [
   { value: 1, label: '1 Cyl' },
@@ -111,7 +102,7 @@ export default function FiltersBar({
   // Count active filters
   const activeFiltersCount =
     filters.type.length +
-    filters.createdYear.length +
+    filters.valves.length +
     filters.cylinders.length +
     filters.tags.length +
     (filters.search ? 1 : 0);
@@ -153,11 +144,11 @@ export default function FiltersBar({
         />
 
         <MultiSelect
-          label="Created"
-          options={getYearOptions()}
-          value={filters.createdYear}
-          onChange={(value) => updateFilter('createdYear', value)}
-          placeholder="All Years"
+          label="Valves"
+          options={VALVES_OPTIONS}
+          value={filters.valves}
+          onChange={(value) => updateFilter('valves', value)}
+          placeholder="All Valves"
           className="w-[160px]"
         />
 
@@ -212,15 +203,15 @@ export default function FiltersBar({
             </Badge>
           ))}
 
-          {/* Created Year filters */}
-          {filters.createdYear.map((year) => (
+          {/* Valves filters */}
+          {filters.valves.map((valves) => (
             <Badge
-              key={year}
+              key={valves}
               variant="secondary"
               className="gap-1 cursor-pointer hover:bg-secondary/80"
-              onClick={() => removeFilter('createdYear', year)}
+              onClick={() => removeFilter('valves', valves)}
             >
-              Created: {year}
+              {valves}V
               <X className="h-3 w-3" />
             </Badge>
           ))}
