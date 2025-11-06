@@ -210,14 +210,9 @@ docs/.doctrees/
 # CHM help files (binary, large, can be re-extracted)
 *.chm
 
-# Test Data - Keep only .prt files, ignore calculation results
-# Игнорируем все calculation results (директории с расчетами)
-test-data/*/
-# НО оставляем .prt файлы в корне test-data/ (они нужны для metadata)
-!test-data/*.prt
-# Опционально: оставить .det/.pou для примеров
-!test-data/*.det
-!test-data/*.pou
+# Test Data - Ignore entire folder (will be several GB with multiple projects)
+# Вся папка test-data исключена из Git (несколько ГБ данных)
+test-data/
 
 # ============================================
 # Production Files (если нужно)

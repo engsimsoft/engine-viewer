@@ -512,6 +512,75 @@
 
   **➡️ Phase 2 FULLY COMPLETE! Ready for Phase 3 (Polish)**
 
+### 2.8 Advanced Features & Enhancements (4-5 часов) ✅
+
+**Date:** 6 ноября 2025
+
+- [X] **Feature: Replace "Created Year" filter with "Valves" filter** ✅
+  - ❌ **Problem:** Created Year filter not useful (all projects from same year)
+  - ✅ **Solution:** Replaced with Valves per Cylinder filter (2V, 3V, 4V, 5V)
+  - ✅ **Implementation:** Updated FiltersBar.tsx, projectFilters.ts
+  - File: `frontend/src/components/projects/FiltersBar.tsx`
+  - File: `frontend/src/utils/projectFilters.ts`
+  - Commit: 71b03f9
+
+- [X] **Feature: Add valves badge to ProjectCard** ✅
+  - ✅ **Implementation:** Calculate total valves (cylinders × valvesPerCylinder)
+  - ✅ **Display:** "16V" badge (cyan color) between Cylinders and Intake
+  - ✅ **Example:** 4 Cyl × 4 valves = 16V, 6 Cyl × 2 valves = 12V
+  - File: `frontend/src/components/projects/EngineBadge.tsx`
+  - File: `frontend/src/components/projects/ProjectCard.tsx`
+  - Commit: db34058, 7939c00
+
+- [X] **Feature: Clarify valves terminology in UI** ✅
+  - ✅ **MetadataDialog:** "Valves" → "Valves per Cylinder"
+  - ✅ **FiltersBar:** Placeholder "All" → "Valves/Cyl"
+  - ✅ **FiltersBar:** Label "Valves/Cyl" → "Valves per Cylinder" (inside dropdown)
+  - Commit: db34058, 7939c00
+
+- [X] **Feature: Auto-scan & File Watcher** ✅
+  - ✅ **Startup Scan:** Process all .prt files on server start
+  - ✅ **File Watcher:** Real-time detection of new/modified .prt files (<1 second)
+  - ✅ **Error Detection:** 4 error types (missing_prt, parsing_failed, incomplete_metadata, corrupted_files)
+  - ✅ **UI Error Display:** Red badge on ProjectCard + detailed errors in MetadataDialog
+  - File: `backend/src/server.js` (startup scan + chokidar watcher)
+  - File: `backend/src/services/fileScanner.js` (detectProjectErrors)
+  - File: `frontend/src/components/projects/ProjectCard.tsx` (error badge)
+  - File: `frontend/src/components/projects/MetadataDialog.tsx` (error details)
+  - File: `frontend/src/components/ui/alert.tsx` (new Alert component)
+  - Commit: 43b1d5c
+
+- [X] **Feature: Project count statistics in filters** ✅
+  - ✅ **Implementation:** Show count next to each filter option
+  - ✅ **Display:** "4 Cyl (15)" - 15 projects with 4 cylinders
+  - ✅ **Filters:** Cylinders, Valves/Cyl, Engine, Tags
+  - ✅ **Performance:** Single O(n) pass, memoized (~1ms for 50-100 projects)
+  - File: `frontend/src/components/shared/MultiSelect.tsx` (count display)
+  - File: `frontend/src/utils/projectFilters.ts` (calculate counts)
+  - File: `frontend/src/pages/HomePage.tsx` (compute counts with useMemo)
+  - File: `frontend/src/components/projects/FiltersBar.tsx` (pass counts to filters)
+  - Commit: 2083bfc
+
+- [X] **Git Repository Cleanup** ✅
+  - ✅ **Problem:** test-data folder will be several GB with multiple projects
+  - ✅ **Solution:** Exclude entire test-data/ from Git
+  - ✅ **Git Status:** Removed test-data from index (keep local files)
+  - File: `.gitignore` (test-data/ excluded)
+  - Commit: [pending]
+
+- [X] **Phase 2.8 Sign-off (Vladimir):** ✅
+  **✅ Advanced Features Complete:**
+  1. Valves filter работает (2V, 3V, 4V, 5V) ✅
+  2. Valves badge показывается на карточках (16V, 24V) ✅
+  3. Терминология уточнена ("Valves per Cylinder") ✅
+  4. Auto-scan + File Watcher работает (<1 sec) ✅
+  5. Error indication показывает проблемы ✅
+  6. Statistics в фильтрах (count рядом с опциями) ✅
+  7. test-data исключена из Git (несколько ГБ) ✅
+  8. Всё работает быстро и без ошибок ✅
+
+  **➡️ Phase 2.8 COMPLETE! All requested features implemented!**
+
 ---
 
 ## 🚀 Phase 3: Polish & Testing (Неделя 3)

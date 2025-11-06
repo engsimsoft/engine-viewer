@@ -35,6 +35,54 @@
   - **File**: `frontend/src/components/projects/MetadataDialog.tsx` (lines 112-124, 390)
   - **Result**: All form fields now save correctly, changes persist after dialog close
 
+### Added (2025-11-06)
+- **Valves filter and badge** (Phase 2.8):
+  - ✅ Replaced "Created Year" filter with "Valves per Cylinder" filter (2, 3, 4, 5 valves)
+  - ✅ Added valves badge to ProjectCard showing total valves (16V, 24V, etc.) in cyan color
+  - ✅ Badge calculation: cylinders × valvesPerCylinder (e.g., 4 Cyl × 4 valves = 16V)
+  - ✅ Clarified terminology: "Valves per Cylinder" instead of ambiguous "Valves"
+  - ✅ Updated filter placeholder to "Valves/Cyl" for brevity
+  - **Files**: `EngineBadge.tsx`, `FiltersBar.tsx`, `MetadataDialog.tsx`, `projectFilters.ts`
+  - **Commits**: 71b03f9 (filter), db34058 + 7939c00 (badge)
+  - **Result**: Users can filter by valves per cylinder and see total valve count on cards
+
+- **Auto-scan & File Watcher** (Phase 2.8):
+  - ✅ Automatic .prt file processing on server startup (<1 second scan time)
+  - ✅ Real-time file watcher using chokidar for instant .prt detection
+  - ✅ Watches for add/change/delete events in test-data folder
+  - ✅ Auto-generates metadata from .prt files without manual restart
+  - ✅ Error detection system with 4 error types:
+    - missing_prt (CRITICAL) - no .prt file found
+    - parsing_failed (ERROR) - .prt file exists but parsing failed
+    - incomplete_metadata (WARNING) - missing critical engine specs
+    - corrupted_files (CRITICAL) - files cannot be read
+  - ✅ Error UI: Red badge on ProjectCard + detailed error section in MetadataDialog
+  - **Files**: `server.js`, `fileScanner.js`, `ProjectCard.tsx`, `MetadataDialog.tsx`, `alert.tsx`
+  - **Commit**: 43b1d5c
+  - **Result**: New projects auto-detected in <1 second, errors clearly visible
+
+- **Project count statistics in filters** (Phase 2.8):
+  - ✅ Faceted search with counts showing next to each filter option (e.g., "4 Cyl (15)")
+  - ✅ Statistics for all filters: Cylinders, Valves/Cyl, Engine (Type + Intake), Tags
+  - ✅ Efficient calculation: single O(n) pass through projects, memoized with useMemo
+  - ✅ Calculation functions:
+    - calculateCylinderCounts() - count by cylinder count
+    - calculateValvesCounts() - count by valves per cylinder
+    - calculateTypeCounts() - count by engine type and intake system
+    - calculateTagCounts() - count by tags
+  - ✅ Extended MultiSelectOption interface with optional count field
+  - **Files**: `projectFilters.ts`, `HomePage.tsx`, `FiltersBar.tsx`, `MultiSelect.tsx`
+  - **Commit**: 2083bfc
+  - **Result**: Users can see data distribution before applying filters
+
+- **Git Repository Cleanup** (Phase 2.8):
+  - ✅ Excluded entire test-data/ folder from Git (will be several GB with multiple projects)
+  - ✅ Updated .gitignore with test-data/ pattern
+  - ✅ Removed test-data from Git index while preserving local files
+  - ✅ Clean repository ready for production deployment
+  - **Files**: `.gitignore`
+  - **Result**: No calculation results or test data in Git, only source code
+
 ### Fixed (2025-11-02)
 - **CRITICAL: Fixed .det + .pou file merge** (2025-11-02):
   - ✅ Fixed incorrect merge logic that was losing critical parameters
