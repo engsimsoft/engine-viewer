@@ -158,29 +158,39 @@ class PrtParser {
 
   /**
    * Парсит intake system из секции INTAKE
-   * Логика:
-   * - "with no airboxes" → ITB (Individual Throttle Bodies)
-   * - "with a common airbox or plenum" → IM (Intake Manifold)
-   * - throttles == cylinders AND no airboxes → ITB
+   * Логика основана на точных строках из .prt файлов:
+   *
+   * 1. "collected intake pipes" → Carb (Carburetor/Collector - 4into1, 1intoN)
+   * 2. "seperate intake pipes":
+   *    - "with no airboxes" + "but with throttles" → ITB (Individual Throttle Bodies)
+   *    - "with a common airbox or plenum" → IM (Intake Manifold)
    *
    * @param {string[]} intakeLines - Строки секции INTAKE system
    * @param {number} numCylinders - Количество цилиндров
-   * @returns {string} - "ITB" | "IM"
+   * @returns {string} - "ITB" | "IM" | "Carb"
    */
   parseIntakeSystem(intakeLines, numCylinders) {
     const intakeText = intakeLines.join('\n').toLowerCase();
 
-    // Явный индикатор ITB
-    if (intakeText.includes('with no airboxes')) {
-      return 'ITB';
+    // 1. ПЕРВЫМ проверяем "collected intake pipes" → Carburetor/Collector
+    if (intakeText.includes('collected intake pipes')) {
+      return 'Carb';
     }
 
-    // Явный индикатор IM (Intake Manifold)
-    if (intakeText.includes('with a common airbox') || intakeText.includes('with a common plenum')) {
-      return 'IM';
+    // 2. Проверяем "seperate intake pipes"
+    if (intakeText.includes('seperate intake pipes')) {
+      // 2a. ITB: separate + no airboxes + throttles
+      if (intakeText.includes('with no airboxes') && intakeText.includes('but with throttles')) {
+        return 'ITB';
+      }
+
+      // 2b. IM: separate + common airbox/plenum
+      if (intakeText.includes('with a common airbox') || intakeText.includes('with a common plenum')) {
+        return 'IM';
+      }
     }
 
-    // Дополнительная проверка: throttles count
+    // Fallback: Дополнительная проверка по throttles count (для старых .prt файлов)
     const throttlesMatch = intakeText.match(/(\d+)\s+throttles/i);
     const airboxMatch = intakeText.match(/(\d+)\s+boxes\/plenums/i);
 

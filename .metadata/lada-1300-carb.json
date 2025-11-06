@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "id": "lada-1300-carb",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 80,
+    "stroke": 66,
+    "compressionRatio": 10.8,
+    "maxPowerRPM": 8200,
+    "intakeSystem": "Carb",
+    "valvesPerCylinder": 2,
+    "inletValves": 1,
+    "exhaustValves": 1
+  },
+  "manual": {},
+  "created": "2025-11-06T12:59:56.845Z",
+  "modified": "2025-11-06T13:22:41.966Z"
+}
