@@ -34,6 +34,12 @@ interface FiltersBarProps {
   resultsCount: number;
   totalCount: number;
   availableTags: string[]; // All unique tags from all projects
+  filterCounts: {
+    cylinders: Record<number, number>;
+    valves: Record<number, number>;
+    types: Record<string, number>;
+    tags: Record<string, number>;
+  };
 }
 
 // Filter options configuration
@@ -69,6 +75,7 @@ export default function FiltersBar({
   resultsCount,
   totalCount,
   availableTags,
+  filterCounts,
 }: FiltersBarProps) {
   const updateFilter = <K extends keyof ProjectFiltersState>(
     key: K,
@@ -97,6 +104,27 @@ export default function FiltersBar({
   const tagsOptions: MultiSelectOption<string>[] = availableTags.map(tag => ({
     value: tag,
     label: tag,
+  }));
+
+  // Enrich filter options with counts
+  const cylindersWithCounts = CYLINDERS_OPTIONS.map(option => ({
+    ...option,
+    count: filterCounts.cylinders[option.value] || 0,
+  }));
+
+  const valvesWithCounts = VALVES_OPTIONS.map(option => ({
+    ...option,
+    count: filterCounts.valves[option.value] || 0,
+  }));
+
+  const typeWithCounts = TYPE_OPTIONS.map(option => ({
+    ...option,
+    count: filterCounts.types[option.value] || 0,
+  }));
+
+  const tagsWithCounts = tagsOptions.map(option => ({
+    ...option,
+    count: filterCounts.tags[option.value] || 0,
   }));
 
   // Count active filters
@@ -136,7 +164,7 @@ export default function FiltersBar({
         {/* Multi-Select Filters */}
         <MultiSelect
           label="Engine"
-          options={TYPE_OPTIONS}
+          options={typeWithCounts}
           value={filters.type}
           onChange={(value) => updateFilter('type', value)}
           placeholder="All Engines"
@@ -145,7 +173,7 @@ export default function FiltersBar({
 
         <MultiSelect
           label="Valves per Cylinder"
-          options={VALVES_OPTIONS}
+          options={valvesWithCounts}
           value={filters.valves}
           onChange={(value) => updateFilter('valves', value)}
           placeholder="Valves/Cyl"
@@ -154,7 +182,7 @@ export default function FiltersBar({
 
         <MultiSelect
           label="Cylinders"
-          options={CYLINDERS_OPTIONS}
+          options={cylindersWithCounts}
           value={filters.cylinders}
           onChange={(value) => updateFilter('cylinders', value)}
           placeholder="All Cylinders"
@@ -163,7 +191,7 @@ export default function FiltersBar({
 
         <MultiSelect
           label="Tags"
-          options={tagsOptions}
+          options={tagsWithCounts}
           value={filters.tags}
           onChange={(value) => updateFilter('tags', value)}
           placeholder="All Tags"

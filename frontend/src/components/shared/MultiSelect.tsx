@@ -16,6 +16,7 @@ export interface MultiSelectOption<T = string> {
   value: T;
   label: string;
   section?: string; // Optional section header (e.g., "Intake (NA only)")
+  count?: number;   // Optional count of projects matching this option (e.g., "4 Cyl (15)")
 }
 
 interface MultiSelectProps<T = string> {
@@ -132,7 +133,14 @@ export default function MultiSelect<T = string>({
                       onCheckedChange={() => handleToggle(option.value)}
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-sm">{option.label}</span>
+                    <span className="text-sm flex-1">
+                      {option.label}
+                      {option.count !== undefined && (
+                        <span className="text-xs text-muted-foreground ml-1.5">
+                          ({option.count})
+                        </span>
+                      )}
+                    </span>
                     {value.includes(option.value) && (
                       <Check className="ml-auto h-4 w-4 text-primary" />
                     )}

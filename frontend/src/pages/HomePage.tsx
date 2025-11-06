@@ -6,7 +6,13 @@ import FiltersBar, { type ProjectFiltersState } from '@/components/projects/Filt
 import { MetadataDialog } from '@/components/projects/MetadataDialog';
 import SkeletonCard from '@/components/shared/SkeletonCard';
 import ErrorMessage from '@/components/shared/ErrorMessage';
-import { filterAndSortProjects } from '@/utils/projectFilters';
+import {
+  filterAndSortProjects,
+  calculateCylinderCounts,
+  calculateValvesCounts,
+  calculateTypeCounts,
+  calculateTagCounts
+} from '@/utils/projectFilters';
 import type { ProjectInfo } from '@/types';
 
 export default function HomePage() {
@@ -35,6 +41,16 @@ export default function HomePage() {
       projectTags.forEach(tag => tagsSet.add(tag));
     });
     return Array.from(tagsSet).sort();
+  }, [projects]);
+
+  // Calculate filter statistics (count of projects for each option)
+  const filterCounts = useMemo(() => {
+    return {
+      cylinders: calculateCylinderCounts(projects),
+      valves: calculateValvesCounts(projects),
+      types: calculateTypeCounts(projects),
+      tags: calculateTagCounts(projects),
+    };
   }, [projects]);
 
   // Apply filters and sorting (client-side)
@@ -118,6 +134,7 @@ export default function HomePage() {
             resultsCount={filteredProjects.length}
             totalCount={projects.length}
             availableTags={availableTags}
+            filterCounts={filterCounts}
           />
         )}
 

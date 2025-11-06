@@ -139,3 +139,80 @@ export function filterAndSortProjects(
   const filtered = filterProjects(projects, filters);
   return sortProjects(filtered, filters.sortBy);
 }
+
+/**
+ * Calculate count statistics for filter options
+ * Returns Record<value, count> for each filter type
+ */
+
+/**
+ * Count projects by cylinder count
+ */
+export function calculateCylinderCounts(projects: ProjectInfo[]): Record<number, number> {
+  const counts: Record<number, number> = {};
+
+  projects.forEach(project => {
+    const cylinders = project.metadata?.auto?.cylinders || project.numCylinders;
+    if (cylinders) {
+      counts[cylinders] = (counts[cylinders] || 0) + 1;
+    }
+  });
+
+  return counts;
+}
+
+/**
+ * Count projects by valves per cylinder
+ */
+export function calculateValvesCounts(projects: ProjectInfo[]): Record<number, number> {
+  const counts: Record<number, number> = {};
+
+  projects.forEach(project => {
+    const valves = project.metadata?.auto?.valvesPerCylinder;
+    if (valves !== undefined) {
+      counts[valves] = (counts[valves] || 0) + 1;
+    }
+  });
+
+  return counts;
+}
+
+/**
+ * Count projects by engine type (NA, Turbo, Supercharged) and intake system (ITB, IM)
+ */
+export function calculateTypeCounts(projects: ProjectInfo[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+
+  projects.forEach(project => {
+    const type = project.metadata?.auto?.type;
+    const intake = project.metadata?.auto?.intakeSystem;
+
+    // Count engine types
+    if (type) {
+      counts[type] = (counts[type] || 0) + 1;
+    }
+
+    // Count intake systems (only for NA engines)
+    if (intake) {
+      counts[intake] = (counts[intake] || 0) + 1;
+    }
+  });
+
+  return counts;
+}
+
+/**
+ * Count projects by tags
+ */
+export function calculateTagCounts(projects: ProjectInfo[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+
+  projects.forEach(project => {
+    const tags = project.metadata?.manual?.tags || project.tags || [];
+    tags.forEach(tag => {
+      counts[tag] = (counts[tag] || 0) + 1;
+    });
+  });
+
+  return counts;
+}
