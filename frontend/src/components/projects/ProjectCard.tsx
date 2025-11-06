@@ -68,34 +68,23 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
       aria-label={`Open project ${project.name}`}
     >
       <CardHeader>
-        <div className="flex-1 min-w-0">
-          {/* Display Name (large, bold) - fallback to name */}
-          <CardTitle className="text-xl font-bold truncate">
-            {displayName || project.name}
-          </CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            {/* Display Name (large, bold) - fallback to name */}
+            <CardTitle className="text-xl truncate">
+              {displayName || project.name}
+            </CardTitle>
 
-          {/* ID (small, muted) - shown below display name */}
-          {displayName && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              ID: {project.id}
-            </p>
-          )}
-        </div>
-
-        {/* Separator after ID */}
-        {displayName && <Separator className="mt-3" />}
-      </CardHeader>
-
-      <CardContent className="space-y-2">
-        {/* Calculations count + Status/Error badges */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Cpu className="w-4 h-4" />
-            <span>{project.calculationsCount} calculations</span>
+            {/* ID (small, muted) - shown below display name */}
+            {displayName && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                ID: {project.id}
+              </p>
+            )}
           </div>
 
-          {/* Status and Error badges */}
-          <div className="flex gap-1 shrink-0">
+          {/* Badges Container */}
+          <div className="flex flex-col gap-1 shrink-0">
             {/* Status Badge */}
             <Badge className={`gap-1 ${statusInfo.color}`}>
               <StatusIcon className="w-3 h-3" />
@@ -106,10 +95,21 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
             {project.errors && project.errors.length > 0 && (
               <Badge variant="destructive" className="gap-1">
                 <AlertTriangle className="w-3 h-3" />
-                {project.errors.length > 1 ? `${project.errors.length} issues` : '1 issue'}
+                {project.errors.length} issue{project.errors.length > 1 ? 's' : ''}
               </Badge>
             )}
           </div>
+        </div>
+
+        {/* Separator after ID */}
+        {displayName && <Separator className="mt-3" />}
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {/* Calculations count */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Cpu className="w-4 h-4" />
+          <span>{project.calculationsCount} calculations</span>
         </div>
 
         {/* Engine specification badges (Type, Cylinders, Valves, Intake) */}

@@ -83,29 +83,6 @@
   - **Files**: `.gitignore`
   - **Result**: No calculation results or test data in Git, only source code
 
-- **UI/UX Improvements - Card Layout & Status Filter** (Phase 2.9, 2025-11-06):
-  - ✅ **Fixed uneven card heights**: Added `auto-rows-fr` to grid and `h-full` to Card component
-    - All cards in same row now have equal height (no more jagged grid)
-    - **Files**: `HomePage.tsx`, `card.tsx`
-  - ✅ **Fixed Status badge overflow**: Moved Status and Error badges to calculations count row
-    - Badges no longer overflow on long project names (e.g., "Dudarev Motorsport")
-    - Calculations count row has predictable length, perfect for badges
-    - **File**: `ProjectCard.tsx`
-  - ✅ **Combined Sort & Status dropdown** (Variant 2):
-    - Single dropdown with two sections: "Sort By" and "Status"
-    - Sort options: Modified (newest), Created (oldest), Name (A-Z)
-    - Status options: Active, Completed, Archived (checkboxes with counts)
-    - Smart button: Shows "Status (2)" when filters active, otherwise current sort method
-    - Benefits: Prevents Tags dropdown clutter with many user tags, logical grouping
-    - **Files**: `FiltersBar.tsx`, `projectFilters.ts`, `HomePage.tsx`
-  - ✅ **UI Polish**:
-    - Reduced spacing: py-6→py-4, gap-6→gap-4, space-y-3→space-y-2, px-6→px-4
-    - Visual hierarchy: Added font-bold to project title
-    - Responsive grid: 1/2/3/4 columns for mobile/tablet/desktop/wide screens
-    - Result: 9→12-16 projects visible on screen (better information density)
-    - **Files**: `card.tsx`, `ProjectCard.tsx`
-  - **Result**: Dashboard UI polished to "iPhone quality" - clean, professional, efficient
-
 ### Fixed (2025-11-02)
 - **CRITICAL: Fixed .det + .pou file merge** (2025-11-02):
   - ✅ Fixed incorrect merge logic that was losing critical parameters
