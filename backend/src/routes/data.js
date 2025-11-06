@@ -190,7 +190,8 @@ router.get('/:id', async (req, res, next) => {
     const dataFolderPath = getDataFolderPath(config);
 
     // Recursively scan directory to find matching file (supports subdirectories)
-    const allFiles = await scanDirectory(dataFolderPath, config.files.extensions);
+    // IMPORTANT: Only scan .det and .pou files (not .prt) because .prt files don't contain calculations
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
 
     // Find file matching the ID
     let matchedFileInfo = null;
