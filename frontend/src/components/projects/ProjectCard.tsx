@@ -60,7 +60,7 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
 
   return (
     <Card
-      className="hover:shadow-lg transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}

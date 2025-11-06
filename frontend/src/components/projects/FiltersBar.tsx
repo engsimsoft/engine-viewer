@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSelect';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface ProjectFiltersState {
   type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM' | 'Carb'>;
@@ -91,6 +91,24 @@ export default function FiltersBar({
   filterCounts,
 }: FiltersBarProps) {
   const [sortStatusOpen, setSortStatusOpen] = useState(false);
+  // Local state for search input (immediate update, debounced filter)
+  const [searchInput, setSearchInput] = useState(filters.search);
+
+  // Debounce search: update filters.search after 300ms of no typing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        updateFilter('search', searchInput);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
+
+  // Sync searchInput when filters.search changes externally (e.g., clear all)
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
 
   const updateFilter = <K extends keyof ProjectFiltersState>(
     key: K,
@@ -177,8 +195,8 @@ export default function FiltersBar({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by name or client..."
-            value={filters.search}
-            onChange={(e) => updateFilter('search', e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-9"
           />
           {filters.search && (
