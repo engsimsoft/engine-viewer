@@ -12,19 +12,24 @@
  * - Clear all button
  */
 
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Check, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import MultiSelect, { type MultiSelectOption } from '@/components/shared/MultiSelect';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export interface ProjectFiltersState {
   type: Array<'NA' | 'Turbo' | 'Supercharged' | 'ITB' | 'IM'>;
   valves: number[]; // Valves per cylinder (2, 3, 4, 5)
   cylinders: number[];
-  tags: string[];
+  tags: string[]; // User tags only
+  status: Array<'active' | 'completed' | 'archived'>; // Separate status field
   search: string;
-  sortBy: 'date' | 'created' | 'name' | 'cylinders';
+  sortBy: 'date' | 'created' | 'name';
 }
 
 interface FiltersBarProps {
@@ -39,6 +44,7 @@ interface FiltersBarProps {
     valves: Record<number, number>;
     types: Record<string, number>;
     tags: Record<string, number>;
+    status: Record<string, number>; // Status counts (active, completed, archived)
   };
 }
 
@@ -68,6 +74,12 @@ const CYLINDERS_OPTIONS: MultiSelectOption<number>[] = [
   { value: 8, label: '8 Cyl' },
 ];
 
+const STATUS_OPTIONS: MultiSelectOption<string>[] = [
+  { value: 'active', label: 'Active', section: 'Project Status' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'archived', label: 'Archived' },
+];
+
 export default function FiltersBar({
   filters,
   onFiltersChange,
@@ -77,6 +89,8 @@ export default function FiltersBar({
   availableTags,
   filterCounts,
 }: FiltersBarProps) {
+  const [sortStatusOpen, setSortStatusOpen] = useState(false);
+
   const updateFilter = <K extends keyof ProjectFiltersState>(
     key: K,
     value: ProjectFiltersState[K]
@@ -89,6 +103,14 @@ export default function FiltersBar({
       updateFilter('search', '');
     } else if (filterType === 'sortBy') {
       updateFilter('sortBy', 'date');
+    } else if (filterType === 'status') {
+      const currentArray = filters.status as any[];
+      updateFilter(
+        'status',
+        value !== undefined
+          ? currentArray.filter((v) => v !== value)
+          : []
+      );
     } else {
       const currentArray = filters[filterType] as any[];
       updateFilter(
@@ -100,8 +122,15 @@ export default function FiltersBar({
     }
   };
 
-  // Generate tags options from available tags
-  const tagsOptions: MultiSelectOption<string>[] = availableTags.map(tag => ({
+  const handleStatusToggle = (status: 'active' | 'completed' | 'archived') => {
+    const newStatus = filters.status.includes(status)
+      ? filters.status.filter((s) => s !== status)
+      : [...filters.status, status];
+    updateFilter('status', newStatus);
+  };
+
+  // Generate tags options: User Tags only (Status moved to Sort & Status dropdown)
+  const userTagsOptions: MultiSelectOption<string>[] = availableTags.map(tag => ({
     value: tag,
     label: tag,
   }));
@@ -122,7 +151,7 @@ export default function FiltersBar({
     count: filterCounts.types[option.value] || 0,
   }));
 
-  const tagsWithCounts = tagsOptions.map(option => ({
+  const tagsWithCounts = userTagsOptions.map(option => ({
     ...option,
     count: filterCounts.tags[option.value] || 0,
   }));
@@ -133,6 +162,7 @@ export default function FiltersBar({
     filters.valves.length +
     filters.cylinders.length +
     filters.tags.length +
+    filters.status.length +
     (filters.search ? 1 : 0);
 
   const hasActiveFilters = activeFiltersCount > 0 || filters.sortBy !== 'date';
@@ -198,18 +228,103 @@ export default function FiltersBar({
           className="w-[160px]"
         />
 
-        {/* Sort Dropdown */}
-        <Select value={filters.sortBy} onValueChange={(value: any) => updateFilter('sortBy', value)}>
-          <SelectTrigger className="h-10 w-[160px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Modified (newest)</SelectItem>
-            <SelectItem value="created">Created (oldest)</SelectItem>
-            <SelectItem value="name">Name (A-Z)</SelectItem>
-            <SelectItem value="cylinders">Cylinders</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Combined Sort & Status Dropdown */}
+        <Popover open={sortStatusOpen} onOpenChange={setSortStatusOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={sortStatusOpen}
+              className="h-10 w-[160px] justify-between"
+            >
+              <span className="truncate">
+                {filters.status.length > 0
+                  ? `Status (${filters.status.length})`
+                  : filters.sortBy === 'date'
+                  ? 'Sort & Status'
+                  : filters.sortBy === 'created'
+                  ? 'Created (oldest)'
+                  : 'Name (A-Z)'}
+              </span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[240px] p-0" align="start">
+            <div className="p-2">
+              {/* Sort By Section */}
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1">
+                Sort By
+              </div>
+              <div className="space-y-1">
+                {[
+                  { value: 'date' as const, label: 'Modified (newest)' },
+                  { value: 'created' as const, label: 'Created (oldest)' },
+                  { value: 'name' as const, label: 'Name (A-Z)' },
+                ].map((option) => (
+                  <div
+                    key={option.value}
+                    className={cn(
+                      'flex items-center gap-2 px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer',
+                      filters.sortBy === option.value && 'bg-accent'
+                    )}
+                    onClick={() => updateFilter('sortBy', option.value)}
+                  >
+                    <span className="text-sm flex-1">{option.label}</span>
+                    {filters.sortBy === option.value && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Separator */}
+              <div className="my-2 border-t border-border" />
+
+              {/* Status Section */}
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1">
+                Status
+              </div>
+              <div className="space-y-1">
+                {STATUS_OPTIONS.map((option) => (
+                  <div
+                    key={option.value}
+                    className="flex items-center gap-2 px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer"
+                    onClick={() => handleStatusToggle(option.value as 'active' | 'completed' | 'archived')}
+                  >
+                    <Checkbox
+                      checked={filters.status.includes(option.value as 'active' | 'completed' | 'archived')}
+                      onCheckedChange={() => handleStatusToggle(option.value as 'active' | 'completed' | 'archived')}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span className="text-sm flex-1">
+                      {option.label}
+                      <span className="text-xs text-muted-foreground ml-1.5">
+                        ({filterCounts.status[option.value] || 0})
+                      </span>
+                    </span>
+                    {filters.status.includes(option.value as 'active' | 'completed' | 'archived') && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Clear Status button */}
+              {filters.status.length > 0 && (
+                <div className="mt-2 pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => updateFilter('status', [])}
+                  >
+                    Clear status filters
+                  </Button>
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Active Filters Row */}
@@ -266,6 +381,19 @@ export default function FiltersBar({
               onClick={() => removeFilter('tags', tag)}
             >
               {tag}
+              <X className="h-3 w-3" />
+            </Badge>
+          ))}
+
+          {/* Status filters */}
+          {filters.status.map((status) => (
+            <Badge
+              key={status}
+              variant="secondary"
+              className="gap-1 cursor-pointer hover:bg-secondary/80"
+              onClick={() => removeFilter('status', status)}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
               <X className="h-3 w-3" />
             </Badge>
           ))}

@@ -581,6 +581,57 @@
 
   **➡️ Phase 2.8 COMPLETE! All requested features implemented!**
 
+### 2.9 UI/UX Improvements - Card Layout & Status Filter (2-3 часа) ✅
+
+**Date:** 6 ноября 2025
+
+- [X] **Fix: Uneven card heights (jagged grid)** ✅
+  - ❌ **Problem:** Cards with varying content heights create jagged grid appearance
+  - ✅ **Solution:** Added `auto-rows-fr` to grid and `h-full` to Card component
+  - ✅ **Implementation:** All cards in same row now have equal height
+  - File: `frontend/src/pages/HomePage.tsx` (grid layout)
+  - File: `frontend/src/components/ui/card.tsx` (h-full, reduced spacing)
+  - Commit: [pending]
+
+- [X] **Fix: Status badge overflow on long project names** ✅
+  - ❌ **Problem:** "Completed" badge overflows on long names (e.g., "Dudarev Motorsport")
+  - ✅ **Solution:** Moved Status and Error badges to calculations count row
+  - ✅ **Implementation:** Badges now on fixed-length row, no more overflow
+  - File: `frontend/src/components/projects/ProjectCard.tsx`
+  - Commit: [pending]
+
+- [X] **Feature: Combined Sort & Status dropdown (Variant 2)** ✅
+  - ✅ **Implementation:** Single dropdown with two sections: "Sort By" and "Status"
+  - ✅ **Sort options:** Modified (newest), Created (oldest), Name (A-Z)
+  - ✅ **Status options:** Active, Completed, Archived (checkboxes with counts)
+  - ✅ **Smart button:** Shows "Status (2)" when filters active, otherwise sort method
+  - ✅ **Benefits:** Prevents Tags dropdown clutter, logical grouping
+  - File: `frontend/src/components/projects/FiltersBar.tsx` (combined dropdown)
+  - File: `frontend/src/utils/projectFilters.ts` (separate status filter logic)
+  - File: `frontend/src/pages/HomePage.tsx` (status field in filters)
+  - Commit: [pending]
+
+- [X] **UI Polish: Card spacing & visual hierarchy** ✅
+  - ✅ **Reduced spacing:** py-6→py-4, gap-6→gap-4, space-y-3→space-y-2, px-6→px-4
+  - ✅ **Visual hierarchy:** Added font-bold to project title
+  - ✅ **Responsive grid:** 1/2/3/4 columns for mobile/tablet/desktop/wide
+  - ✅ **Result:** 9→12-16 projects visible on screen
+  - File: `frontend/src/components/ui/card.tsx`
+  - File: `frontend/src/components/projects/ProjectCard.tsx`
+  - Commit: [pending]
+
+- [X] **Phase 2.9 Sign-off (Vladimir):** ✅
+  **✅ UI/UX Improvements Complete:**
+  1. Card heights теперь равные (no jagged grid) ✅
+  2. Status badges не переполняются (moved to calculations row) ✅
+  3. Combined Sort & Status dropdown (Variant 2) работает ✅
+  4. Spacing оптимизирован (12-16 projects visible) ✅
+  5. Visual hierarchy улучшена (bold titles) ✅
+  6. Responsive layout работает (mobile/tablet/desktop/wide) ✅
+  7. TypeScript компиляция успешна ✅
+
+  **➡️ Phase 2.9 COMPLETE! Dashboard UI polished to "iPhone quality"!**
+
 ---
 
 ## 🚀 Phase 3: Polish & Testing (Неделя 3)
