@@ -243,13 +243,10 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 - **[CHANGELOG.md](CHANGELOG.md)** - история изменений, версии
 
 **Техническая документация:**
-- **[docs/architecture.md](docs/architecture.md)** - архитектура системы, data flow, паттерны
+- **[docs/architecture.md](docs/architecture.md)** - полная архитектура (включает API, chart presets, parsers guide, data flow, паттерны)
 - **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly documentation о старых программах
-- **[docs/chart-presets.md](docs/chart-presets.md)** - документация по 6 пресетам графиков
-- **[docs/api.md](docs/api.md)** - API документация, endpoints
 - **[docs/setup.md](docs/setup.md)** - детальная установка, зависимости, запуск
 - **[docs/troubleshooting.md](docs/troubleshooting.md)** - решение проблем
-- **[docs/parsers-guide.md](docs/parsers-guide.md)** - руководство по добавлению парсеров
 
 **Форматы файлов и параметры:**
 - **[docs/file-formats/README.md](docs/file-formats/README.md)** - обзор всех форматов (.det, .pou)
@@ -258,10 +255,11 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 
 **Architecture Decision Records:**
 - **[docs/decisions/](docs/decisions/)** - ADRs (WHY decisions, not WHAT)
-- **[docs/decisions/001-det-file-parsing.md](docs/decisions/001-det-file-parsing.md)** - парсинг .det (первая колонка служебная)
-- **[docs/decisions/002-multi-format-support.md](docs/decisions/002-multi-format-support.md)** - Registry pattern для парсеров
+- **[docs/decisions/001-det-file-format.md](docs/decisions/001-det-file-format.md)** - парсинг .det (первая колонка служебная)
+- **[docs/decisions/002-pou-file-format.md](docs/decisions/002-pou-file-format.md)** - поддержка .pou файлов и Parser Registry
 - **[docs/decisions/003-color-palette-engineering-style.md](docs/decisions/003-color-palette-engineering-style.md)** - цветовая палитра графиков
 - **[docs/decisions/004-engmod4t-suite-documentation.md](docs/decisions/004-engmod4t-suite-documentation.md)** - AI-friendly документация для EngMod4T Suite
+- **[docs/decisions/005-prt-parser-metadata-separation.md](docs/decisions/005-prt-parser-metadata-separation.md)** - .prt парсер и разделение auto/manual metadata
 
 **Управление проектом:**
 - **[scripts/README.md](scripts/README.md)** - документация shell скриптов (start, stop, status)
@@ -283,7 +281,7 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 - [ ] Протестировал результат
 - [ ] Отметил `[X]` в roadmap (если roadmap предоставлен)
 - [ ] Обновил [CHANGELOG.md](CHANGELOG.md) если значительные изменения
-- [ ] Обновил документацию (architecture.md, chart-presets.md, ADRs) если нужно
+- [ ] Обновил документацию ([architecture.md](docs/architecture.md), ADRs) если нужно
 
 ---
 

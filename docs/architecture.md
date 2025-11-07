@@ -1,7 +1,146 @@
-# Архитектура проекта
+# Engine Results Viewer - Полная архитектура
 
-**Дата:** 21 октября 2025
-**Версия:** 1.0
+**Версия:** 2.0.0
+**Дата:** 7 ноября 2025
+**Статус:** Production-ready (v2.0.0, Phase 3 complete)
+
+---
+
+## 📑 Содержание
+
+- [О проекте](#о-проекте)
+- [Статус реализации](#статус-реализации)
+- [Общая схема](#общая-схема)
+- [Архитектурные принципы](#архитектурные-принципы)
+- [Backend архитектура](#backend-архитектура)
+  - [Слои и модули](#слои-и-модули)
+  - [Parser System (Registry Pattern)](#parser-system-registry-pattern)
+  - [Metadata System](#metadata-system)
+  - [File Scanner](#file-scanner)
+  - [API Routes](#api-routes)
+- [Frontend архитектура](#frontend-архитектура)
+  - [HomePage Dashboard](#homepage-dashboard)
+  - [ProjectPage Visualization](#projectpage-visualization)
+  - [Components](#components)
+  - [Hooks](#hooks)
+  - [State Management](#state-management)
+- [Data Flow](#data-flow)
+- [Chart Implementation](#chart-implementation)
+- [Форматы данных](#форматы-данных)
+- [Accessibility (WCAG 2.1 AA)](#accessibility-wcag-21-aa)
+- [Responsive Design](#responsive-design)
+- [Технологический стек](#технологический-стек)
+- [Безопасность](#безопасность)
+- [Масштабируемость](#масштабируемость)
+
+---
+
+## О проекте
+
+**Engine Results Viewer** - современное веб-приложение для визуализации результатов инженерных расчётов двигателей внутреннего сгорания (ДВС).
+
+**Цель:** Замена Desktop UI программы Post4T (15 лет разработки на Delphi/VBA) на современный Web интерфейс с сохранением workflow и данных.
+
+**Контекст:**
+- **EngMod4T Suite** = DAT4T (pre-processor) → EngMod4T (simulation) → Post4T (visualization)
+- **Engine Viewer** заменяет ТОЛЬКО Post4T (визуализация)
+- DAT4T и EngMod4T остаются без изменений (продолжают генерировать .det/.pou/.prt файлы)
+
+**Масштаб:**
+- ~50 проектов в год
+- ~15 типов файлов для визуализации
+- Источник данных: `test-data/` (dev), `C:/4Stroke/` (production, Windows)
+
+**Платформа:**
+- Development: macOS + VS Code + Claude Code
+- Production: Windows (все production машины)
+- Тестирование: Chrome/Safari (macOS), Chrome (Windows)
+
+---
+
+## Статус реализации
+
+**Версия:** v2.0.0 (Phase 3 complete, 6 ноября 2025)
+
+### ✅ Реализовано (~30% от Post4T feature parity)
+
+**Backend (100%):**
+- ✅ REST API (GET /api/projects, GET /api/project/:id)
+- ✅ Parser Registry Pattern (.det, .pou, .prt форматы)
+- ✅ File Scanner (recursive directory scan, auto metadata)
+- ✅ Metadata System (auto from .prt + manual editable)
+- ✅ CRUD API для metadata
+- ✅ Error handling, validation
+
+**HomePage Dashboard (100%):**
+- ✅ FiltersBar (Type, Intake, Cylinders, Valves, Combined Sort/Status dropdown)
+- ✅ ProjectCard (displayName, badges, status, calculation count, client, date)
+- ✅ MetadataDialog (edit manual metadata, view auto metadata readonly)
+- ✅ File watcher (auto-reload on changes)
+- ✅ Error detection (parser errors → red badge on card)
+- ✅ Project count statistics
+- ✅ Responsive grid (1/2/3 columns)
+- ✅ Skeleton loaders (iPhone quality UX)
+
+**ProjectPage Visualization (20%):**
+- ✅ 6 Chart Presets (Power/Torque, Pressure/Temp, MEP, Critical, Efficiency, Custom)
+- ✅ Cross-project comparison (1 primary + up to 4 comparison projects)
+- ✅ CalculationSelector (max 5 calculations, color-coded)
+- ✅ DataTable (with CSV/Excel export)
+- ✅ Peak values display (max power, max torque, at RPM)
+- ✅ Units conversion (SI/American/HP systems)
+- ✅ Chart export (PNG/SVG)
+- ✅ Responsive layout (mobile/tablet/desktop)
+
+**Accessibility & Polish (100%):**
+- ✅ WCAG 2.1 AA compliance
+- ✅ Keyboard navigation (focus indicators, tab order, ESC handling)
+- ✅ Screen reader support (ARIA labels, semantic HTML, live regions)
+- ✅ Touch targets ≥44×44px
+- ✅ Color contrast verification
+- ✅ Animations & transitions (professional, smooth)
+
+### ❌ Не реализовано (~70% от Post4T)
+
+**Отсутствующие функции Post4T:**
+
+1. **Thermo/Gasdynamic Traces** (9 типов)
+   - Pressure traces (cylinder, intake, exhaust)
+   - Temperature traces (cylinder, intake, exhaust)
+   - Mass flow traces
+   - Heat release rate
+   - Valve lift profiles
+
+2. **PV-Diagrams** (Pressure-Volume diagrams)
+   - Indicated PV-diagram
+   - Pumping loop visualization
+   - Per-cylinder PV-diagrams
+
+3. **Turbo Maps** (Turbocharger performance)
+   - Compressor map overlay
+   - Turbine map overlay
+   - Operating point visualization
+
+4. **Noise Analysis**
+   - Sound pressure level (SPL) prediction
+   - Frequency spectrum
+   - Order analysis
+
+5. **Advanced Data Tables**
+   - Per-calculation summary tables
+   - Statistical analysis (min/max/avg)
+   - Export to specific formats (proprietary)
+
+6. **Settings Panel**
+   - Units conversion selector (currently hardcoded SI)
+   - Color palette customization
+   - Chart preferences
+
+7. **File Format Support**
+   - ~12 trace file types (`.tr*` extensions)
+   - Advanced parameter sets
+
+**Замечание:** Эти функции будут реализованы по мере необходимости. Текущие 30% покрывают основной workflow (Performance & Efficiency analysis).
 
 ---
 
@@ -9,21 +148,22 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         USER (Browser)                           │
+│                      USER (Browser - Chrome/Safari)              │
+│                   http://localhost:5173 (dev)                    │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
                             │ HTTP requests
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FRONTEND (React + Vite)                       │
+│                  FRONTEND (React 18 + Vite)                      │
 │                   http://localhost:5173                          │
 │                                                                  │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐       │
 │  │   HomePage   │   │ ProjectPage  │   │  Components  │       │
 │  │              │   │              │   │              │       │
-│  │ - List       │   │ - Charts     │   │ - Chart      │       │
-│  │   projects   │   │ - Selector   │   │ - Table      │       │
-│  │              │   │ - Table      │   │ - Cards      │       │
+│  │ - Filters    │   │ - Charts     │   │ - Cards      │       │
+│  │ - Cards      │   │ - Selector   │   │ - Dialogs    │       │
+│  │ - Metadata   │   │ - Table      │   │ - Shared UI  │       │
 │  └──────┬───────┘   └──────┬───────┘   └──────────────┘       │
 │         │                  │                                     │
 │         └──────────────────┴─────────────────┐                 │
@@ -32,19 +172,18 @@
 │                        │     API Client (axios)       │         │
 │                        │  - getProjects()             │         │
 │                        │  - getProject(id)            │         │
-│                        │  - getConfig()               │         │
+│                        │  - updateMetadata()          │         │
 │                        └──────────────┬───────────────┘         │
 └────────────────────────────────────────┼───────────────────────┘
                                          │
-                                         │ /api/* requests
-                                         │ (Vite proxy)
+                                         │ /api/* → proxy
                                          ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   BACKEND (Node.js + Express)                    │
+│                 BACKEND (Node.js + Express)                      │
 │                   http://localhost:3000                          │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────┐      │
-│  │                   Express Server                      │      │
+│  │                 Express Server                        │      │
 │  │  - CORS middleware                                    │      │
 │  │  - JSON parsing                                       │      │
 │  │  - Error handling                                     │      │
@@ -53,65 +192,88 @@
 │          ┌──────────────────┼──────────────────┐               │
 │          │                  │                  │               │
 │  ┌───────▼────────┐ ┌──────▼──────┐  ┌───────▼────────┐      │
-│  │  GET /health   │ │ GET /api/   │  │ GET /api/      │      │
-│  │                │ │  projects   │  │  project/:id   │      │
+│  │  GET /health   │ │ GET /api/   │  │ POST /api/     │      │
+│  │                │ │  projects   │  │  projects/:id/ │      │
+│  │                │ │             │  │  metadata      │      │
 │  └────────────────┘ └──────┬──────┘  └───────┬────────┘      │
 │                            │                  │               │
 │                    ┌───────▼──────────────────▼────────┐      │
 │                    │      Services Layer               │      │
 │                    │  - fileScanner.js                 │      │
-│                    │  - fileParser.js                  │      │
-│                    │  - config.js                      │      │
+│                    │  - ParserRegistry                 │      │
+│                    │  - metadataService.js             │      │
 │                    └───────┬───────────────────────────┘      │
 │                            │                                    │
 └────────────────────────────┼────────────────────────────────────┘
                              │
-                             │ Read files
+                             │ Read/Write files
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      FILE SYSTEM                                 │
 │                                                                  │
-│  ┌──────────────┐        ┌──────────────┐                      │
-│  │ config.yaml  │        │  test-data/  │                      │
-│  │              │        │              │                      │
-│  │ - Settings   │        │ - *.det      │                      │
-│  │ - Colors     │        │   files      │                      │
-│  │ - Paths      │        │              │                      │
-│  └──────────────┘        └──────────────┘                      │
+│  test-data/ (DEV) или C:/4Stroke/ (PRODUCTION)                  │
+│  ├── BMW M42.prt            ← READ-ONLY! (В КОРНЕ)              │
+│  ├── 4_Cyl_ITB.prt          ← READ-ONLY! (В КОРНЕ)              │
+│  ├── [~50 проектов/год]     ← Каждый проект = .prt в корне     │
+│  │                                                               │
+│  ├── BMW M42/               ← Папка результатов проекта         │
+│  │   ├── BMW M42.det        ← LIMITED WRITE (только markers!)   │
+│  │   └── BMW M42.pou        ← LIMITED WRITE (только markers!)   │
+│  │                                                               │
+│  ├── 4_Cyl_ITB/                                                  │
+│  │   ├── 4_Cyl_ITB.det                                          │
+│  │   └── 4_Cyl_ITB.pou                                          │
+│  │                                                               │
+│  └── config.yaml            ← Application configuration          │
+│                                                                  │
+│  METADATA STORAGE (отдельно от C:/4Stroke/):                    │
+│  engine-viewer/.metadata/   ← В КОРНЕ проекта Engine Viewer!    │
+│      ├── bmw-m42.json       ← Combined auto + manual            │
+│      └── 4-cyl-itb.json                                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**Ключевые изменения в v2.0:**
+- **Вложенные папки:** Каждый проект в своей папке (BMW M42/, 4_Cyl_ITB/)
+- **Метаданные:** `.prt` (в корне C:/4Stroke/) → auto metadata, `.metadata/*.json` (в engine-viewer/.metadata/) → combined (auto + manual)
+- **File Scanner:** Recursive scan с поддержкой вложенных директорий
+- **ВАЖНО:**
+  - .prt файлы ВСЕГДА в корне C:/4Stroke/ (или test-data/)
+  - .det/.pou файлы в папках проектов
+  - .metadata/*.json в корне engine-viewer/ (НЕ в C:/4Stroke/!)
 
 ---
 
 ## Архитектурные принципы
 
-### 1. Separation of Concerns (Разделение ответственности)
+### 1. Separation of Concerns
 
 **Backend:**
-- **Routes** - только HTTP маршрутизация
-- **Services** - вся бизнес-логика
-- **Config** - загрузка конфигурации
+- **Routes** - HTTP маршрутизация
+- **Services** - бизнес-логика
+- **Parsers** - парсинг файлов (Registry Pattern)
 
 **Frontend:**
-- **Pages** - композиция компонентов для страниц
+- **Pages** - композиция компонентов
 - **Components** - переиспользуемые UI элементы
-- **Hooks** - бизнес-логика и state management
-- **API** - HTTP клиент, изолирован от компонентов
+- **Hooks** - бизнес-логика и state
+- **API** - HTTP клиент (изолирован)
 
-### 2. Single Responsibility (Одна ответственность)
+### 2. Single Responsibility
 
 Каждый модуль делает ОДНУ вещь:
-- `fileParser.js` - ТОЛЬКО парсинг .det файлов
-- `fileScanner.js` - ТОЛЬКО сканирование папки
-- `ChartComponent` - ТОЛЬКО отображение графика
+- `detParser.js` - парсинг .det файлов
+- `fileScanner.js` - сканирование папки
+- `ChartPreset1` - график Power & Torque
 
 ### 3. DRY (Don't Repeat Yourself)
 
-- Общие компоненты вынесены в `components/`
+- Общие компоненты: `components/shared/`
 - Custom hooks для переиспользуемой логики
 - Утилиты в `utils/`
+- Единый TypeScript types: `shared-types.ts` (backend + frontend)
 
-### 4. Layered Architecture (Слоистая архитектура)
+### 4. Layered Architecture
 
 ```
 Presentation Layer (UI)
@@ -121,11 +283,17 @@ Business Logic Layer (Services, Hooks)
 Data Access Layer (API, File System)
 ```
 
+### 5. Registry Pattern (Parsers)
+
+- Централизованное управление парсерами
+- Легко добавлять новые форматы
+- Автоматическое определение формата файла
+
 ---
 
 ## Backend архитектура
 
-### Слои
+### Слои и модули
 
 ```
 ┌─────────────────────────────────────────┐
@@ -135,7 +303,7 @@ Data Access Layer (API, File System)
 │  │      Express Routes              │  │
 │  │  - routes/projects.js            │  │
 │  │  - routes/data.js                │  │
-│  │  - routes/config.js              │  │
+│  │  - routes/metadata.js            │  │
 │  └──────────────────────────────────┘  │
 └───────────────┬─────────────────────────┘
                 │
@@ -146,9 +314,9 @@ Data Access Layer (API, File System)
 │                                         │
 │  ┌──────────────────────────────────┐  │
 │  │         Services                 │  │
-│  │  - fileScanner.scanFolder()      │  │
-│  │  - fileParser.parse()            │  │
-│  │  - config.load()                 │  │
+│  │  - fileScanner.js                │  │
+│  │  - metadataService.js            │  │
+│  │  - ParserRegistry                │  │
 │  └──────────────────────────────────┘  │
 └───────────────┬─────────────────────────┘
                 │
@@ -159,55 +327,448 @@ Data Access Layer (API, File System)
 │                                         │
 │  ┌──────────────────────────────────┐  │
 │  │      File System                 │  │
-│  │  - test-data/*.det               │  │
+│  │  - test-data/**/*.det            │  │
+│  │  - .metadata/*.json              │  │
 │  │  - config.yaml                   │  │
 │  └──────────────────────────────────┘  │
 └─────────────────────────────────────────┘
 ```
-
-### Модули
 
 **server.js** - Express сервер
 - Инициализация Express
 - Middleware (CORS, JSON parsing)
 - Подключение routes
 - Error handling
-- Запуск сервера
+- Запуск сервера (port 3000)
 
 **config.js** - Загрузка конфигурации
 - Чтение config.yaml
 - Парсинг YAML → JavaScript объект
-- Валидация конфигурации
-- Экспорт настроек
+- Валидация настроек
+- Экспорт для приложения
 
-**fileScanner.js** - Сканирование файлов
-- Сканирование папки test-data/
-- Фильтрация по расширению (.det)
-- Получение метаданных (дата изменения, размер)
-- Возврат списка файлов
+---
 
-**fileParser.js** - Парсинг .det файлов
-- Чтение файла
-- Парсинг строки метаданных (тип двигателя, цилиндры)
-- Парсинг названий колонок
-- **⚠️ Учёт служебной первой колонки!**
-- Парсинг данных расчётов (маркеры $1, $2, ...)
-- Валидация данных
-- Возврат структурированного JSON
+### Parser System (Registry Pattern)
 
-**routes/projects.js** - API для списка проектов
-- GET /api/projects
-- Вызов fileScanner
-- Формирование ответа
+**Архитектура парсеров:**
 
-**routes/data.js** - API для данных проекта
-- GET /api/project/:id
-- Вызов fileParser
-- Формирование ответа
+```
+backend/src/parsers/
+├── index.js                    # Единый API, регистрация
+├── registry/
+│   └── FormatRegistry.js       # Registry pattern
+├── common/
+│   ├── calculationMarker.js    # Парсинг $ маркеров
+│   └── formatDetector.js       # Автоопределение формата
+└── formats/
+    ├── detParser.js            # .det формат (24 параметра)
+    ├── pouParser.js            # .pou формат (71 параметр)
+    └── prtParser.js            # .prt формат (metadata)
+```
 
-**routes/config.js** - API для конфигурации
-- GET /api/config - получить конфигурацию
-- POST /api/config - обновить конфигурацию
+**FormatRegistry.js** - Централизованное управление парсерами:
+
+```javascript
+class FormatRegistry {
+  constructor() {
+    this.parsers = new Map();
+  }
+
+  register(format, ParserClass) {
+    this.parsers.set(format, ParserClass);
+  }
+
+  getParser(format) {
+    return new (this.parsers.get(format))();
+  }
+
+  hasParser(format) {
+    return this.parsers.has(format);
+  }
+}
+
+export const globalRegistry = new FormatRegistry();
+```
+
+**parsers/index.js** - Точка входа:
+
+```javascript
+import { globalRegistry } from './registry/FormatRegistry.js';
+import { DetParser } from './formats/detParser.js';
+import { PouParser } from './formats/pouParser.js';
+import { PrtParser } from './formats/prtParser.js';
+
+// Регистрируем парсеры при импорте
+globalRegistry.register('det', DetParser);
+globalRegistry.register('pou', PouParser);
+globalRegistry.register('prt', PrtParser);
+
+export async function parseEngineFile(filePath) {
+  const format = detectFormat(filePath);
+  const parser = globalRegistry.getParser(format);
+  return await parser.parse(filePath);
+}
+```
+
+**Универсальный EngMod4T формат:**
+
+⚠️ **КРИТИЧЕСКИ ВАЖНО:** Все ~15 типов файлов создаются ОДНОЙ программой (EngMod4T, Delphi 7) → **единый формат!**
+
+```javascript
+// ✅ ПРАВИЛЬНО для ВСЕХ файлов EngMod4T
+const columns = line.trim().split(/\s+/);      // Множественные пробелы
+const dataColumns = columns.slice(1);          // Пропускаем служебную колонку
+const values = dataColumns.map(parseFloat);
+
+// ❌ НЕПРАВИЛЬНО
+const values = line.split(',');       // НЕТ! Это не CSV
+const values = line.split(/\t+/);     // НЕТ! Это не табы
+```
+
+**Характеристики всех файлов:**
+- Fixed-width ASCII text (НЕ CSV, НЕ tab-separated)
+- Разделитель: множественные пробелы
+- **Первая колонка ВСЕГДА служебная** (пропускать через `slice(1)`)
+- Выравнивание: числа справа, пробелы слева
+
+---
+
+### Metadata System
+
+**Назначение:** Автоматическое извлечение метаданных из `.prt` + ручное редактирование пользователем.
+
+**Архитектура:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           FILE SYSTEM (.prt files - Auto metadata source)        │
+│  test-data/BMW M42.prt  ← В КОРНЕ test-data/!                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Parse .prt
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRT PARSER                                    │
+│  backend/src/parsers/formats/prtParser.js                        │
+│                                                                  │
+│  Extract:                                                        │
+│  - cylinders, bore, stroke, CR, maxRPM                          │
+│  - type (NA/Turbo/Supercharged)                                 │
+│  - intakeSystem (ITB vs IM) ← Line 276 detection                │
+│  - exhaustSystem (4-2-1, 4-1, tri-y) ← Regex patterns           │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Auto metadata
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              METADATA SERVICE                                    │
+│  backend/src/services/metadataService.js                         │
+│                                                                  │
+│  updateAutoMetadata(id, autoData)                               │
+│  - Updates "auto" section ONLY                                  │
+│  - Preserves "manual" section                                   │
+│                                                                  │
+│  updateManualMetadata(id, manualData)                           │
+│  - Updates "manual" section ONLY                                │
+│  - Preserves "auto" section                                     │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             │ Save to disk
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│         METADATA STORAGE (.metadata/*.json)                      │
+│                                                                  │
+│  .metadata/bmw-m42.json:                                         │
+│  {                                                               │
+│    "version": "1.0",                                             │
+│    "id": "bmw-m42",                                              │
+│    "displayName": "BMW M42",                                     │
+│    "auto": {           ← READ-ONLY (from .prt)                  │
+│      "cylinders": 4,                                             │
+│      "type": "NA",                                               │
+│      "intakeSystem": "ITB",                                      │
+│      "exhaustSystem": "4-2-1",                                   │
+│      "bore": 84, "stroke": 81, "CR": 10.5                       │
+│    },                                                            │
+│    "manual": {         ← USER-EDITABLE                          │
+│      "description": "Track build",                               │
+│      "client": "Ivan Petrov",                                    │
+│      "tags": ["bmw", "itb"],                                     │
+│      "status": "active",                                         │
+│      "notes": "Dyno tested 01.11.2025"                           │
+│    }                                                             │
+│  }                                                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**TypeScript Interface:**
+
+```typescript
+export interface AutoMetadata {
+  cylinders: number;
+  type: 'NA' | 'Turbo' | 'Supercharged';
+  configuration: 'inline' | 'V' | 'boxer' | 'W';
+  bore: number;                    // mm
+  stroke: number;                  // mm
+  compressionRatio: number;
+  maxPowerRPM: number;
+  intakeSystem: 'ITB' | 'IM';      // ITB = Individual throttle bodies
+  exhaustSystem: '4-2-1' | '4-1' | 'tri-y' | 'custom';
+}
+
+export interface ManualMetadata {
+  description?: string;
+  client?: string;
+  tags?: string[];
+  status?: 'active' | 'completed' | 'archived';
+  notes?: string;
+  color?: string;  // HEX color
+}
+
+export interface ProjectMetadata {
+  version: '1.0';
+  id: string;
+  displayName?: string;
+  auto?: AutoMetadata;      // From .prt
+  manual: ManualMetadata;   // User-editable
+  created: string;          // ISO 8601
+  modified: string;         // ISO 8601
+}
+```
+
+**Intake System Detection (Line 276 of .prt):**
+
+```javascript
+// Line 276: "N throttles - with no airboxes" → ITB
+// Line 276: "N throttle - with a common airbox or plenum" → IM
+
+if (line.includes('with no airboxes')) {
+  intakeSystem = 'ITB';
+} else if (line.includes('with a common airbox or plenum')) {
+  intakeSystem = 'IM';
+}
+```
+
+**Exhaust System Parsing (Regex patterns):**
+
+```javascript
+// "4into2into1 manifold" → "4-2-1"
+// "4into1 manifold" → "4-1"
+// "tri-y manifold" → "tri-y"
+
+const patterns = [
+  { regex: /(\d+)into(\d+)into(\d+)/i, format: '$1-$2-$3' },
+  { regex: /(\d+)into(\d+)/i, format: '$1-$2' },
+  { regex: /tri-y/i, format: 'tri-y' }
+];
+```
+
+**Rules:**
+- ✅ Auto metadata: Read-only in frontend, updated on file scan
+- ✅ Manual metadata: User-editable, preserved during auto updates
+- ✅ Re-parsing .prt: Auto section updated, manual preserved
+- ✅ Data integrity: Explicit separation prevents data loss
+
+**См. также:** [ADR 005: .prt Parser and Metadata Separation](decisions/005-prt-parser-metadata-separation.md)
+
+---
+
+### File Scanner
+
+**fileScanner.js** - Сканирование директории с проектами:
+
+**Новая архитектура v2.0:**
+- ✅ Recursive directory scan (вложенные папки)
+- ✅ Ищет .det/.pou/.prt в подпапках
+- ✅ Автоматически парсит .prt для auto metadata
+- ✅ Объединяет auto + manual metadata
+- ✅ Возвращает список ProjectInfo
+
+**Структура файловой системы (РЕАЛЬНАЯ, v2.0):**
+
+```
+engine-viewer/                  ← PROJECT ROOT
+├── .metadata/                  ← Metadata storage (в корне проекта!)
+│   ├── bmw-m42.json            ← Combined auto + manual
+│   ├── 4-cyl-itb.json
+│   └── vesta-16-im.json
+├── test-data/                  ← Data folder (dev) или C:/4Stroke/ (production)
+│   ├── BMW M42.prt             ← Auto metadata source (В КОРНЕ data folder!)
+│   ├── 4_Cyl_ITB.prt           ← Auto metadata source (В КОРНЕ data folder!)
+│   ├── Vesta 1.6 IM.prt        ← Auto metadata source (В КОРНЕ data folder!)
+│   ├── BMW M42/                ← Project results folder
+│   │   ├── BMW M42.det
+│   │   └── BMW M42.pou
+│   ├── 4_Cyl_ITB/              ← Project results folder
+│   │   ├── 4_Cyl_ITB.det
+│   │   └── 4_Cyl_ITB.pou
+│   └── Vesta 1.6 IM/           ← Project results folder
+│       └── Vesta 1.6 IM.det
+├── backend/
+├── frontend/
+└── config.yaml
+```
+
+**ВАЖНО:**
+- .prt файлы ВСЕГДА в корне data folder (test-data/ или C:/4Stroke/), НЕ в папках проектов!
+- .metadata/ находится в КОРНЕ engine-viewer/, НЕ внутри test-data/ или C:/4Stroke/!
+
+**Recursive Scan Logic:**
+
+```javascript
+async function scanDirectory(dirPath) {
+  const projects = [];
+
+  for (const entry of await fs.readdir(dirPath, { withFileTypes: true })) {
+    if (entry.isDirectory() && !entry.name.startsWith('.')) {
+      // Рекурсивное сканирование подпапки
+      const subProjects = await scanDirectory(
+        path.join(dirPath, entry.name)
+      );
+      projects.push(...subProjects);
+    } else if (entry.isFile()) {
+      // Проверка на .det или .pou файл
+      if (entry.name.endsWith('.det') || entry.name.endsWith('.pou')) {
+        const projectId = normalizeFilenameToId(entry.name);
+
+        // Поиск соответствующего .prt файла (В КОРНЕ test-data/)
+        const prtFileName = entry.name.replace(/\.(det|pou)$/, '.prt');
+        const prtFullPath = path.join('./test-data', prtFileName);  // В корне!
+
+        if (await fileExists(prtFullPath)) {
+          // Парсинг .prt для auto metadata
+          const autoMetadata = await prtParser.parse(prtFullPath);
+          await metadataService.updateAutoMetadata(projectId, autoMetadata);
+        }
+
+        // Чтение combined metadata
+        const metadata = await metadataService.readMetadata(projectId);
+
+        projects.push({
+          id: projectId,
+          name: entry.name,
+          path: path.join(dirPath, entry.name),
+          metadata
+        });
+      }
+    }
+  }
+
+  return projects;
+}
+```
+
+---
+
+### API Routes
+
+**routes/projects.js** - GET /api/projects
+
+```javascript
+router.get('/api/projects', async (req, res) => {
+  const { cylinders, type, intake, exhaust, status, search, sortBy } = req.query;
+
+  // Scan all projects (recursive)
+  const projects = await fileScanner.scanFolder('./test-data');
+
+  // Apply filters
+  let filtered = projects;
+
+  if (cylinders) {
+    filtered = filtered.filter(p =>
+      p.metadata?.auto?.cylinders === parseInt(cylinders)
+    );
+  }
+
+  if (type) {
+    filtered = filtered.filter(p =>
+      p.metadata?.auto?.type === type
+    );
+  }
+
+  if (intake) {
+    filtered = filtered.filter(p =>
+      p.metadata?.auto?.intakeSystem === intake
+    );
+  }
+
+  if (status) {
+    filtered = filtered.filter(p =>
+      p.metadata?.manual?.status === status
+    );
+  }
+
+  if (search) {
+    const searchLower = search.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.displayName.toLowerCase().includes(searchLower) ||
+      p.metadata?.manual?.client?.toLowerCase().includes(searchLower) ||
+      p.metadata?.manual?.tags?.some(tag =>
+        tag.toLowerCase().includes(searchLower)
+      )
+    );
+  }
+
+  // Apply sorting
+  if (sortBy === 'name') {
+    filtered.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  } else if (sortBy === 'date') {
+    filtered.sort((a, b) =>
+      new Date(b.modified) - new Date(a.modified)
+    );
+  } else if (sortBy === 'cylinders') {
+    filtered.sort((a, b) =>
+      (a.metadata?.auto?.cylinders || 0) - (b.metadata?.auto?.cylinders || 0)
+    );
+  }
+
+  res.json({ projects: filtered });
+});
+```
+
+**routes/data.js** - GET /api/project/:id
+
+```javascript
+router.get('/api/project/:id', async (req, res) => {
+  const { id } = req.params;
+
+  // Find project file
+  const projects = await fileScanner.scanFolder('./test-data');
+  const project = projects.find(p => p.id === id);
+
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  // Parse data file (auto-detect format)
+  const data = await parseEngineFile(project.path);
+
+  // Merge with metadata
+  const metadata = await metadataService.readMetadata(id);
+
+  res.json({
+    ...data,
+    metadata
+  });
+});
+```
+
+**routes/metadata.js** - POST /api/projects/:id/metadata
+
+```javascript
+router.post('/api/projects/:id/metadata', async (req, res) => {
+  const { id } = req.params;
+  const manualData = req.body;
+
+  // Update ONLY manual section (preserves auto)
+  await metadataService.updateManualMetadata(id, manualData);
+
+  res.json({ success: true });
+});
+```
+
+**См. также:** [docs/api.md](api.md) - Complete API documentation
 
 ---
 
@@ -227,10 +788,11 @@ Data Access Layer (API, File System)
 │                 │                       │
 │  ┌──────────────▼───────────────────┐  │
 │  │        Components                │  │
-│  │  - ProjectCard.tsx               │  │
-│  │  - ChartPreset1.tsx              │  │
-│  │  - DataTable.tsx                 │  │
-│  │  - CalculationSelector.tsx       │  │
+│  │  - ProjectCard                   │  │
+│  │  - FiltersBar                    │  │
+│  │  - MetadataDialog                │  │
+│  │  - ChartPreset1-6                │  │
+│  │  - DataTable                     │  │
 │  └──────────────────────────────────┘  │
 └───────────────┬─────────────────────────┘
                 │
@@ -243,15 +805,13 @@ Data Access Layer (API, File System)
 │  │        Custom Hooks              │  │
 │  │  - useProjects()                 │  │
 │  │  - useProjectData(id)            │  │
-│  │  - useSelectedCalculations()     │  │
-│  │  - useChartPreset()              │  │
+│  │  - useMetadata()                 │  │
+│  │  - useFilters()                  │  │
 │  └──────────────┬───────────────────┘  │
 │                 │                       │
 │  ┌──────────────▼───────────────────┐  │
-│  │          Utils                   │  │
-│  │  - formatDate()                  │  │
-│  │  - exportToCSV()                 │  │
-│  │  - exportToPNG()                 │  │
+│  │     State Management             │  │
+│  │  - Zustand (Comparison refs)     │  │
 │  └──────────────────────────────────┘  │
 └───────────────┬─────────────────────────┘
                 │
@@ -262,609 +822,21 @@ Data Access Layer (API, File System)
 │                                         │
 │  ┌──────────────────────────────────┐  │
 │  │        API Client                │  │
-│  │  - api/client.ts                 │  │
+│  │  - frontend/src/api/client.ts    │  │
 │  │  - getProjects()                 │  │
 │  │  - getProject(id)                │  │
-│  │  - getConfig()                   │  │
+│  │  - updateMetadata()              │  │
 │  └──────────────────────────────────┘  │
 └─────────────────────────────────────────┘
 ```
 
-### Модули
-
-**App.tsx** - Главный компонент
-- React Router setup
-- Routes (/, /:projectId)
-- Layout
-
-**pages/HomePage.tsx** - Главная страница
-- Отображение списка проектов
-- Использование useProjects() hook
-- Обработка состояний (loading, error, empty)
-
-**pages/ProjectPage.tsx** - Страница проекта
-- Загрузка данных проекта
-- Селектор расчётов
-- Пресеты графиков
-- Таблица данных
-
-**components/** - Переиспользуемые компоненты
-- `ProjectCard` - карточка проекта
-- `MetadataDialog` - диалог редактирования метаданных
-- `TagInput` - компонент для управления тегами
-- `LoadingSpinner` - индикатор загрузки
-- `ErrorMessage` - сообщение об ошибке
-- `EmptyState` - пустое состояние
-- **Visualization components:**
-  - `CalculationSelector` - выбор расчётов (макс 5) с checkbox и цветными индикаторами
-  - `ChartPreset1` - график "Мощность и момент" (dual Y-axes) ✅
-  - `ChartPreset2` - в разработке
-  - `ChartPreset3` - в разработке
-  - `ChartPreset4` - в разработке
-  - `DataTable` - таблица данных (в разработке)
-
-**hooks/** - Custom hooks
-- `useProjects` - загрузка списка проектов ✅
-- `useProjectData` - загрузка данных проекта по ID (с race condition handling) ✅
-- `useSelectedCalculations` - управление выбранными расчётами (макс 5) ✅
-- `useChartPreset` - управление пресетами (в разработке)
-
-**api/client.ts** - API клиент
-- Axios instance
-- HTTP методы (GET, POST)
-- Обработка ошибок
-- Типизация запросов/ответов
-
-**types/** - TypeScript типы
-- `EngineMetadata` - метаданные двигателя
-- `DataPoint` - точка данных
-- `Calculation` - расчёт
-- `ProjectData` - данные проекта
-- UI типы
-
-**utils/** - Утилиты
-- `formatDate` - форматирование дат
-- `exportToCSV` - экспорт в CSV
-- `exportToExcel` - экспорт в Excel
-- `exportToPNG` - экспорт графика в PNG
-
 ---
 
-## Поток данных
+### HomePage Dashboard
 
-### GET /api/projects
+**Назначение:** Список проектов с фильтрацией, сортировкой и редактированием метаданных.
 
-```
-User clicks on HomePage
-         ↓
-HomePage.tsx calls useProjects()
-         ↓
-useProjects() calls api.getProjects()
-         ↓
-api.getProjects() → GET /api/projects
-         ↓
-Backend routes/projects.js
-         ↓
-fileScanner.scanFolder()
-         ↓
-Read test-data/ folder
-         ↓
-Return list of .det files
-         ↓
-Response: [{id, name, date, calculations}, ...]
-         ↓
-useProjects() updates state
-         ↓
-HomePage.tsx re-renders with data
-```
-
-### GET /api/project/:id
-
-```
-User clicks "Открыть" on ProjectCard
-         ↓
-Navigate to /project/:id
-         ↓
-ProjectPage.tsx calls useProjectData(id)
-         ↓
-useProjectData() calls api.getProject(id)
-         ↓
-api.getProject(id) → GET /api/project/:id
-         ↓
-Backend routes/data.js
-         ↓
-fileParser.parse(filename)
-         ↓
-Read test-data/Vesta 1.6 IM.det
-         ↓
-Parse file:
-  - Line 1: metadata (cylinders, type)
-  - Line 2: column names
-  - Line 3+: calculations ($1, $2) and data
-         ↓
-Return ProjectData JSON
-         ↓
-Response: {project_name, engine, parameters, calculations}
-         ↓
-useProjectData() updates state
-         ↓
-ProjectPage.tsx re-renders with data
-         ↓
-Charts display data
-```
-
----
-
-## Форматы данных
-
-### ProjectData (JSON)
-
-```typescript
-interface ProjectData {
-  project_name: string;           // "Vesta 1.6 IM"
-  file_path: string;              // "test-data/Vesta 1.6 IM.det"
-  modified_date: string;          // ISO 8601 date
-  engine: {
-    type: string;                 // "NATUR"
-    cylinders: number;            // 4
-  };
-  parameters: string[];           // ["RPM", "P-Av", "Torque", ...]
-  calculations: Calculation[];    // [...]
-}
-
-interface Calculation {
-  id: string;                     // "$1", "$2", "$3"
-  name: string;                   // "$1", "$2", "$3"
-  data: DataPoint[];              // [...]
-}
-
-interface DataPoint {
-  RPM: number;
-  "P-Av": number;
-  Torque: number;
-  "PurCyl( 1)": number;
-  // ... все остальные параметры
-}
-```
-
----
-
-## Metadata System (Project Metadata v1.0) 🔧
-
-**Status:** ✅ Implemented (Phase 1 complete, Nov 2025)
-
-**Purpose:** Автоматическое извлечение метаданных двигателя из `.prt` файлов и разделение на read-only (auto) и user-editable (manual) секции.
-
-### Архитектура Metadata System
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FILE SYSTEM (.prt files)                      │
-│  test-data/                                                      │
-│    ├── BMW M42/BMW M42.prt                                       │
-│    ├── 4_Cyl_ITB/4_Cyl_ITB.prt                                   │
-│    └── Vesta 1.6 IM/Vesta 1.6 IM.prt                             │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Parse .prt files
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    PRT PARSER                                    │
-│  backend/src/parsers/formats/prtParser.js                        │
-│                                                                  │
-│  Extract:                                                        │
-│  - Engine specs (cylinders, bore, stroke, CR, maxRPM)           │
-│  - Type detection (NA/Turbo/Supercharged)                       │
-│  - Intake system (ITB vs IM)                                    │
-│  - Exhaust pattern (4-2-1, 4-1, tri-y, etc.)                    │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Auto metadata
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  METADATA SERVICE                                │
-│  backend/src/services/metadataService.js                         │
-│                                                                  │
-│  updateAutoMetadata(projectId, autoData)                        │
-│  - Reads existing .metadata/{id}.json                            │
-│  - Updates "auto" section ONLY                                  │
-│  - Preserves "manual" section                                   │
-│  - Saves merged metadata                                         │
-│                                                                  │
-│  updateManualMetadata(projectId, manualData)                    │
-│  - Reads existing .metadata/{id}.json                            │
-│  - Updates "manual" section ONLY                                │
-│  - Preserves "auto" section                                     │
-│  - Saves merged metadata                                         │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             │ Save to disk
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              METADATA STORAGE (.metadata/*.json)                 │
-│                                                                  │
-│  .metadata/bmw-m42.json:                                         │
-│  {                                                               │
-│    "version": "1.0",                                             │
-│    "id": "bmw-m42",                                              │
-│    "displayName": "BMW M42",                                     │
-│    "auto": {                                                     │
-│      "cylinders": 4,                                             │
-│      "type": "NA",                                               │
-│      "configuration": "inline",                                  │
-│      "intakeSystem": "ITB",                                      │
-│      "exhaustSystem": "4-2-1"                                    │
-│    },                                                            │
-│    "manual": {                                                   │
-│      "client": "Ivan Petrov",                                    │
-│      "tags": ["track-build"],                                    │
-│      "notes": "Dyno tested"                                      │
-│    }                                                             │
-│  }                                                               │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Metadata Structure v1.0
-
-**TypeScript Interface:**
-```typescript
-export interface AutoMetadata {
-  cylinders: number;                    // From .prt: number of cylinders
-  type: 'NA' | 'Turbo' | 'Supercharged'; // Engine type
-  configuration: EngineConfiguration;   // inline, V, boxer, etc.
-  bore: number;                         // Bore (mm)
-  stroke: number;                       // Stroke (mm)
-  compressionRatio: number;             // Compression ratio
-  maxPowerRPM: number;                  // Max power RPM
-  intakeSystem: IntakeSystem;           // ITB or IM
-  exhaustSystem: ExhaustSystem;         // 4-2-1, 4-1, tri-y, etc.
-}
-
-export interface ManualMetadata {
-  description?: string;     // User description
-  client?: string;          // Client name
-  tags?: string[];          // User tags
-  status?: ProjectStatus;   // active, completed, archived
-  notes?: string;           // User notes
-  color?: string;           // Project color (hex)
-}
-
-export interface ProjectMetadata {
-  version: '1.0';
-  id: string;
-  displayName?: string;
-  auto?: AutoMetadata;      // Read-only (from .prt)
-  manual: ManualMetadata;   // User-editable
-  created: string;          // ISO 8601
-  modified: string;         // ISO 8601
-}
-```
-
-### .prt Parser Implementation
-
-**File:** `backend/src/parsers/formats/prtParser.js`
-
-**Parsing Logic:**
-
-1. **Engine Specs Extraction:**
-   ```javascript
-   // Line 1: Header with engine name
-   // Line 2-10: Engine specifications
-   // Line ~50: "Maximum power obtained at _____ rpm" → maxPowerRPM
-   // Line ~100: Bore, stroke, compression ratio
-   ```
-
-2. **Intake System Detection:**
-   ```javascript
-   // Line 276: "N throttles - with no airboxes" → ITB
-   // Line 276: "N throttle - with a common airbox or plenum" → IM
-
-   if (line.includes('with no airboxes')) {
-     intakeSystem = 'ITB';
-   } else if (line.includes('with a common airbox or plenum')) {
-     intakeSystem = 'IM';
-   }
-   ```
-
-3. **Exhaust System Parsing:**
-   ```javascript
-   // Regex patterns for exhaust configuration
-   // "4into2into1 manifold" → "4-2-1"
-   // "4into1 manifold" → "4-1"
-   // "tri-y manifold" → "tri-y"
-
-   const patterns = [
-     { regex: /(\d+)into(\d+)into(\d+)/i, format: '$1-$2-$3' },
-     { regex: /(\d+)into(\d+)/i, format: '$1-$2' },
-     { regex: /tri-y/i, format: 'tri-y' }
-   ];
-   ```
-
-4. **Type Detection:**
-   ```javascript
-   // Based on turbocharger/supercharger count
-   if (turbochargers > 0) {
-     engineType = 'Turbo';
-   } else if (superchargers > 0) {
-     engineType = 'Supercharged';
-   } else {
-     engineType = 'NA';
-   }
-   ```
-
-**Registry Integration:**
-```javascript
-// backend/src/parsers/index.js
-import { PrtParser } from './formats/prtParser.js';
-import { globalRegistry } from './registry/FormatRegistry.js';
-
-globalRegistry.register('prt', PrtParser);
-```
-
-### Metadata Service
-
-**File:** `backend/src/services/metadataService.js`
-
-**Key Functions:**
-
-```javascript
-/**
- * Update auto metadata (from .prt parser)
- * - Preserves manual section
- * - Overwrites auto section
- */
-export async function updateAutoMetadata(projectId, autoData) {
-  const metadataPath = `.metadata/${projectId}.json`;
-
-  // Read existing metadata
-  let metadata = await readMetadata(projectId);
-
-  // Update auto section only
-  metadata.auto = autoData;
-  metadata.modified = new Date().toISOString();
-
-  // Save (preserves manual section)
-  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-}
-
-/**
- * Update manual metadata (from user)
- * - Preserves auto section
- * - Overwrites manual section
- */
-export async function updateManualMetadata(projectId, manualData) {
-  const metadataPath = `.metadata/${projectId}.json`;
-
-  // Read existing metadata
-  let metadata = await readMetadata(projectId);
-
-  // Update manual section only
-  metadata.manual = { ...metadata.manual, ...manualData };
-  metadata.modified = new Date().toISOString();
-
-  // Save (preserves auto section)
-  await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-}
-```
-
-### File Scanner Integration
-
-**File:** `backend/src/services/fileScanner.js`
-
-**Recursive Directory Scanning:**
-```javascript
-async function scanDirectory(dirPath) {
-  const projects = [];
-
-  for (const entry of await fs.readdir(dirPath, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      // Recursively scan subdirectories
-      const subProjects = await scanDirectory(path.join(dirPath, entry.name));
-      projects.push(...subProjects);
-    } else if (entry.isFile()) {
-      // Check if .det or .pou file
-      if (entry.name.endsWith('.det') || entry.name.endsWith('.pou')) {
-        // Check for corresponding .prt file
-        const prtPath = entry.name.replace(/\.(det|pou)$/, '.prt');
-        const prtFullPath = path.join(dirPath, prtPath);
-
-        if (await fileExists(prtFullPath)) {
-          // Parse .prt for auto metadata
-          const autoMetadata = await prtParser.parse(prtFullPath);
-
-          // Update auto metadata (preserves manual)
-          await metadataService.updateAutoMetadata(projectId, autoMetadata);
-        }
-
-        projects.push({
-          id: projectId,
-          name: entry.name,
-          path: path.join(dirPath, entry.name),
-          metadata: await metadataService.readMetadata(projectId)
-        });
-      }
-    }
-  }
-
-  return projects;
-}
-```
-
-**New Directory Structure Support:**
-```
-test-data/
-  ├── BMW M42/
-  │   ├── BMW M42.det
-  │   ├── BMW M42.pou
-  │   └── BMW M42.prt          ← Auto metadata source
-  ├── 4_Cyl_ITB/
-  │   ├── 4_Cyl_ITB.det
-  │   ├── 4_Cyl_ITB.pou
-  │   └── 4_Cyl_ITB.prt
-  └── .metadata/
-      ├── bmw-m42.json         ← Combined auto + manual
-      └── 4-cyl-itb.json
-```
-
-### API Updates
-
-**GET /api/projects** - List projects with filters
-
-```javascript
-// routes/projects.js
-router.get('/api/projects', async (req, res) => {
-  const { cylinders, type, intake, exhaust } = req.query;
-
-  // Scan all projects
-  const projects = await fileScanner.scanFolder('./test-data');
-
-  // Apply filters on metadata.auto.*
-  let filtered = projects;
-
-  if (cylinders) {
-    filtered = filtered.filter(p => p.metadata?.auto?.cylinders === parseInt(cylinders));
-  }
-
-  if (type) {
-    filtered = filtered.filter(p => p.metadata?.auto?.type === type);
-  }
-
-  if (intake) {
-    filtered = filtered.filter(p => p.metadata?.auto?.intakeSystem === intake);
-  }
-
-  if (exhaust) {
-    filtered = filtered.filter(p => p.metadata?.auto?.exhaustSystem === exhaust);
-  }
-
-  res.json(filtered);
-});
-```
-
-**POST /api/projects/:id/metadata** - Update manual metadata only
-
-```javascript
-// routes/metadata.js
-router.post('/api/projects/:id/metadata', async (req, res) => {
-  const { id } = req.params;
-  const manualData = req.body;
-
-  // Update ONLY manual section (preserves auto)
-  await metadataService.updateManualMetadata(id, manualData);
-
-  res.json({ success: true });
-});
-```
-
-### Data Flow: Metadata Population
-
-```
-1. User adds new .det + .prt files to test-data/
-
-2. Backend scans test-data/ (recursive)
-   ↓
-   fileScanner.scanFolder()
-
-3. For each .det file found, check for .prt sibling
-   ↓
-   const prtPath = detPath.replace('.det', '.prt')
-
-4. If .prt exists, parse it
-   ↓
-   prtParser.parse(prtPath)
-
-5. Extract auto metadata from .prt
-   ↓
-   { cylinders, type, intake, exhaust, ... }
-
-6. Update auto metadata in .metadata/{id}.json
-   ↓
-   metadataService.updateAutoMetadata(id, autoData)
-
-7. Merge with existing manual metadata
-   ↓
-   metadata = { auto: {...}, manual: {...} }
-
-8. Return merged metadata to frontend
-   ↓
-   GET /api/projects → ProjectInfo[] with metadata
-```
-
-### Migration from Legacy Metadata
-
-**Script:** `backend/scripts/migrate-metadata.js`
-
-**Purpose:** Migrate old metadata files (no auto/manual split) to v1.0 structure
-
-```javascript
-async function migrateMetadata(oldMetadataPath) {
-  const oldMetadata = JSON.parse(await fs.readFile(oldMetadataPath, 'utf-8'));
-
-  const newMetadata = {
-    version: '1.0',
-    id: oldMetadata.id,
-    displayName: oldMetadata.displayName,
-
-    // Empty auto section (will be filled on first scan)
-    auto: {},
-
-    // Move user data to manual section
-    manual: {
-      description: oldMetadata.description,
-      client: oldMetadata.client,
-      tags: oldMetadata.tags,
-      status: oldMetadata.status,
-      notes: oldMetadata.notes,
-      color: oldMetadata.color
-    },
-
-    created: oldMetadata.created || new Date().toISOString(),
-    modified: new Date().toISOString()
-  };
-
-  await fs.writeFile(oldMetadataPath, JSON.stringify(newMetadata, null, 2));
-}
-```
-
-### Rules and Principles
-
-**Auto Metadata:**
-- ✅ Source of truth: `.prt` file
-- ✅ Read-only in frontend
-- ✅ Updated automatically on file scan
-- ✅ Never manually edited by user
-
-**Manual Metadata:**
-- ✅ Source of truth: `.metadata/{id}.json`
-- ✅ User-editable in frontend
-- ✅ Preserved during auto metadata updates
-- ✅ Created/updated via API
-
-**Re-parsing .prt files:**
-- When: File scanner runs (app startup, manual rescan)
-- Result: Auto section updated, manual section preserved
-- Safety: Explicit separation prevents accidental data loss
-
-**Benefits:**
-- ✅ Automation: ~5 min/project × 50 projects = 4 hours/year saved
-- ✅ Accuracy: 100% accurate auto metadata (source of truth)
-- ✅ Smart filters: Dashboard filters work automatically
-- ✅ Data integrity: Manual data never lost during re-parse
-
-**See Also:**
-- [ADR 005: .prt Parser and Metadata Separation](decisions/005-prt-parser-metadata-separation.md)
-- [PROJECT-METADATA-DASHBOARD-SPEC.md](../PROJECT-METADATA-DASHBOARD-SPEC.md)
-- [docs/file-formats/prt-format.md](file-formats/prt-format.md)
-
----
-
-## Frontend Components (Phase 2) ✅
-
-**Status:** ✅ Implemented (Phase 2.1-2.7 complete, Nov 2025)
-
-**Purpose:** Dashboard UI для управления проектами с метаданными, фильтрами и редактированием.
-
-### HomePage Dashboard Architecture
+**Layout:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -874,8 +846,8 @@ async function migrateMetadata(oldMetadataPath) {
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │  FiltersBar (frontend/src/components/projects/FiltersBar)  │ │
 │  │                                                             │ │
-│  │  Search: [_____________]  [Type ▾] [Intake ▾] [Exhaust ▾]  │ │
-│  │          [Cylinders ▾]   [Sort: Date ▾]  [Clear all]       │ │
+│  │  Search: [_____________]  [Type ▾] [Intake ▾] [Cyl ▾]      │ │
+│  │          [Valves ▾]  [Sort: Date/Name/Cyl ▾] [Clear]       │ │
 │  │                                                             │ │
 │  │  Active filters: [Type: NA ×] [Intake: ITB ×]              │ │
 │  │  Showing 8 of 50 projects                                  │ │
@@ -886,729 +858,624 @@ async function migrateMetadata(oldMetadataPath) {
 │  │                                                            │  │
 │  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐      │  │
 │  │  │ ProjectCard  │ │ ProjectCard  │ │ ProjectCard  │      │  │
-│  │  │              │ │              │ │              │      │  │
-│  │  │ BMW M42    ⚙│ │ Vesta 1.6  ✓│ │ 4 Cyl ITB  📦│      │  │
-│  │  │ ID: bmw-m42  │ │ ID: vesta..  │ │ ID: 4-cyl..  │      │  │
 │  │  │ ────────────│ │ ────────────│ │ ────────────│      │  │
-│  │  │ 📊 24 calcs  │ │ 📊 18 calcs  │ │ 📊 32 calcs  │      │  │
-│  │  │ [NA][4][ITB] │ │ [NA][4][IM]  │ │ [NA][4][ITB] │      │  │
-│  │  │ 👤 BMW AG    │ │ 👤 (No clnt) │ │ 👤 Personal  │      │  │
-│  │  │ 📅 05 Nov 25 │ │ 📅 03 Nov 25 │ │ 📅 01 Nov 25 │      │  │
-│  │  │ [✏️] [Open]   │ │ [✏️] [Open]   │ │ [✏️] [Open]   │      │  │
+│  │  │ BMW M42    🔧│ │ Vesta 1.6  ✓│ │ 4 Cyl ITB  📦│      │  │
+│  │  │ ID: bmw-m42  │ │              │ │              │      │  │
+│  │  │ ────────────│ │              │ │              │      │  │
+│  │  │ 📊 24 calcs  │ │              │ │              │      │  │
+│  │  │ [NA][4][ITB] │ │              │ │              │      │  │
+│  │  │ 👤 BMW AG    │ │              │ │              │      │  │
+│  │  │ 📅 05 Nov 25 │ │              │ │              │      │  │
+│  │  │ [✏️Edit][Open]│ │              │ │              │      │  │
 │  │  └──────────────┘ └──────────────┘ └──────────────┘      │  │
 │  └───────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │  MetadataDialog (when Edit clicked)                        │ │
-│  │  frontend/src/components/projects/MetadataDialog.tsx       │ │
-│  │                                                             │ │
-│  │  [×] Edit Metadata                                          │ │
-│  │  Project: BMW M42.det                                       │ │
-│  │  ─────────────────────────────────────────────────────     │ │
-│  │  📋 Project Identity                                        │ │
-│  │     ID (readonly): bmw-m42                                  │ │
-│  │     Display Name: [BMW M42________________]                 │ │
-│  │                                                             │ │
-│  │  🔧 Engine Configuration (read-only from .prt)             │ │
-│  │     Cylinders: 4    Type: NA                               │ │
-│  │     Config: inline  Intake: ITB                            │ │
-│  │     Exhaust: 4-2-1  Bore×Stroke: 84×81mm                   │ │
-│  │                                                             │ │
-│  │  ✏️ Manual Metadata (user-editable)                        │ │
-│  │     Description: [___________________________]              │ │
-│  │     Client: [BMW AG_____________________]                   │ │
-│  │     Tags: [track-build] [dyno-tested]                       │ │
-│  │     Status: [Active ▾]                                      │ │
-│  │     Color: [🔵] 🔵🟢🟠🔴🟣🔷                                │ │
-│  │     Notes: [Dyno tested on 01.11.2025_______]               │ │
-│  │                                                             │ │
-│  │                            [Cancel] [Save]                  │ │
-│  └────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### ProjectCard Component
+**Components:**
 
-**File:** `frontend/src/components/projects/ProjectCard.tsx`
+**ProjectCard.tsx** - Карточка проекта:
+- DisplayName (large, bold)
+- ID (small, muted, readonly)
+- Status badge (Active/Completed/Archived - top-right corner)
+- Calculations count
+- Engine badges (Type/Cylinders/Intake)
+  - Color coding: NA=green, Turbo=blue, Supercharged=purple
+  - ITB=orange, IM=gray
+- Client name (ALWAYS visible, critical field)
+- Modified date
+- Edit button (opens MetadataDialog)
+- Open button (navigate to ProjectPage)
 
-**Design Principles:**
-- Show ONLY essential information on card (user feedback: "Configuration and Exhaust are irrelevant")
-- Client field ALWAYS visible (user feedback: "CRITICAL information")
-- Status badge prominent (user feedback: "очень важный лейбл")
+**Design principle:** Show ONLY essential info (user feedback: "Exhaust system irrelevant on card")
 
-**Layout Structure:**
-```typescript
-<Card>
-  <CardHeader>
-    <DisplayName>BMW M42</DisplayName>        // Large, bold
-    <ID>ID: bmw-m42</ID>                      // Small, muted
-    <StatusBadge>Active</StatusBadge>         // Top-right corner
-  </CardHeader>
+**FiltersBar.tsx** - Фильтры и поиск:
+- Search input (filters by displayName, client, tags)
+- Multi-select dropdowns:
+  - Type (NA/Turbo/Supercharged)
+  - Intake (ITB/IM)
+  - Cylinders (3/4/6/8/10/12)
+  - Valves (8/12/16/24)
+- Combined Sort & Status dropdown (user feedback: "Combined dropdown better UX")
+  - Sort: Date/Name/Cylinders
+  - Status: Active/Completed/Archived
+- Clear filters button
+- Active filters chips (removable)
+- Count display ("Showing X of Y projects")
 
-  <CardContent>
-    <CalculationsCount>24 calculations</CalculationsCount>
+**UI consistency:**
+- All dropdowns: `w-[160px]` width
+- All dropdowns: `h-10` height (40px)
+- Search input: `flex-1 min-w-[200px]`
 
-    <EngineBadge>                              // ONLY essential badges
-      [NA]     // Type (blue/green/purple)
-      [4 Cyl]  // Cylinders (gray)
-      [ITB]    // Intake (orange/gray)
-    </EngineBadge>
-
-    <Client>BMW AG</Client>                    // ALWAYS show (or "(No client)")
-    <Date>Modified: 05 Nov 2025</Date>
-  </CardContent>
-
-  <CardFooter>
-    <EditButton />      // Icon button
-    <OpenButton />      // Full width button
-  </CardFooter>
-</Card>
-```
-
-**Status Badge Configuration:**
-```typescript
-const statusConfig = {
-  active: {
-    label: 'Active',
-    icon: Wrench,
-    color: 'bg-blue-600 text-white hover:bg-blue-700'
-  },
-  completed: {
-    label: 'Completed',
-    icon: CheckCircle,
-    color: 'bg-green-600 text-white hover:bg-green-700'
-  },
-  archived: {
-    label: 'Archived',
-    icon: Archive,
-    color: 'bg-gray-600 text-white hover:bg-gray-700'
-  }
-};
-```
-
-**EngineBadge Color Coding:**
-- **Type:** NA (green), Turbo (blue), Supercharged (purple)
-- **Intake:** ITB (orange), IM (gray)
-- **Cylinders:** Gray (neutral)
-
-### MetadataDialog Component
-
-**File:** `frontend/src/components/projects/MetadataDialog.tsx`
-
-**Form Management:**
-- **Library:** react-hook-form + zod validation
-- **State:** Fully controlled components (important: Select uses `value={field.value}`, NOT `defaultValue`)
-- **API:** Flat payload structure `{displayName, description, client, tags, status, notes, color}`
-
-**Sections:**
-```typescript
-1. Project Identity
-   - ID (readonly, disabled input)
-   - Display Name (editable)
-
-2. Engine Configuration (if .prt parsed)
-   - Cylinders, Type, Configuration (all readonly)
-   - Intake, Exhaust, Bore×Stroke, CR, Max RPM (all readonly)
-   - Source: metadata.auto (from .prt file)
-
-3. Manual Metadata (user-editable)
-   - Description, Client, Tags
-   - Status (Active/Completed/Archived)
-   - Color (hex picker + preset buttons)
-   - Notes (textarea)
-```
-
-**Critical Bug Fixes (Nov 6, 2025):**
-1. **Status Select not controlled:** Changed from `defaultValue` to `value={field.value}` to make it fully controlled by react-hook-form
-2. **Payload structure mismatch:** Backend expects flat structure, was sending nested `{manual: {...}}` - fixed to send flat `{displayName, client, ...}`
-
-### FiltersBar Component
-
-**File:** `frontend/src/components/projects/FiltersBar.tsx`
-
-**Filter Types:**
-```typescript
-interface ProjectFiltersState {
-  type: Array<'NA' | 'Turbo' | 'Supercharged'>;  // Multi-select
-  intake: IntakeSystem[];                         // Multi-select
-  exhaust: ExhaustSystem[];                       // Multi-select
-  cylinders: number[];                            // Multi-select
-  search: string;                                 // Text input
-  sortBy: 'date' | 'name' | 'cylinders';         // Single select
-}
-```
-
-**Filter Logic (AND):**
-```typescript
-// All filters must match (AND logic)
-if (filters.type.length > 0) {
-  filtered = filtered.filter(p =>
-    filters.type.includes(p.metadata?.auto?.type)
-  );
-}
-
-if (filters.search) {
-  filtered = filtered.filter(p =>
-    p.displayName.toLowerCase().includes(filters.search) ||
-    p.metadata?.manual?.client?.toLowerCase().includes(filters.search)
-  );
-}
-```
-
-**UI Consistency:**
-- All filters: `w-[160px]` width (unified after user feedback)
-- All filters: `h-10` height (40px, unified after user feedback)
-- Search input: flexible width with `flex-1 min-w-[200px]`
-
-### Data Flow: Edit Metadata
+**MetadataDialog.tsx** - Редактирование метаданных:
 
 ```
-1. User clicks Edit button on ProjectCard
-   ↓
-   HomePage.handleEditProject(project)
-
-2. Open MetadataDialog with project data
-   ↓
-   <MetadataDialog open={true} project={project} />
-
-3. Form loads with existing metadata
-   ↓
-   useEffect: form.reset({
-     displayName: metadata?.displayName,
-     client: metadata?.manual?.client,
-     status: metadata?.manual?.status,
-     ...
-   })
-
-4. User edits fields (Status, Client, etc.)
-   ↓
-   react-hook-form tracks changes
-
-5. User clicks Save
-   ↓
-   onSubmit(values)
-
-6. Prepare flat payload
-   ↓
-   payload = {
-     displayName: values.displayName,
-     client: values.client,
-     status: values.status,
-     ...
-   }
-
-7. POST to Backend API
-   ↓
-   axios.post(`/api/projects/${id}/metadata`, payload)
-
-8. Backend updates .metadata/{id}.json
-   ↓
-   metadataService.updateManualMetadata(id, payload)
-   // Preserves auto section, updates manual section
-
-9. Success → Close dialog → Refetch projects
-   ↓
-   toast.success('Metadata saved')
-   onSuccess() → HomePage.refetch()
-
-10. ProjectCard updates with new data
-    ↓
-    New client name, status badge, etc. visible
+┌────────────────────────────────────────────────────────────┐
+│  [×] Edit Metadata                                          │
+│  Project: BMW M42.det                                       │
+│  ─────────────────────────────────────────────────────     │
+│  📋 Project Identity                                        │
+│     ID (readonly): bmw-m42                                  │
+│     Display Name: [BMW M42________________]                 │
+│                                                             │
+│  🔧 Engine Configuration (read-only from .prt)             │
+│     Cylinders: 4    Type: NA                               │
+│     Config: inline  Intake: ITB                            │
+│     Exhaust: 4-2-1  Bore×Stroke: 84×81mm                   │
+│                                                             │
+│  ✏️ Manual Metadata (user-editable)                        │
+│     Description: [___________________________]              │
+│     Client: [BMW AG_____________________]                   │
+│     Tags: [track-build] [dyno-tested] [+ Add]              │
+│     Status: [Active ▾]  (Active/Completed/Archived)        │
+│     Color: [🔵] 🔵🟢🟠🔴🟣🔷                                │
+│     Notes: [Dyno tested on 01.11.2025_______]               │
+│                                                             │
+│                            [Cancel] [Save]                  │
+└────────────────────────────────────────────────────────────┘
 ```
 
-### Loading States
+**Form management:**
+- Library: react-hook-form + zod validation
+- State: Fully controlled (Select uses `value={field.value}`, NOT `defaultValue`)
+- API payload: Flat structure `{displayName, client, tags, status, ...}`
 
-**Skeleton Cards:** Used during initial data fetch for "iPhone quality" UX
-```typescript
-if (loading) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {[...Array(6)].map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  );
-}
-```
+**Critical bug fixes (Nov 6, 2025):**
+1. Status Select: Changed to fully controlled (`value` instead of `defaultValue`)
+2. Payload structure: Backend expects flat, not nested `{manual: {...}}`
 
-**SkeletonCard:** `frontend/src/components/shared/SkeletonCard.tsx`
-- Animated pulse effect
-- Matches ProjectCard layout
-- Shows during: initial load, refetch after metadata save
-
-### Responsive Design
-
-**Grid Layout:**
-- Desktop (≥1024px): 3 columns
-- Tablet (768-1024px): 2 columns
-- Mobile (<768px): 1 column
-
-**Filter Layout:**
-- Desktop: All filters in single row with flex-wrap
-- Mobile: Filters wrap to multiple rows
-- Search input: Always takes available width with `flex-1`
-
-**Touch Targets:**
-- All buttons: minimum 44×44px (iOS HIG)
-- Filter dropdowns: h-10 (40px) for easy tapping
-- Card hover: Full card clickable area
-
-### See Also
-- [PROJECT-METADATA-DASHBOARD-ROADMAP.md](../PROJECT-METADATA-DASHBOARD-ROADMAP.md) - Phase 2.1-2.7 implementation details
-- [CHANGELOG.md](../CHANGELOG.md) - Bug fixes (2025-11-06)
-- Backend API: [routes/metadata.js](../../backend/src/routes/metadata.js)
-- Backend Service: [services/metadataService.js](../../backend/src/services/metadataService.js)
+**Loading states:**
+- Skeleton cards during initial fetch ("iPhone quality" UX)
+- Smooth transitions (no flash of empty state)
+- Optimistic updates on metadata save
 
 ---
 
-## Компоненты визуализации (Этап 7) ✅
-
-### Архитектура страницы ProjectPage
+### ProjectPage Visualization
 
 **Layout:**
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ProjectPage                                                │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐ │
-│  │  Project Info Card                                    │ │
-│  │  - Название проекта, тип двигателя, цилиндры         │ │
-│  │  - Badge с количеством расчётов                       │ │
-│  └───────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ┌─────────────────┐  ┌───────────────────────────────────┐ │
-│  │ CalculationSel  │  │  Visualization Area              │ │
-│  │                 │  │                                  │ │
-│  │ □ Calc 1 🔴     │  │  ChartPreset1                    │ │
-│  │ ☑ Calc 2 🟢     │  │  ┌────────────────────────────┐ │ │
-│  │ ☑ Calc 3 🔵     │  │  │  Power & Torque Chart      │ │ │
-│  │ □ Calc 4 🟡     │  │  │  (Dual Y-axes)             │ │ │
-│  │ □ Calc 5 🟣     │  │  │                            │ │ │
-│  │                 │  │  │  Left Y: Power (kW)        │ │ │
-│  │ Selected: 2/5   │  │  │  Right Y: Torque (N·m)     │ │ │
-│  │                 │  │  │  X: RPM                    │ │ │
-│  └─────────────────┘  │  │                            │ │ │
-│                        │  │  [DataZoom Slider]         │ │ │
-│                        │  └────────────────────────────┘ │ │
-│                        └───────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  ProjectPage                                                     │
+│                                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  Project Info Card                                        │  │
+│  │  - Name, Type, Cylinders, Calculations count              │  │
+│  │  - Peak Power: 115 kW @ 5500 RPM                          │  │
+│  │  - Peak Torque: 225 N·m @ 3800 RPM                        │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌─────────────────┐  ┌───────────────────────────────────────┐ │
+│  │ LeftPanel       │  │  Visualization Area                   │ │
+│  │ (Desktop)       │  │                                       │ │
+│  │                 │  │  Tabs: [Preset1] [Preset2] ... [Custom]│ │
+│  │ Calc Selector:  │  │                                       │ │
+│  │ ☑ Calc 1 🔴     │  │  ChartPreset1: Power & Torque         │ │
+│  │ ☑ Calc 2 🟢     │  │  ┌────────────────────────────┐       │ │
+│  │ □ Calc 3 🔵     │  │  │  [Interactive ECharts]     │       │ │
+│  │ □ Calc 4 🟡     │  │  │  - Dual Y-axes             │       │ │
+│  │ □ Calc 5 🟣     │  │  │  - DataZoom slider         │       │ │
+│  │                 │  │  │  - Legend                  │       │ │
+│  │ Selected: 2/5   │  │  │  - Tooltip                 │       │ │
+│  │                 │  │  └────────────────────────────┘       │ │
+│  │ Comparison:     │  │                                       │ │
+│  │ + Add project   │  │  DataTable (below chart)              │ │
+│  │                 │  │  - All parameters                     │ │
+│  │ [Hamburger on   │  │  - CSV/Excel export                   │ │
+│  │  mobile]        │  │                                       │ │
+│  └─────────────────┘  └───────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Custom Hooks для визуализации
+**6 Chart Presets:**
 
-**useProjectData.ts** - Загрузка данных проекта
+1. **Power & Torque** (Most important)
+   - P-Av (kW), Torque (N·m)
+   - Dual Y-axes
+   - Lines: Solid (power), Dashed (torque)
+
+2. **Pressure & Temperature** (Durability analysis)
+   - PCylMax (bar), TCylMax (°C), TUbMax (°C)
+   - Dual Y-axes
+   - Lines: Solid (pressure), Dashed (cyl temp), Dotted (exhaust temp)
+
+3. **MEP** (Efficiency analysis)
+   - FMEP, IMEP, BMEP, PMEP (all in bar)
+   - Single Y-axis
+   - Formula: `IMEP = BMEP + FMEP + PMEP`
+
+4. **Critical Values** ⚠️ (Engine destruction risk)
+   - PCylMax (bar), MaxDeg (detonation degree)
+   - Dual Y-axes
+   - **SAFETY CRITICAL:** Exceeding limits → engine damage
+
+5. **Volumetric Efficiency**
+   - PurCyl (cylinder charge purity), LamAv (lambda)
+   - Single Y-axis
+   - Breathing analysis
+
+6. **Custom** (User-defined parameters)
+   - Modal selector: Choose any parameters
+   - Category tabs: Performance/Pressure/Temperature/etc.
+   - Up to 6 parameters
+
+**См. также:** [docs/chart-presets.md](chart-presets.md) - Complete documentation
+
+**Cross-Project Comparison:**
+- 1 primary project + up to 4 comparison projects
+- CalculationReference pattern (Zustand store)
+- Color-coded: Primary=Red, Comp1=Green, Comp2=Blue, Comp3=Yellow, Comp4=Purple
+
+**DataTable:**
+- Shows all parameters (24 from .det or 71 from .pou)
+- Export: CSV, Excel (XLSX)
+- Sortable columns
+- Horizontal scroll on mobile
+
+---
+
+### Components
+
+**Shared components:**
+- `components/shared/LoadingSpinner.tsx`
+- `components/shared/ErrorMessage.tsx`
+- `components/shared/SkeletonCard.tsx`
+- `components/ui/*` - Radix UI primitives (Button, Dialog, Select, Checkbox, etc.)
+
+**Project components:**
+- `components/projects/ProjectCard.tsx`
+- `components/projects/FiltersBar.tsx`
+- `components/projects/MetadataDialog.tsx`
+
+**Visualization components:**
+- `components/visualization/CalculationSelector.tsx` - Select up to 5 calculations
+- `components/visualization/ChartPreset1.tsx` - Power & Torque
+- `components/visualization/ChartPreset2.tsx` - Pressure & Temperature
+- `components/visualization/ChartPreset3.tsx` - MEP
+- `components/visualization/ChartPreset4.tsx` - Critical Values
+- `components/visualization/ChartPreset5.tsx` - Volumetric Efficiency
+- `components/visualization/ChartPreset6.tsx` - Custom
+- `components/visualization/DataTable.tsx` - Tabular data
+
+---
+
+### Hooks
+
+**useProjects.ts** - Загрузка списка проектов:
 ```typescript
-// Функциональность:
-- Загрузка детальных данных проекта по ID из API
-- State management: project, loading, error
-- Race condition handling (ignore flag в useEffect)
-- Функция refetch для повторной загрузки
-- Автоматическая очистка при размонтировании
+const { projects, loading, error, refetch } = useProjects();
+```
 
-// Использование:
+**useProjectData.ts** - Загрузка данных проекта:
+```typescript
 const { project, loading, error, refetch } = useProjectData(id);
+// Race condition handling: ignore flag в useEffect
 ```
 
-**useSelectedCalculations.ts** - Управление выбором расчётов
+**useFilters.ts** - Управление фильтрами:
 ```typescript
-// Функциональность:
-- Управление массивом selectedIds (максимум 5 элементов)
-- toggleCalculation(id) - добавить/убрать расчёт из выбранных
-- Валидация максимального количества (MAX_CALCULATIONS = 5)
-- Хелперы: isSelected, isMaxReached, canSelect, count, maxCount
-- clearSelection() для сброса выбора
-
-// Использование:
-const {
-  selectedIds,
-  toggleCalculation,
-  isMaxReached,
-  count,
-  maxCount
-} = useSelectedCalculations();
+const { filters, setFilter, clearFilters, applyFilters } = useFilters();
 ```
 
-### Компоненты визуализации
-
-**CalculationSelector.tsx** - UI выбора расчётов
+**useMetadata.ts** - CRUD для метаданных:
 ```typescript
-// Функциональность:
-- Отображение списка расчётов с checkboxes (Radix UI)
-- Цветные индикаторы для каждого расчёта (синхронизированы с графиком)
-- Badge с счётчиком выбранных расчётов (2/5)
-- Автоматическое отключение checkboxes при достижении лимита
-- Tooltip предупреждение при превышении лимита
-
-// Props:
-- calculations: Calculation[]       // Все расчёты проекта
-- selectedIds: string[]              // Выбранные ID расчётов
-- onToggle: (id: string) => void     // Callback при клике
-- isMaxReached: boolean              // Достигнут ли лимит
-- maxCount: number                   // Максимум выборов (5)
-
-// Цвета из config.yaml:
-const CALCULATION_COLORS = [
-  '#ff6b6b',  // Красный
-  '#4ecdc4',  // Бирюзовый
-  '#45b7d1',  // Синий
-  '#f9ca24',  // Жёлтый
-  '#a29bfe',  // Фиолетовый
-];
-```
-
-**ChartPreset1.tsx** - График "Мощность и момент"
-```typescript
-// Функциональность:
-- Dual Y-axes chart (ECharts)
-- Левая ось: P-Av (Мощность в кВт)
-- Правая ось: Torque (Момент в Н·м)
-- Ось X: RPM (Обороты двигателя)
-- DataZoom slider для интерактивного зумирования
-- Tooltip с кастомным форматированием (цвет + единицы)
-- Legend для переключения видимости серий
-- Цветовая схема: синхронизирована с CalculationSelector
-
-// Props:
-- calculations: Calculation[]       // Все расчёты проекта
-- selectedIds: string[]             // Выбранные ID для отображения
-
-// Оптимизация:
-- useMemo для chartOption (пересчёт только при изменении selectedIds)
-- Фильтрация расчётов по selectedIds
-- Циклическое повторение цветов (index % colors.length)
-
-// Линии:
-- Мощность: сплошная линия (solid), привязана к yAxisIndex: 0
-- Момент: пунктирная линия (dashed), привязана к yAxisIndex: 1
-```
-
-**chartConfig.ts** - Базовая конфигурация ECharts
-```typescript
-// Экспорт функций:
-- getBaseChartConfig(): базовая конфигурация для всех графиков
-  - grid (отступы для dual Y-axes)
-  - tooltip (trigger: 'axis', custom formatter)
-  - legend (position: top center)
-  - dataZoom (slider + inside zoom)
-  - animation: true
-
-- createXAxis(name): создание оси X
-  - type: 'value'
-  - name: название (например "RPM")
-  - nameLocation: 'middle'
-  - axisLabel.formatter для тысяч (1000 → 1k)
-
-- createYAxis(name, position, color): создание оси Y
-  - type: 'value'
-  - position: 'left' | 'right'
-  - name: название (например "Мощность (кВт)")
-  - nameTextStyle.color: цвет оси
-  - splitLine: пунктирная линия сетки
-
-- getCalculationColor(index): получить цвет для расчёта
-  - Циклическое повторение из CALCULATION_COLORS
-  - index % 5 для бесконечного количества расчётов
-
-// Константы:
-const CALCULATION_COLORS: string[] = [...]  // 5 цветов из config.yaml
-```
-
-### Data Flow для визуализации
-
-```
-User открывает /project/:id
-         ↓
-ProjectPage.tsx рендерится
-         ↓
-useProjectData(id) вызывается
-         ↓
-api.getProject(id) → Backend
-         ↓
-Backend парсит .det файл
-         ↓
-Response: EngineProject JSON
-         ↓
-project state обновляется
-         ↓
-ProjectPage передаёт project.calculations в:
-  - CalculationSelector (для выбора)
-  - ChartPreset1 (для отображения)
-         ↓
-User выбирает расчёты через checkboxes
-         ↓
-toggleCalculation(id) вызывается
-         ↓
-selectedIds state обновляется (useSelectedCalculations)
-         ↓
-ChartPreset1 получает новый selectedIds
-         ↓
-useMemo пересчитывает chartOption
-         ↓
-ECharts re-renders с новыми сериями
-```
-
-### ECharts интеграция
-
-**echarts-for-react:**
-```typescript
-import ReactECharts from 'echarts-for-react';
-
-// Использование:
-<ReactECharts
-  option={chartOption}           // EChartsOption
-  style={{ height: '600px' }}    // Размер графика
-  opts={{ renderer: 'canvas' }}  // Или 'svg'
-/>
-
-// chartOption:
-- Полная типизация: EChartsOption из echarts
-- Включает: title, xAxis, yAxis[], series[], tooltip, legend, dataZoom
-```
-
-**Performance оптимизации:**
-```typescript
-// 1. useMemo для chartOption
-const chartOption = useMemo((): EChartsOption => {
-  // Пересчёт только при изменении selectedCalculations
-}, [selectedCalculations]);
-
-// 2. useMemo для selectedCalculations
-const selectedCalculations = useMemo(() => {
-  return calculations.filter(calc => selectedIds.includes(calc.id));
-}, [calculations, selectedIds]);
-
-// 3. useCallback для toggleCalculation
-const toggleCalculation = useCallback((id: string) => {
-  // Стабильная ссылка функции
-}, []);
-```
-
-### Обработка состояний в ProjectPage
-
-```typescript
-// Loading state
-if (loading) {
-  return <LoadingSpinner />;
-}
-
-// Error state
-if (error) {
-  return <ErrorMessage message={error} onRetry={refetch} />;
-}
-
-// Empty state (проект не найден)
-if (!project) {
-  return <div>Проект не найден</div>;
-}
-
-// Success state - рендер UI
-return (
-  <ProjectPage with data />
-);
-```
-
-### Technical Details
-
-**Race condition handling в useProjectData:**
-```typescript
-useEffect(() => {
-  let ignore = false;  // Флаг для отмены устаревших запросов
-
-  const fetchProject = async () => {
-    const data = await projectsApi.getProject(projectId);
-    if (!ignore) {  // Обновить state только если не отменено
-      setProject(data);
-    }
-  };
-
-  fetchProject();
-
-  return () => {
-    ignore = true;  // Cleanup: отменить при размонтировании
-  };
-}, [projectId]);
-```
-
-**Checkbox component (Radix UI):**
-```typescript
-// Установлено:
-@radix-ui/react-checkbox
-
-// Компонент: frontend/src/components/ui/checkbox.tsx
-- ForwardRef для передачи ref
-- TailwindCSS стилизация (border-primary, data-[state=checked]:bg-primary)
-- Check icon из lucide-react
-```
-
-**API response format fix:**
-```typescript
-// Backend возвращает:
-{
-  success: true,
-  data: { ...EngineProject },
-  meta: { ... }
-}
-
-// Frontend должен извлечь:
-if (response.data && response.data.success && response.data.data) {
-  return response.data.data;
-}
+const { metadata, updateMetadata, loading, error } = useMetadata(projectId);
 ```
 
 ---
 
-## Accessibility Implementation Patterns
+### State Management
 
-**Status:** ✅ Implemented (v2.0.0, WCAG 2.1 AA compliant)
+**Zustand store** - CalculationReference для cross-project comparison:
+
+```typescript
+// frontend/src/store/comparisonStore.ts
+interface ComparisonState {
+  primaryProject: CalculationReference | null;
+  comparisonProjects: CalculationReference[];  // Max 4
+
+  setPrimaryProject: (ref: CalculationReference) => void;
+  addComparison: (ref: CalculationReference) => void;
+  removeComparison: (index: number) => void;
+  clearAll: () => void;
+}
+
+interface CalculationReference {
+  projectId: string;
+  projectName: string;
+  calculationId: string;
+  calculationName: string;
+  color: string;  // From CALCULATION_COLORS
+}
+```
+
+**Why Zustand?**
+- Lightweight (no Provider wrapper needed)
+- Simple API (hooks-based)
+- Perfect for cross-page state (comparison persists on navigation)
+
+---
+
+## Data Flow
+
+### GET /api/projects (List all projects)
+
+```
+User navigates to HomePage
+         ↓
+HomePage.tsx calls useProjects()
+         ↓
+useProjects() → api.getProjects()
+         ↓
+axios GET /api/projects
+         ↓
+Backend: routes/projects.js
+         ↓
+fileScanner.scanFolder('./test-data')
+  - Recursive scan (subdirectories)
+  - Find .det/.pou files
+  - Parse .prt for auto metadata
+  - Read .metadata/*.json
+  - Merge auto + manual
+         ↓
+Return: ProjectInfo[] with metadata
+         ↓
+useProjects() updates state
+         ↓
+HomePage re-renders with project cards
+```
+
+### GET /api/project/:id (Get project data)
+
+```
+User clicks "Open" on ProjectCard
+         ↓
+Navigate to /project/:id
+         ↓
+ProjectPage.tsx calls useProjectData(id)
+         ↓
+useProjectData() → api.getProject(id)
+         ↓
+axios GET /api/project/:id
+         ↓
+Backend: routes/data.js
+         ↓
+fileScanner finds project file
+         ↓
+parseEngineFile(filePath)
+  - detectFormat() → 'det' or 'pou'
+  - globalRegistry.getParser(format)
+  - parser.parse(filePath)
+    - Line 1: metadata (cylinders, engineType)
+    - Line 2: column headers (24 or 71 params)
+    - Line 3+: $ markers + data points
+         ↓
+Return: EngineProject JSON
+         ↓
+useProjectData() updates state
+         ↓
+ProjectPage renders charts + table
+```
+
+### POST /api/projects/:id/metadata (Update metadata)
+
+```
+User edits metadata in MetadataDialog
+         ↓
+User clicks "Save"
+         ↓
+Form validation (react-hook-form + zod)
+         ↓
+onSubmit(values)
+         ↓
+api.updateMetadata(id, values)
+         ↓
+axios POST /api/projects/:id/metadata
+  Payload: {displayName, client, tags, status, notes, color}
+         ↓
+Backend: routes/metadata.js
+         ↓
+metadataService.updateManualMetadata(id, values)
+  - Read existing .metadata/{id}.json
+  - Update ONLY manual section
+  - Preserve auto section
+  - Save to disk
+         ↓
+Response: {success: true}
+         ↓
+Toast notification: "Metadata saved"
+         ↓
+HomePage.refetch() → Update project list
+         ↓
+ProjectCard updates with new metadata
+```
+
+---
+
+## Chart Implementation
+
+**Library:** ECharts + echarts-for-react
+
+**Base configuration:**
+
+```typescript
+// frontend/src/config/chartConfig.ts
+
+export function getBaseChartConfig(): EChartsOption {
+  return {
+    grid: {
+      left: '10%',
+      right: '10%',
+      top: '15%',
+      bottom: '15%'
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'cross' }
+    },
+    legend: {
+      top: 'center',
+      left: 'left',
+      orient: 'vertical'
+    },
+    dataZoom: [
+      { type: 'slider', xAxisIndex: 0 },
+      { type: 'inside', xAxisIndex: 0 }
+    ]
+  };
+}
+
+export function createYAxis(name: string, position: 'left' | 'right', color?: string) {
+  return {
+    type: 'value',
+    name,
+    position,
+    nameTextStyle: { color },
+    splitLine: { lineStyle: { type: 'dashed' } }
+  };
+}
+```
+
+**Chart patterns:**
+
+**Dual Y-Axis:**
+```typescript
+yAxis: [
+  createYAxis('P-Av (kW)', 'left', '#e74c3c'),
+  createYAxis('Torque (N·m)', 'right', '#2ecc71')
+]
+```
+
+**Line styles:**
+- Solid: Primary parameter
+- Dashed: Secondary parameter
+- Dotted: Tertiary parameter
+
+**Color assignment:**
+- Single calculation: PARAMETER_COLORS (distinguish P-Av vs Torque)
+- Comparison mode: CALCULATION_COLORS (distinguish Calc1 vs Calc2)
+
+**Legend format:** `{CalcName} - {ParamName}`
+- Example: `"Vesta 1.6 IM - P-Av"`
+
+**Axis label format:** `{ParamName} ({Unit})`
+- Example: `"P-Av (kW)"` → units change, param name NEVER changes
+- ⚠️ **КРИТИЧЕСКИ:** Названия параметров ВСЕГДА на английском (никогда не переводить!)
+
+**Per-cylinder arrays:**
+- Parameters like PCylMax, TCylMax are arrays `[val1, val2, val3, val4]`
+- Chart displays **averaged value**: `values.reduce((sum, v) => sum + v, 0) / values.length`
+- Rationale: Simplifies visualization (1 line instead of 4-6)
+
+**См. также:**
+- [docs/chart-presets.md](chart-presets.md) - Detailed docs for all 6 presets
+- [ADR 003: Color Palette Engineering Style](decisions/003-color-palette-engineering-style.md)
+
+---
+
+## Форматы данных
+
+### ProjectInfo (Summary for list)
+
+```typescript
+interface ProjectInfo {
+  id: string;                  // "bmw-m42" (normalized slug)
+  displayName: string;         // "BMW M42" (from metadata or filename)
+  fileName: string;            // "BMW M42.det"
+  format: 'det' | 'pou';
+  calculationsCount: number;
+  modified: string;            // ISO 8601
+  metadata: ProjectMetadata;   // Combined auto + manual
+}
+```
+
+### EngineProject (Full data)
+
+```typescript
+interface EngineProject {
+  fileName: string;
+  format: 'det' | 'pou';
+  metadata: {
+    numCylinders: number;
+    engineType: 'NATUR' | 'TURBO' | 'SUPERCHARGED';
+  };
+  columnHeaders: string[];     // ["RPM", "P-Av", "Torque", ...]
+  calculations: Calculation[];
+}
+
+interface Calculation {
+  id: string;                  // "$1", "$2", "$3.1"
+  name: string;                // "1", "2", "3.1" (no $ symbol)
+  dataPoints: DataPoint[];
+}
+
+interface DataPoint {
+  RPM: number;
+  'P-Av': number;              // kW
+  Torque: number;              // N·m
+  PCylMax: number[];           // bar (per-cylinder array)
+  TCylMax: number[];           // °C (per-cylinder array)
+  TUbMax: number[];            // °C (per-cylinder array)
+  PurCyl: number[];            // ratio (per-cylinder array)
+  Deto: number[];              // detonation degree (per-cylinder)
+  Convergence: number;
+  // ... more parameters depending on format
+}
+```
+
+### ProjectMetadata (Combined auto + manual)
+
+```typescript
+interface ProjectMetadata {
+  version: '1.0';
+  id: string;
+  displayName?: string;
+
+  auto?: {                     // From .prt file (READ-ONLY)
+    cylinders: number;
+    type: 'NA' | 'Turbo' | 'Supercharged';
+    intakeSystem: 'ITB' | 'IM';
+    exhaustSystem: '4-2-1' | '4-1' | 'tri-y' | 'custom';
+    bore: number;              // mm
+    stroke: number;            // mm
+    compressionRatio: number;
+    maxPowerRPM: number;
+  };
+
+  manual: {                    // User-editable
+    description?: string;
+    client?: string;
+    tags?: string[];
+    status?: 'active' | 'completed' | 'archived';
+    notes?: string;
+    color?: string;            // HEX color
+  };
+
+  created: string;             // ISO 8601
+  modified: string;            // ISO 8601
+}
+```
+
+**См. также:**
+- [docs/file-formats/det-format.md](file-formats/det-format.md) - .det specification (24 params)
+- [docs/file-formats/pou-format.md](file-formats/pou-format.md) - .pou specification (71 params)
+- [docs/file-formats/prt-format.md](file-formats/prt-format.md) - .prt specification (metadata)
+
+---
+
+## Accessibility (WCAG 2.1 AA)
+
+**Status:** ✅ Implemented (v2.0.0, Phase 3 complete)
 
 ### Keyboard Navigation
 
-**Focus Management:**
-```typescript
-// All interactive elements are keyboard accessible
+**Focus indicators:**
+```tsx
 <button className="focus-visible:ring-[3px] focus-visible:ring-ring">
-  {/* Prominent 3px focus indicator for buttons */}
+  {/* Prominent 3px ring for buttons */}
 </button>
 
 <Card className="focus-visible:ring-2 focus-visible:ring-ring">
-  {/* Subtle 2px focus indicator for cards */}
+  {/* Subtle 2px ring for cards */}
 </Card>
 ```
 
-**Focus Trap in Modals:**
-- **Radix UI Dialog** provides built-in focus trap
-- Focus moves to modal when opened
-- ESC key closes modal
-- Focus returns to trigger element on close
-
-```typescript
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-
-// Automatic focus management:
-// - DialogContent traps focus inside modal
-// - Tab cycles through focusable elements
-// - Shift+Tab cycles backwards
-// - ESC closes and returns focus
-```
-
-**Tab Order:**
-1. Header navigation (logo, back button, settings)
-2. Left panel (calculation selector, filters)
+**Tab order:**
+1. Header (logo, back button, settings)
+2. Left panel (filters, calculation selector)
 3. Main content (charts, tables)
-4. Footer (if present)
+4. Footer
 
-### ARIA Labels and Semantic HTML
+**Focus trap in modals:**
+- Radix UI Dialog provides built-in focus trap
+- ESC closes modal
+- Focus returns to trigger element
 
-**Button Accessibility:**
-```typescript
-// Icon-only buttons must have aria-label
+### ARIA Labels
+
+**Icon-only buttons:**
+```tsx
 <button aria-label="Edit project metadata">
   <EditIcon />
 </button>
-
-// Text buttons don't need aria-label (text is readable)
-<button>Save Changes</button>
 ```
 
-**Form Accessibility:**
-```typescript
-// React Hook Form + Radix UI
+**Form fields:**
+```tsx
 <FormLabel htmlFor="projectName">Project Name</FormLabel>
 <FormControl>
   <Input id="projectName" {...field} />
 </FormControl>
-<FormMessage /> {/* Error message linked automatically */}
+<FormMessage /> {/* Error linked automatically */}
 ```
 
-**Dialog Accessibility:**
-```typescript
+**Dialog accessibility:**
+```tsx
 <DialogTitle>Select Calculation</DialogTitle>
-<DialogDescription>
-  Choose up to 5 calculations to compare.
-</DialogDescription>
-
-// Automatic ARIA attributes:
-// - aria-labelledby points to DialogTitle
-// - aria-describedby points to DialogDescription
-// - role="dialog"
-// - aria-modal="true"
+<DialogDescription>Choose up to 5 calculations</DialogDescription>
+// Automatic: aria-labelledby, aria-describedby, role="dialog"
 ```
 
-**Semantic HTML:**
-- `<nav>` for navigation areas
-- `<main>` for main content
-- `<article>` for project cards
-- `<section>` for chart sections
-- `<button>` for interactive actions (never `<div>` with onClick)
-
-### Screen Reader Support
-
-**Descriptive Text:**
-```typescript
-// Status indicators for screen readers
-<span className="sr-only">Loading project data</span>
-<LoadingSpinner aria-hidden="true" />
-
-// Hidden counts for screen readers
-<Badge>
-  <span className="sr-only">Selected calculations: </span>
-  2/5
-</Badge>
-```
-
-**Live Regions:**
-```typescript
-// Announce dynamic content changes
+**Live regions:**
+```tsx
 <div role="status" aria-live="polite">
   {successMessage && <p>{successMessage}</p>}
 </div>
 
-// Error announcements
 <div role="alert" aria-live="assertive">
   {errorMessage && <p>{errorMessage}</p>}
 </div>
 ```
 
-### Color Contrast (WCAG 2.1 AA)
+### Color Contrast
 
-**Text Contrast:**
-- Background: `#ffffff` (white)
-- Primary text: `#09090b` (near black) - Contrast ratio: 20.2:1 ✅
-- Secondary text: `#71717a` (gray) - Contrast ratio: 4.6:1 ✅
-- Muted text: `#a1a1aa` (light gray) - Contrast ratio: 3.1:1 (large text only)
+**Text contrast (WCAG AA):**
+- Primary text: `#09090b` on `#ffffff` → 20.2:1 ✅
+- Secondary text: `#71717a` on `#ffffff` → 4.6:1 ✅
+- Muted text: `#a1a1aa` (large text only) → 3.1:1
 
-**Interactive Elements:**
-- Primary buttons: High contrast (14:1+)
-- Focus indicators: 3:1+ contrast
-- Chart colors: All meet 3:1 contrast on white background
+**Interactive elements:**
+- Buttons: 14:1+ contrast
+- Focus rings: 3:1+ contrast
+- Chart colors: All meet 3:1 on white
 
-**Checked by:**
-- TailwindCSS default palette (WCAG compliant)
-- shadcn/ui theme (accessibility-first design)
-- Manual verification with WebAIM Contrast Checker
+**Source:** TailwindCSS default palette (WCAG compliant)
 
-### Touch Target Sizes
+### Touch Targets
 
-**Minimum touch targets: 44×44 px** (WCAG 2.1 AAA guideline)
-
-```typescript
-// All buttons meet minimum size
-<Button className="h-10 px-4">  {/* 40px height, close to 44px */}
+**Minimum: 44×44px (WCAG AAA)**
+```tsx
+<Button className="h-10 px-4">  {/* 40px height */}
   Action
 </Button>
 
-// Cards have large clickable area
-<ProjectCard className="min-h-[200px]">
-  {/* Entire card is clickable */}
-</ProjectCard>
-
-// Checkboxes have extended hit area
-<Checkbox className="h-4 w-4 data-[state=checked]:bg-primary">
-  {/* Parent label extends hit area */}
+<Checkbox className="h-4 w-4">  {/* Parent label extends hit area */}
 </Checkbox>
 ```
 
-### Accessibility Testing Checklist
+### Testing Checklist
 
 **Keyboard:**
 - ✅ All features accessible via keyboard
@@ -1617,32 +1484,27 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 - ✅ No keyboard traps (except modals)
 
 **Screen Reader:**
-- ✅ All images have alt text (or aria-label)
-- ✅ Form inputs have labels
-- ✅ Buttons have descriptive text or aria-label
-- ✅ Status changes announced
+- ✅ Alt text for images
+- ✅ Form labels
+- ✅ Button descriptions
+- ✅ Status announcements
 
 **Visual:**
-- ✅ Color contrast meets WCAG AA
-- ✅ Information not conveyed by color alone (line styles in charts)
-- ✅ Text resizable up to 200% without loss of content
+- ✅ Color contrast meets AA
+- ✅ Not relying on color alone
+- ✅ Text resizable to 200%
 
 **Motor:**
 - ✅ Touch targets ≥44×44px
 - ✅ No precise timing required
-- ✅ Gestures have keyboard alternatives
 
 ---
 
-## Responsive Design Implementation
+## Responsive Design
 
-**Status:** ✅ Implemented (v2.0.0, mobile-first approach)
-
-### Breakpoints
-
-**TailwindCSS breakpoints:**
+**Breakpoints:**
 ```typescript
-sm:  640px   // Small tablets portrait
+sm:  640px   // Small tablets
 md:  768px   // Tablets and small laptops
 lg:  1024px  // Laptops
 xl:  1280px  // Desktops
@@ -1654,163 +1516,71 @@ xl:  1280px  // Desktops
 - `768px - 1024px`: Tablet
 - `> 1024px`: Desktop
 
-### Component-Level Responsive Patterns
+### Component Patterns
 
 **Header (mobile optimization):**
-```typescript
-// Desktop: Full text buttons + calculation count
+```tsx
+// Desktop: Full text buttons
 <Button>
   <ExportIcon /> Export to PNG
 </Button>
-<span>2 calculations selected</span>
 
-// Mobile (<768px): Icon-only buttons, hidden count
+// Mobile: Icon-only
 <Button className="md:inline-flex md:gap-2">
   <ExportIcon />
   <span className="hidden md:inline">Export to PNG</span>
 </Button>
-<span className="hidden md:inline">2 calculations selected</span>
 ```
 
-**Modals (mobile full-screen):**
-```typescript
-// Desktop: Centered modal with padding
-<DialogContent className="max-w-lg">
+**Modals:**
+```tsx
+// Mobile: Nearly full-screen (inset-4 for margin)
+<DialogContent className="inset-4 max-w-lg md:inset-auto">
   {/* Content */}
 </DialogContent>
-
-// Mobile: Nearly full-screen (inset-4 for small margin)
-<DialogContent className="inset-4 max-w-lg md:inset-auto">
-  {/* Content fills screen on mobile */}
-</DialogContent>
 ```
 
-**LeftPanel (hamburger menu):**
-```typescript
-// Mobile: Hidden by default, toggle button
+**LeftPanel:**
+```tsx
+// Mobile: Hamburger menu (Sheet component)
 <Sheet>
-  <SheetTrigger>
-    <MenuIcon />  {/* Hamburger */}
-  </SheetTrigger>
-  <SheetContent side="left">
-    {/* Calculation selector, filters */}
-  </SheetContent>
+  <SheetTrigger><MenuIcon /></SheetTrigger>
+  <SheetContent side="left">{/* Filters */}</SheetContent>
 </Sheet>
 
-// Desktop (>1024px): Always visible sidebar
+// Desktop: Always visible sidebar
 <aside className="hidden lg:block">
-  {/* Calculation selector, filters */}
+  {/* Filters, calculation selector */}
 </aside>
 ```
 
-**PeakValuesCards (adaptive layout):**
-```typescript
-// Mobile: Stacked vertically
-<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-  <Card>Power: 115 kW</Card>
-  <Card>Torque: 225 N·m</Card>
-  <Card>Peak Power RPM: 5500</Card>
-  <Card>Peak Torque RPM: 3800</Card>
+**Grid Layout:**
+```tsx
+// HomePage cards
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {projects.map(p => <ProjectCard key={p.id} project={p} />)}
 </div>
-
-// Tablet: 2 columns
-// Desktop: 4 columns inline
 ```
 
-**Charts (responsive sizing):**
-```typescript
-// Height scales with viewport
+**Charts:**
+```tsx
 <ReactECharts
   option={chartOption}
   style={{
     height: 'calc(100vh - 300px)',  // Adaptive height
     minHeight: '400px',             // Minimum on mobile
-    width: '100%'                   // Full width always
+    width: '100%'
   }}
 />
-
-// ECharts grid margins adjust automatically
-grid: {
-  left: '10%',    // More space for Y-axis labels
-  right: '10%',   // Space for right Y-axis
-  top: '15%',     // Space for title
-  bottom: '15%'   // Space for dataZoom
-}
 ```
 
-**DataTable (horizontal scroll on mobile):**
-```typescript
-// Mobile: Scrollable table
+**DataTable:**
+```tsx
+// Mobile: Horizontal scroll
 <div className="overflow-x-auto">
-  <Table>
-    {/* 73 parameters = wide table */}
-  </Table>
-</div>
-
-// Desktop: Full width, no scroll needed
-```
-
-### Typography Scaling
-
-**Headings:**
-```typescript
-// Mobile → Desktop scaling
-<h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">
-  Engine Results Viewer
-</h1>
-
-<h2 className="text-xl md:text-2xl font-semibold">
-  Project Name
-</h2>
-```
-
-**Body text:**
-- Base: `text-sm` (14px)
-- Desktop: `md:text-base` (16px)
-- Large screens: No change (16px is readable)
-
-### Spacing and Layout
-
-**Container padding:**
-```typescript
-// Mobile: Smaller padding (save screen space)
-<main className="p-4 md:p-6 lg:p-8">
-  {/* Content */}
-</main>
-```
-
-**Grid gaps:**
-```typescript
-// Tighter on mobile, comfortable on desktop
-<div className="grid gap-4 md:gap-6 lg:gap-8">
-  {/* Cards */}
+  <Table>{/* 73 parameters = wide table */}</Table>
 </div>
 ```
-
-### Images and Media
-
-**Responsive images:**
-```typescript
-// Placeholder for future: Project thumbnails
-<img
-  src={thumbnail}
-  alt="Project thumbnail"
-  className="w-full h-auto object-cover"
-  loading="lazy"
-/>
-```
-
-### Performance Considerations
-
-**Mobile:**
-- Reduced animation duration (users expect faster)
-- Lazy loading for off-screen content
-- Smaller initial bundle (code splitting)
-
-**Desktop:**
-- Full animations enabled
-- Preload hover states
-- Larger cache for better performance
 
 ### Testing Matrix
 
@@ -1821,712 +1591,160 @@ grid: {
 - ✅ Desktop 27" (2560×1440, Chrome)
 
 **Browsers:**
-- ✅ Chrome 120+ (primary)
+- ✅ Chrome 120+
 - ✅ Safari 17+ (macOS, iOS)
-- ✅ Firefox 121+ (secondary)
-- ❌ Edge (not tested, but likely works - Chromium-based)
+- ✅ Firefox 121+
 
 ---
 
-## Data Processing Algorithms
-
-**Status:** ✅ Implemented (v2.0.0)
-
-### RPM Step Calculator
-
-**Purpose:** Display average RPM step instead of raw point count (more meaningful for users)
-
-**Algorithm:**
-```typescript
-function calculateAverageStep(dataPoints: DataPoint[]): number {
-  if (dataPoints.length < 2) return 0;
-
-  // 1. Extract RPM values
-  const rpms = dataPoints.map(point => point.RPM);
-
-  // 2. Sort ascending (in case data is unsorted)
-  rpms.sort((a, b) => a - b);
-
-  // 3. Calculate steps between consecutive points
-  const steps: number[] = [];
-  for (let i = 1; i < rpms.length; i++) {
-    steps.push(rpms[i] - rpms[i-1]);
-  }
-
-  // 4. Average the steps
-  const avgStep = steps.reduce((sum, step) => sum + step, 0) / steps.length;
-
-  // 5. Round to nearest 50 (50, 100, 150, 200, 250...)
-  const roundedStep = Math.round(avgStep / 50) * 50;
-
-  return roundedStep;
-}
-```
-
-**Example:**
-```
-Input RPMs: [800, 900, 1000, 1100, 1250, 1400]
-Steps: [100, 100, 100, 150, 150]
-Average: 120
-Rounded: 100 RPM step
-
-Display: "RPM step: 100" (instead of "25 points")
-```
-
-**Why round to nearest 50?**
-- Engine testing typically done in 50-200 RPM steps
-- Rounding provides cleaner display
-- Reflects real-world testing practices
-
----
-
-### Peak Values Finder
-
-**Purpose:** Find peak power, torque, and RPM at which peaks occur
-
-**Algorithm:**
-```typescript
-function findPeakValues(dataPoints: DataPoint[]) {
-  let maxPower = -Infinity;
-  let maxTorque = -Infinity;
-  let powerAtRPM = 0;
-  let torqueAtRPM = 0;
-
-  for (const point of dataPoints) {
-    // Find max power
-    if (point['P-Av'] > maxPower) {
-      maxPower = point['P-Av'];
-      powerAtRPM = point.RPM;
-    }
-
-    // Find max torque
-    if (point.Torque > maxTorque) {
-      maxTorque = point.Torque;
-      torqueAtRPM = point.RPM;
-    }
-  }
-
-  return {
-    peakPower: { value: maxPower, rpm: powerAtRPM },
-    peakTorque: { value: maxTorque, rpm: torqueAtRPM }
-  };
-}
-```
-
-**Display:**
-```typescript
-<Card>
-  <CardTitle>Peak Power</CardTitle>
-  <CardContent>
-    <p className="text-3xl font-bold">{peakPower.value} kW</p>
-    <p className="text-sm text-muted-foreground">
-      at {peakPower.rpm} RPM
-    </p>
-  </CardContent>
-</Card>
-```
-
----
-
-### Per-Cylinder Averaging
-
-**Purpose:** Convert per-cylinder arrays to single averaged value for chart display
-
-**Algorithm:**
-```typescript
-function averagePerCylinder(values: number[]): number {
-  return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
-
-// Example: PCylMax for 4-cylinder engine
-const pcylMax = [120.5, 122.3, 119.8, 121.2]; // bar per cylinder
-const avgPcylMax = averagePerCylinder(pcylMax); // 120.95 bar
-```
-
-**Which parameters use averaging?**
-- `PCylMax` - Max cylinder pressure (per-cylinder → averaged)
-- `TCylMax` - Max cylinder temperature (per-cylinder → averaged)
-- `TUbMax` - Max exhaust temperature (per-cylinder → averaged)
-- `Deto` - Detonation degree (per-cylinder → averaged)
-- `MaxDeg` - Maximum detonation degree (per-cylinder → averaged)
-
-**Rationale:**
-- Simplifies chart visualization (1 line instead of 4-6)
-- Most users care about overall engine behavior
-- Individual cylinder analysis = advanced feature (future enhancement)
-
----
-
-### Color Assignment Algorithm
-
-**Purpose:** Assign colors to calculations and parameters
-
-**Algorithm 1: Calculation Colors (Comparison Mode)**
-```typescript
-// 5 colors cycling
-const CALCULATION_COLORS = [
-  '#e74c3c', // Red
-  '#2ecc71', // Green
-  '#3498db', // Blue
-  '#f39c12', // Orange
-  '#9b59b6'  // Purple
-];
-
-function getCalculationColor(index: number): string {
-  return CALCULATION_COLORS[index % CALCULATION_COLORS.length];
-}
-
-// Assign to calculations
-calculations.forEach((calc, index) => {
-  calc.color = getCalculationColor(index);
-});
-```
-
-**Algorithm 2: Parameter Colors (Single Calculation Mode)**
-```typescript
-// From config/parameters.ts
-const PARAMETER_COLORS: Record<string, string> = {
-  'P-Av': '#e74c3c',      // Red (power)
-  'Torque': '#2ecc71',    // Green (torque)
-  'PCylMax': '#3498db',   // Blue (pressure)
-  'TCylMax': '#f39c12',   // Orange (temperature)
-  // ... 73 parameters total
-};
-
-function getParameterColor(paramName: string): string {
-  return PARAMETER_COLORS[paramName] || '#71717a'; // Gray fallback
-}
-```
-
-**When to use which?**
-- **Single calculation:** Use PARAMETER_COLORS (distinguish P-Av vs Torque)
-- **Comparison mode:** Use CALCULATION_COLORS (distinguish Vesta vs Camry)
-
-See: [ADR 003: Color Palette Engineering Style](decisions/003-color-palette-engineering-style.md)
-
----
-
-### Units Conversion Algorithms
-
-**Purpose:** Convert between SI, American, and HP unit systems
-
-**Power Conversion:**
-```typescript
-function convertPower(kW: number, targetUnits: Units): number {
-  switch (targetUnits) {
-    case 'SI':
-      return kW; // Already in kW
-    case 'American':
-      return kW * 1.341; // kW → bhp (brake horsepower)
-    case 'HP':
-      return kW * 1.36;  // kW → PS (metric horsepower)
-  }
-}
-```
-
-**Torque Conversion:**
-```typescript
-function convertTorque(Nm: number, targetUnits: Units): number {
-  switch (targetUnits) {
-    case 'SI':
-      return Nm; // Already in N·m
-    case 'American':
-      return Nm * 0.7376; // N·m → lb-ft
-    case 'HP':
-      return Nm; // PS system uses N·m for torque
-  }
-}
-```
-
-**Pressure Conversion:**
-```typescript
-function convertPressure(bar: number, targetUnits: Units): number {
-  switch (targetUnits) {
-    case 'SI':
-    case 'HP':
-      return bar; // bar used in both
-    case 'American':
-      return bar * 14.504; // bar → psi
-  }
-}
-```
-
-**Temperature Conversion:**
-```typescript
-function convertTemperature(celsius: number, targetUnits: Units): number {
-  switch (targetUnits) {
-    case 'SI':
-    case 'HP':
-      return celsius; // °C used in both
-    case 'American':
-      return (celsius * 9/5) + 32; // °C → °F
-  }
-}
-```
-
-**Conversion Sources:**
-- **1 kW = 1.341 bhp:** SAE J1349 standard (brake horsepower)
-- **1 kW = 1.36 PS:** DIN 70020 standard (metric horsepower)
-- **1 N·m = 0.7376 lb-ft:** Physics constant
-- **1 bar = 14.504 psi:** Physics constant
-
----
-
-## Parameter Configuration System
-
-**Status:** ✅ Implemented (v2.0.0, 73 parameters supported)
-
-### Single Source of Truth: parameters.ts
-
-**File:** `frontend/src/config/parameters.ts`
-
-**Purpose:**
-- Central registry for all 73 engine parameters
-- Parameter metadata (display name, unit, color, category)
-- Used by parsers, charts, tables, export
-
-**Structure:**
-```typescript
-export interface ParameterConfig {
-  name: string;           // Display name (e.g., "P-Av")
-  fullName: string;       // Full name (e.g., "Average Power")
-  unit: string;           // SI unit (e.g., "kW")
-  unitAmerican?: string;  // American unit (e.g., "bhp")
-  unitHP?: string;        // HP system unit (e.g., "PS")
-  color: string;          // Chart color (e.g., "#e74c3c")
-  category: ParameterCategory;
-  description: string;    // Engineering description
-  isPerCylinder: boolean; // Array or scalar value
-}
-
-export const PARAMETERS: Record<string, ParameterConfig> = {
-  'RPM': { ... },
-  'P-Av': { ... },
-  'Torque': { ... },
-  // ... 73 parameters total
-};
-```
-
-### Parameter Categories
-
-```typescript
-type ParameterCategory =
-  | 'performance'   // Power, Torque
-  | 'pressure'      // PCylMax, BMEP, IMEP, FMEP, PMEP
-  | 'temperature'   // TCylMax, TUbMax
-  | 'efficiency'    // PurCyl, LamAv
-  | 'combustion'    // MaxDeg, Deto, Convergence
-  | 'flow'          // Mass flow rates
-  | 'other';        // Miscellaneous
-```
-
-**Usage in UI:**
-```typescript
-// Custom parameter selector (ChartPreset6)
-<Tabs>
-  <TabsList>
-    <TabsTrigger value="performance">Performance</TabsTrigger>
-    <TabsTrigger value="pressure">Pressure</TabsTrigger>
-    <TabsTrigger value="temperature">Temperature</TabsTrigger>
-    {/* ... */}
-  </TabsList>
-
-  <TabsContent value="performance">
-    {/* Show only performance parameters */}
-  </TabsContent>
-</Tabs>
-```
-
-### Parameter Mapping Strategy
-
-**Problem:** Different file formats use different names for same parameter
-
-**Example:**
-- `.det` file: `Purc` (short name)
-- `.pou` file: `PurCyl` (full name)
-- Both represent: Cylinder Charge Purity
-
-**Solution: Canonical names in PARAMETERS**
-```typescript
-export const PARAMETERS = {
-  'PurCyl': {
-    name: 'PurCyl',
-    aliases: ['Purc'],  // Alternative names
-    // ...
-  }
-};
-
-// Parser uses mapping:
-function mapParameterName(rawName: string): string {
-  // Search for parameter with this alias
-  for (const [canonical, config] of Object.entries(PARAMETERS)) {
-    if (config.aliases?.includes(rawName)) {
-      return canonical;
-    }
-  }
-  return rawName; // No mapping found, use as-is
-}
-```
-
-### Integration with Parsers
-
-**DET Parser:**
-```typescript
-// Parse column headers
-const headers = line2.split(/\s+/).slice(1); // Skip service column
-
-// Map to canonical names
-const parameters = headers.map(mapParameterName);
-
-// Validate against PARAMETERS config
-parameters.forEach(param => {
-  if (!PARAMETERS[param]) {
-    console.warn(`Unknown parameter: ${param}`);
-  }
-});
-```
-
-**POU Parser:** Same pattern
-
-### Integration with Charts
-
-**Example: ChartPreset1.tsx**
-```typescript
-import { PARAMETERS } from '@/config/parameters';
-
-// Get parameter config
-const powerConfig = PARAMETERS['P-Av'];
-const torqueConfig = PARAMETERS['Torque'];
-
-// Use in chart
-yAxis: [
-  {
-    name: `${powerConfig.name} (${powerConfig.unit})`,
-    nameTextStyle: { color: powerConfig.color }
-  },
-  {
-    name: `${torqueConfig.name} (${torqueConfig.unit})`,
-    nameTextStyle: { color: torqueConfig.color }
-  }
-]
-```
-
-### Integration with Units Conversion
-
-```typescript
-// Get unit based on user settings
-function getUnit(param: string, units: Units): string {
-  const config = PARAMETERS[param];
-
-  switch (units) {
-    case 'SI':
-      return config.unit;
-    case 'American':
-      return config.unitAmerican || config.unit;
-    case 'HP':
-      return config.unitHP || config.unit;
-  }
-}
-
-// Update axis label dynamically
-yAxis: {
-  name: `${config.name} (${getUnit('P-Av', currentUnits)})`
-}
-// Result: "P-Av (kW)" → "P-Av (bhp)" → "P-Av (PS)"
-```
-
-### 73 Parameters Breakdown
-
-**From .det (24 parameters):**
-- RPM, P-Av, Torque, BMEP, IMEP, FMEP, PMEP
-- PCylMax, TCylMax, TUbMax (per-cylinder arrays)
-- PurCyl, LamAv, MaxDeg, Deto (per-cylinder arrays)
-- ... (see [PARAMETERS-REFERENCE.md](PARAMETERS-REFERENCE.md))
-
-**From .pou (71 parameters):**
-- All .det parameters +
-- Detailed combustion parameters
-- Mass flow rates
-- Heat transfer coefficients
-- Emissions estimates
-- ... (see [PARAMETERS-REFERENCE.md](PARAMETERS-REFERENCE.md))
-
-**Merged format (.pou-merged):**
-- 75 parameters total (71 from .pou + 4 critical from .det)
-- Critical .det params: P-Av, Torque, BMEP, RPM
-- Why? .pou may have slightly different values due to calculation method
-
----
-
-## Chart Implementation Patterns
-
-**Status:** ✅ Implemented (v2.0.0, 6 presets)
-
-See detailed documentation: **[docs/chart-presets.md](chart-presets.md)**
-
-### Quick Reference
-
-**Dual Y-Axis Pattern:**
-- Used when parameters have different units or scales
-- Examples: Power (kW) vs Torque (N·m), Pressure (bar) vs Temperature (°C)
-- Left axis: Primary parameter, Right axis: Secondary parameter
-
-**Line Style Conventions:**
-- Solid: Primary/most important parameter
-- Dashed: Secondary parameter
-- Dotted: Tertiary parameter
-- Purpose: Distinguishability beyond color (accessibility, print)
-
-**Color Systems:**
-- **Single calculation:** PARAMETER_COLORS (distinguish P-Av vs Torque)
-- **Comparison mode:** CALCULATION_COLORS (distinguish Calc1 vs Calc2)
-- See: [ADR 003: Color Palette Engineering Style](decisions/003-color-palette-engineering-style.md)
-
-**Axis Label Format:**
-- Pattern: `{ParameterName} ({Unit})`
-- Examples: `P-Av (kW)`, `Torque (N·m)`, `PCylMax (bar)`
-- **CRITICAL:** Always use original English parameter names (never translate)
-
-**Legend Format:**
-- Pattern: `{CalculationName} - {ParameterName}`
-- Example: `Vesta 1.6 IM - P-Av`
-- No units in legend (only on axes)
-
-**Per-Cylinder Handling:**
-- Parameters like PCylMax, TCylMax are arrays
-- Chart displays averaged value: `average(cylinder1, cylinder2, ...)`
-- Simplifies visualization (1 line instead of 4-6)
-
-**6 Chart Presets:**
-1. **Power & Torque** - Most important (P-Av, Torque, dual Y-axis)
-2. **Pressure & Temperature** - Durability analysis (PCylMax, TCylMax, TUbMax)
-3. **MEP** - Efficiency analysis (FMEP, IMEP, BMEP, PMEP)
-4. **Critical Values** - Safety analysis (PCylMax, MaxDeg) ⚠️
-5. **Volumetric Efficiency** - Breathing analysis (PurCyl, LamAv)
-6. **Custom** - User-defined parameters (modal selector)
-
----
-
-## Технологический выбор и обоснование
-
-### Почему Node.js + Express (Backend)?
-
-**Плюсы:**
-- ✅ JavaScript на frontend и backend (один язык)
-- ✅ Простая настройка Express
+## Технологический стек
+
+### Backend
+
+**Runtime:** Node.js 20+
+**Framework:** Express.js
+**Module system:** ES Modules (import/export)
+
+**Dependencies:**
+- `express` - Web framework
+- `cors` - CORS middleware
+- `yaml` - config.yaml parsing
+- `fs/promises` - Async file operations
+
+**Dev dependencies:**
+- `nodemon` - Auto-restart on changes
+
+### Frontend
+
+**Runtime:** Browser (Chrome, Safari)
+**Framework:** React 18.3
+**Build tool:** Vite 5
+**Language:** TypeScript 5
+
+**Core libraries:**
+- `react-router-dom` - Routing
+- `axios` - HTTP client
+- `zustand` - State management (comparison refs)
+
+**Visualization:**
+- `echarts` - Charting library
+- `echarts-for-react` - React wrapper
+
+**UI Components:**
+- `@radix-ui/*` - Accessible primitives (Dialog, Select, Checkbox, etc.)
+- `lucide-react` - Icons
+
+**Forms:**
+- `react-hook-form` - Form state management
+- `zod` - Schema validation
+
+**Styling:**
+- `tailwindcss` 4 - Utility-first CSS
+- `tailwind-merge` - Classname merging
+- `clsx` - Conditional classes
+
+**Data export:**
+- `xlsx` - Excel export
+- `papaparse` - CSV export
+
+### Development
+
+**Package manager:** npm
+**Version control:** Git
+**IDE:** VS Code + Claude Code
+**OS:** macOS (dev), Windows (production)
+
+### Обоснование выбора
+
+**Почему Node.js + Express?**
+- ✅ JavaScript на backend и frontend (один язык)
+- ✅ Простая настройка
 - ✅ Легко работать с JSON
 - ✅ Быстрая разработка
 
-**Альтернативы:**
-- Python + FastAPI: больше подходит для data science, но не нужен здесь
-- Python + Flask: старый стек
-
-### Почему React 18 + TypeScript (Frontend)?
-
-**Плюсы:**
-- ✅ React - современный и популярный
-- ✅ TypeScript - type safety, меньше багов
-- ✅ Hooks - чистая функциональная логика
+**Почему React + TypeScript?**
+- ✅ Современный UI framework
+- ✅ Type safety (меньше багов)
+- ✅ Hooks (чистая функциональная логика)
 - ✅ Большая экосистема
 
-**Альтернативы:**
-- Vue: меньше библиотек для charts
-- Angular: слишком тяжёлый для этого проекта
-
-### Почему ECharts?
-
-**Плюсы:**
-- ✅ Мощная библиотека для графиков
-- ✅ Интерактивность "из коробки" (zoom, pan, tooltip)
+**Почему ECharts?**
+- ✅ Мощная библиотека (interactive zoom, pan, tooltip)
 - ✅ Высокая производительность
 - ✅ Гибкая конфигурация
-- ✅ Хорошая React интеграция (echarts-for-react)
+- ✅ Подходит для инженерных графиков
 
-**Альтернативы:**
-- Recharts: проще, но менее мощный
-- Chart.js: меньше функций для инженерных графиков
-- D3.js: слишком low-level, долгая разработка
-
-### Почему Vite?
-
-**Плюсы:**
-- ✅ Очень быстрый (HMR в миллисекундах)
+**Почему Vite?**
+- ✅ Очень быстрый HMR (миллисекунды)
 - ✅ Современный bundler (ESM)
-- ✅ Отличная DX (developer experience)
 - ✅ TypeScript "из коробки"
 
-**Альтернативы:**
-- Webpack: медленнее, сложнее настройка
-- Create React App: устарел
-
-### Почему TailwindCSS?
-
-**Плюсы:**
-- ✅ Utility-first подход - быстрая разработка
+**Почему TailwindCSS?**
+- ✅ Utility-first → быстрая разработка
 - ✅ Нет конфликтов CSS
-- ✅ Отличная документация
 - ✅ Адаптивный дизайн легко
-
-**Альтернативы:**
-- CSS Modules: больше файлов, медленнее
-- Styled Components: runtime overhead
 
 ---
 
 ## Безопасность
 
 ### Backend
+
 - ✅ CORS настроен (только localhost:5173 в dev)
-- ✅ JSON parsing ограничен размером
-- ✅ Валидация путей файлов (предотвращение path traversal)
+- ✅ JSON parsing с лимитом размера
+- ✅ Валидация путей (предотвращение path traversal)
 - ✅ Error handling (не раскрывать stack traces в production)
 
 ### Frontend
-- ✅ TypeScript strict mode (type safety)
-- ✅ Sanitize пользовательского ввода (если будет)
+
+- ✅ TypeScript strict mode
+- ✅ Sanitize пользовательского ввода
 - ✅ Проверка API ответов
 
 ---
 
 ## Масштабируемость
 
-### Текущая архитектура:
-- **Подходит для:** 10-100 проектов, файлы до 10 MB
-- **Ограничения:** Все данные в памяти (fileParser держит результат)
+### Текущая архитектура
 
-### Если проект вырастет:
-- **База данных:** SQLite или PostgreSQL для хранения результатов парсинга
-- **Кэширование:** Redis для кэширования частых запросов
-- **Background jobs:** Bull или другая очередь для парсинга больших файлов
-- **API pagination:** Limit/offset для больших списков
+**Подходит для:**
+- 10-100 проектов
+- Файлы до 10 MB
+- 1-5 одновременных пользователей
 
----
+**Ограничения:**
+- Все данные в памяти (parser результаты)
+- Нет кэширования парсинга
+- Синхронное сканирование файлов
 
-## TypeScript типы (shared-types.ts)
+### Если проект вырастет
 
-**Статус:** ✅ Реализовано (версия 0.2.0)
+**Для 1000+ проектов:**
+- SQLite/PostgreSQL для хранения parsed results
+- Redis для кэширования частых запросов
+- Background jobs (Bull queue) для парсинга больших файлов
+- API pagination (limit/offset)
 
-### Расположение
-
-Файл **[shared-types.ts](../shared-types.ts)** в корне проекта содержит все общие типы для backend и frontend.
-
-### Структура типов
-
-**Core Types (Основные типы данных):**
-```typescript
-EngineMetadata      // Метаданные двигателя (цилиндры, тип)
-DataPoint           // Одна точка данных (RPM + 23 параметра)
-Calculation         // Один расчёт (маркер + массив точек)
-ProjectData         // Полный проект (метаданные + расчёты)
-ProjectInfo         // Краткая информация для списка
-```
-
-**API Types (Типы для REST API):**
-```typescript
-GetProjectsResponse    // Ответ: список проектов
-GetProjectResponse     // Ответ: данные проекта
-ErrorResponse          // Стандартная ошибка
-```
-
-**Chart Types (Типы для графиков):**
-```typescript
-ChartParameter         // Параметры для отображения
-ChartPreset            // Пресеты графиков (preset1-4, custom)
-ChartPresetConfig      // Конфигурация пресета
-SelectedCalculations   // Выбранные расчёты для сравнения
-```
-
-**Export Types (Типы для экспорта):**
-```typescript
-ChartExportFormat      // PNG, SVG, JPG
-DataExportFormat       // CSV, Excel, JSON
-ChartExportOptions     // Опции экспорта графиков
-DataExportOptions      // Опции экспорта данных
-```
-
-### Использование
-
-**Backend (JavaScript/Node.js):**
-```javascript
-// Backend будет использовать JSDoc для типизации
-/**
- * @typedef {import('../shared-types').ProjectData} ProjectData
- */
-
-/**
- * @param {string} filePath
- * @returns {Promise<ProjectData>}
- */
-async function parseDetFile(filePath) {
-  // ...
-}
-```
-
-**Frontend (TypeScript/React):**
-```typescript
-import type {
-  ProjectData,
-  Calculation,
-  ChartPreset
-} from '../shared-types';
-
-// Полная типизация компонентов
-```
-
-### Особенности типов
-
-**Основано на РЕАЛЬНЫХ данных:**
-- Анализ файла `test-data/Vesta 1.6 IM.det` (462 строки, 17 расчётов)
-- 24 параметра данных (RPM, P-Av, Torque, массивы по цилиндрам)
-- **ВАЖНО:** Учтено что первая колонка служебная
-
-**Массивы для цилиндров:**
-```typescript
-interface DataPoint {
-  // Параметры по цилиндрам (всегда 4 значения)
-  PurCyl: [number, number, number, number];
-  TUbMax: [number, number, number, number];
-  TCylMax: [number, number, number, number];
-  PCylMax: [number, number, number, number];
-  Deto: [number, number, number, number];
-}
-```
-
-**Строгая типизация:**
-```typescript
-// Только разрешённые типы двигателя
-type EngineType = 'NATUR' | 'TURBO' | 'SUPERCHARGED';
-
-// Только разрешённые параметры для графиков
-type ChartParameter = 'RPM' | 'PAv' | 'Torque' | ...;
-```
-
-### Преимущества общих типов
-
-1. **Single Source of Truth** - типы в одном месте
-2. **Sync между backend/frontend** - одинаковые типы данных
-3. **Type safety** - ошибки выявляются на этапе компиляции
-4. **Autocomplete** - IDE подсказывает доступные поля
-5. **Документация** - типы = документация структуры данных
-
-### Обновление типов
-
-При изменении структуры данных:
-1. Обнови `shared-types.ts`
-2. Проверь что backend и frontend компилируются
-3. Обнови эту документацию
-4. Обнови `docs/api.md` с новыми типами
+**Для масштабного Production:**
+- Docker containerization
+- Nginx reverse proxy
+- Load balancing (если >100 users)
+- Database indexing
+- File system optimization (S3/MinIO for cloud)
 
 ---
 
 ## Следующие шаги
 
 После изучения архитектуры:
-1. Изучи [shared-types.ts](../shared-types.ts) - все типы данных
-2. Изучи [docs/api.md](api.md) - API endpoints
-3. Открой [roadmap.md](../roadmap.md) - начни реализацию
-4. Следуй принципам архитектуры при написании кода
+1. Изучи [shared-types.ts](../shared-types.ts) - все TypeScript типы
+2. Изучи [docs/chart-presets.md](chart-presets.md) - детали 6 пресетов
+3. Изучи [docs/file-formats/](file-formats/) - спецификации форматов
+4. Изучи [docs/decisions/](decisions/) - ADRs (Architecture Decision Records)
+5. Следуй принципам архитектуры при написании кода
 
 ---
 
-**Архитектура спроектирована для чистоты, масштабируемости и поддерживаемости 🏗️**
+**Архитектура спроектирована для чистоты, масштабируемости и поддерживаемости** 🏗️
+
+**Last updated:** 7 ноября 2025 (v2.0.0 consolidation)

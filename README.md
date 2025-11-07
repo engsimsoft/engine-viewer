@@ -81,26 +81,25 @@ cd frontend && npm install && npm run dev
 
 ## Документация
 
-### Основная документация
-- **[docs/setup.md](docs/setup.md)** - детальная установка и настройка
-- **[scripts/README.md](scripts/README.md)** - скрипты управления проектом
-- **[docs/architecture.md](docs/architecture.md)** - архитектура проекта
-- **[docs/api.md](docs/api.md)** - API документация
-- **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly documentation
-- **[docs/file-formats/README.md](docs/file-formats/README.md)** - форматы файлов (.det, .pou)
-- **[docs/PARAMETERS-REFERENCE.md](docs/PARAMETERS-REFERENCE.md)** - справочник всех 73 параметров двигателя
-- **[docs/parsers-guide.md](docs/parsers-guide.md)** - руководство по добавлению парсеров
-- **[docs/troubleshooting.md](docs/troubleshooting.md)** - решение проблем
+### Главная документация
+- **[docs/architecture.md](docs/architecture.md)** - 📖 Полная архитектура проекта (Backend, Frontend, Parsers, API, Charts)
+- **[CLAUDE.md](CLAUDE.md)** - 🤖 Инструкции для работы с Claude Code
+- **[CHANGELOG.md](CHANGELOG.md)** - 📝 История изменений
+- **[DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md)** - 📋 Правила документации (SSOT)
 
-### Для разработчиков
-- **[CLAUDE.md](CLAUDE.md)** - инструкции для работы с Claude Code
-- **[CHANGELOG.md](CHANGELOG.md)** - история изменений
-- **[docs/chart-presets.md](docs/chart-presets.md)** - документация по пресетам графиков
+### Установка и настройка
+- **[docs/setup.md](docs/setup.md)** - Детальная установка и настройка
+- **[scripts/README.md](scripts/README.md)** - Скрипты управления проектом (start.sh, stop.sh, status.sh)
+- **[docs/troubleshooting.md](docs/troubleshooting.md)** - Решение проблем
+
+### Референсная документация
+- **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly docs
+- **[docs/file-formats/README.md](docs/file-formats/README.md)** - Форматы файлов (.det, .pou, .prt)
+- **[docs/PARAMETERS-REFERENCE.md](docs/PARAMETERS-REFERENCE.md)** - Справочник всех 73 параметров двигателя
 - **[docs/decisions/](docs/decisions/)** - Architecture Decision Records (ADRs)
 
 ### Техническое задание
-- **[engine-viewer-tech-spec .md](engine-viewer-tech-spec%20.md)** - полное ТЗ
-- **[DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md)** - правила документации
+- **[engine-viewer-tech-spec .md](engine-viewer-tech-spec%20.md)** - Полное ТЗ (устарело, см. architecture.md)
 
 ---
 
