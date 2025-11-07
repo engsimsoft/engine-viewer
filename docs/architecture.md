@@ -17,6 +17,8 @@
   - [Parser System (Registry Pattern)](#parser-system-registry-pattern)
   - [Metadata System](#metadata-system)
   - [File Scanner](#file-scanner)
+  - [Metadata Architecture](#metadata-architecture)
+  - [Configuration History](#configuration-history)
   - [API Routes](#api-routes)
 - [Frontend архитектура](#frontend-архитектура)
   - [HomePage Dashboard](#homepage-dashboard)
@@ -658,6 +660,303 @@ async function scanDirectory(dirPath) {
   return projects;
 }
 ```
+
+**File Watching (Real-time monitoring):**
+
+✅ **ENABLED** - файловый watcher работает автоматически при старте backend!
+
+```javascript
+// backend/src/server.js:162
+// Автоматически запускается при npm run backend
+
+fileWatcher = createFileWatcher(
+  dataFolderPath,
+  config.files.extensions,
+  {
+    onAdd: async (filePath) => {
+      console.log(`[FileWatcher] File added: ${filePath}`);
+      // Auto-update metadata for .prt files
+    },
+    onChange: async (filePath) => {
+      console.log(`[FileWatcher] File changed: ${filePath}`);
+      // Re-process .prt → update auto metadata
+    },
+    onRemove: (filePath) => {
+      console.log(`[FileWatcher] File removed: ${filePath}`);
+    }
+  }
+);
+```
+
+**Особенности:**
+- ✅ Chokidar-based (node_modules/chokidar)
+- ✅ Рекурсивное отслеживание всех подпапок
+- ✅ `awaitWriteFinish` - ждёт завершения записи (500ms стабильности)
+- ✅ Автоматическое обновление metadata при изменении .prt файла
+- ⏳ Frontend auto-reload - future enhancement (WebSocket не реализован)
+
+**Текущее поведение:**
+- Backend знает об изменениях → файловый watcher работает
+- Frontend НЕ знает → требуется manual refresh (F5) в браузере
+
+---
+
+### Metadata Architecture
+
+**Назначение:** Архитектурные решения по хранению, управлению и версионированию metadata.
+
+#### Storage Location
+
+**Решение:** `.metadata/` внутри папки проекта (subfolder approach)
+
+**Production Structure:**
+```
+C:/4Stroke/ProjectName/
+├── ProjectName.det               # ✅ EngMod4T результаты (READ-ONLY)
+├── ProjectName.pou               # ✅ EngMod4T результаты (READ-ONLY)
+└── .metadata/                    # ✅ Engine Viewer данные (наша территория)
+    ├── project-metadata.json     # UI metadata (tags, client, notes, status, color)
+    ├── marker-tracking.json      # Timestamps когда markers были обнаружены
+    └── prt-versions/             # Configuration snapshots (.prt для каждого marker)
+        ├── $baseline.prt
+        ├── $v2.prt
+        └── $v15_final.prt
+```
+
+**Обоснование:**
+
+1. **File Ownership Contract (EngMod4T Suite Architecture)**
+   - `C:/4Stroke/` ROOT принадлежит EngMod4T Suite
+   - **SUBFOLDERS** `C:/4Stroke/ProjectName/` - результаты расчётов
+   - ✅ `.metadata/` в subfolder = наша территория (не нарушает contract)
+
+2. **Locality (всё в одном месте)**
+   - Simulation data (.det, .pou) и metadata рядом
+   - Backup простой: копируешь папку проекта → всё сохранено
+   - Переносишь папку → metadata не теряется
+
+3. **Post4T Compatibility**
+   - Post4T игнорирует папки начинающиеся с точки (`.metadata/`)
+   - Не сломаем workflow инженеров
+
+4. **Один компьютер = один инженер**
+   - НЕТ shared network folders
+   - НЕТ multi-user на одном компьютере
+   - AppData/Local/ не нужен (нет преимуществ)
+
+5. **Separation of Concerns**
+   - Simulation Data (EngMod4T) ≠ UI Metadata (Engine Viewer)
+   - `.prt, .det, .pou` - simulation input/output
+   - `.metadata/*.json` - UI preferences и configuration history
+
+**См. также:** [ADR 007: Metadata Storage Location](decisions/007-metadata-storage-location.md)
+
+---
+
+#### Conflict Handling
+
+**Решение:** Last-write-wins (single-user программа)
+
+**Контекст:**
+- 👤 **Один пользователь** на одном компьютере
+- 🏠 **Персональная программа** (не shared environment)
+- 🚫 **НЕТ multi-user scenarios**
+
+**Вывод:** Конфликты метаданных **физически невозможны** в этом use case.
+
+**Current Implementation:**
+```javascript
+async function saveMetadata(projectId, metadata) {
+  // Simply overwrite the file (last-write-wins)
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+  // No locking, no version checking
+  return { success: true };
+}
+```
+
+**Преимущества:**
+- ✅ Простота реализации (уже работает)
+- ✅ Нет overhead на проверки/блокировки
+- ✅ Подходит для single-user программы
+- ✅ YAGNI (You Aren't Gonna Need It) - не добавляем функциональность "на будущее"
+
+---
+
+#### Git Strategy
+
+**Решение:** Development examples tracked, Production ignored
+
+**Development (test-data/):**
+- ✅ **Commit примеры metadata** в git
+- **Почему:**
+  - Примеры показывают функциональность
+  - Новые пользователи видят как заполнять metadata
+  - Не содержат реальных personal данных
+
+**Production (C:/4Stroke/):**
+- ✅ **`.metadata/` в `.gitignore`**
+- **Почему:**
+  - Personal data (заметки инженера, клиенты, статусы)
+  - 50+ проектов → 50+ metadata файлов
+  - Не должны попадать в shared repository
+
+**.gitignore pattern:**
+```gitignore
+# Production metadata - NOT tracked ❌
+.metadata/*
+
+# Except examples (whitelist) ✅
+!.metadata/bmw-m42.json
+!.metadata/vesta-16-im.json
+!.metadata/4-cyl-itb.json
+
+# Also ignore marker tracking
+.metadata/marker-tracking.json
+
+# PRT versions (snapshots, can be large)
+.metadata/prt-versions/
+```
+
+**См. также:** [ADR 007: Metadata Storage Location](decisions/007-metadata-storage-location.md)
+
+---
+
+### Configuration History
+
+**Назначение:** Killer-feature для автоматического отслеживания изменений конфигурации двигателя.
+
+**Статус:** ⏳ **Не реализовано** - планируется для будущей версии
+
+---
+
+#### Бизнес-проблема
+
+**Текущая ситуация (без Configuration History):**
+- Инженер делает **42+ расчёта** для одного проекта
+- Каждый расчёт = изменения в конфигурации (bore, stroke, valve timing, etc.)
+- **Вручную** ведётся Excel таблица с описанием изменений
+- **Проблемы:**
+  - ❌ Забываешь что менял 2 недели назад
+  - ❌ Нет автоматического diff между конфигурациями
+  - ❌ Нельзя посмотреть "какая конфигурация была в расчёте $15?"
+  - ❌ Manual tracking = errors & time waste
+
+**Это главная боль (killer-feature)** которую должен решить Engine Viewer!
+
+---
+
+#### Решение: Automatic Configuration History
+
+**Концепция:**
+1. **Автоматическое сохранение .prt snapshot** при каждом новом marker
+2. **Configuration History UI** - визуализация всех конфигураций проекта
+3. **Configuration Viewer** - отображение parsed .prt в human-readable формате
+4. **Configuration Diff** - сравнение двух конфигураций с highlight изменений
+
+**Workflow:**
+```
+1. User запускает EngMod4T расчёт → создаётся marker $1
+2. Engine Viewer автоматически:
+   - Копирует ProjectName.prt → .metadata/prt-versions/$1.prt
+   - Обновляет marker-tracking.json: { "$1": { timestamp, prtHash } }
+3. User делает изменения → запускает расчёт $2
+4. Engine Viewer сохраняет новую конфигурацию $2
+5. User открывает "Configuration History" tab
+6. Видит список всех конфигураций с timestamps
+7. Может просмотреть любую конфигурацию
+8. Может сравнить любые две конфигурации (visual diff)
+```
+
+---
+
+#### Что решает Configuration History
+
+**Заменяет:**
+- ❌ Manual Excel tracking (42+ rows)
+- ❌ "Что я менял 2 недели назад?"
+- ❌ "Какая конфигурация была в расчёте $15?"
+
+**Даёт:**
+- ✅ Автоматическое отслеживание всех изменений
+- ✅ Visual diff между любыми конфигурациями
+- ✅ Timeline всех расчётов с timestamps
+- ✅ Возможность вернуться к любой предыдущей конфигурации
+
+---
+
+#### UI Концепция
+
+**Configuration History Tab** (на одном уровне с Metadata tab):
+```
+┌──────────────────────────────────────────────────────────┐
+│ Configuration History для "ProjectName"                  │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│ ✅ $baseline                                             │
+│ Конфигурация сохранена                                   │
+│ Сохранена: 7 ноя 2025, 10:00                            │
+│ [Просмотр] [Сравнить с текущей]                         │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│ ✅ $v2                                                   │
+│ Конфигурация сохранена                                   │
+│ Сохранена: 7 ноя 2025, 14:30                            │
+│ [Просмотр] [Сравнить с baseline]                        │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│ ⚠️ $v3                                                   │
+│ Configuration not saved                                  │
+│ Обнаружен: 7 ноя 2025, 16:00                            │
+│ [💾 Сохранить текущую как $v3]                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### Структура данных (концептуально)
+
+```
+.metadata/
+├── prt-versions/                    # Snapshots .prt файлов
+│   ├── $baseline.prt               # Конфигурация для marker $baseline
+│   ├── $v2.prt                     # Конфигурация для marker $v2
+│   └── $v15_final.prt              # Конфигурация для marker $v15_final
+│
+└── marker-tracking.json            # Tracking metadata
+    {
+      "$baseline": {
+        "timestamp": "2025-11-07T10:00:00Z",
+        "prtHash": "abc123",
+        "hasPrtSnapshot": true
+      },
+      "$v2": {
+        "timestamp": "2025-11-07T14:30:00Z",
+        "prtHash": "def456",
+        "hasPrtSnapshot": true
+      },
+      "$v3": {
+        "timestamp": "2025-11-07T16:00:00Z",
+        "prtHash": null,
+        "hasPrtSnapshot": false,
+        "warning": "Configuration not saved (opened Engine Viewer after multiple calculations)"
+      }
+    }
+```
+
+---
+
+#### Техническая реализация
+
+**Отложено на будущее обсуждение.**
+
+Сейчас зафиксировано **ЧТО** (WHAT) и **ПОЧЕМУ** (WHY).
+
+**КАК** (HOW) будет обсуждено при планировании roadmap для этой фичи.
+
+**См. также:** [ADR 008: Configuration History](decisions/008-configuration-history.md)
 
 ---
 
