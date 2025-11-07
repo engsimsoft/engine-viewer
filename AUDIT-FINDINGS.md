@@ -1116,4 +1116,120 @@ This audit document serves as a baseline for:
 
 ---
 
-**END OF AUDIT FINDINGS**
+## 8. ✅ AUDIT CORRECTIONS (Post-Verification)
+
+**Verification Date:** 2025-11-07
+**Method:** Read actual source code, count lines, verify logic
+**Report:** [AUDIT-VERIFICATION.md](AUDIT-VERIFICATION.md)
+
+### 8.1 Line Counts - Corrections
+
+**Backend Parsers (errors found):**
+| File | Audit Claim | Reality | Correction |
+|------|-------------|---------|------------|
+| detParser.js | 286 lines | **269 lines** | -17 lines (6% overestimate) |
+| pouParser.js | 418 lines | **370 lines** | -48 lines (13% overestimate) |
+| prtParser.js | 540 lines | **470 lines** | -70 lines (15% overestimate) |
+
+**Frontend Chart Presets (errors found):**
+| File | Audit Claim | Reality | Correction |
+|------|-------------|---------|------------|
+| ChartPreset2.tsx | 300 lines | **400 lines** | +100 lines (25% underestimate) |
+| ChartPreset3.tsx | 350 lines | **425 lines** | +75 lines (18% underestimate) |
+| ChartPreset4.tsx | 400 lines | **498 lines** | +98 lines (20% underestimate) |
+| ChartPreset5.tsx | 280 lines | **399 lines** | +119 lines (30% underestimate) |
+| ChartPreset6.tsx | 320 lines | **470 lines** | +150 lines (32% underestimate) |
+
+**Accurate Claims (verified ✅):**
+- Backend services/routes: All within ±1 line (acceptable)
+- appStore.ts: 357 lines (perfect match)
+- types/index.ts: 346 lines (perfect match)
+- Number of chart presets: 6 (correct)
+
+---
+
+### 8.2 CONTRADICTION #1 - Status Update
+
+**Original Claim (Section 5.1):**
+> docs/architecture.md shows `.metadata/` inside `C:/4Stroke/ProjectName/`
+
+**Verification Result:** ✅ **RESOLVED - docs/architecture.md already corrected**
+
+**Current State (verified):**
+- docs/architecture.md line 230: "engine-viewer/.metadata/ ← В КОРНЕ проекта Engine Viewer!"
+- docs/architecture.md line 238: ".metadata/*.json (в engine-viewer/.metadata/)"
+- docs/architecture.md line 592: ".metadata/ ← Metadata storage (в корне проекта!)"
+- docs/architecture.md line 615: ".metadata/ находится в КОРНЕ engine-viewer/"
+
+**Conclusion:** CONTRADICTION #1 is no longer valid. Documentation was corrected after audit was written.
+
+---
+
+### 8.3 Root Cause Analysis
+
+**Why were line counts wrong?**
+
+1. **Backend parsers (overestimated):**
+   - Possible cause: Counted comments/blank lines differently, or based on outdated version
+   - Impact: LOW - differences are 6-15%, doesn't affect functionality
+
+2. **Frontend presets (underestimated by 20-32%):**
+   - Cause: **Audit written without checking actual files**
+   - Evidence: Severe underestimation suggests guessing rather than measuring
+   - Impact: HIGH - confirms user complaint "ты создаешь документацию которую выдумываешь"
+
+**Key Finding:** Parts of audit were written without reading actual source code, especially frontend components.
+
+---
+
+### 8.4 Verified Accurate Claims
+
+The following audit claims were verified against real code and found CORRECT:
+
+1. ✅ **`.metadata/` location** - Project root (metadataService.js:38 confirmed)
+2. ✅ **Intake system detection** - prtParser.js lines 171-208 (logic verified)
+3. ✅ **6 chart presets** - Counted actual files
+4. ✅ **Parameter name mapping** - detParser.js line 23, pouParser.js line 26 (verified)
+5. ✅ **First column handling** - Fixed-width format parsed with `split(/\s+/)` (verified)
+6. ✅ **Metadata structure v1.0** - auto/manual separation (metadataService.js verified)
+
+---
+
+### 8.5 Documentation Standards Update
+
+**New Rule Added to CLAUDE.md:**
+```markdown
+## ⚠️ CODE IS SINGLE SOURCE OF TRUTH
+
+BEFORE writing/updating documentation:
+1. Read CODE using Read tool
+2. Verify what code ACTUALLY does
+3. Count lines with wc -l
+4. Record file:line references
+
+FORBIDDEN:
+- Write documentation "from memory"
+- Make assumptions about code
+- Guess line counts or file sizes
+- Copy old docs without verification
+```
+
+**Files Updated:**
+- [CLAUDE.md](CLAUDE.md) - Removed reference to deleted ARCHITECT-CONTEXT.md
+- [CLAUDE.md](CLAUDE.md) - Added links to AUDIT-FINDINGS.md and AUDIT-VERIFICATION.md
+- [AUDIT-VERIFICATION.md](AUDIT-VERIFICATION.md) - Created comprehensive verification report
+
+---
+
+### 8.6 Remaining Issues
+
+**From Priority 1 (Technical Debt):**
+1. ✅ **docs/architecture.md errors** - RESOLVED (already corrected)
+2. ⚠️ **38 uncommitted metadata files** - STILL OPEN (need decision: commit or gitignore)
+3. ⚠️ **No deployment guide** - STILL OPEN (docs/deployment.md needed)
+
+**Recommendation:** Address remaining Priority 1 issues in next iteration.
+
+---
+
+**END OF AUDIT FINDINGS (with corrections applied)**
