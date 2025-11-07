@@ -238,9 +238,10 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 
 **Основная документация:**
 - **[README.md](README.md)** - точка входа в проект, быстрый старт
-- **[ARCHITECT-CONTEXT.md](ARCHITECT-CONTEXT.md)** - контекст для Claude Chat (architect mode)
 - **[DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md)** - правила документации (SSOT), чек-листы
 - **[CHANGELOG.md](CHANGELOG.md)** - история изменений, версии
+- **[AUDIT-FINDINGS.md](AUDIT-FINDINGS.md)** - audit v2.0.0 (codebase state, issues, questions)
+- **[AUDIT-VERIFICATION.md](AUDIT-VERIFICATION.md)** - verification report (audit claims vs real code)
 
 **Техническая документация:**
 - **[docs/architecture.md](docs/architecture.md)** - полная архитектура (включает API, chart presets, parsers guide, data flow, паттерны)
