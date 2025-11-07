@@ -241,7 +241,7 @@ legend: [`${calc.name} - Мощность`]   // ❌ Перевод запрещ
 - **[DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md)** - правила документации (SSOT), чек-листы
 - **[CHANGELOG.md](CHANGELOG.md)** - история изменений, версии
 - **[AUDIT-FINDINGS.md](AUDIT-FINDINGS.md)** - audit v2.0.0 (codebase state, issues, questions)
-- **[AUDIT-VERIFICATION.md](AUDIT-VERIFICATION.md)** - verification report (audit claims vs real code)
+- **[DEVELOPMENT-PLAN.md](DEVELOPMENT-PLAN.md)** - roadmap v2.1+ (answers to audit questions)
 
 **Техническая документация:**
 - **[docs/architecture.md](docs/architecture.md)** - полная архитектура (включает API, chart presets, parsers guide, data flow, паттерны)
