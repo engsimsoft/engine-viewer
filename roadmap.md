@@ -112,7 +112,7 @@
 - [X] Обновить CHANGELOG.md - добавить новый endpoint и компоненты (10 мин) ✅
 - [X] Запустить `./scripts/check-doc-links.sh` (2 мин) ✅ All links valid
 - [X] Протестировать: API endpoint + Project Overview page (15 мин) ✅ User confirmed
-- [ ] Git commit: `feat(api,ui): add project overview with summary endpoint` (5 мин)
+- [X] Git commit: `feat(api,ui): add project overview with summary endpoint` (5 мин) ✅ Commit 9a4a3ce
 
 **Deliverable:** ✅ Project Overview works, navigation correct, API returns data, documented, committed
 
@@ -323,11 +323,15 @@
 **Проблемы:**
 - ✅ FIXED: LucideIcon type not exported → used `type IconComponent = typeof TrendingUp`
 
+**Git Commit:**
+- [X] Commit 9a4a3ce: `feat(api,ui): add project overview with summary endpoint` ✅
+  - 45 files changed, 2324 insertions(+), 50 deletions(-)
+  - Created: ProjectOverviewPage, AnalysisTypeCard, useProjectSummary, roadmap.md
+  - Modified: App.tsx, HomePage.tsx, CHANGELOG.md, data.js
+
 **Следующее:**
-- [ ] Обновить CHANGELOG.md
-- [ ] Запустить ./scripts/check-doc-links.sh
-- [ ] Git commit: `feat(api,ui): add project overview with summary endpoint`
 - Начать Этап 2: Refactoring & Reusable Components
+- PerformancePage переименование, AnalysisPageLayout, Breadcrumbs
 
 **Заметки:**
 - Упростили HomePage UX - только shortcut button (без dual-button UI)
