@@ -28,7 +28,7 @@
  * ```
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../stores/appStore';
 import type { CalculationReference } from '../types/v2';
@@ -183,12 +183,16 @@ export function useDeepLinking(projectId: string) {
   const addComparison = useAppStore((state) => state.addComparison);
   const clearComparisons = useAppStore((state) => state.clearComparisons);
 
+  // Track if we're currently syncing URL → Store to prevent Store → URL from triggering
+  const isSyncingFromURLRef = useRef(false);
+
   // ============================================================
   // URL → Store (on mount & browser Back/Forward)
   // ============================================================
 
   useEffect(() => {
     const syncFromURL = async () => {
+      isSyncingFromURLRef.current = true;
 
       // Read URL params
       const presetParam = searchParams.get('preset');
@@ -248,6 +252,8 @@ export function useDeepLinking(projectId: string) {
         }
       }
       // Note: Don't clear comparisons if URL empty - Store → URL will sync URL to match store
+
+      isSyncingFromURLRef.current = false;
     };
 
     syncFromURL();
@@ -258,8 +264,8 @@ export function useDeepLinking(projectId: string) {
   // ============================================================
 
   useEffect(() => {
-    // Don't block this effect - let it always sync store → URL
-    // The URL → Store effect will handle avoiding duplicates
+    // Skip if we're currently syncing URL → Store (prevent infinite loop)
+    if (isSyncingFromURLRef.current) return;
 
     const params = new URLSearchParams();
 
