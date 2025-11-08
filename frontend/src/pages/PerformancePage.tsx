@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useAppStore } from '@/stores/appStore';
+import { useDeepLinking } from '@/hooks/useDeepLinking';
 import { ChartExportProvider } from '@/contexts/ChartExportContext';
 import { Header } from '@/components/performance/Header';
 import { LeftPanel } from '@/components/performance/LeftPanel';
@@ -46,6 +47,9 @@ import ErrorMessage from '@/components/shared/ErrorMessage';
 export default function PerformancePage() {
   // projectId from URL - initial context for Phase 2
   const { id } = useParams<{ id: string }>();
+
+  // v3.0: Deep linking - sync URL params with store state
+  useDeepLinking(id || '');
 
   // Load project data
   const { project, loading, error, refetch } = useProjectData(id);
