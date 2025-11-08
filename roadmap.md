@@ -334,17 +334,22 @@
 - Header теперь переиспользуется для Performance, Traces, Config History
 - Breadcrumbs добавлены только на Level 3 (как и планировалось)
 
+**Git Commit Этап 2:**
+- [X] Commit 7471af4: `refactor(ui): rename to PerformancePage, add breadcrumbs navigation` ✅
+  - 65 files changed, 1415 insertions(+), 127 deletions(-)
+  - Created: Breadcrumbs.tsx, pvd-format.md, trace-files.md
+  - Renamed: ProjectPage → PerformancePage, visualization/ → performance/ (20+ components)
+  - Modified: Header.tsx (generic props), App.tsx, CHANGELOG.md, roadmap.md
+
 **Следующее:**
-- [ ] Обновить CHANGELOG.md
-- [ ] Запустить ./scripts/check-doc-links.sh
-- [ ] Git commit для Этапа 2
-- [ ] User testing: breadcrumbs + navigation
-- Начать Этап 3: State Management & Deep Linking (или пропустить если не нужен)
+- [ ] User testing: breadcrumbs + navigation ← READY FOR TESTING 🚀
+- Начать Этап 3: State Management & Deep Linking (опционально - спросить у user)
 
 **Заметки:**
 - Breadcrumbs format: Engine Viewer > Vesta 1.6 IM > Performance & Efficiency
 - Back button теперь возвращает на Project Overview (а не на HomePage)
 - Header component generic → легко добавить Traces, Config History pages
+- Упрощение: вместо AnalysisPageLayout → generic Header (проще и гибче)
 
 ---
 
