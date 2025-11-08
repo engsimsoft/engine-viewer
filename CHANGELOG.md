@@ -36,6 +36,13 @@
   - Returns `{ summary, loading, error }` states
   - **File**: `frontend/src/hooks/useProjectSummary.ts`
 
+- **Breadcrumbs navigation component**:
+  - Shows on Level 3 pages (Analysis Pages: Performance, Traces, etc.)
+  - Format: "Engine Viewer > Project Name > Analysis Type"
+  - Clickable links with ChevronRight separators
+  - Text truncation on small screens
+  - **File**: `frontend/src/components/navigation/Breadcrumbs.tsx`
+
 ### Changed
 - **BREAKING CHANGE: 3-level routing hierarchy** (v2.0 → v3.0):
   - `/project/:id` now shows ProjectOverviewPage (was: ProjectPage/Performance directly)
@@ -48,6 +55,32 @@
   - "Open Project" button now navigates to `/project/:id/performance` (shortcut to Performance page)
   - Users can manually navigate to `/project/:id` for Project Overview page
   - **File**: `frontend/src/pages/HomePage.tsx`
+
+- **ProjectPage renamed to PerformancePage** (clarity):
+  - More descriptive name for Performance & Efficiency analysis page
+  - Function renamed from `ProjectPage()` to `PerformancePage()`
+  - Updated comments and documentation
+  - **File**: `frontend/src/pages/PerformancePage.tsx` (was ProjectPage.tsx)
+
+- **components/visualization/ renamed to components/performance/**:
+  - Better reflects purpose (Performance-specific components)
+  - All 20+ components moved to new directory
+  - All imports updated automatically
+  - **Directory**: `frontend/src/components/performance/`
+
+- **Header component made generic and reusable**:
+  - Now accepts props: `title`, `backHref`, `breadcrumbs` (all optional)
+  - Default title: "Performance & Efficiency" (backwards compatible)
+  - Default backHref: "/" (backwards compatible)
+  - Breadcrumbs optional - shown only when provided
+  - Reusable for all analysis pages (Performance, Traces, Config History, etc.)
+  - Back button destination now configurable
+  - **File**: `frontend/src/components/performance/Header.tsx`
+
+- **PerformancePage now shows breadcrumbs**:
+  - Breadcrumbs: "Engine Viewer > Project Name > Performance & Efficiency"
+  - Back button returns to Project Overview (not HomePage)
+  - **File**: `frontend/src/pages/PerformancePage.tsx`
 
 ---
 

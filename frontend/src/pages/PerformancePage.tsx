@@ -3,27 +3,27 @@ import { useParams } from 'react-router-dom';
 import { useProjectData } from '@/hooks/useProjectData';
 import { useAppStore } from '@/stores/appStore';
 import { ChartExportProvider } from '@/contexts/ChartExportContext';
-import { Header } from '@/components/visualization/Header';
-import { LeftPanel } from '@/components/visualization/LeftPanel';
-import { PrimarySelectionModal } from '@/components/visualization/PrimarySelectionModal';
-import { ComparisonModal } from '@/components/visualization/ComparisonModal';
-import { ChartPreset1 } from '@/components/visualization/ChartPreset1';
-import { ChartPreset2 } from '@/components/visualization/ChartPreset2';
-import { ChartPreset3 } from '@/components/visualization/ChartPreset3';
-import { ChartPreset4 } from '@/components/visualization/ChartPreset4';
-import { ChartPreset5 } from '@/components/visualization/ChartPreset5';
-import { ChartPreset6 } from '@/components/visualization/ChartPreset6';
-import { DataTable } from '@/components/visualization/DataTable';
+import { Header } from '@/components/performance/Header';
+import { LeftPanel } from '@/components/performance/LeftPanel';
+import { PrimarySelectionModal } from '@/components/performance/PrimarySelectionModal';
+import { ComparisonModal } from '@/components/performance/ComparisonModal';
+import { ChartPreset1 } from '@/components/performance/ChartPreset1';
+import { ChartPreset2 } from '@/components/performance/ChartPreset2';
+import { ChartPreset3 } from '@/components/performance/ChartPreset3';
+import { ChartPreset4 } from '@/components/performance/ChartPreset4';
+import { ChartPreset5 } from '@/components/performance/ChartPreset5';
+import { ChartPreset6 } from '@/components/performance/ChartPreset6';
+import { DataTable } from '@/components/performance/DataTable';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
 /**
- * Project Visualization Page (Phase 2 - Integrated)
+ * Performance & Efficiency Analysis Page (Phase 2 - v3.0)
  *
- * IMPORTANT (v2.0 Architecture):
+ * IMPORTANT (v3.0 Architecture):
+ * - Route: /project/:id/performance (Level 3 in 3-level hierarchy)
  * - projectId from URL (:id) is used as INITIAL CONTEXT for visualization
  * - This is NOT a limitation - user can compare calculations from ANY projects
- * - In Phase 2: projectId determines which project to show in Primary Selection Modal by default
  * - Cross-project comparison fully supported through useMultiProjectData hook
  *
  * Phase 2 Updates:
@@ -32,13 +32,18 @@ import ErrorMessage from '@/components/shared/ErrorMessage';
  * - All UI text in English
  * - Connected to Zustand store
  *
+ * v3.0 Changes:
+ * - Renamed from ProjectPage to PerformancePage (clarity)
+ * - Part of 3-level routing: HomePage → ProjectOverviewPage → PerformancePage
+ * - Displays: Power, Torque, MEP, BSFC, Efficiency charts
+ *
  * Displays:
  * - Project header with back button and settings
  * - Left panel: Primary selector + Presets + Comparisons
  * - Chart area: Selected preset visualization
  * - Data table with export (CSV, Excel)
  */
-export default function ProjectPage() {
+export default function PerformancePage() {
   // projectId from URL - initial context for Phase 2
   const { id } = useParams<{ id: string }>();
 
@@ -105,8 +110,16 @@ export default function ProjectPage() {
   return (
     <ChartExportProvider>
       <div className="min-h-screen bg-background flex flex-col">
-        {/* Header Component (Phase 2 - Updated: Performance & Efficiency) */}
-        <Header />
+        {/* Header Component (v3.0 - with Breadcrumbs) */}
+        <Header
+          title="Performance & Efficiency"
+          backHref={`/project/${id}`}
+          breadcrumbs={[
+            { label: 'Engine Viewer', href: '/' },
+            { label: project.name, href: `/project/${id}` },
+            { label: 'Performance & Efficiency' }
+          ]}
+        />
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">

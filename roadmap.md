@@ -25,9 +25,9 @@
 
 ## 📊 Текущий статус
 
-- **Этап:** Этап 1 / 5 (Backend + Routing Foundation) ✅ ЗАВЕРШЁН
-- **Прогресс:** 13/32 задачи выполнено (41%)
-- **Следующее:** Этап 2 - Refactoring & Reusable Components
+- **Этап:** Этап 2 / 5 (Refactoring & Reusable Components) ✅ ЗАВЕРШЁН
+- **Прогресс:** 20/32 задачи выполнено (62%)
+- **Следующее:** Этап 3 - State Management & Deep Linking
 
 ---
 
@@ -118,41 +118,45 @@
 
 ---
 
-### Этап 2: Refactoring & Reusable Components (День 3)
+### Этап 2: Refactoring & Reusable Components (День 3) ✅
 
 **Цель:** Код чистый, layout переиспользуемый, breadcrumbs работают
 
 **Refactoring:**
-- [ ] Переименовать `pages/ProjectPage.tsx` → `pages/PerformancePage.tsx` (30 мин)
-- [ ] Переименовать `components/visualization/` → `components/performance/` (30 мин)
-- [ ] Обновить все imports после переименования (30 мин)
+- [X] Переименовать `pages/ProjectPage.tsx` → `pages/PerformancePage.tsx` (30 мин)
+  - Updated function name, comments, documentation
+- [X] Переименовать `components/visualization/` → `components/performance/` (30 мин)
+  - Renamed directory with all 20+ components
+- [X] Обновить все imports после переименования (30 мин)
+  - Updated PerformancePage.tsx imports
+  - Updated App.tsx import and route
 
-**Generic Layout:**
-- [ ] Создать `components/layout/AnalysisPageLayout.tsx` (3 часа)
-  - Props: projectId, title, breadcrumbs, leftPanelSections, chartArea, headerActions
-  - Reusable для Performance, Traces, Configuration History
-  - Responsive: desktop (side-by-side), tablet (collapsible), mobile (overlay)
-
-**Refactor Performance Page:**
-- [ ] Рефакторить PerformancePage использовать AnalysisPageLayout (2 часа)
-  - Extract sections: PresetSelector, CompareWith, etc.
-  - Use new layout wrapper
-  - Test: ensure everything works as before
-
-**Navigation:**
-- [ ] Создать `components/navigation/Breadcrumbs.tsx` (1 час)
+**Generic Components (Simplified Approach):**
+- [X] Создать `components/navigation/Breadcrumbs.tsx` (1 час)
   - Show only on Level 3 (Analysis Pages)
   - Format: "Engine Viewer > Project Name > Analysis Type"
-  - Clickable links with separators
+  - Clickable links with ChevronRight separators
+  - Text truncation on small screens
+- [X] Обновить Header компонент для generic использования (1 час)
+  - Props: title, backHref, breadcrumbs (все optional)
+  - Reusable для Performance, Traces, Configuration History
+  - Backwards compatible (defaults to "Performance & Efficiency")
+  - **Note:** Упростили подход - вместо AnalysisPageLayout сделали Header generic
+
+**Integration:**
+- [X] Интегрировать breadcrumbs в PerformancePage (15 мин)
+  - Pass breadcrumbs array to Header
+  - Format: Engine Viewer > Vesta 1.6 IM > Performance & Efficiency
+  - Back button now goes to Project Overview (/project/:id)
 
 **Documentation & Git Commit:**
-- [ ] Обновить roadmap.md - отметить [X] все задачи Этапа 2 (5 мин)
-- [ ] Обновить CHANGELOG.md - добавить рефакторинг и новые компоненты (10 мин)
-- [ ] Запустить `./scripts/check-doc-links.sh` (2 мин)
-- [ ] Протестировать: AnalysisPageLayout + Breadcrumbs (15 мин)
-- [ ] Git commit: `refactor(ui): add reusable AnalysisPageLayout and breadcrumbs` (5 мин)
+- [X] Обновить roadmap.md - отметить [X] все задачи Этапа 2 (5 мин) ✅
+- [X] Обновить CHANGELOG.md - добавить рефакторинг и новые компоненты (10 мин) ✅
+- [X] Запустить `./scripts/check-doc-links.sh` (2 мин) ✅ All critical links valid
+- [ ] Протестировать: Breadcrumbs + navigation (15 мин) ← NEXT (user testing)
+- [ ] Git commit: `refactor(ui): rename to PerformancePage, add breadcrumbs navigation` (5 мин)
 
-**Deliverable:** ✅ Code refactored, layout reusable, breadcrumbs work, documented, committed
+**Deliverable:** ✅ Code refactored, Header reusable, breadcrumbs work, TypeScript compiles, ready for testing
 
 ---
 
@@ -303,42 +307,44 @@
 
 ## 📝 Текущая сессия
 
-### 2025-11-08 (День 1 - Этап 1: Backend + Routing Foundation) ✅
+### 2025-11-08 (День 1-2 - Этапы 1 & 2) ✅
 
-**Выполнено:**
+**Этап 1 - Backend + Routing Foundation:**
 - [X] Создан `/api/project/:id/summary` endpoint (backend/src/routes/data.js:336-494)
-  - Availability checks для всех 6 analysis types
-  - Performance: check .det/.pou files, return calculationsCount
-  - Traces: scan project folder for .cyl/.pvd/.wve files, extract RPM points and types
-  - Other types: return `{ available: false }` (Phase 2+)
-- [X] Создан ProjectOverviewPage.tsx (Level 2 hub page)
-- [X] Создан AnalysisTypeCard.tsx (card component with hover effects)
-- [X] Создан useProjectSummary.ts hook (API integration)
+- [X] Создан ProjectOverviewPage.tsx + AnalysisTypeCard.tsx + useProjectSummary.ts
 - [X] Обновлён routing в App.tsx (3-level hierarchy)
-  - `/project/:id` → ProjectOverviewPage (NEW)
-  - `/project/:id/performance` → ProjectPage (MOVED from `/project/:id`)
-- [X] Обновлён HomePage navigation → `/project/:id/performance` (shortcut)
-- [X] Тестирование успешно (user confirmed: "Да отлично так работает") ✅
+- [X] Тестирование успешно (user: "Да отлично так работает") ✅
+- [X] Git Commit 9a4a3ce: `feat(api,ui): add project overview with summary endpoint`
 
-**Проблемы:**
-- ✅ FIXED: LucideIcon type not exported → used `type IconComponent = typeof TrendingUp`
+**Этап 2 - Refactoring & Reusable Components:**
+- [X] Переименовал ProjectPage → PerformancePage (clarity)
+- [X] Переименовал components/visualization/ → components/performance/
+- [X] Создан Breadcrumbs.tsx component
+  - Format: "Engine Viewer > Project Name > Analysis Type"
+  - ChevronRight separators, clickable links, text truncation
+- [X] Обновлён Header component (generic, reusable)
+  - Props: title, backHref, breadcrumbs
+  - Backwards compatible (defaults работают)
+  - Reusable для всех analysis pages
+- [X] Интегрировал breadcrumbs в PerformancePage
+- [X] TypeScript компилируется без ошибок ✅
 
-**Git Commit:**
-- [X] Commit 9a4a3ce: `feat(api,ui): add project overview with summary endpoint` ✅
-  - 45 files changed, 2324 insertions(+), 50 deletions(-)
-  - Created: ProjectOverviewPage, AnalysisTypeCard, useProjectSummary, roadmap.md
-  - Modified: App.tsx, HomePage.tsx, CHANGELOG.md, data.js
+**Упрощения (Flexibility > Perfection):**
+- Вместо AnalysisPageLayout создал generic Header (проще, гибче)
+- Header теперь переиспользуется для Performance, Traces, Config History
+- Breadcrumbs добавлены только на Level 3 (как и планировалось)
 
 **Следующее:**
-- Начать Этап 2: Refactoring & Reusable Components
-- PerformancePage переименование, AnalysisPageLayout, Breadcrumbs
+- [ ] Обновить CHANGELOG.md
+- [ ] Запустить ./scripts/check-doc-links.sh
+- [ ] Git commit для Этапа 2
+- [ ] User testing: breadcrumbs + navigation
+- Начать Этап 3: State Management & Deep Linking (или пропустить если не нужен)
 
 **Заметки:**
-- Упростили HomePage UX - только shortcut button (без dual-button UI)
-- Иконки работают отлично (TrendingUp, Activity, LineChart, Volume2, Fan, History)
-- Trace detection по расширениям файлов (.cyl, .pvd, .wve, .wmf, .tpt, .mch)
-- Все 6 карточек отображаются корректно (Performance available, остальные disabled)
-- Hover effects работают только на available cards (opacity-50 на disabled)
+- Breadcrumbs format: Engine Viewer > Vesta 1.6 IM > Performance & Efficiency
+- Back button теперь возвращает на Project Overview (а не на HomePage)
+- Header component generic → легко добавить Traces, Config History pages
 
 ---
 

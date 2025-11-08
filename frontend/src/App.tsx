@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import ProjectOverviewPage from '@/pages/ProjectOverviewPage';
-import ProjectPage from '@/pages/ProjectPage';
+import PerformancePage from '@/pages/PerformancePage';
 import HelpPage from '@/pages/HelpPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useAppStore } from '@/stores/appStore';
@@ -15,12 +15,13 @@ import './App.css';
  * v3.0 Routing Architecture (3-Level Hierarchy):
  * - Route 1: `/` - HomePage (project list)
  * - Route 2: `/project/:id` - ProjectOverviewPage (analysis type selection HUB)
- * - Route 3: `/project/:id/performance` - ProjectPage (Performance & Efficiency)
+ * - Route 3: `/project/:id/performance` - PerformancePage (Performance & Efficiency)
  * - Route 4: `/help` - HelpPage (parameters documentation)
  *
  * BREAKING CHANGE (v2.0 → v3.0):
  * - `/project/:id` now shows Project Overview (was: Performance page directly)
  * - Performance page moved to `/project/:id/performance`
+ * - ProjectPage renamed to PerformancePage for clarity
  *
  * User Journey:
  * 1. HomePage → select project
@@ -62,7 +63,7 @@ function App() {
 
           {/* Performance & Efficiency - visualization page */}
           {/* :id = initial project context (cross-project comparison supported) */}
-          <Route path="/project/:id/performance" element={<ProjectPage />} />
+          <Route path="/project/:id/performance" element={<PerformancePage />} />
 
           {/* Help page - parameters documentation */}
           <Route path="/help" element={<HelpPage />} />

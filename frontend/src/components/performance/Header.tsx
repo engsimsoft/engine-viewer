@@ -1,14 +1,16 @@
 /**
- * Header Component - Visualization Page Header
+ * Header Component - Analysis Page Header
  *
- * Phase 2 - Section 2.1 (Updated: Performance & Efficiency Header)
+ * Phase 2 v3.0 - Generic Header with Breadcrumbs
  *
  * Layout:
- * [← Back to Projects]  [Performance & Efficiency]  [PNG][SVG][Help][⚙️]
+ * [← Back]  [Title]  [PNG][SVG][Help][⚙️]
+ * [Breadcrumbs] (optional, v3.0 feature)
  *
  * Features:
- * - Back button to navigate to projects list
- * - Static "Performance & Efficiency" title
+ * - Back button (configurable destination)
+ * - Dynamic title (Performance, Traces, Config History, etc.)
+ * - Optional breadcrumbs navigation (v3.0)
  * - Export buttons (PNG, SVG)
  * - Help button to navigate to /help page
  * - Settings popover
@@ -20,31 +22,65 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useChartExport } from '@/contexts/ChartExportContext';
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface HeaderProps {
+  /** Page title (e.g., "Performance & Efficiency", "Traces", etc.) */
+  title?: string;
+  /** Back button destination (default: '/') */
+  backHref?: string;
+  /** Optional breadcrumbs navigation (v3.0 feature) */
+  breadcrumbs?: BreadcrumbItem[];
+}
 
 /**
- * Header Component for Visualization Page
+ * Header Component for Analysis Pages
  *
- * Displays static "Performance & Efficiency" title with navigation and export controls.
+ * v3.0: Now accepts props for title, back navigation, and breadcrumbs.
  *
  * @example
  * ```tsx
- * <Header />
+ * <Header
+ *   title="Performance & Efficiency"
+ *   backHref="/project/vesta-16-im"
+ *   breadcrumbs={[
+ *     { label: 'Engine Viewer', href: '/' },
+ *     { label: 'Vesta 1.6 IM', href: '/project/vesta-16-im' },
+ *     { label: 'Performance & Efficiency' }
+ *   ]}
+ * />
  * ```
  */
-export function Header() {
+export function Header({
+  title = 'Performance & Efficiency',
+  backHref = '/',
+  breadcrumbs
+}: HeaderProps = {}) {
   const navigate = useNavigate();
   const { exportPNG, exportSVG, isExportAvailable } = useChartExport();
 
   /**
-   * Navigate back to projects list
+   * Navigate back (to project overview or projects list)
    */
   const handleBackClick = () => {
-    navigate('/');
+    navigate(backHref);
   };
 
   return (
     <header className="border-b bg-background">
       <div className="container mx-auto px-4 py-4">
+        {/* Breadcrumbs (v3.0 - Level 3 pages only) */}
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <div className="mb-3">
+            <Breadcrumbs items={breadcrumbs} />
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           {/* Left: Back Button */}
           <div className="flex items-center">
@@ -54,15 +90,14 @@ export function Header() {
               className="gap-2 hover:bg-accent"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to Projects</span>
-              <span className="sm:hidden">Back</span>
+              <span className="hidden sm:inline">Back</span>
             </Button>
           </div>
 
-          {/* Center: Static Title */}
+          {/* Center: Page Title */}
           <div className="flex-1 text-center px-4">
             <h1 className="text-xl font-bold text-foreground">
-              Performance & Efficiency
+              {title}
             </h1>
           </div>
 
