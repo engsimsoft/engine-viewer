@@ -54,6 +54,14 @@ export default function AnalysisTypeCard({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Enter or Space opens the card
+    if (available && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      navigate(href);
+    }
+  };
+
   // Build status message based on analysis type
   const getStatusMessage = () => {
     if (!available) {
@@ -85,6 +93,11 @@ export default function AnalysisTypeCard({
         }
       `}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={available ? 0 : -1}
+      role="button"
+      aria-label={`${title}: ${getStatusMessage()}`}
+      aria-disabled={!available}
     >
       <CardHeader>
         <div className="flex items-center gap-3">

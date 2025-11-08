@@ -54,20 +54,22 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <Routes>
-          {/* Home page - project list */}
-          <Route path="/" element={<HomePage />} />
+        <div className="page-container">
+          <Routes>
+            {/* Home page - project list */}
+            <Route path="/" element={<HomePage />} />
 
-          {/* Project Overview - central hub for analysis type selection */}
-          <Route path="/project/:id" element={<ProjectOverviewPage />} />
+            {/* Project Overview - central hub for analysis type selection */}
+            <Route path="/project/:id" element={<ProjectOverviewPage />} />
 
-          {/* Performance & Efficiency - visualization page */}
-          {/* :id = initial project context (cross-project comparison supported) */}
-          <Route path="/project/:id/performance" element={<PerformancePage />} />
+            {/* Performance & Efficiency - visualization page */}
+            {/* :id = initial project context (cross-project comparison supported) */}
+            <Route path="/project/:id/performance" element={<PerformancePage />} />
 
-          {/* Help page - parameters documentation */}
-          <Route path="/help" element={<HelpPage />} />
-        </Routes>
+            {/* Help page - parameters documentation */}
+            <Route path="/help" element={<HelpPage />} />
+          </Routes>
+        </div>
         <Toaster />
       </ErrorBoundary>
     </BrowserRouter>
