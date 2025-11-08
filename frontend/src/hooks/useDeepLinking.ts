@@ -28,7 +28,7 @@
  * ```
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../stores/appStore';
 import type { CalculationReference } from '../types/v2';
@@ -183,16 +183,12 @@ export function useDeepLinking(projectId: string) {
   const addComparison = useAppStore((state) => state.addComparison);
   const clearComparisons = useAppStore((state) => state.clearComparisons);
 
-  // Track if we're currently syncing URL → Store to avoid triggering Store → URL
-  const isSyncingFromURLRef = useRef(false);
-
   // ============================================================
   // URL → Store (on mount & browser Back/Forward)
   // ============================================================
 
   useEffect(() => {
     const syncFromURL = async () => {
-      isSyncingFromURLRef.current = true;
 
       // Read URL params
       const presetParam = searchParams.get('preset');
@@ -227,10 +223,8 @@ export function useDeepLinking(projectId: string) {
             }
           }
         }
-      } else if (primaryCalculation) {
-        // URL has no primary, but store has one → clear store
-        clearPrimaryCalculation();
       }
+      // Note: Don't clear store if URL empty - Store → URL will sync URL to match store
 
       // Sync comparison calculations
       if (compareParam) {
@@ -252,12 +246,8 @@ export function useDeepLinking(projectId: string) {
             addComparison(calcRef);
           }
         }
-      } else if (comparisonCalculations.length > 0) {
-        // URL has no comparisons, but store has some → clear store
-        clearComparisons();
       }
-
-      isSyncingFromURLRef.current = false;
+      // Note: Don't clear comparisons if URL empty - Store → URL will sync URL to match store
     };
 
     syncFromURL();
@@ -268,8 +258,8 @@ export function useDeepLinking(projectId: string) {
   // ============================================================
 
   useEffect(() => {
-    // Skip if we're currently syncing URL → store (avoid feedback loop)
-    if (isSyncingFromURLRef.current) return;
+    // Don't block this effect - let it always sync store → URL
+    // The URL → Store effect will handle avoiding duplicates
 
     const params = new URLSearchParams();
 
