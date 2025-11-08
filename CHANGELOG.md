@@ -111,6 +111,24 @@
   - Auto-restoration: Refresh page keeps current preset and calculations
   - **File**: `frontend/src/pages/PerformancePage.tsx` (line 52)
 
+- **UI Polish & Accessibility improvements**:
+  - Page fade transitions (300ms opacity animation on route changes)
+  - Keyboard navigation: Tab through Analysis Type Cards, Enter/Space to activate
+  - ARIA labels and accessibility attributes (role="button", aria-label, aria-disabled)
+  - Hover effects with smooth transitions (scale + shadow on available cards)
+  - Responsive design verified across mobile/tablet/desktop breakpoints
+  - **Files**: `frontend/src/App.css`, `frontend/src/App.tsx`, `frontend/src/components/project-overview/AnalysisTypeCard.tsx`
+
+### Fixed
+- **Deep linking race condition causing state loss** (2025-11-08):
+  - Fixed bug where selecting Primary Calculation → clicking Back → returning to page cleared all selections
+  - Root cause: `isSyncingRef` blocking prevented Store → URL sync on first render, then "clear if URL empty" logic cleared store on navigation back
+  - Solution: Removed blocking logic and clearing logic, simplified bidirectional sync (Store ↔ URL always in sync)
+  - Effect: Store → URL now always syncs, URL → Store only restores from params (doesn't clear)
+  - User confirmation: "Отлично все заработало" (Everything works perfectly)
+  - **File**: `frontend/src/hooks/useDeepLinking.ts`
+  - **Commit**: eeb5fd9
+
 ---
 
 ## [2.0.0] - 2025-11-02
