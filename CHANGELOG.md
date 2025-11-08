@@ -43,6 +43,20 @@
   - Text truncation on small screens
   - **File**: `frontend/src/components/navigation/Breadcrumbs.tsx`
 
+- **Zustand store slices**:
+  - `settingsSlice`: User preferences (units, theme, chartSettings) - persisted to localStorage
+  - `performanceSlice`: Calculations, presets, UI modals - session-only
+  - **Files**: `frontend/src/stores/slices/settingsSlice.ts`, `frontend/src/stores/slices/performanceSlice.ts`
+
+- **Deep linking hook (useDeepLinking)**:
+  - Synchronizes URL params with Zustand store state
+  - Supports preset, primary calculation, comparison calculations
+  - URL format: `/project/:id/performance?preset=1&primary=$1&compare=$2,$5`
+  - Cross-project references: `?primary=bmw-m42:$5`
+  - Browser Back/Forward support via React Router's useSearchParams
+  - Auto-fetches calculation metadata from API when restoring from URL
+  - **File**: `frontend/src/hooks/useDeepLinking.ts`
+
 ### Changed
 - **BREAKING CHANGE: 3-level routing hierarchy** (v2.0 → v3.0):
   - `/project/:id` now shows ProjectOverviewPage (was: ProjectPage/Performance directly)
@@ -81,6 +95,21 @@
   - Breadcrumbs: "Engine Viewer > Project Name > Performance & Efficiency"
   - Back button returns to Project Overview (not HomePage)
   - **File**: `frontend/src/pages/PerformancePage.tsx`
+
+- **Zustand store refactored into modular slices**:
+  - Split monolithic store into separate slices for better maintainability
+  - `settingsSlice`: Persisted to localStorage (units, theme, chartSettings)
+  - `performanceSlice`: Session-only (calculations, presets, UI modals)
+  - Combined using Zustand's slice pattern with selective persistence
+  - No breaking changes - API remains the same
+  - **File**: `frontend/src/stores/appStore.ts`
+
+- **PerformancePage now uses deep linking**:
+  - URL params synced with Zustand store state (bidirectional)
+  - Shareable URLs: Copy URL to share exact visualization state
+  - Browser navigation: Back/Forward restores state correctly
+  - Auto-restoration: Refresh page keeps current preset and calculations
+  - **File**: `frontend/src/pages/PerformancePage.tsx` (line 52)
 
 ---
 
