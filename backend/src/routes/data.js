@@ -9,7 +9,7 @@
 
 import { Router } from 'express';
 import path from 'path';
-import fs from 'fs/promises';
+import { readdir } from 'fs/promises';
 import { parseDetFile } from '../services/fileParser.js';
 import { getConfig, getDataFolderPath } from '../config.js';
 import { getFileInfo, normalizeFilenameToId, scanDirectory } from '../services/fileScanner.js';
@@ -270,6 +270,211 @@ router.get('/:id', async (req, res, next) => {
     res.json(response);
   } catch (error) {
     console.error(`[API] GET /api/project/${req.params.id} - Error:`, error.message);
+
+    // Check if error is due to file not found
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project file not found',
+          details: error.message
+        }
+      });
+    }
+
+    // Pass other errors to global error handler
+    next(error);
+  }
+});
+
+/**
+ * GET /api/project/:id/summary
+ *
+ * Get project summary with analysis types availability.
+ * Used by Project Overview page to display available analysis types.
+ *
+ * URL Parameters:
+ * - id: Project identifier (normalized filename without extension)
+ *
+ * Response format:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "project": {
+ *       "id": "vesta-16-im",
+ *       "displayName": "Vesta 1.6 IM",
+ *       "specs": {
+ *         "cylinders": 4,
+ *         "engineType": "NATUR"
+ *       }
+ *     },
+ *     "availability": {
+ *       "performance": {
+ *         "available": true,
+ *         "calculationsCount": 3,
+ *         "lastRun": "2025-11-07T14:30:00Z"
+ *       },
+ *       "traces": {
+ *         "available": true,
+ *         "rpmPointsCount": 11,
+ *         "traceTypes": ["pressure", "temperature"]
+ *       },
+ *       "pvDiagrams": { "available": false },
+ *       "noise": { "available": false },
+ *       "turbo": { "available": false },
+ *       "configuration": { "available": false }
+ *     }
+ *   }
+ * }
+ *
+ * Error responses:
+ * - 400: Invalid project ID
+ * - 404: Project not found
+ * - 500: Server error
+ */
+router.get('/:id/summary', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!id || !/^[a-z0-9-]+$/.test(id)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_PROJECT_ID',
+          message: 'Invalid project ID format',
+          details: 'Project ID must contain only lowercase letters, numbers, and hyphens'
+        }
+      });
+    }
+
+    console.log(`[API] GET /api/project/${id}/summary - Loading project summary...`);
+
+    // Get configuration
+    const config = getConfig();
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Scan directory to find matching file
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
+
+    // Find file matching the ID
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
+      if (fileId === id) {
+        matchedFileInfo = fileInfo;
+        break;
+      }
+    }
+
+    if (!matchedFileInfo) {
+      console.warn(`[API] GET /api/project/${id}/summary - Project not found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project not found',
+          details: `No project found with ID: ${id}`
+        }
+      });
+    }
+
+    // Parse project file to get metadata and calculations
+    const projectData = await parseDetFile(matchedFileInfo.path);
+    const fileInfo = await getFileInfo(matchedFileInfo.path);
+
+    // Get project folder path (parent directory of the .det/.pou file)
+    const projectFolderPath = path.dirname(matchedFileInfo.path);
+
+    // Check availability for each analysis type
+
+    // 1. Performance - available if .det or .pou file exists (we already found it)
+    const performanceAvailability = {
+      available: true,
+      calculationsCount: projectData.calculations?.length || 0,
+      lastRun: fileInfo.modifiedAt
+    };
+
+    // 2. Traces - check if trace files exist in project folder
+    // Trace file extensions: .cyl, .pvd, .wve, .wmf, .tpt, .mch, etc.
+    const traceExtensions = ['.cyl', '.pvd', '.wve', '.wmf', '.tpt', '.mch', '.pur', '.eff'];
+    let tracesAvailability = { available: false };
+
+    try {
+      const projectFiles = await readdir(projectFolderPath);
+      const traceFiles = projectFiles.filter(file => {
+        const ext = path.extname(file).toLowerCase();
+        return traceExtensions.includes(ext);
+      });
+
+      if (traceFiles.length > 0) {
+        // Extract RPM points from trace filenames (e.g., "0.55 MF V1_10000.cyl" → 10000 RPM)
+        const rpmPoints = new Set();
+        const traceTypes = new Set();
+
+        traceFiles.forEach(file => {
+          // Try to extract RPM from filename (pattern: _XXXXX.ext)
+          const rpmMatch = file.match(/_(\d{4,5})\./);
+          if (rpmMatch) {
+            rpmPoints.add(parseInt(rpmMatch[1], 10));
+          }
+
+          // Detect trace type from extension
+          const ext = path.extname(file).toLowerCase();
+          if (ext === '.cyl' || ext === '.pvd') traceTypes.add('pressure');
+          if (ext === '.tpt') traceTypes.add('temperature');
+          if (ext === '.wve' || ext === '.wmf') traceTypes.add('wave');
+          if (ext === '.mch') traceTypes.add('mach');
+        });
+
+        tracesAvailability = {
+          available: true,
+          rpmPointsCount: rpmPoints.size,
+          traceTypes: Array.from(traceTypes)
+        };
+      }
+    } catch (error) {
+      console.warn(`[API] Could not check trace files for ${id}:`, error.message);
+      // Keep tracesAvailability as { available: false }
+    }
+
+    // 3-5. PV-Diagrams, Noise, Turbo - not available yet (Phase 2+)
+    const pvDiagramsAvailability = { available: false };
+    const noiseAvailability = { available: false };
+    const turboAvailability = { available: false };
+
+    // 6. Configuration History - not implemented yet (Phase 2.1)
+    const configurationAvailability = { available: false };
+
+    // Build response
+    const response = {
+      success: true,
+      data: {
+        project: {
+          id: id,
+          displayName: matchedFileInfo.name.replace(/\.(det|pou)$/i, ''),
+          specs: {
+            cylinders: projectData.metadata?.numCylinders || 0,
+            engineType: projectData.metadata?.engineType || 'UNKNOWN'
+          }
+        },
+        availability: {
+          performance: performanceAvailability,
+          traces: tracesAvailability,
+          pvDiagrams: pvDiagramsAvailability,
+          noise: noiseAvailability,
+          turbo: turboAvailability,
+          configuration: configurationAvailability
+        }
+      }
+    };
+
+    console.log(`[API] GET /api/project/${id}/summary - Success`);
+
+    res.json(response);
+  } catch (error) {
+    console.error(`[API] GET /api/project/${req.params.id}/summary - Error:`, error.message);
 
     // Check if error is due to file not found
     if (error.code === 'ENOENT') {

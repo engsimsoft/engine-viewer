@@ -7,6 +7,50 @@
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Project Summary API endpoint** (`/api/project/:id/summary`):
+  - Returns availability status for all 6 analysis types (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)
+  - Performance availability: checks .det/.pou files, returns calculationsCount
+  - Traces availability: scans project folder for trace files (.cyl, .pvd, .wve, .wmf, .tpt, .mch), extracts RPM points and trace types
+  - Other analysis types: return `{ available: false }` (Phase 2+)
+  - **File**: `backend/src/routes/data.js` (lines 336-494)
+
+- **ProjectOverviewPage component** (Level 2 hub page):
+  - Central hub for analysis type selection
+  - Grid layout with 6 AnalysisTypeCard components
+  - Shows project name, specs (cylinders, engine type)
+  - Back button to project list
+  - **File**: `frontend/src/pages/ProjectOverviewPage.tsx`
+
+- **AnalysisTypeCard component**:
+  - Card UI for each analysis type with icon, title, description
+  - Availability states: Available (hover effects, clickable) / Disabled (grayed out, "Coming in Phase 2")
+  - Icons from Lucide React: TrendingUp, Activity, LineChart, Volume2, Fan, History
+  - Status messages: "X calculations ready", "X RPM points", "Not available"
+  - **File**: `frontend/src/components/project-overview/AnalysisTypeCard.tsx`
+
+- **useProjectSummary hook**:
+  - Custom React hook for fetching project summary from API
+  - Returns `{ summary, loading, error }` states
+  - **File**: `frontend/src/hooks/useProjectSummary.ts`
+
+### Changed
+- **BREAKING CHANGE: 3-level routing hierarchy** (v2.0 → v3.0):
+  - `/project/:id` now shows ProjectOverviewPage (was: ProjectPage/Performance directly)
+  - `/project/:id/performance` now shows ProjectPage (was: `/project/:id`)
+  - **Rationale**: Project Overview as central hub supports multiple analysis types (Performance, Traces, Config History, etc.)
+  - **Migration**: Update any bookmarks from `/project/:id` to `/project/:id/performance` for direct Performance page access
+  - **File**: `frontend/src/App.tsx`
+
+- **HomePage navigation updated**:
+  - "Open Project" button now navigates to `/project/:id/performance` (shortcut to Performance page)
+  - Users can manually navigate to `/project/:id` for Project Overview page
+  - **File**: `frontend/src/pages/HomePage.tsx`
+
+---
+
 ## [2.0.0] - 2025-11-02
 
 ### Fixed (2025-11-06)

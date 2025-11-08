@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
+import ProjectOverviewPage from '@/pages/ProjectOverviewPage';
 import ProjectPage from '@/pages/ProjectPage';
 import HelpPage from '@/pages/HelpPage';
 import { Toaster } from '@/components/ui/sonner';
@@ -11,19 +12,29 @@ import './App.css';
 /**
  * Main App Component - Routing Configuration
  *
- * v2.0 Routing Architecture:
+ * v3.0 Routing Architecture (3-Level Hierarchy):
  * - Route 1: `/` - HomePage (project list)
- * - Route 2: `/project/:id` - ProjectPage (visualization with cross-project comparison)
- * - Route 3: `/help` - HelpPage (parameters documentation)
+ * - Route 2: `/project/:id` - ProjectOverviewPage (analysis type selection HUB)
+ * - Route 3: `/project/:id/performance` - ProjectPage (Performance & Efficiency)
+ * - Route 4: `/help` - HelpPage (parameters documentation)
  *
- * IMPORTANT:
- * - projectId in URL (:id) serves as INITIAL CONTEXT for visualization
- * - User can compare calculations from ANY project (cross-project comparison)
- * - See docs/routing.md for full architecture details
+ * BREAKING CHANGE (v2.0 → v3.0):
+ * - `/project/:id` now shows Project Overview (was: Performance page directly)
+ * - Performance page moved to `/project/:id/performance`
  *
- * Phase 1: Routing structure defined and ready ✅
- * Phase 2: ProjectPage updated to use Zustand store + useMultiProjectData ✅
- * Phase 2: HelpPage added for parameters documentation ✅
+ * User Journey:
+ * 1. HomePage → select project
+ * 2. ProjectOverviewPage → select analysis type (Performance, Traces, etc.)
+ * 3. Analysis Page → view charts and data
+ *
+ * Shortcuts:
+ * - HomePage "Open Project" button → `/project/:id/performance` (direct to charts)
+ * - HomePage "⋮" menu → `/project/:id` (Project Overview)
+ *
+ * v3.0 Features:
+ * - Project Overview as central hub ✅
+ * - Multiple analysis types support (Performance, Traces, Config History)
+ * - Cross-project comparison still works (Zustand store + useMultiProjectData)
  */
 function App() {
   // Apply theme to document root
@@ -46,9 +57,12 @@ function App() {
           {/* Home page - project list */}
           <Route path="/" element={<HomePage />} />
 
-          {/* Visualization page - cross-project comparison support */}
-          {/* :id = initial project context (NOT a restriction) */}
-          <Route path="/project/:id" element={<ProjectPage />} />
+          {/* Project Overview - central hub for analysis type selection */}
+          <Route path="/project/:id" element={<ProjectOverviewPage />} />
+
+          {/* Performance & Efficiency - visualization page */}
+          {/* :id = initial project context (cross-project comparison supported) */}
+          <Route path="/project/:id/performance" element={<ProjectPage />} />
 
           {/* Help page - parameters documentation */}
           <Route path="/help" element={<HelpPage />} />

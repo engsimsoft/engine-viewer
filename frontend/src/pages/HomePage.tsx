@@ -62,7 +62,9 @@ export default function HomePage() {
   }, [projects, filters]);
 
   const handleOpenProject = (id: string) => {
-    navigate(`/project/${id}`);
+    // v3.0: Direct shortcut to Performance page (most common workflow)
+    // Bypass Project Overview for faster access
+    navigate(`/project/${id}/performance`);
   };
 
   const handleEditProject = (project: ProjectInfo) => {
