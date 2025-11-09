@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "4-cyl-itb",
-  "displayName": "Tetst ITB",
+  "displayName": "Test Project",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -18,14 +18,12 @@
   },
   "manual": {
     "description": "",
-    "client": "Claude Code",
-    "tags": [
-      "Race"
-    ],
+    "client": "",
+    "tags": [],
     "status": "active",
     "notes": "",
     "color": ""
   },
   "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-08T10:46:37.146Z"
+  "modified": "2025-11-09T18:44:06.948Z"
 }

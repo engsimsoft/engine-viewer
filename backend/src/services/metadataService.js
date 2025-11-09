@@ -24,10 +24,27 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Mutex } from 'async-mutex';
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Mutex storage: one mutex per projectId to prevent concurrent writes
+const mutexes = new Map();
+
+/**
+ * Get or create mutex for a specific projectId
+ * Lazy initialization: creates mutex only when needed
+ * @param {string} projectId - Project ID
+ * @returns {Mutex} Mutex instance for this projectId
+ */
+function getOrCreateMutex(projectId) {
+  if (!mutexes.has(projectId)) {
+    mutexes.set(projectId, new Mutex());
+  }
+  return mutexes.get(projectId);
+}
 
 /**
  * Получить путь к директории с метаданными
@@ -150,34 +167,38 @@ export async function ensureMetadataDir() {
  * @returns {Promise<Object>} Сохранённые метаданные (с обновлёнными timestamps)
  */
 export async function saveMetadata(projectId, metadata) {
-  try {
-    // Убедиться что директория существует
-    await ensureMetadataDir();
+  const mutex = getOrCreateMutex(projectId);
 
-    // Проверить существование метаданных
-    const existingMetadata = await getMetadata(projectId);
-    const now = new Date().toISOString();
+  return mutex.runExclusive(async () => {
+    try {
+      // Убедиться что директория существует
+      await ensureMetadataDir();
 
-    // Подготовить данные для сохранения (v1.0 format)
-    const dataToSave = {
-      version: '1.0',
-      id: projectId, // Гарантируем что ID совпадает
-      displayName: metadata.displayName || '',
-      auto: metadata.auto || existingMetadata?.auto, // Сохранить существующий auto
-      manual: metadata.manual || {},
-      created: existingMetadata?.created || now,
-      modified: now
-    };
+      // Проверить существование метаданных
+      const existingMetadata = await getMetadata(projectId);
+      const now = new Date().toISOString();
 
-    // Сохранить в файл с красивым форматированием
-    const filePath = getMetadataFilePath(projectId);
-    const jsonContent = JSON.stringify(dataToSave, null, 2);
-    await fs.writeFile(filePath, jsonContent, 'utf8');
+      // Подготовить данные для сохранения (v1.0 format)
+      const dataToSave = {
+        version: '1.0',
+        id: projectId, // Гарантируем что ID совпадает
+        displayName: metadata.displayName || '',
+        auto: metadata.auto || existingMetadata?.auto, // Сохранить существующий auto
+        manual: metadata.manual || {},
+        created: existingMetadata?.created || now,
+        modified: now
+      };
 
-    return dataToSave;
-  } catch (error) {
-    throw new Error(`Failed to save metadata for project ${projectId}: ${error.message}`);
-  }
+      // Сохранить в файл с красивым форматированием
+      const filePath = getMetadataFilePath(projectId);
+      const jsonContent = JSON.stringify(dataToSave, null, 2);
+      await fs.writeFile(filePath, jsonContent, 'utf8');
+
+      return dataToSave;
+    } catch (error) {
+      throw new Error(`Failed to save metadata for project ${projectId}: ${error.message}`);
+    }
+  });
 }
 
 /**
@@ -188,33 +209,37 @@ export async function saveMetadata(projectId, metadata) {
  * @returns {Promise<Object>} Обновлённые метаданные
  */
 export async function updateAutoMetadata(projectId, autoMetadata) {
-  try {
-    await ensureMetadataDir();
+  const mutex = getOrCreateMutex(projectId);
 
-    // Получить существующие метаданные
-    const existingMetadata = await getMetadata(projectId);
-    const now = new Date().toISOString();
+  return mutex.runExclusive(async () => {
+    try {
+      await ensureMetadataDir();
 
-    // Создать или обновить metadata
-    const dataToSave = {
-      version: '1.0',
-      id: projectId,
-      displayName: existingMetadata?.displayName || '',
-      auto: autoMetadata, // Обновляем auto section
-      manual: existingMetadata?.manual || {}, // Сохраняем manual section
-      created: existingMetadata?.created || now,
-      modified: now
-    };
+      // Получить существующие метаданные
+      const existingMetadata = await getMetadata(projectId);
+      const now = new Date().toISOString();
 
-    // Сохранить
-    const filePath = getMetadataFilePath(projectId);
-    const jsonContent = JSON.stringify(dataToSave, null, 2);
-    await fs.writeFile(filePath, jsonContent, 'utf8');
+      // Создать или обновить metadata
+      const dataToSave = {
+        version: '1.0',
+        id: projectId,
+        displayName: existingMetadata?.displayName || '',
+        auto: autoMetadata, // Обновляем auto section
+        manual: existingMetadata?.manual || {}, // Сохраняем manual section
+        created: existingMetadata?.created || now,
+        modified: now
+      };
 
-    return dataToSave;
-  } catch (error) {
-    throw new Error(`Failed to update auto metadata for project ${projectId}: ${error.message}`);
-  }
+      // Сохранить
+      const filePath = getMetadataFilePath(projectId);
+      const jsonContent = JSON.stringify(dataToSave, null, 2);
+      await fs.writeFile(filePath, jsonContent, 'utf8');
+
+      return dataToSave;
+    } catch (error) {
+      throw new Error(`Failed to update auto metadata for project ${projectId}: ${error.message}`);
+    }
+  });
 }
 
 /**
@@ -225,40 +250,44 @@ export async function updateAutoMetadata(projectId, autoMetadata) {
  * @returns {Promise<Object>} Обновлённые метаданные
  */
 export async function updateManualMetadata(projectId, manualMetadata) {
-  try {
-    await ensureMetadataDir();
+  const mutex = getOrCreateMutex(projectId);
 
-    // Получить существующие метаданные
-    const existingMetadata = await getMetadata(projectId);
-    const now = new Date().toISOString();
+  return mutex.runExclusive(async () => {
+    try {
+      await ensureMetadataDir();
 
-    // Создать или обновить metadata
-    const dataToSave = {
-      version: '1.0',
-      id: projectId,
-      displayName: manualMetadata.displayName ?? existingMetadata?.displayName ?? '',
-      auto: existingMetadata?.auto, // Сохраняем auto section
-      manual: {
-        description: manualMetadata.description || '',
-        client: manualMetadata.client || '',
-        tags: manualMetadata.tags || [],
-        status: manualMetadata.status || 'active',
-        notes: manualMetadata.notes || '',
-        color: manualMetadata.color || ''
-      },
-      created: existingMetadata?.created || now,
-      modified: now
-    };
+      // Получить существующие метаданные
+      const existingMetadata = await getMetadata(projectId);
+      const now = new Date().toISOString();
 
-    // Сохранить
-    const filePath = getMetadataFilePath(projectId);
-    const jsonContent = JSON.stringify(dataToSave, null, 2);
-    await fs.writeFile(filePath, jsonContent, 'utf8');
+      // Создать или обновить metadata
+      const dataToSave = {
+        version: '1.0',
+        id: projectId,
+        displayName: manualMetadata.displayName ?? existingMetadata?.displayName ?? '',
+        auto: existingMetadata?.auto, // Сохраняем auto section
+        manual: {
+          description: manualMetadata.description || '',
+          client: manualMetadata.client || '',
+          tags: manualMetadata.tags || [],
+          status: manualMetadata.status || 'active',
+          notes: manualMetadata.notes || '',
+          color: manualMetadata.color || ''
+        },
+        created: existingMetadata?.created || now,
+        modified: now
+      };
 
-    return dataToSave;
-  } catch (error) {
-    throw new Error(`Failed to update manual metadata for project ${projectId}: ${error.message}`);
-  }
+      // Сохранить
+      const filePath = getMetadataFilePath(projectId);
+      const jsonContent = JSON.stringify(dataToSave, null, 2);
+      await fs.writeFile(filePath, jsonContent, 'utf8');
+
+      return dataToSave;
+    } catch (error) {
+      throw new Error(`Failed to update manual metadata for project ${projectId}: ${error.message}`);
+    }
+  });
 }
 
 /**
