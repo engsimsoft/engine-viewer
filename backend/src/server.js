@@ -11,6 +11,7 @@ import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
 import metadataRouter from './routes/metadata.js';
 import { scanProjects, createFileWatcher } from './services/fileScanner.js';
+import { getGlobalQueue } from './services/prtQueue.js';
 import { basename } from 'path';
 
 // Инициализация Express
@@ -146,13 +147,18 @@ async function startServer() {
     // Get data folder path
     const dataFolderPath = getDataFolderPath(config);
 
+    // Initialize PRT parsing queue for background processing
+    const prtQueue = getGlobalQueue({ concurrency: 3 });
+    console.log('✅ PRT parsing queue initialized (concurrency: 3)');
+
     // Startup scan: process all existing files (including .prt files)
     console.log('\n🔍 Performing startup scan...');
     const startTime = Date.now();
     const projects = await scanProjects(
       dataFolderPath,
       config.files.extensions,
-      config.files.maxSize
+      config.files.maxSize,
+      prtQueue  // Pass queue for background .prt parsing
     );
     const scanDuration = Date.now() - startTime;
     console.log(`✅ Startup scan complete: ${projects.length} projects found (${scanDuration}ms)`);
@@ -171,7 +177,7 @@ async function startServer() {
           if (fileName.endsWith('.prt')) {
             console.log(`[Watcher] Processing .prt file: ${fileName}`);
             try {
-              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize);
+              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize, prtQueue);
               console.log(`[Watcher] ✅ Metadata updated for: ${fileName}`);
             } catch (error) {
               console.error(`[Watcher] ❌ Error processing ${fileName}:`, error.message);
@@ -187,7 +193,7 @@ async function startServer() {
           if (fileName.endsWith('.prt')) {
             console.log(`[Watcher] Re-processing .prt file: ${fileName}`);
             try {
-              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize);
+              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize, prtQueue);
               console.log(`[Watcher] ✅ Metadata re-generated for: ${fileName}`);
             } catch (error) {
               console.error(`[Watcher] ❌ Error re-processing ${fileName}:`, error.message);

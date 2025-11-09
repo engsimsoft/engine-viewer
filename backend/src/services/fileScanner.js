@@ -366,13 +366,14 @@ export function detectProjectErrors(project, metadata, prtFilePath) {
  * @param {string} directoryPath - Путь к директории для сканирования
  * @param {string[]} extensions - Массив расширений файлов
  * @param {number} maxFileSize - Максимальный размер файла в байтах (0 = без ограничений)
+ * @param {Object} [prtQueue] - Опциональная очередь для фонового парсинга .prt файлов
  * @returns {Promise<ProjectFileInfo[]>} - Массив информации о проектах
  *
  * @example
- * const projects = await scanProjects('./test-data', ['.det', '.pou', '.prt'], 10485760);
+ * const projects = await scanProjects('./test-data', ['.det', '.pou', '.prt'], 10485760, prtQueue);
  * console.log(`Найдено ${projects.length} проектов`);
  */
-export async function scanProjects(directoryPath, extensions = ['.det', '.pou', '.prt'], maxFileSize = 0) {
+export async function scanProjects(directoryPath, extensions = ['.det', '.pou', '.prt'], maxFileSize = 0, prtQueue = null) {
   const files = await scanDirectory(directoryPath, extensions);
 
   // Фильтруем файлы по размеру (если задано ограничение)
@@ -387,10 +388,23 @@ export async function scanProjects(directoryPath, extensions = ['.det', '.pou', 
   // Парсим метаданные каждого файла
   const projectPromises = validFiles.map(async (file) => {
     try {
-      // Если это .prt файл - парсим и обновляем auto metadata
+      // Если это .prt файл - проверяем кэш и добавляем в очередь если нужно
       if (file.name.endsWith('.prt')) {
-        console.log(`[Scanner] Processing .prt file: ${file.name}`);
-        await parsePrtFileAndUpdateMetadata(file);
+        const projectId = normalizeFilenameToId(file.name);
+
+        // Check cache validity
+        const needsParsing = await shouldParsePrt(file.path, projectId);
+
+        if (prtQueue && needsParsing) {
+          // Add to background queue (low priority during startup)
+          console.log(`[Scanner] Queuing for parsing: ${file.name}`);
+          prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'low');
+        } else if (needsParsing) {
+          // No queue provided → parse synchronously (old behavior for compatibility)
+          console.log(`[Scanner] Processing .prt file: ${file.name}`);
+          await parsePrtFileAndUpdateMetadata(file);
+        }
+        // else: cache is valid, skip parsing
 
         // Для .prt файлов не создаём проект (они только обновляют metadata)
         // Проект создаётся из .det/.pou файлов
