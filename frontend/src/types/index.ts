@@ -173,6 +173,7 @@ export interface AutoMetadata {
   configuration: EngineConfiguration;
   bore: number;               // мм
   stroke: number;             // мм
+  displacement?: number;      // Объем двигателя в литрах (calculated from bore, stroke, cylinders)
   compressionRatio: number;
   maxPowerRPM: number;
   intakeSystem: IntakeSystem;

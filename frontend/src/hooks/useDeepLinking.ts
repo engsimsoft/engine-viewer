@@ -179,7 +179,6 @@ export function useDeepLinking(projectId: string) {
   // Store actions
   const setSelectedPreset = useAppStore((state) => state.setSelectedPreset);
   const setPrimaryCalculation = useAppStore((state) => state.setPrimaryCalculation);
-  const clearPrimaryCalculation = useAppStore((state) => state.clearPrimaryCalculation);
   const addComparison = useAppStore((state) => state.addComparison);
   const clearComparisons = useAppStore((state) => state.clearComparisons);
 

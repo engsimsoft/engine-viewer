@@ -14,7 +14,7 @@ export default function ProjectOverviewPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner />
       </div>
     );
   }
