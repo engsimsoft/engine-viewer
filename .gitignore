@@ -221,3 +221,9 @@ test-data/
 # config.production.yaml
 
 # Personal notes and cheat sheets (local only)
+
+# ============================================
+# Claude Code
+# ============================================
+# Local settings only (AGENT_RULES.md is tracked)
+.claude/settings.local.json
