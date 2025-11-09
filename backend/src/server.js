@@ -12,7 +12,7 @@ import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
 import metadataRouter from './routes/metadata.js';
 import { createQueueRouter } from './routes/queue.js';
-import { scanProjects, createFileWatcher, parsePrtFileAndUpdateMetadata } from './services/fileScanner.js';
+import { scanProjects, createFileWatcher, parsePrtFileAndUpdateMetadata, shouldParsePrt, normalizeFilenameToId } from './services/fileScanner.js';
 import { getGlobalQueue } from './services/prtQueue.js';
 import { basename } from 'path';
 
@@ -180,21 +180,28 @@ async function startServer() {
           const fileName = basename(filePath);
           console.log(`[Watcher] 📄 New file detected: ${fileName}`);
 
-          // If it's a .prt file, add directly to queue (high priority)
+          // If it's a .prt file, check cache before queuing
           if (fileName.endsWith('.prt')) {
-            console.log(`[Watcher] New .prt file: ${fileName} → queued (high priority)`);
-            try {
-              const stats = await stat(filePath);
-              const file = {
-                name: fileName,
-                path: filePath,
-                size: stats.size,
-                mtime: stats.mtime
-              };
-              await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
-              console.log(`[Watcher] ✅ Queued for processing: ${fileName}`);
-            } catch (error) {
-              console.error(`[Watcher] ❌ Error queuing ${fileName}:`, error.message);
+            const projectId = normalizeFilenameToId(fileName);
+            const needsParsing = await shouldParsePrt(filePath, projectId);
+
+            if (needsParsing) {
+              console.log(`[Watcher] New .prt file: ${fileName} → queued (high priority)`);
+              try {
+                const stats = await stat(filePath);
+                const file = {
+                  name: fileName,
+                  path: filePath,
+                  size: stats.size,
+                  mtime: stats.mtime
+                };
+                await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
+                console.log(`[Watcher] ✅ Queued for processing: ${fileName}`);
+              } catch (error) {
+                console.error(`[Watcher] ❌ Error queuing ${fileName}:`, error.message);
+              }
+            } else {
+              console.log(`[Watcher] Cache valid for ${fileName} → skip`);
             }
           }
         },
@@ -203,21 +210,28 @@ async function startServer() {
           const fileName = basename(filePath);
           console.log(`[Watcher] 📝 File modified: ${fileName}`);
 
-          // If it's a .prt file, add directly to queue (high priority)
+          // If it's a .prt file, check cache before re-queuing
           if (fileName.endsWith('.prt')) {
-            console.log(`[Watcher] Changed .prt file: ${fileName} → re-queued (high priority)`);
-            try {
-              const stats = await stat(filePath);
-              const file = {
-                name: fileName,
-                path: filePath,
-                size: stats.size,
-                mtime: stats.mtime
-              };
-              await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
-              console.log(`[Watcher] ✅ Re-queued for processing: ${fileName}`);
-            } catch (error) {
-              console.error(`[Watcher] ❌ Error re-queuing ${fileName}:`, error.message);
+            const projectId = normalizeFilenameToId(fileName);
+            const needsParsing = await shouldParsePrt(filePath, projectId);
+
+            if (needsParsing) {
+              console.log(`[Watcher] Changed .prt file: ${fileName} → re-queued (high priority)`);
+              try {
+                const stats = await stat(filePath);
+                const file = {
+                  name: fileName,
+                  path: filePath,
+                  size: stats.size,
+                  mtime: stats.mtime
+                };
+                await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
+                console.log(`[Watcher] ✅ Re-queued for processing: ${fileName}`);
+              } catch (error) {
+                console.error(`[Watcher] ❌ Error re-queuing ${fileName}:`, error.message);
+              }
+            } else {
+              console.log(`[Watcher] Cache valid for ${fileName} → skip`);
             }
           }
         },

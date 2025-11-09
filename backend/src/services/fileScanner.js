@@ -565,7 +565,7 @@ export function createFileWatcher(directoryPath, extensions = ['.det', '.pou', '
   // Настройки chokidar
   const watcherOptions = {
     persistent: true,       // Не останавливать процесс
-    ignoreInitial: false,   // Триггерить 'add' для существующих файлов
+    ignoreInitial: true,    // НЕ триггерить 'add' для существующих файлов (только для новых)
     awaitWriteFinish: {     // Ждать завершения записи файла
       stabilityThreshold: 500,  // Миллисекунды стабильности размера файла
       pollInterval: 100         // Интервал проверки
