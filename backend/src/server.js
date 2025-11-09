@@ -11,6 +11,7 @@ import { loadConfig, validateConfig, getDataFolderPath } from './config.js';
 import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
 import metadataRouter from './routes/metadata.js';
+import { createQueueRouter } from './routes/queue.js';
 import { scanProjects, createFileWatcher, parsePrtFileAndUpdateMetadata } from './services/fileScanner.js';
 import { getGlobalQueue } from './services/prtQueue.js';
 import { basename } from 'path';
@@ -100,6 +101,11 @@ app.use('/projects', projectsRouter);
 app.use('/projects', metadataRouter); // Metadata routes: /projects/:id/metadata
 app.use('/project', dataRouter);
 
+// Queue status API (uses global queue instance)
+const globalPrtQueue = getGlobalQueue({ concurrency: 3 });
+const queueRouter = createQueueRouter(globalPrtQueue);
+app.use('/api/queue', queueRouter);
+
 /**
  * Error Handling Middleware
  */
@@ -148,9 +154,9 @@ async function startServer() {
     // Get data folder path
     const dataFolderPath = getDataFolderPath(config);
 
-    // Initialize PRT parsing queue for background processing
-    const prtQueue = getGlobalQueue({ concurrency: 3 });
-    console.log('✅ PRT parsing queue initialized (concurrency: 3)');
+    // Get global PRT parsing queue instance (already initialized at top level)
+    const prtQueue = globalPrtQueue;
+    console.log('✅ PRT parsing queue ready (concurrency: 3)');
 
     // Startup scan: process all existing files (including .prt files)
     console.log('\n🔍 Performing startup scan...');

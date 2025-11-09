@@ -331,11 +331,11 @@ export async function saveMetadata(projectId, metadataData) {
 **Цель:** При изменении .prt → добавлять в очередь, не пересканировать все
 
 **Задачи:**
-- [ ] Изменить `server.js:166-179` (File Watcher):
-  - При `onAdd` / `onChange` для .prt файла:
-    - НЕ вызывать `scanProjects()`
-    - Добавить файл в `prtQueue` с priority: 'high'
-  - Добавить логи: "File changed: <filename> → queued for re-parsing"
+- [X] Изменить `server.js:166-179` (File Watcher): ✅
+  - [X] При `onAdd` / `onChange` для .prt файла: ✅
+    - [X] НЕ вызывать `scanProjects()` ✅
+    - [X] Добавить файл в `prtQueue` с priority: 'high' ✅
+  - [X] Добавить логи: "File changed: <filename> → queued for re-parsing" ✅
 
 **Изменения в коде:**
 ```javascript
@@ -365,17 +365,19 @@ watcher.on('change', async (filePath) => {
 ```
 
 **Верификация:**
-- [ ] Запустить backend
-- [ ] Изменить существующий .prt файл (например, touch test-data/*.prt)
-- [ ] Проверить логи:
-  - ✅ `[Watcher] Changed .prt file: ... → re-queued`
-  - ✅ `[Queue] Processing: ... (priority: high)`
-  - ✅ НЕТ повторного сканирования всех файлов
-- [ ] Проверить: .metadata обновился
-- [ ] Git commit: `refactor(watcher): use queue for .prt file changes`
+- [X] Запустить backend ✅
+- [X] Изменить существующий .prt файл (`touch test-data/BMW\ M42.prt`) ✅
+- [X] Проверить логи: ✅
+  - [X] `[Watcher] Changed .prt file: BMW M42.prt → re-queued (high priority)` ✅
+  - [X] `[Queue] Added to queue: BMW M42.prt (priority: high)` ✅
+  - [X] `[Queue] Processing: BMW M42.prt (36/36)` ✅
+  - [X] НЕТ повторного сканирования всех файлов ✅
+- [X] Проверить: .metadata обновился (completed 35/36) ✅
+- [X] Git commit: `refactor(watcher): use queue for .prt file changes` ✅ (8a8bcb4)
 
 **Файлы:**
 - `backend/src/server.js` (изменён)
+- `backend/src/services/fileScanner.js` (изменён - export parsePrtFileAndUpdateMetadata)
 
 ---
 
