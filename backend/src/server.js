@@ -6,11 +6,12 @@
 
 import express from 'express';
 import cors from 'cors';
+import { stat } from 'fs/promises';
 import { loadConfig, validateConfig, getDataFolderPath } from './config.js';
 import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
 import metadataRouter from './routes/metadata.js';
-import { scanProjects, createFileWatcher } from './services/fileScanner.js';
+import { scanProjects, createFileWatcher, parsePrtFileAndUpdateMetadata } from './services/fileScanner.js';
 import { getGlobalQueue } from './services/prtQueue.js';
 import { basename } from 'path';
 
@@ -173,14 +174,21 @@ async function startServer() {
           const fileName = basename(filePath);
           console.log(`[Watcher] 📄 New file detected: ${fileName}`);
 
-          // If it's a .prt file, trigger metadata extraction
+          // If it's a .prt file, add directly to queue (high priority)
           if (fileName.endsWith('.prt')) {
-            console.log(`[Watcher] Processing .prt file: ${fileName}`);
+            console.log(`[Watcher] New .prt file: ${fileName} → queued (high priority)`);
             try {
-              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize, prtQueue);
-              console.log(`[Watcher] ✅ Metadata updated for: ${fileName}`);
+              const stats = await stat(filePath);
+              const file = {
+                name: fileName,
+                path: filePath,
+                size: stats.size,
+                mtime: stats.mtime
+              };
+              await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
+              console.log(`[Watcher] ✅ Queued for processing: ${fileName}`);
             } catch (error) {
-              console.error(`[Watcher] ❌ Error processing ${fileName}:`, error.message);
+              console.error(`[Watcher] ❌ Error queuing ${fileName}:`, error.message);
             }
           }
         },
@@ -189,14 +197,21 @@ async function startServer() {
           const fileName = basename(filePath);
           console.log(`[Watcher] 📝 File modified: ${fileName}`);
 
-          // If it's a .prt file, re-process it
+          // If it's a .prt file, add directly to queue (high priority)
           if (fileName.endsWith('.prt')) {
-            console.log(`[Watcher] Re-processing .prt file: ${fileName}`);
+            console.log(`[Watcher] Changed .prt file: ${fileName} → re-queued (high priority)`);
             try {
-              await scanProjects(dataFolderPath, ['.prt'], config.files.maxSize, prtQueue);
-              console.log(`[Watcher] ✅ Metadata re-generated for: ${fileName}`);
+              const stats = await stat(filePath);
+              const file = {
+                name: fileName,
+                path: filePath,
+                size: stats.size,
+                mtime: stats.mtime
+              };
+              await prtQueue.addToQueue(file, parsePrtFileAndUpdateMetadata, 'high');
+              console.log(`[Watcher] ✅ Re-queued for processing: ${fileName}`);
             } catch (error) {
-              console.error(`[Watcher] ❌ Error re-processing ${fileName}:`, error.message);
+              console.error(`[Watcher] ❌ Error re-queuing ${fileName}:`, error.message);
             }
           }
         },

@@ -249,7 +249,7 @@ export async function shouldParsePrt(prtPath, projectId) {
  * @param {FileInfo} file - Информация о файле
  * @returns {Promise<Object|null>} - Auto metadata или null если ошибка
  */
-async function parsePrtFileAndUpdateMetadata(file) {
+export async function parsePrtFileAndUpdateMetadata(file) {
   try {
     const prtParser = new PrtParser();
     const result = await prtParser.parse(file.path);
