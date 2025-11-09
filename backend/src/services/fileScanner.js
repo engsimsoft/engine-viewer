@@ -16,7 +16,7 @@ import { join, extname, basename, dirname } from 'path';
 import { watch } from 'chokidar';
 import { parseDetFile, getProjectSummary } from './fileParser.js';
 import { PrtParser } from '../parsers/formats/prtParser.js';
-import { updateAutoMetadata } from './metadataService.js';
+import { updateAutoMetadata, getMetadata, getMetadataFilePath } from './metadataService.js';
 
 /**
  * @typedef {Object} FileInfo
@@ -206,6 +206,41 @@ async function getPrtFileDates(detOrPouFilePath) {
   } catch (error) {
     console.error(`[Scanner] ⚠️  Error reading .prt file dates:`, error.message);
     return null;
+  }
+}
+
+/**
+ * Проверяет нужно ли парсить .prt файл (cache validation)
+ * Сравнивает modification time .prt файла с датой обновления metadata
+ *
+ * @param {string} prtPath - Путь к .prt файлу
+ * @param {string} projectId - ID проекта (normalized filename)
+ * @returns {Promise<boolean>} - true если нужно парсить, false если кэш актуален
+ */
+export async function shouldParsePrt(prtPath, projectId) {
+  try {
+    // Check if metadata exists
+    const metadata = await getMetadata(projectId);
+
+    if (!metadata) {
+      console.log(`[Cache] Metadata missing for ${projectId} → parse`);
+      return true; // Metadata doesn't exist → need to parse
+    }
+
+    // Compare modification times
+    const prtStats = await stat(prtPath);
+    const metadataDate = new Date(metadata.modified);
+
+    if (prtStats.mtime > metadataDate) {
+      console.log(`[Cache] PRT newer for ${projectId} (prt: ${prtStats.mtime.toISOString()}, metadata: ${metadata.modified}) → parse`);
+      return true; // .prt file is newer → re-parse
+    }
+
+    console.log(`[Cache] Cache valid for ${projectId} (prt: ${prtStats.mtime.toISOString()}, metadata: ${metadata.modified}) → skip`);
+    return false; // Cache is valid → skip parsing
+  } catch (error) {
+    console.error(`[Cache] Error checking ${projectId}:`, error.message);
+    return true; // On error → parse to be safe
   }
 }
 
