@@ -7,6 +7,7 @@ import HelpPage from '@/pages/HelpPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useAppStore } from '@/stores/appStore';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import ParsingProgress from '@/components/shared/ParsingProgress';
 import './App.css';
 
 /**
@@ -54,6 +55,7 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
+        <ParsingProgress />
         <div className="page-container">
           <Routes>
             {/* Home page - project list */}

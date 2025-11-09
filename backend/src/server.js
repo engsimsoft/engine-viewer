@@ -104,7 +104,7 @@ app.use('/project', dataRouter);
 // Queue status API (uses global queue instance)
 const globalPrtQueue = getGlobalQueue({ concurrency: 3 });
 const queueRouter = createQueueRouter(globalPrtQueue);
-app.use('/api/queue', queueRouter);
+app.use('/queue', queueRouter);
 
 /**
  * Error Handling Middleware

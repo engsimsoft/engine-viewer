@@ -1,21 +1,7 @@
 {
   "version": "1.0",
   "id": "4-cyl-itb",
-  "displayName": "Test Project",
-  "auto": {
-    "cylinders": 4,
-    "type": "NA",
-    "configuration": "inline",
-    "bore": 82.5,
-    "stroke": 75.6,
-    "displacement": 1.62,
-    "compressionRatio": 11.3,
-    "maxPowerRPM": 8000,
-    "intakeSystem": "ITB",
-    "valvesPerCylinder": 4,
-    "inletValves": 2,
-    "exhaustValves": 2
-  },
+  "displayName": "",
   "manual": {
     "description": "",
     "client": "",
@@ -24,6 +10,6 @@
     "notes": "",
     "color": ""
   },
-  "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-09T19:08:15.704Z"
+  "created": "2025-11-09T20:00:27.320Z",
+  "modified": "2025-11-09T20:00:27.325Z"
 }

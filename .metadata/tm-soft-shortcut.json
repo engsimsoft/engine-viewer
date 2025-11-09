@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "tm-soft-shortcut",
-  "displayName": "ShortCut",
+  "displayName": "",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -16,16 +16,7 @@
     "inletValves": 2,
     "exhaustValves": 2
   },
-  "manual": {
-    "description": "",
-    "client": "DK Racing",
-    "tags": [
-      "CN"
-    ],
-    "status": "completed",
-    "notes": "",
-    "color": ""
-  },
-  "created": "2025-11-05T14:51:17.039Z",
-  "modified": "2025-11-09T19:08:15.790Z"
+  "manual": {},
+  "created": "2025-11-09T19:57:42.581Z",
+  "modified": "2025-11-09T19:57:42.581Z"
 }

@@ -73,7 +73,7 @@ cd frontend && npm install && npm run dev
 
 ## Технологии
 
-**Backend:** Node.js, Express, js-yaml
+**Backend:** Node.js, Express, js-yaml, p-queue, async-mutex
 **Frontend:** React 18, TypeScript, Vite, ECharts, TailwindCSS, Tanstack Table
 **Подробнее:** См. [docs/architecture.md](docs/architecture.md)
 

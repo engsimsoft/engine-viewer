@@ -50,7 +50,9 @@ npm install
 - `express` - HTTP сервер
 - `cors` - CORS middleware для frontend
 - `js-yaml` - парсинг config.yaml
-- `chokidar` - file watching (опционально)
+- `chokidar` - file watching
+- `p-queue` v9.0.0 - Promise queue with concurrency control (NEW in v2.1)
+- `async-mutex` v0.5.0 - Mutex for race condition protection (NEW in v2.1)
 
 ### 3. Структура backend
 ```

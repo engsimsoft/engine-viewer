@@ -9,6 +9,31 @@
 
 ## [Unreleased]
 
+### Performance
+- **Lazy .prt parsing with background queue** (ADR-009):
+  - **Backend startup: ~278-306ms** (down from 400-500ms) - **40% faster**
+  - Projected 500-file startup: < 2 seconds (down from 30-60 sec) - **95% faster**
+  - **Cache validation**: Compare .prt `mtime` vs metadata timestamp - skip unchanged files
+  - **Background queue** (p-queue v9.0.0): Process files after server starts, concurrency limit: 3
+  - **Race condition protection** (async-mutex v0.5.0): Mutex per projectId prevents JSON corruption
+  - **File watcher**: `ignoreInitial: true` prevents re-parsing all files on startup
+  - **Queue API**: `/queue/status` endpoint for monitoring (total, pending, completed, isProcessing)
+  - **Frontend indicators**:
+    - `ParsingProgress` component: fixed top bar showing "Processing X/Y projects (Z%)"
+    - `ProjectCard` spinner: shows "Processing metadata..." when metadata missing
+    - Toast notification: "All projects processed" on completion
+  - **Testing results**:
+    - Load test: 135 files processed successfully (306ms startup)
+    - Race condition test: 10 parallel writes, 0 JSON errors
+    - Regression test: stable restarts (278ms average)
+  - **Files**:
+    - `backend/src/services/prtQueue.js` (new) - Queue implementation
+    - `backend/src/services/fileScanner.js` - Cache validation + ignoreInitial fix
+    - `backend/src/services/metadataService.js` - Mutex protection
+    - `backend/src/routes/queue.js` (new) - Queue status API
+    - `frontend/src/hooks/useQueueStatus.ts` (new) - Polling hook
+    - `frontend/src/components/shared/ParsingProgress.tsx` (new) - Progress UI
+
 ### Added
 - **Project Summary API endpoint** (`/api/project/:id/summary`):
   - Returns availability status for all 6 analysis types (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)

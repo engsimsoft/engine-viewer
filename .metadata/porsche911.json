@@ -16,14 +16,7 @@
     "inletValves": 1,
     "exhaustValves": 1
   },
-  "manual": {
-    "description": "",
-    "client": "",
-    "tags": [],
-    "status": "archived",
-    "notes": "",
-    "color": ""
-  },
-  "created": "2025-11-06T10:03:52.174Z",
-  "modified": "2025-11-09T19:08:15.790Z"
+  "manual": {},
+  "created": "2025-11-09T19:57:42.588Z",
+  "modified": "2025-11-09T19:57:42.588Z"
 }

@@ -1,8 +1,8 @@
 # Engine Results Viewer - Полная архитектура
 
-**Версия:** 2.0.0
-**Дата:** 7 ноября 2025
-**Статус:** Production-ready (v2.0.0, Phase 3 complete)
+**Версия:** 3.0.0
+**Дата:** 9 ноября 2025
+**Статус:** Production-ready (v3.0.0, Phase 2.0 complete - 3-Level Routing, Deep Linking, Project Overview)
 
 ---
 
@@ -22,10 +22,12 @@
   - [API Routes](#api-routes)
 - [Frontend архитектура](#frontend-архитектура)
   - [HomePage Dashboard](#homepage-dashboard)
-  - [ProjectPage Visualization](#projectpage-visualization)
+  - [ProjectOverviewPage](#projectoverviewpage)
+  - [PerformancePage Visualization](#performancepage-visualization)
   - [Components](#components)
   - [Hooks](#hooks)
   - [State Management](#state-management)
+  - [Routing Architecture](#routing-architecture)
 - [Data Flow](#data-flow)
 - [Chart Implementation](#chart-implementation)
 - [Форматы данных](#форматы-данных)
@@ -84,7 +86,7 @@
 - ✅ Responsive grid (1/2/3 columns)
 - ✅ Skeleton loaders (iPhone quality UX)
 
-**ProjectPage Visualization (20%):**
+**PerformancePage Visualization (100%):**
 - ✅ 6 Chart Presets (Power/Torque, Pressure/Temp, MEP, Critical, Efficiency, Custom)
 - ✅ Cross-project comparison (1 primary + up to 4 comparison projects)
 - ✅ CalculationSelector (max 5 calculations, color-coded)
@@ -161,12 +163,12 @@
 │                   http://localhost:5173                          │
 │                                                                  │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐       │
-│  │   HomePage   │   │ ProjectPage  │   │  Components  │       │
-│  │              │   │              │   │              │       │
-│  │ - Filters    │   │ - Charts     │   │ - Cards      │       │
-│  │ - Cards      │   │ - Selector   │   │ - Dialogs    │       │
-│  │ - Metadata   │   │ - Table      │   │ - Shared UI  │       │
-│  └──────┬───────┘   └──────┬───────┘   └──────────────┘       │
+│  │   HomePage   │   │  Overview    │   │ Performance  │       │
+│  │              │   │   Page       │   │    Page      │       │
+│  │ - Filters    │   │ - Analysis   │   │ - Charts     │       │
+│  │ - Cards      │   │   Type Cards │   │ - Selector   │       │
+│  │ - Metadata   │   │ - Router     │   │ - Table      │       │
+│  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘       │
 │         │                  │                                     │
 │         └──────────────────┴─────────────────┐                 │
 │                                               │                 │
@@ -342,12 +344,40 @@ Data Access Layer (API, File System)
 - Подключение routes
 - Error handling
 - Запуск сервера (port 3000)
+- Initialization of PRT parsing queue (background processing)
 
 **config.js** - Загрузка конфигурации
 - Чтение config.yaml
 - Парсинг YAML → JavaScript объект
 - Валидация настроек
 - Экспорт для приложения
+
+**prtQueue.js** - Background queue для парсинга .prt файлов (NEW in v2.1)
+- `PrtParsingQueue` class (extends EventEmitter)
+- Concurrency control: max 3 files simultaneously (p-queue)
+- Priority system: high (file watcher) vs low (startup scan)
+- Deduplication: prevents same projectId from queueing twice
+- Event-driven progress tracking (emit 'progress' events)
+- Global singleton pattern: `getGlobalQueue()` for shared instance
+- Status API: `getStatus()` returns `{total, pending, completed}`
+
+**metadataService.js** - Управление метаданными проектов
+- `getMetadata(projectId)` - Read metadata from `.metadata/{id}.json`
+- `saveMetadata(projectId, metadata)` - Write metadata to disk
+- `updateAutoMetadata(id, autoData)` - Update "auto" section only (from .prt)
+- `updateManualMetadata(id, manualData)` - Update "manual" section only (user edits)
+- **Race condition protection** (NEW in v2.1): async-mutex per projectId
+  - `getOrCreateMutex(projectId)` - One mutex per project
+  - `mutex.runExclusive()` - Serialize writes to same file
+  - Prevents JSON corruption during concurrent writes
+
+**fileScanner.js** - Сканирование директории с проектами
+- `scanProjects(dirPath)` - Recursive directory scan
+- `shouldParsePrt(prtPath, projectId)` - Cache validation (NEW in v2.1)
+  - Compares .prt `mtime` vs metadata `modified` timestamp
+  - Returns `true` if .prt is newer (needs re-parsing)
+  - Returns `false` if cache is valid (skip parsing)
+- File watcher integration with cache checks (ignoreInitial: true)
 
 ---
 
@@ -1053,11 +1083,62 @@ router.get('/api/project/:id', async (req, res) => {
 });
 ```
 
+**routes/data.js** - GET /api/project/:id/summary (NEW in v3.0)
+
+```javascript
+router.get('/api/project/:id/summary', async (req, res) => {
+  const { id } = req.params;
+
+  // Find project
+  const projects = await fileScanner.scanFolder('./test-data');
+  const project = projects.find(p => p.id === id);
+
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  // Check availability for each analysis type
+  const summary = {
+    projectId: id,
+    displayName: project.displayName,
+    analysisTypes: {
+      performance: {
+        available: project.hasDetOrPou,
+        description: 'Power & Torque curves, MEP analysis'
+      },
+      traces: { available: false, description: 'Pressure/Temperature traces' },
+      pvDiagrams: { available: false, description: 'PV diagrams' },
+      noise: { available: false, description: 'SPL predictions' },
+      turbo: { available: false, description: 'Turbo maps' },
+      configuration: { available: false, description: 'Config history' }
+    }
+  };
+
+  res.json(summary);
+});
+```
+
+**Purpose:** Powers ProjectOverviewPage - shows which analysis types are available.
+
+**Response format:**
+```json
+{
+  "projectId": "vesta-16-im",
+  "displayName": "Vesta 1.6 IM",
+  "analysisTypes": {
+    "performance": {
+      "available": true,
+      "description": "Power & Torque curves, MEP analysis"
+    }
+  }
+}
+```
+
 **routes/metadata.js** - POST /api/projects/:id/metadata
 
 ```javascript
 router.post('/api/projects/:id/metadata', async (req, res) => {
-  const { id } = req.params;
+  const { id} = req.params;
   const manualData = req.body;
 
   // Update ONLY manual section (preserves auto)
@@ -1067,7 +1148,46 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 });
 ```
 
-**См. также:** [docs/api.md](api.md) - Complete API documentation
+**routes/queue.js** - GET /queue/status (NEW in v2.1)
+
+```javascript
+router.get('/status', (req, res) => {
+  try {
+    const status = prtQueue.getStatus();
+    res.json({
+      success: true,
+      data: {
+        ...status,
+        isProcessing: status.pending > 0
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to get queue status' }
+    });
+  }
+});
+```
+
+**Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "total": 135,
+    "pending": 0,
+    "completed": 135,
+    "isProcessing": false
+  }
+}
+```
+
+**Purpose:** Frontend polls this endpoint to show parsing progress (progress bar, spinners).
+
+**См. также:**
+- [docs/api.md](api.md) - Complete API documentation
+- [ADR-009: Lazy .prt Parsing](decisions/009-lazy-prt-parsing.md) - Performance optimization
 
 ---
 
@@ -1082,7 +1202,8 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 │  ┌──────────────────────────────────┐  │
 │  │          Pages                   │  │
 │  │  - HomePage.tsx                  │  │
-│  │  - ProjectPage.tsx               │  │
+│  │  - ProjectOverviewPage.tsx (NEW) │  │
+│  │  - PerformancePage.tsx (v3.0)    │  │
 │  └──────────────┬───────────────────┘  │
 │                 │                       │
 │  ┌──────────────▼───────────────────┐  │
@@ -1184,7 +1305,7 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 - Client name (ALWAYS visible, critical field)
 - Modified date
 - Edit button (opens MetadataDialog)
-- Open button (navigate to ProjectPage)
+- Open button (navigate to `/project/:id` - ProjectOverviewPage)
 
 **Design principle:** Show ONLY essential info (user feedback: "Exhaust system irrelevant on card")
 
@@ -1251,13 +1372,110 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 
 ---
 
-### ProjectPage Visualization
+### ProjectOverviewPage
+
+**Назначение:** Центральная страница проекта - выбор типа анализа (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration).
+
+**Route:** `/project/:id` (Level 2 в 3-level routing hierarchy)
 
 **Layout:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  ProjectPage                                                     │
+│                    ProjectOverviewPage                           │
+│  frontend/src/pages/ProjectOverviewPage.tsx                      │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  Header (border-bottom, bg-card)                           │ │
+│  │                                                             │ │
+│  │  [← Back to Projects]                                      │ │
+│  │                                                             │ │
+│  │  BMW M42                                                    │ │
+│  │  4 Cyl • NA                                                 │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │  Analysis Types Grid (responsive: 1/2/3 columns)           │ │
+│  │                                                             │ │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │ │
+│  │  │ 📈 Performance│ │ 📊 Traces    │ │ 📉 PV-Diagrams│       │ │
+│  │  │ & Efficiency │ │ Thermo &     │ │ Pressure-    │       │ │
+│  │  │              │ │ Gasdynamic   │ │ Volume       │       │ │
+│  │  │ 24 calcs     │ │ Not available│ │ Not available│       │ │
+│  │  │ ready        │ │              │ │              │       │ │
+│  │  │              │ │              │ │              │       │ │
+│  │  │[View→] ✓     │ │[Coming...]  ⌛│ │[Coming...]  ⌛│       │ │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘       │ │
+│  │                                                             │ │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │ │
+│  │  │ 🔊 Noise     │ │ 🌀 Turbo Map │ │ 🕰️ Config    │       │ │
+│  │  │ FFT Spectrum │ │ Compressor   │ │ History      │       │ │
+│  │  │              │ │              │ │              │       │ │
+│  │  │ Not available│ │ Not available│ │ Not available│       │ │
+│  │  │              │ │              │ │              │       │ │
+│  │  │[Coming...]  ⌛│ │[Coming...]  ⌛│ │[Coming...]  ⌛│       │ │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘       │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Components:**
+
+**AnalysisTypeCard.tsx** - Карточка типа анализа:
+- **File:** `frontend/src/components/project-overview/AnalysisTypeCard.tsx`
+- **Props:**
+  - `id` - тип анализа (performance, traces, pvDiagrams, noise, turbo, configuration)
+  - `title` - название анализа
+  - `description` - описание
+  - `href` - URL для перехода (e.g., `/project/:id/performance`)
+  - `available` - доступность данных (boolean)
+  - `calculationsCount` - количество расчётов (для performance)
+  - `rpmPointsCount` - количество RPM точек (для traces)
+  - `traceTypes` - типы traces (для traces)
+
+- **Features:**
+  - Icon mapping (TrendingUp, Activity, LineChart, Volume2, Fan, History)
+  - Hover effects: `hover:shadow-xl hover:scale-[1.02]` (если available)
+  - Disabled state: `opacity-50 cursor-not-allowed` (если not available)
+  - Keyboard navigation: `tabIndex={available ? 0 : -1}`, Enter/Space для перехода
+  - ARIA labels: `role="button"`, `aria-label`, `aria-disabled`
+  - Status message: "24 calculations ready" / "Not available" / "Coming in Phase 2"
+
+**Data flow:**
+1. `useProjectSummary(id)` hook → fetch `/api/project/:id/summary`
+2. API response: `{ project: {...}, availability: { performance: {...}, traces: {...}, ... }}`
+3. AnalysisTypeCard отображает карточки с availability статусами
+4. Клик на available карточку → navigate to `/project/:id/performance`
+
+**Responsive grid:**
+- Mobile: `grid-cols-1` (1 column)
+- Tablet: `md:grid-cols-2` (2 columns)
+- Desktop: `lg:grid-cols-3` (3 columns)
+
+**State management:**
+- Loading state: `<LoadingSpinner />` (центрирован на экране)
+- Error state: `<ErrorMessage />` с retry функцией
+- No Zustand state (stateless page - всё через API)
+
+**Accessibility:**
+- Keyboard navigation: Tab через available cards, Enter/Space для перехода
+- ARIA labels на всех интерактивных элементах
+- Screen reader friendly status messages
+
+**См. также:**
+- [GET /api/project/:id/summary](#backend-api-routes) - API endpoint
+- [useProjectSummary hook](#custom-hooks) - Data fetching
+- [3-Level Routing Hierarchy](#routing-architecture) - Навигация
+
+---
+
+### PerformancePage Visualization
+
+**Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  PerformancePage (Route: /project/:id/performance)               │
 │                                                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │  Project Info Card                                        │  │
@@ -1341,14 +1559,55 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 - `components/shared/LoadingSpinner.tsx`
 - `components/shared/ErrorMessage.tsx`
 - `components/shared/SkeletonCard.tsx`
+- `components/shared/ParsingProgress.tsx` - Fixed top progress bar (NEW in v2.1)
+  - Shows "Processing X/Y projects (Z%)" during background parsing
+  - Polls useQueueStatus() hook every 2 seconds
+  - Auto-hides when `pending === 0`
+  - Blue gradient background, white text, responsive layout
+  - Positioned at top: `fixed top-0 left-0 right-0 z-50`
 - `components/ui/*` - Radix UI primitives (Button, Dialog, Select, Checkbox, etc.)
 
 **Project components:**
 - `components/projects/ProjectCard.tsx`
+  - **Updated in v2.1:** Added spinner for projects missing metadata
+  - Shows `<Loader2 className="animate-spin" />` with "Processing metadata..." when `metadata?.auto` is null
+  - Replaces EngineBadge during parsing
 - `components/projects/FiltersBar.tsx`
 - `components/projects/MetadataDialog.tsx`
 
-**Visualization components:**
+**Project Overview components (NEW in v3.0):**
+- `components/project-overview/AnalysisTypeCard.tsx`
+  - Analysis type selection cards (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)
+  - Props: `id`, `title`, `description`, `href`, `available`, `calculationsCount`, `rpmPointsCount`, `traceTypes`
+  - Icon mapping: TrendingUp, Activity, LineChart, Volume2, Fan, History
+  - Features: hover effects (`hover:shadow-xl hover:scale-[1.02]`), disabled state, keyboard navigation
+  - ARIA labels: `role="button"`, `aria-label`, `aria-disabled`
+  - Status messages: "24 calculations ready" / "Not available" / "Coming in Phase 2"
+  - See: [ProjectOverviewPage section](#projectoverviewpage) for detailed usage
+
+**Navigation components (NEW in v3.0):**
+- `components/navigation/Breadcrumbs.tsx`
+  - Breadcrumb navigation for Level 3 pages (Analysis Pages only)
+  - Format: "Engine Viewer > Project Name > Analysis Type"
+  - Props: `items: BreadcrumbItem[]` where `BreadcrumbItem = { label: string, href?: string }`
+  - Features:
+    - First items are clickable links with hover effects
+    - Last item (current page) displayed in muted color, not clickable
+    - ChevronRight separators between items
+    - Responsive: text truncation on small screens (`max-w-[200px]`)
+    - ARIA label: `aria-label="Breadcrumb"`
+  - Example:
+    ```tsx
+    <Breadcrumbs
+      items={[
+        { label: 'Engine Viewer', href: '/' },
+        { label: 'Vesta 1.6 IM', href: '/project/vesta-16-im' },
+        { label: 'Performance & Efficiency' } // current page
+      ]}
+    />
+    ```
+
+**Performance (Visualization) components:**
 - `components/visualization/CalculationSelector.tsx` - Select up to 5 calculations
 - `components/visualization/ChartPreset1.tsx` - Power & Torque
 - `components/visualization/ChartPreset2.tsx` - Pressure & Temperature
@@ -1357,6 +1616,11 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
 - `components/visualization/ChartPreset5.tsx` - Volumetric Efficiency
 - `components/visualization/ChartPreset6.tsx` - Custom
 - `components/visualization/DataTable.tsx` - Tabular data
+
+**App component:**
+- `App.tsx` - **Updated in v2.1:** Integrated ParsingProgress globally
+  - Rendered before page-container (above all routes)
+  - Visible across all pages during background parsing
 
 ---
 
@@ -1383,22 +1647,179 @@ const { filters, setFilter, clearFilters, applyFilters } = useFilters();
 const { metadata, updateMetadata, loading, error } = useMetadata(projectId);
 ```
 
+**useQueueStatus.ts** - Polling queue status (NEW in v2.1):
+```typescript
+const status = useQueueStatus();
+// Returns: QueueStatus | null
+// { total: number, pending: number, completed: number, isProcessing: boolean }
+```
+
+**Features:**
+- Polls `/api/queue/status` every 2 seconds
+- Stops polling when `pending === 0`
+- Shows toast notification when processing completes
+- Cleanup on unmount (prevents memory leaks)
+- TypeScript fix: Uses `number` for intervalId (browser context, not `NodeJS.Timeout`)
+
+**Used by:** ParsingProgress component (fixed top progress bar)
+
+**useProjectSummary.ts** - Fetch project summary (NEW in v3.0):
+```typescript
+const { summary, loading, error } = useProjectSummary(projectId);
+// Returns: UseProjectSummaryResult
+// summary: ProjectSummary | null
+// ProjectSummary = { project: {...}, availability: { performance, traces, pvDiagrams, noise, turbo, configuration } }
+```
+
+**Features:**
+- Fetches `/api/project/:id/summary` endpoint
+- Returns project info (id, displayName, specs) + analysis types availability
+- Loading states: `loading: boolean`, `error: string | null`
+- Race condition handling: `isMounted` flag in useEffect cleanup
+- Auto-fetches on projectId change
+
+**Used by:** ProjectOverviewPage (analysis type cards)
+
+**useDeepLinking.ts** - URL params ↔ Zustand state sync (NEW in v3.0):
+```typescript
+useDeepLinking(projectId);
+// No return value - syncs URL params with store automatically
+```
+
+**Purpose:** Keep URL params synchronized with Zustand store state for shareable URLs and browser Back/Forward support.
+
+**URL Format Examples:**
+- `/project/vesta-16-im/performance?preset=1&primary=$1`
+- `/project/vesta-16-im/performance?preset=4&primary=$1&compare=$2,$5`
+- `/project/bmw-m42/performance?preset=2&primary=$3&compare=vesta-16-im:$1`
+
+**Synced State:**
+- Chart preset selection (`preset=1-6`)
+- Primary calculation (`primary=projectId:calculationId` or just `$calculationId`)
+- Comparison calculations (`compare=projectId1:calcId1,projectId2:calcId2,...`)
+
+**Features:**
+- **Bidirectional sync:**
+  - URL → Store: On mount & browser Back/Forward
+  - Store → URL: When preset/calculations change
+- **Auto-fetch calculation data** when restoring from URL
+- **Infinite loop prevention:** `isSyncingFromURLRef` flag
+- **Shareable URLs:** Copy URL → share → same visualization state
+- **Browser Back/Forward support:** URL changes trigger store updates
+
+**Implementation details:**
+- Uses `useSearchParams()` from react-router-dom
+- `setSearchParams(params, { replace: true })` updates URL without adding to browser history
+- `parseCalculationParam()` - parse "projectId:calcId" or "$calcId" format
+- `serializeCalculation()` - serialize CalculationReference to URL param
+- `fetchCalculationMetadata()` - fetch full calculation data from `/api/project/:id`
+
+**Used by:** PerformancePage (enables deep linking for all visualization state)
+
 ---
 
 ### State Management
 
-**Zustand store** - CalculationReference для cross-project comparison:
+**Zustand Store with Slices Architecture (v3.0)**
+
+**File:** `frontend/src/stores/appStore.ts`
+
+**Architecture:** Modular slices pattern - separate concerns, selective persistence.
 
 ```typescript
-// frontend/src/store/comparisonStore.ts
-interface ComparisonState {
-  primaryProject: CalculationReference | null;
-  comparisonProjects: CalculationReference[];  // Max 4
+// appStore.ts - Combined store with two slices
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { createSettingsSlice } from './slices/settingsSlice';
+import { createPerformanceSlice } from './slices/performanceSlice';
 
-  setPrimaryProject: (ref: CalculationReference) => void;
-  addComparison: (ref: CalculationReference) => void;
+type AppStore = SettingsSlice & PerformanceSlice;
+
+export const useAppStore = create<AppStore>()(
+  persist(
+    (...args) => ({
+      ...createSettingsSlice(...args),
+      ...createPerformanceSlice(...args),
+    }),
+    {
+      name: 'engine-viewer-storage',
+      // Persist ONLY settings slice (not performance state)
+      partialize: (state) => ({
+        units: state.units,
+        theme: state.theme,
+        chartSettings: state.chartSettings,
+      }),
+    }
+  )
+);
+```
+
+**Slice 1: SettingsSlice** (`frontend/src/stores/slices/settingsSlice.ts`)
+
+**Purpose:** User preferences (persisted to localStorage)
+
+**State:**
+```typescript
+interface SettingsSlice {
+  // State
+  units: 'si' | 'american' | 'hp';
+  theme: 'light' | 'dark';
+  chartSettings: {
+    animation: boolean;
+    showGrid: boolean;
+    decimals: number;
+  };
+
+  // Actions
+  setUnits: (units: 'si' | 'american' | 'hp') => void;
+  setTheme: (theme: 'light' | 'dark') => void;
+  updateChartSettings: (settings: Partial<ChartSettings>) => void;
+}
+```
+
+**Persistence:** YES (localStorage via `zustand/middleware persist`)
+
+**Usage:**
+```typescript
+const units = useAppStore((state) => state.units);
+const setUnits = useAppStore((state) => state.setUnits);
+```
+
+**Slice 2: PerformanceSlice** (`frontend/src/stores/slices/performanceSlice.ts`)
+
+**Purpose:** Performance page state (session-only, synced with URL via useDeepLinking)
+
+**State:**
+```typescript
+interface PerformanceSlice {
+  // Calculation State
+  primaryCalculation: CalculationReference | null;
+  comparisonCalculations: CalculationReference[];  // Max 4
+
+  // Chart Preset State
+  selectedPreset: 1 | 2 | 3 | 4 | 5 | 6;
+  selectedCustomParams: SelectedParameter[];
+
+  // UI Modal State
+  isSettingsOpen: boolean;
+  isPrimaryModalOpen: boolean;
+  isComparisonModalOpen: boolean;
+  isParameterSelectorOpen: boolean;
+
+  // Actions
+  setPrimaryCalculation: (calc: CalculationReference) => void;
+  clearPrimaryCalculation: () => void;
+  addComparison: (calc: CalculationReference) => void;
   removeComparison: (index: number) => void;
-  clearAll: () => void;
+  clearComparisons: () => void;
+  setSelectedPreset: (preset: 1 | 2 | 3 | 4 | 5 | 6) => void;
+  setSelectedCustomParams: (params: SelectedParameter[]) => void;
+  toggleParameter: (paramId: string) => void;
+  setCylinderSelection: (paramId: string, cylinder: 'avg' | number) => void;
+  toggleSettings: () => void;
+  togglePrimaryModal: () => void;
+  toggleComparisonModal: () => void;
+  toggleParameterSelector: () => void;
 }
 
 interface CalculationReference {
@@ -1406,14 +1827,190 @@ interface CalculationReference {
   projectName: string;
   calculationId: string;
   calculationName: string;
-  color: string;  // From CALCULATION_COLORS
+  color: string;  // Auto-assigned from CALCULATION_COLORS
+  metadata: {
+    rpmRange: [number, number];
+    avgStep: number;
+    pointsCount: number;
+    engineType: string;
+    cylinders: number;
+  };
 }
 ```
 
+**Persistence:** NO (session-only, state managed via URL params through useDeepLinking hook)
+
+**Color Assignment:**
+- Primary calculation → `CALCULATION_COLORS[0]` (red)
+- Comparisons → auto-assigned next available color from palette
+- `getNextColor()` utility finds first unused color
+
+**Usage:**
+```typescript
+const preset = useAppStore((state) => state.selectedPreset);
+const setPreset = useAppStore((state) => state.setSelectedPreset);
+const primaryCalculation = useAppStore((state) => state.primaryCalculation);
+const setPrimaryCalculation = useAppStore((state) => state.setPrimaryCalculation);
+```
+
+**Integration with Deep Linking:**
+- PerformanceSlice state synced with URL params via `useDeepLinking()` hook
+- URL changes (browser Back/Forward) → store updates
+- Store changes (user interactions) → URL updates
+- Enables shareable URLs with full visualization state
+
 **Why Zustand?**
 - Lightweight (no Provider wrapper needed)
-- Simple API (hooks-based)
-- Perfect for cross-page state (comparison persists on navigation)
+- Simple API (hooks-based, direct state access)
+- Built-in middleware (persist, devtools)
+- Perfect for cross-page state (settings persist, performance syncs with URL)
+- TypeScript-friendly (full type inference)
+
+**Why Slices Pattern?**
+- Separation of concerns (settings vs performance state)
+- Selective persistence (only settings saved to localStorage)
+- Easier testing and maintenance
+- Scalable for future features (can add new slices without refactoring)
+
+---
+
+### Routing Architecture
+
+**3-Level Hierarchy (v3.0)**
+
+**File:** `frontend/src/App.tsx`
+
+**Structure:**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                   ROUTING HIERARCHY                               │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Level 1: HomePage                                               │
+│  Route: /                                                        │
+│  Component: HomePage.tsx                                         │
+│  Purpose: List all projects (cards grid with filters)           │
+│                                                                   │
+│       ↓ User clicks "Open" on ProjectCard                        │
+│                                                                   │
+│  Level 2: Project Overview                                       │
+│  Route: /project/:id                                             │
+│  Component: ProjectOverviewPage.tsx                              │
+│  Purpose: Select analysis type (Performance, Traces, etc.)      │
+│                                                                   │
+│       ↓ User clicks "Performance & Efficiency" card              │
+│                                                                   │
+│  Level 3: Analysis Pages                                         │
+│  Routes:                                                         │
+│    /project/:id/performance     - PerformancePage.tsx           │
+│    /project/:id/traces          - TracesPage.tsx (future)       │
+│    /project/:id/pv-diagrams     - PVDiagramsPage.tsx (future)   │
+│    /project/:id/noise           - NoisePage.tsx (future)         │
+│    /project/:id/turbo           - TurboPage.tsx (future)         │
+│    /project/:id/configuration   - ConfigurationPage.tsx (future) │
+│  Purpose: Specific analysis visualization                       │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**React Router Configuration:**
+
+```typescript
+// App.tsx
+<BrowserRouter>
+  <ErrorBoundary>
+    <ParsingProgress />
+    <div className="page-container">
+      <Routes>
+        {/* Level 1: HomePage */}
+        <Route path="/" element={<HomePage />} />
+
+        {/* Level 2: Project Overview */}
+        <Route path="/project/:id" element={<ProjectOverviewPage />} />
+
+        {/* Level 3: Analysis Pages */}
+        <Route path="/project/:id/performance" element={<PerformancePage />} />
+        <Route path="/project/:id/traces" element={<TracesPage />} />
+        <Route path="/project/:id/pv-diagrams" element={<PVDiagramsPage />} />
+        <Route path="/project/:id/noise" element={<NoisePage />} />
+        <Route path="/project/:id/turbo" element={<TurboPage />} />
+        <Route path="/project/:id/configuration" element={<ConfigurationPage />} />
+      </Routes>
+    </div>
+    <Toaster />
+  </ErrorBoundary>
+</BrowserRouter>
+```
+
+**Navigation Flow:**
+
+1. **Level 1 → Level 2:**
+   - User clicks "Open" button on ProjectCard
+   - `navigate(\`/project/${projectId}\`)` in ProjectCard.tsx
+   - Navigates to ProjectOverviewPage
+
+2. **Level 2 → Level 3:**
+   - User clicks AnalysisTypeCard (e.g., "Performance & Efficiency")
+   - `navigate(href)` where `href="/project/:id/performance"`
+   - Navigates to PerformancePage
+
+3. **Level 3 → Level 2:**
+   - User clicks "Back" button or breadcrumb link
+   - `navigate(\`/project/${projectId}\`)`
+   - Returns to ProjectOverviewPage
+
+4. **Level 3 → Level 1:**
+   - User clicks breadcrumb "Engine Viewer" link
+   - `navigate('/')`
+   - Returns to HomePage
+
+**Breadcrumbs (Level 3 Only):**
+
+```typescript
+// Example: PerformancePage breadcrumbs
+<Breadcrumbs
+  items={[
+    { label: 'Engine Viewer', href: '/' },
+    { label: projectName, href: `/project/${projectId}` },
+    { label: 'Performance & Efficiency' } // current page
+  ]}
+/>
+```
+
+**Deep Linking Support (Level 3):**
+
+Performance page supports URL params for complete state restoration:
+
+```
+/project/vesta-16-im/performance?preset=1&primary=$1&compare=$2,$5
+```
+
+- `preset=1-6` - Selected chart preset
+- `primary=projectId:calcId` - Primary calculation
+- `compare=projId1:calcId1,projId2:calcId2` - Comparison calculations
+
+Managed by `useDeepLinking()` hook - syncs URL ↔ Zustand store.
+
+**Route Parameters:**
+
+- `:id` - Project ID (normalized filename: `Vesta 1.6 IM.det` → `vesta-16-im`)
+
+**URL Format Examples:**
+
+- Level 1: `/` (HomePage)
+- Level 2: `/project/bmw-m42` (ProjectOverviewPage for BMW M42 project)
+- Level 3: `/project/bmw-m42/performance` (PerformancePage)
+- Level 3 with state: `/project/bmw-m42/performance?preset=2&primary=$3&compare=vesta-16-im:$1`
+
+**Why 3-Level Hierarchy?**
+
+- **Scalability:** Easy to add new analysis types without restructuring
+- **Clarity:** Each level has single responsibility
+- **Navigation:** Intuitive breadcrumbs, clear user flow
+- **Future-proof:** Prepared for 6 analysis types (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)
+- **SEO-friendly:** Semantic URLs (e.g., `/project/bmw-m42/performance`)
+- **Deep linking:** Full state encoded in URL (shareable, bookmarkable)
 
 ---
 
@@ -1451,9 +2048,13 @@ HomePage re-renders with project cards
 ```
 User clicks "Open" on ProjectCard
          ↓
-Navigate to /project/:id
+Navigate to /project/:id (ProjectOverviewPage)
          ↓
-ProjectPage.tsx calls useProjectData(id)
+User clicks "Performance & Efficiency" card
+         ↓
+Navigate to /project/:id/performance (PerformancePage)
+         ↓
+PerformancePage.tsx calls useProjectData(id)
          ↓
 useProjectData() → api.getProject(id)
          ↓
@@ -1475,7 +2076,7 @@ Return: EngineProject JSON
          ↓
 useProjectData() updates state
          ↓
-ProjectPage renders charts + table
+PerformancePage renders charts + table
 ```
 
 ### POST /api/projects/:id/metadata (Update metadata)
@@ -1909,6 +2510,9 @@ xl:  1280px  // Desktops
 - `cors` - CORS middleware
 - `yaml` - config.yaml parsing
 - `fs/promises` - Async file operations
+- `p-queue` v9.0.0 - Promise queue with concurrency control (NEW in v2.1)
+- `async-mutex` v0.5.0 - Mutex for race condition protection (NEW in v2.1)
+- `chokidar` - File system watcher
 
 **Dev dependencies:**
 - `nodemon` - Auto-restart on changes
@@ -1945,6 +2549,11 @@ xl:  1280px  // Desktops
 **Data export:**
 - `xlsx` - Excel export
 - `papaparse` - CSV export
+
+**Development configuration:**
+- Vite proxy (NEW in v2.1): `/api` requests → `http://localhost:3000` with path rewrite
+  - Frontend: `fetch('/api/queue/status')` → Backend: `GET http://localhost:3000/queue/status`
+  - Configured in `frontend/vite.config.ts`
 
 ### Development
 

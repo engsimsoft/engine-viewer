@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Wrench, CheckCircle, Archive, Calendar, Cpu, User, Edit, AlertTriangle } from 'lucide-react';
+import { Wrench, CheckCircle, Archive, Calendar, Cpu, User, Edit, AlertTriangle, Loader2 } from 'lucide-react';
 import type { ProjectInfo } from '@/types';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -113,13 +113,20 @@ export default function ProjectCard({ project, onOpen, onEdit }: ProjectCardProp
         </div>
 
         {/* Engine specification badges (Type, Cylinders, Valves, Displacement, Intake) */}
-        <EngineBadge
-          type={metadata?.auto?.type}
-          cylinders={metadata?.auto?.cylinders || project.numCylinders}
-          valvesPerCylinder={metadata?.auto?.valvesPerCylinder}
-          displacement={metadata?.auto?.displacement}
-          intake={metadata?.auto?.intakeSystem}
-        />
+        {metadata?.auto ? (
+          <EngineBadge
+            type={metadata.auto.type}
+            cylinders={metadata.auto.cylinders || project.numCylinders}
+            valvesPerCylinder={metadata.auto.valvesPerCylinder}
+            displacement={metadata.auto.displacement}
+            intake={metadata.auto.intakeSystem}
+          />
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Processing metadata...</span>
+          </div>
+        )}
 
         {/* Client (ALWAYS show) */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
