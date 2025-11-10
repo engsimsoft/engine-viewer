@@ -13,6 +13,7 @@ import { readdir } from 'fs/promises';
 import { parseDetFile } from '../services/fileParser.js';
 import { getConfig, getDataFolderPath } from '../config.js';
 import { getFileInfo, normalizeFilenameToId, scanDirectory } from '../services/fileScanner.js';
+import { parseEngineFile } from '../parsers/index.js';
 
 const router = Router();
 
@@ -439,8 +440,37 @@ router.get('/:id/summary', async (req, res, next) => {
       // Keep tracesAvailability as { available: false }
     }
 
-    // 3-5. PV-Diagrams, Noise, Turbo - not available yet (Phase 2+)
-    const pvDiagramsAvailability = { available: false };
+    // 3. PV-Diagrams - check if .pvd files exist in project folder
+    let pvDiagramsAvailability = { available: false };
+
+    try {
+      const projectFiles = await readdir(projectFolderPath);
+      const pvdFiles = projectFiles.filter(file => file.toLowerCase().endsWith('.pvd'));
+
+      if (pvdFiles.length > 0) {
+        // Extract RPM points from .pvd filenames (e.g., "V8_2000.pvd" → 2000 RPM)
+        const rpmPoints = new Set();
+
+        pvdFiles.forEach(file => {
+          // Try to extract RPM from filename (pattern: _XXXXX.pvd)
+          const rpmMatch = file.match(/_(\d{4,5})\.pvd$/i);
+          if (rpmMatch) {
+            rpmPoints.add(parseInt(rpmMatch[1], 10));
+          }
+        });
+
+        pvDiagramsAvailability = {
+          available: true,
+          filesCount: pvdFiles.length,
+          rpmPointsCount: rpmPoints.size
+        };
+      }
+    } catch (error) {
+      console.warn(`[API] Could not check PVD files for ${id}:`, error.message);
+      // Keep pvDiagramsAvailability as { available: false }
+    }
+
+    // 4-5. Noise, Turbo - not available yet (Phase 2+)
     const noiseAvailability = { available: false };
     const turboAvailability = { available: false };
 
@@ -483,6 +513,192 @@ router.get('/:id/summary', async (req, res, next) => {
         error: {
           code: 'PROJECT_NOT_FOUND',
           message: 'Project file not found',
+          details: error.message
+        }
+      });
+    }
+
+    // Pass other errors to global error handler
+    next(error);
+  }
+});
+
+/**
+ * GET /api/project/:id/pvd-files
+ *
+ * Get list of PV-Diagram files for a specific project with metadata.
+ * Parses each .pvd file to extract peak pressure and RPM information.
+ *
+ * URL Parameters:
+ * - id: Project identifier (normalized filename without extension)
+ *
+ * Response format:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "projectId": "v8",
+ *     "files": [
+ *       {
+ *         "fileName": "V8_2000.pvd",
+ *         "rpm": 2000,
+ *         "cylinders": 8,
+ *         "engineType": "TURBO",
+ *         "peakPressure": 156.789,
+ *         "peakPressureAngle": 15.5,
+ *         "dataPoints": 721
+ *       },
+ *       ...
+ *     ]
+ *   },
+ *   "meta": {
+ *     "totalFiles": 11,
+ *     "rpmPoints": [2000, 2500, 3000, ...],
+ *     "parseDuration": 45
+ *   }
+ * }
+ *
+ * Error responses:
+ * - 400: Invalid project ID
+ * - 404: Project not found or no PV-Diagrams available
+ * - 500: Server error (parse error, file read error, etc.)
+ */
+router.get('/:id/pvd-files', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ID format
+    if (!id || !/^[a-z0-9-]+$/.test(id)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_PROJECT_ID',
+          message: 'Invalid project ID format',
+          details: 'Project ID must contain only lowercase letters, numbers, and hyphens'
+        }
+      });
+    }
+
+    console.log(`[API] GET /api/project/${id}/pvd-files - Loading PV-Diagram files...`);
+
+    // Get configuration
+    const config = getConfig();
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Scan directory to find matching project file (.det or .pou)
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
+
+    // Find file matching the ID
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
+      if (fileId === id) {
+        matchedFileInfo = fileInfo;
+        break;
+      }
+    }
+
+    if (!matchedFileInfo) {
+      console.warn(`[API] GET /api/project/${id}/pvd-files - Project not found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project not found',
+          details: `No project found with ID: ${id}`
+        }
+      });
+    }
+
+    // Get project folder path (parent directory of the .det/.pou file)
+    const projectFolderPath = path.dirname(matchedFileInfo.path);
+
+    // Find all .pvd files in project folder
+    const projectFiles = await readdir(projectFolderPath);
+    const pvdFiles = projectFiles.filter(file => file.toLowerCase().endsWith('.pvd'));
+
+    if (pvdFiles.length === 0) {
+      console.warn(`[API] GET /api/project/${id}/pvd-files - No PV-Diagram files found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NO_PVD_FILES',
+          message: 'No PV-Diagram files found',
+          details: `Project ${id} has no .pvd files`
+        }
+      });
+    }
+
+    // Parse each .pvd file and extract metadata
+    const startTime = Date.now();
+    const filesWithMetadata = [];
+
+    for (const fileName of pvdFiles) {
+      try {
+        const filePath = path.join(projectFolderPath, fileName);
+
+        // Parse .pvd file using PvdParser
+        const pvdData = await parseEngineFile(filePath);
+
+        // Calculate peak pressure across all cylinders and all crank angles
+        let peakPressure = 0;
+        let peakPressureAngle = 0;
+
+        for (const dataPoint of pvdData.data) {
+          for (const cylinder of dataPoint.cylinders) {
+            if (cylinder.pressure > peakPressure) {
+              peakPressure = cylinder.pressure;
+              peakPressureAngle = dataPoint.deg;
+            }
+          }
+        }
+
+        filesWithMetadata.push({
+          fileName: fileName,
+          rpm: pvdData.metadata.rpm,
+          cylinders: pvdData.metadata.cylinders,
+          engineType: pvdData.metadata.engineType,
+          peakPressure: parseFloat(peakPressure.toFixed(3)),
+          peakPressureAngle: parseFloat(peakPressureAngle.toFixed(2)),
+          dataPoints: pvdData.data.length
+        });
+      } catch (error) {
+        console.error(`[API] Error parsing ${fileName}:`, error.message);
+        // Skip files that fail to parse
+      }
+    }
+
+    const parseDuration = Date.now() - startTime;
+
+    // Extract unique RPM points
+    const rpmPoints = [...new Set(filesWithMetadata.map(f => f.rpm))].sort((a, b) => a - b);
+
+    // Build response
+    const response = {
+      success: true,
+      data: {
+        projectId: id,
+        files: filesWithMetadata
+      },
+      meta: {
+        totalFiles: filesWithMetadata.length,
+        rpmPoints: rpmPoints,
+        parseDuration: parseDuration
+      }
+    };
+
+    console.log(`[API] GET /api/project/${id}/pvd-files - Success: ${filesWithMetadata.length} files (${parseDuration}ms)`);
+
+    res.json(response);
+  } catch (error) {
+    console.error(`[API] GET /api/project/${req.params.id}/pvd-files - Error:`, error.message);
+
+    // Check if error is due to file not found
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'FILE_NOT_FOUND',
+          message: 'File not found',
           details: error.message
         }
       });

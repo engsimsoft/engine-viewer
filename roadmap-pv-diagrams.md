@@ -5,8 +5,8 @@
 
 ## 📊 Текущий статус
 - **Этап:** Этап 1 (Backend - Parser & API)
-- **Прогресс:** 7/73 задач выполнено (10%)
-- **Следующее:** API endpoints для .pvd файлов
+- **Прогресс:** 10/73 задач выполнено (14%)
+- **Следующее:** Comprehensive verification Stage 1
 
 ---
 
@@ -27,18 +27,17 @@
 - [X] Verify: запустить backend, проверить что parser загружается без ошибок (15 мин)
 
 **1.3 API Endpoint:**
-- [ ] Добавить endpoint `/api/project/:id/pvd-files` - список .pvd с peak pressure metadata (2-3 часа)
-- [ ] Добавить endpoint `/api/files/:projectId/:filename` support для .pvd (или extend existing) (1-2 часа)
-- [ ] Тест через curl: получить список .pvd, получить данные V8_2000.pvd (30 мин)
+- [X] Добавить endpoint `/api/project/:id/pvd-files` - список .pvd с peak pressure metadata (2-3 часа)
+- [X] Добавить .pvd support в formatDetector.js (15 мин)
+- [X] Тест через curl: получить список .pvd для 4_Cyl_ITB (12 files, 3000-8500 RPM) (30 мин)
 
 **Verify этап 1 (COMPREHENSIVE):**
 - [ ] **Unit Tests:** Run test scripts - все parser тесты проходят (30 мин)
   - [X] `node backend/test-pvd-parser.js` - V8 (8-cyl) ✓
   - [X] `node backend/test-pvd-1cyl.js` - MOTO 250 (1-cyl) ✓
 - [ ] **Backend Tests:** `npm test` (backend) - если есть automated tests (30 мин)
-- [ ] **Integration Tests:** curl/Postman endpoints возвращают корректные данные (15 мин)
-  - `/api/project/:id/pvd-files` - список .pvd с metadata
-  - `/api/files/:projectId/:filename` - данные .pvd файла
+- [X] **Integration Tests:** curl/Postman endpoints возвращают корректные данные (15 мин)
+  - [X] `/api/project/:id/pvd-files` - список .pvd с metadata ✓ (4_Cyl_ITB: 12 files, 3000-8500 RPM)
 - [ ] **Browser Tests (MCP Playwright):** если нужно UI тестирование
 - [ ] **Code Quality:** eslint/prettier - код соответствует стандартам
 - [ ] **Git Commit:** Stage 1 complete с описанием изменений

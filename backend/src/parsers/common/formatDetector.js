@@ -6,6 +6,7 @@
  * - .det: 24 параметра (базовые характеристики)
  * - .pou: 71 параметр (расширенный набор)
  * - .prt: Метаданные проекта (engine specs, intake/exhaust configuration)
+ * - .pvd: PV-Diagrams (pressure-volume diagrams, 721 точек × N цилиндров)
  */
 
 import { basename } from 'path';
@@ -14,7 +15,7 @@ import { cleanLine } from './calculationMarker.js';
 /**
  * Определяет формат файла по расширению
  * @param {string} filePath - Путь к файлу
- * @returns {string|null} - 'det', 'pou', 'prt' или null если формат неизвестен
+ * @returns {string|null} - 'det', 'pou', 'prt', 'pvd' или null если формат неизвестен
  */
 function detectFormatByExtension(filePath) {
   const fileName = basename(filePath).toLowerCase();
@@ -29,6 +30,10 @@ function detectFormatByExtension(filePath) {
 
   if (fileName.endsWith('.prt')) {
     return 'prt';
+  }
+
+  if (fileName.endsWith('.pvd')) {
+    return 'pvd';
   }
 
   return null;
@@ -71,7 +76,7 @@ function detectFormatByContent(firstLine) {
  *
  * @param {string} filePath - Путь к файлу
  * @param {string} firstLine - Первая строка файла
- * @returns {string} - 'det', 'pou' или 'prt'
+ * @returns {string} - 'det', 'pou', 'prt', или 'pvd'
  * @throws {Error} - Если формат не удалось определить
  */
 function detectFormat(filePath, firstLine) {
@@ -83,7 +88,7 @@ function detectFormat(filePath, firstLine) {
   }
 
   // Если расширение неизвестно, анализируем содержимое
-  // (для .prt файлов это не применимо, только для .det/.pou)
+  // (для .prt и .pvd файлов это не применимо, только для .det/.pou)
   format = detectFormatByContent(firstLine);
 
   if (format) {
@@ -93,17 +98,17 @@ function detectFormat(filePath, firstLine) {
   // Если не удалось определить формат
   throw new Error(
     `Не удалось определить формат файла: ${filePath}. ` +
-    `Поддерживаемые форматы: .det, .pou, .prt`
+    `Поддерживаемые форматы: .det, .pou, .prt, .pvd`
   );
 }
 
 /**
  * Проверяет, поддерживается ли данный формат
- * @param {string} format - Формат файла ('det', 'pou', 'prt', и т.д.)
+ * @param {string} format - Формат файла ('det', 'pou', 'prt', 'pvd', и т.д.)
  * @returns {boolean} - true если формат поддерживается
  */
 function isSupportedFormat(format) {
-  const supportedFormats = ['det', 'pou', 'prt'];
+  const supportedFormats = ['det', 'pou', 'prt', 'pvd'];
   return supportedFormats.includes(format);
 }
 
