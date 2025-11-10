@@ -344,3 +344,98 @@ export interface ExportOptions {
   width?: number;
   height?: number;
 }
+
+// ====================================================================
+// PV-Diagrams Types (.pvd files)
+// ====================================================================
+
+/**
+ * System configuration from .pvd file (lines 3-15)
+ */
+export interface PVDSystemConfig {
+  numPipIn: number;      // Number of intake pipes
+  numColIn: number;      // Number of intake collectors
+  numBoxIn: number;      // Number of intake boxes
+  numPipEx: number;      // Number of exhaust pipes
+  numColEx: number;      // Number of exhaust collectors
+  numBoxEx: number;      // Number of exhaust boxes
+  numOutPipEx: number;   // Number of output exhaust pipes
+  numStepExH: number;    // Number of exhaust step headers
+  numStepEx: number;     // Number of exhaust steps
+  numExSil: number;      // Number of exhaust silencers
+  numExSilPlen: number;  // Number of exhaust silencer plenums
+  iTraceL: number;       // Intake trace length
+  eTraceL: number;       // Exhaust trace length
+}
+
+/**
+ * Metadata from .pvd file (lines 1-17)
+ */
+export interface PVDMetadata {
+  rpm: number;                    // Engine speed (RPM)
+  cylinders: number;              // Number of cylinders
+  engineType: 'NATUR' | 'TURBO';  // Engine type
+  numTurbo: number;               // Number of turbochargers
+  numExPas: number;               // Number of exhaust passages
+  numSuper: number;               // Number of superchargers
+  systemConfig: PVDSystemConfig;  // System configuration
+  firingOrder: number[];          // Firing order / ignition timing (2 lines combined)
+}
+
+/**
+ * Cylinder data at one crank angle
+ * Contains Volume (cm³) and Pressure (bar) for one cylinder
+ */
+export interface PVDCylinderDataPoint {
+  volume: number;    // Volume in cm³
+  pressure: number;  // Pressure in bar
+}
+
+/**
+ * One data point from .pvd file (one crank angle)
+ * Line format: "deg  vol1 press1  vol2 press2  vol3 press3 ..."
+ */
+export interface PVDDataPoint {
+  deg: number;                        // Crank angle (0-720°)
+  cylinders: PVDCylinderDataPoint[];  // Data for each cylinder [cyl1, cyl2, ...]
+}
+
+/**
+ * Complete parsed .pvd file data
+ * Returned by parseEngineFile(filePath) via PvdParser
+ */
+export interface PVDData {
+  metadata: PVDMetadata;   // Metadata from lines 1-17
+  columnHeaders: string[]; // Column headers from line 18
+  data: PVDDataPoint[];    // 721 data points (0-720° crank angle)
+}
+
+/**
+ * File info with peak pressure metadata
+ * Returned by GET /api/project/:id/pvd-files
+ */
+export interface PVDFileInfo {
+  fileName: string;          // File name (e.g., "V8_2000.pvd")
+  rpm: number;               // RPM from metadata
+  cylinders: number;         // Number of cylinders
+  engineType: string;        // Engine type (NATUR, TURBO)
+  peakPressure: number;      // Peak pressure across all cylinders (bar)
+  peakPressureAngle: number; // Crank angle at peak pressure (deg)
+  dataPoints: number;        // Number of data points (721)
+}
+
+/**
+ * API response from GET /api/project/:id/pvd-files
+ */
+export interface PVDFilesResponse {
+  success: boolean;
+  data: {
+    projectId: string;       // Project ID
+    files: PVDFileInfo[];    // Array of .pvd files with metadata
+  };
+  meta: {
+    totalFiles: number;      // Number of .pvd files found
+    rpmPoints: number[];     // Unique RPM points sorted [3000, 3500, 4000, ...]
+    parseDuration: number;   // Parse time in milliseconds
+  };
+}

@@ -709,4 +709,147 @@ router.get('/:id/pvd-files', async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/project/:id/pvd/:fileName
+ * Fetch specific .pvd file data (full parsed data)
+ *
+ * Response structure:
+ * {
+ *   success: true,
+ *   data: {
+ *     metadata: { rpm, cylinders, engineType, ... },
+ *     columnHeaders: [...],
+ *     data: [ { deg, cylinders: [{volume, pressure}, ...] }, ... ]
+ *   }
+ * }
+ */
+router.get('/:id/pvd/:fileName', async (req, res, next) => {
+  try {
+    const { id, fileName } = req.params;
+
+    // Validate ID format
+    if (!id || !/^[a-z0-9-]+$/.test(id)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_PROJECT_ID',
+          message: 'Invalid project ID format',
+          details: 'Project ID must contain only lowercase letters, numbers, and hyphens'
+        }
+      });
+    }
+
+    // Validate fileName (must end with .pvd)
+    if (!fileName || !fileName.toLowerCase().endsWith('.pvd')) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_FILE_NAME',
+          message: 'Invalid file name',
+          details: 'File name must end with .pvd extension'
+        }
+      });
+    }
+
+    console.log(`[API] GET /api/project/${id}/pvd/${fileName} - Loading PV-Diagram data...`);
+
+    // Get configuration
+    const config = getConfig();
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Scan directory to find matching project file (.det or .pou)
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
+
+    // Find file matching the ID
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
+      if (fileId === id) {
+        matchedFileInfo = fileInfo;
+        break;
+      }
+    }
+
+    if (!matchedFileInfo) {
+      console.warn(`[API] GET /api/project/${id}/pvd/${fileName} - Project not found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project not found',
+          details: `No project found with ID: ${id}`
+        }
+      });
+    }
+
+    // Get project folder path (parent directory of the .det/.pou file)
+    const projectFolderPath = path.dirname(matchedFileInfo.path);
+
+    // Build full .pvd file path
+    const pvdFilePath = path.join(projectFolderPath, fileName);
+
+    // Check if file exists
+    try {
+      await readdir(projectFolderPath);
+      const projectFiles = await readdir(projectFolderPath);
+      if (!projectFiles.includes(fileName)) {
+        console.warn(`[API] GET /api/project/${id}/pvd/${fileName} - File not found`);
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: 'FILE_NOT_FOUND',
+            message: 'PV-Diagram file not found',
+            details: `File ${fileName} not found in project ${id}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`[API] Error checking file existence:`, error.message);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'DIRECTORY_READ_ERROR',
+          message: 'Failed to read project directory',
+          details: error.message
+        }
+      });
+    }
+
+    // Parse .pvd file using PvdParser
+    const startTime = Date.now();
+    const pvdData = await parseEngineFile(pvdFilePath);
+    const parseDuration = Date.now() - startTime;
+
+    console.log(`[API] GET /api/project/${id}/pvd/${fileName} - Success (${parseDuration}ms, ${pvdData.data.length} points)`);
+
+    // Build response
+    res.json({
+      success: true,
+      data: pvdData,
+      meta: {
+        fileName: fileName,
+        parseDuration: parseDuration,
+        dataPoints: pvdData.data.length
+      }
+    });
+  } catch (error) {
+    console.error(`[API] GET /api/project/${req.params.id}/pvd/${req.params.fileName} - Error:`, error.message);
+
+    // Check if error is due to parsing failure
+    if (error.message && error.message.includes('слишком короткий')) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_FILE_FORMAT',
+          message: 'Invalid .pvd file format',
+          details: error.message
+        }
+      });
+    }
+
+    // Pass other errors to global error handler
+    next(error);
+  }
+});
+
 export default router;

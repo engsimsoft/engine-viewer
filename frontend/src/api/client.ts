@@ -11,6 +11,8 @@ import type {
   ProjectsListResponse,
   IntakeSystem,
   ExhaustSystem,
+  PVDFilesResponse,
+  PVDData,
 } from '@/types';
 
 // Создаём axios instance с базовой конфигурацией
@@ -182,6 +184,44 @@ export async function healthCheck(): Promise<boolean> {
 }
 
 // ====================================================================
+// PV-Diagrams API
+// ====================================================================
+
+/**
+ * Get list of .pvd files for a project with peak pressure metadata
+ *
+ * @param projectId - Project ID
+ * @returns Promise with array of PVD files and metadata
+ */
+export async function getPVDFiles(projectId: string): Promise<PVDFilesResponse> {
+  try {
+    const { data } = await api.get<PVDFilesResponse>(`/project/${projectId}/pvd-files`);
+    return data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+/**
+ * Get full parsed data for a specific .pvd file
+ *
+ * @param projectId - Project ID
+ * @param fileName - .pvd file name (e.g., "V8_2000.pvd")
+ * @returns Promise with complete PVD data (metadata + 721 data points)
+ */
+export async function getPVDData(projectId: string, fileName: string): Promise<PVDData> {
+  try {
+    const response = await api.get<{ success: boolean; data: PVDData }>(`/project/${projectId}/pvd/${fileName}`);
+    if (response.data && response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Invalid response format from server');
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+// ====================================================================
 // Export default API object
 // ====================================================================
 
@@ -192,6 +232,8 @@ export const projectsApi = {
   saveMetadata,
   deleteMetadata,
   healthCheck,
+  getPVDFiles,
+  getPVDData,
 };
 
 export default projectsApi;
