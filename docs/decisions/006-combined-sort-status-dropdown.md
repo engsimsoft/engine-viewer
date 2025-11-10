@@ -1,4 +1,4 @@
-# ADR 007: Combined Sort & Status Dropdown UI Pattern
+# ADR 006: Combined Sort & Status Dropdown UI Pattern
 
 **Дата:** 7 ноября 2025
 **Статус:** Принято

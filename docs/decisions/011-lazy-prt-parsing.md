@@ -1,4 +1,4 @@
-# ADR 009: Lazy .prt Parsing with Background Queue
+# ADR 011: Lazy .prt Parsing with Background Queue
 
 **Date:** 2025-11-09
 **Status:** ✅ Implemented

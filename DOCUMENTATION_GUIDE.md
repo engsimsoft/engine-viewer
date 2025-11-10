@@ -426,6 +426,13 @@ MIT
 
 ### docs/decisions/template.md (ADR)
 
+**CRITICAL: ADR Numbering Rules**
+- ✅ ADR numbers must be **unique** and **sequential** (001, 002, 003... NO duplicates!)
+- ✅ Number = chronological order of decision (NOT alphabetical!)
+- ✅ NEVER reuse deleted ADR numbers (creates confusion in git history)
+- ✅ Check existing ADRs before assigning number: `ls docs/decisions/*.md | sort`
+- ❌ FORBIDDEN: Two ADRs with same number (e.g., 007-foo.md + 007-bar.md)
+
 ```markdown
 # ADR [NUMBER]: [TITLE]
 

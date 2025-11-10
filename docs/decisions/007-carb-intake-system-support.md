@@ -1,4 +1,4 @@
-# ADR 008: Carburetor (Carb) Intake System Support
+# ADR 007: Carburetor (Carb) Intake System Support
 
 **Дата:** 7 ноября 2025
 **Статус:** Принято

@@ -487,7 +487,7 @@ const values = line.split(/\t+/);     // НЕТ! Это не табы
 │  Extract:                                                        │
 │  - cylinders, bore, stroke, CR, maxRPM                          │
 │  - type (NA/Turbo/Supercharged)                                 │
-│  - intakeSystem (ITB vs IM) ← Line 276 detection                │
+│  - intakeSystem (ITB, IM, Carb) ← Text pattern detection        │
 │  - exhaustSystem (4-2-1, 4-1, tri-y) ← Regex patterns           │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -545,7 +545,7 @@ export interface AutoMetadata {
   stroke: number;                  // mm
   compressionRatio: number;
   maxPowerRPM: number;
-  intakeSystem: 'ITB' | 'IM';      // ITB = Individual throttle bodies
+  intakeSystem: 'ITB' | 'IM' | 'Carb';  // ITB = Individual throttle bodies, IM = Intake Manifold, Carb = Carburetor/Collector
   exhaustSystem: '4-2-1' | '4-1' | 'tri-y' | 'custom';
 }
 
@@ -569,18 +569,44 @@ export interface ProjectMetadata {
 }
 ```
 
-**Intake System Detection (Line 276 of .prt):**
+**Intake System Detection (3 types: ITB, IM, Carb):**
+
+Engine Viewer поддерживает три типа intake систем:
+- **Carb** (Carburetor/Collector) - collected intake pipes (4into1 collector)
+- **ITB** (Individual Throttle Bodies) - separate pipes, no airboxes, throttles per cylinder
+- **IM** (Intake Manifold) - separate pipes with common airbox/plenum
+
+**Detection Logic (Priority Order):**
 
 ```javascript
-// Line 276: "N throttles - with no airboxes" → ITB
-// Line 276: "N throttle - with a common airbox or plenum" → IM
-
-if (line.includes('with no airboxes')) {
-  intakeSystem = 'ITB';
-} else if (line.includes('with a common airbox or plenum')) {
-  intakeSystem = 'IM';
+// Priority 1: Check "collected intake pipes" → Carb
+if (intakeText.includes('collected intake pipes')) {
+  return 'Carb';
 }
+
+// Priority 2: Check "seperate intake pipes"
+if (intakeText.includes('seperate intake pipes')) {
+  // ITB: separate + no airboxes + throttles
+  if (intakeText.includes('with no airboxes') && intakeText.includes('but with throttles')) {
+    return 'ITB';
+  }
+
+  // IM: separate + common airbox/plenum
+  if (intakeText.includes('with a common airbox') || intakeText.includes('with a common plenum')) {
+    return 'IM';
+  }
+}
+
+// Priority 3: Fallback heuristics (для старых .prt файлов)
+if (throttles === numCylinders && airboxes === 0) {
+  return 'ITB';
+}
+
+// Default: IM
+return 'IM';
 ```
+
+**См. также:** [ADR 007: Carburetor (Carb) Intake System Support](decisions/007-carb-intake-system-support.md) - полная документация detection logic
 
 **Exhaust System Parsing (Regex patterns):**
 
@@ -779,7 +805,7 @@ C:/4Stroke/ProjectName/
    - `.prt, .det, .pou` - simulation input/output
    - `.metadata/*.json` - UI preferences и configuration history
 
-**См. также:** [ADR 007: Metadata Storage Location](decisions/007-metadata-storage-location.md)
+**См. также:** [ADR 008: Metadata Storage Location](decisions/008-metadata-storage-location.md)
 
 ---
 
@@ -847,7 +873,7 @@ async function saveMetadata(projectId, metadata) {
 .metadata/prt-versions/
 ```
 
-**См. также:** [ADR 007: Metadata Storage Location](decisions/007-metadata-storage-location.md)
+**См. также:** [ADR 008: Metadata Storage Location](decisions/008-metadata-storage-location.md)
 
 ---
 
@@ -986,7 +1012,7 @@ async function saveMetadata(projectId, metadata) {
 
 **КАК** (HOW) будет обсуждено при планировании roadmap для этой фичи.
 
-**См. также:** [ADR 008: Configuration History](decisions/008-configuration-history.md)
+**См. также:** [ADR 009: Configuration History](decisions/009-configuration-history.md)
 
 ---
 
@@ -1187,7 +1213,7 @@ router.get('/status', (req, res) => {
 
 **См. также:**
 - [docs/api.md](api.md) - Complete API documentation
-- [ADR-009: Lazy .prt Parsing](decisions/009-lazy-prt-parsing.md) - Performance optimization
+- [ADR-011: Lazy .prt Parsing](decisions/011-lazy-prt-parsing.md) - Performance optimization
 
 ---
 
@@ -1301,7 +1327,7 @@ router.get('/status', (req, res) => {
 - Calculations count
 - Engine badges (Type/Cylinders/Intake)
   - Color coding: NA=green, Turbo=blue, Supercharged=purple
-  - ITB=orange, IM=gray
+  - ITB=orange, IM=gray, Carb=amber
 - Client name (ALWAYS visible, critical field)
 - Modified date
 - Edit button (opens MetadataDialog)
@@ -1313,7 +1339,7 @@ router.get('/status', (req, res) => {
 - Search input (filters by displayName, client, tags)
 - Multi-select dropdowns:
   - Type (NA/Turbo/Supercharged)
-  - Intake (ITB/IM)
+  - Intake (ITB/IM/Carb)
   - Cylinders (3/4/6/8/10/12)
   - Valves (8/12/16/24)
 - Combined Sort & Status dropdown (user feedback: "Combined dropdown better UX")
@@ -2256,7 +2282,7 @@ interface ProjectMetadata {
   auto?: {                     // From .prt file (READ-ONLY)
     cylinders: number;
     type: 'NA' | 'Turbo' | 'Supercharged';
-    intakeSystem: 'ITB' | 'IM';
+    intakeSystem: 'ITB' | 'IM' | 'Carb';
     exhaustSystem: '4-2-1' | '4-1' | 'tri-y' | 'custom';
     bore: number;              // mm
     stroke: number;            // mm

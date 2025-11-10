@@ -1,6 +1,6 @@
-# ADR 008: Configuration History (Automatic .prt Versioning)
+# ADR 009: Configuration History (Automatic .prt Versioning)
 
-**Date:** 2025-11-07
+**Date:** 2025-11-08
 **Status:** ✅ Accepted (Design phase)
 **Context:** Killer feature - replacing manual Excel tracking
 **Decision Maker:** User requirement (main pain point)

@@ -1,6 +1,6 @@
-# ADR 007: Metadata Storage Location
+# ADR 008: Metadata Storage Location
 
-**Date:** 2025-11-07
+**Date:** 2025-11-08
 **Status:** ✅ Accepted
 **Context:** User metadata storage architecture
 **Decision Maker:** Engineering requirements analysis

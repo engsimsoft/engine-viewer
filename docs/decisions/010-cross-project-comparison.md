@@ -1,4 +1,4 @@
-# ADR 006: Cross-Project Comparison Feature
+# ADR 010: Cross-Project Comparison Feature
 
 **Дата:** 7 ноября 2025
 **Статус:** Принято
