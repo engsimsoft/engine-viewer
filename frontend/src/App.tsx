@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import ProjectOverviewPage from '@/pages/ProjectOverviewPage';
 import PerformancePage from '@/pages/PerformancePage';
+import PVDiagramTestPage from '@/pages/PVDiagramTestPage';
 import HelpPage from '@/pages/HelpPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useAppStore } from '@/stores/appStore';
@@ -67,6 +68,9 @@ function App() {
             {/* Performance & Efficiency - visualization page */}
             {/* :id = initial project context (cross-project comparison supported) */}
             <Route path="/project/:id/performance" element={<PerformancePage />} />
+
+            {/* PV-Diagram Test Page - Stage 3 integration test */}
+            <Route path="/project/:id/pv-diagram-test" element={<PVDiagramTestPage />} />
 
             {/* Help page - parameters documentation */}
             <Route path="/help" element={<HelpPage />} />

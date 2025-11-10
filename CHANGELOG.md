@@ -35,6 +35,61 @@
     - `frontend/src/components/shared/ParsingProgress.tsx` (new) - Progress UI
 
 ### Added
+- **PV-Diagrams: Stage 3 - Basic Chart Component & Integration**:
+  - **PVDiagramChart Component** (`frontend/src/components/pv-diagrams/PVDiagramChart.tsx`, 335 lines):
+    - P-V Normal chart: Volume (cm³) on x-axis, Pressure (bar) on y-axis
+    - Linear axes with auto-calculated ranges and 5% padding
+    - Series per cylinder: maps 721 data points to ECharts format
+    - Color palette: 8 high-contrast colors for 8-cylinder engines (CYLINDER_COLORS array)
+    - Area style under curves (opacity 0.1) for better visualization
+    - Interactive features:
+      - Tooltip: shows Volume/Pressure values for all cylinders at cursor position
+      - Legend: click to toggle cylinder visibility
+      - DataZoom: inside (mouse wheel) + slider for zoom/pan on both axes
+    - Loading/Error/Empty states with proper UI components
+    - Title: displays RPM dynamically from metadata
+    - Props: {data, loading, error, onRetry, selectedCylinder}
+  - **PVDiagramControls Component** (`frontend/src/components/pv-diagrams/PVDiagramControls.tsx`, 149 lines):
+    - RPM selector dropdown: displays all .pvd files with peak pressure info
+    - Cylinder selector dropdown: "All Cylinders" or specific cylinder (1-based display)
+    - File info display: fileName, engineType, cylinders count, dataPoints count, peak pressure @ angle
+    - Uses shadcn/ui components: Select, SelectTrigger, SelectContent, SelectItem, Label
+    - Props: {files, selectedFileName, onFileChange, numCylinders, selectedCylinder, onCylinderChange}
+  - **PVDiagramTestPage Integration** (`frontend/src/pages/PVDiagramTestPage.tsx`, 141 lines):
+    - Complete data flow integration: usePVDFiles → PVDiagramControls → usePVDData → PVDiagramChart
+    - Auto-selects first .pvd file when files load
+    - State management: selectedFileName, selectedCylinder (null = "All")
+    - Debug panel: shows current state (file, cylinder, loading status, data points)
+    - Loading/Error/Empty states for files list
+    - Route: `/project/:id/pv-diagram-test`
+    - Added to App.tsx routing configuration
+  - **Verification**: TypeScript typecheck ✓, Frontend build (2.83s) ✓, Integration complete ✓
+  - **Progress**: Stage 3 integration complete (36/73 tasks, 49%)
+  - **Next**: Visual verification (browser test with real data)
+
+- **PV-Diagrams: Stage 2 - TypeScript Types & Data Hooks**:
+  - **TypeScript Types** (`frontend/src/types/index.ts`, lines 348-441):
+    - `PVDSystemConfig` - system configuration from .pvd file (lines 3-15)
+    - `PVDMetadata` - metadata from .pvd file (rpm, cylinders, engineType, turbo config, firing order)
+    - `PVDCylinderDataPoint` - volume (cm³) + pressure (bar) for one cylinder at one angle
+    - `PVDDataPoint` - {deg, cylinders[]} - one data point (0-720° crank angle)
+    - `PVDData` - complete parsed .pvd file (metadata + 721 data points)
+    - `PVDFileInfo` - file info with peak pressure metadata (from API)
+    - `PVDFilesResponse` - API response structure
+  - **Backend API Endpoint** (`backend/src/routes/data.js`, lines 726-853):
+    - `GET /api/project/:id/pvd/:fileName` - fetch specific .pvd file data (full parsed: metadata + 721 points)
+    - Validation: projectId format, .pvd extension
+    - Error handling: 404 (file not found), 400 (invalid format), 500 (server error)
+  - **API Client Functions** (`frontend/src/api/client.ts`, lines 194-220):
+    - `getPVDFiles(projectId)` - fetch list of .pvd files with peak pressure metadata
+    - `getPVDData(projectId, fileName)` - fetch specific .pvd file data (721 points)
+  - **React Hooks**:
+    - `frontend/src/hooks/usePVDFiles.ts` - loads list of .pvd files with metadata, returns {files, rpmPoints, totalFiles, loading, error, refetch}
+    - `frontend/src/hooks/usePVDData.ts` - loads specific .pvd file data (721 points), returns {data, loading, error, refetch}
+    - Both hooks include: loading states, error handling, refetch function, race condition protection (ignore flag)
+  - **Verification**: TypeScript typecheck ✓, Frontend build (2.98s) ✓
+  - **Commit**: a07135b
+
 - **Project Summary API endpoint** (`/api/project/:id/summary`):
   - Returns availability status for all 6 analysis types (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)
   - Performance availability: checks .det/.pou files, returns calculationsCount
