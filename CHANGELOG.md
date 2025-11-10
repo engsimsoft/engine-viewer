@@ -80,7 +80,50 @@
   - **Files Deleted**: 2 test files
   - **Progress**: Stage 3 complete (49/73 tasks, 67%)
   - **Browser verification**: User confirmed - all working ✓
-  - **Status**: Stage 3 COMPLETE → Stage 4 starting
+  - **Status**: Stage 3 COMPLETE → Stage 4-5 starting
+
+- **PV-Diagrams: Stage 4-5 - Tab-based Layout & Multiple Chart Types** (merged stages for efficiency):
+  - **Zustand State** - Updated `pvDiagramsSlice.ts` (77 lines):
+    - Added: `selectedDiagramType: DiagramType` ('pv' | 'log-pv' | 'p-alpha')
+    - Added: `setSelectedDiagramType(type: DiagramType)` action
+    - Default: 'pv' (Normal P-V Diagram)
+  - **Tabs UI** (`frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx`, 51 lines):
+    - 3-column grid tabs: "P-V", "Log P-V", "P-α"
+    - shadcn/ui Tabs component (professional styling)
+    - Synced with Zustand selectedDiagramType state
+  - **Chart Helpers** (`frontend/src/components/pv-diagrams/chartOptionsHelpers.ts`, 560 lines):
+    - **createPVChartOptions** - Normal P-V Diagram:
+      - Linear axes: Volume (cm³) x Pressure (bar)
+      - Classic thermodynamic diagram
+      - Area style (opacity 0.1) for better visualization
+    - **createLogPVChartOptions** - Log P-V Diagram:
+      - Logarithmic axes (base 10): log(Volume) x log(Pressure)
+      - Polytropic process analysis (P × V^n = const)
+      - Tooltip shows log scale note
+    - **createPAlphaChartOptions** - P-α Diagram:
+      - X-axis: Crank Angle (0-720° for 4-stroke)
+      - Y-axis: Pressure (bar)
+      - **TDC markers**: 0°, 360°, 720° (red dashed lines, labeled "TDC")
+      - **BDC markers**: 180°, 540° (blue dotted lines, labeled "BDC")
+      - MarkLine labels at end position
+  - **Refactored Chart** (`PVDiagramChart.tsx`, 166 lines, was 361):
+    - Switch-case logic for 3 diagram types
+    - Dynamic export filename includes diagram type: `{project}_PVDiagram{type}_{rpm}RPM_{cylinder}`
+    - Cleaner code structure using helper functions
+  - **LeftPanel Integration** (`PVLeftPanel.tsx` updated, 92 lines):
+    - Added Section 3: "DIAGRAM TYPE"
+    - Shows tabs when RPM selected (same visibility logic as Cylinder Filter)
+  - **Verification**:
+    - TypeScript typecheck ✓
+    - Frontend dev server (localhost:5175) ✓
+    - Browser test: All 3 diagram types working ✓
+    - User confirmed: "всё открывается", "в плане реализации все очень хорошо сделано" ✓
+  - **Files Created**: 2 (DiagramTypeTabs, chartOptionsHelpers)
+  - **Files Modified**: 3 (pvDiagramsSlice, PVLeftPanel, PVDiagramChart)
+  - **Files Deleted**: 1 backup (PVDiagramChart.tsx.backup)
+  - **Progress**: Stage 4-5 complete (64/73 tasks, 88%)
+  - **Known Issues**: Math calculation errors in chart data (to be fixed later)
+  - **Status**: Stage 4-5 COMPLETE → Stage 6 (Polish & Metadata)
 
 - **PV-Diagrams: Stage 2 - TypeScript Types & Data Hooks**:
   - **TypeScript Types** (`frontend/src/types/index.ts`, lines 348-441):

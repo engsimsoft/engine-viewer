@@ -8,6 +8,11 @@ import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
 import { useChartExport } from '@/contexts/ChartExportContext';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
+import {
+  createPVChartOptions,
+  createLogPVChartOptions,
+  createPAlphaChartOptions,
+} from './chartOptionsHelpers';
 
 interface PVDiagramChartProps {
   /** Parsed PVD data (metadata + 721 data points) */
@@ -25,29 +30,18 @@ interface PVDiagramChartProps {
 }
 
 /**
- * Cylinder color palette (8 colors for 8-cylinder engines)
- * High-contrast colors for visibility
- */
-const CYLINDER_COLORS = [
-  '#e74c3c',  // Cylinder 1 - Red
-  '#3498db',  // Cylinder 2 - Blue
-  '#2ecc71',  // Cylinder 3 - Green
-  '#f39c12',  // Cylinder 4 - Orange
-  '#9b59b6',  // Cylinder 5 - Purple
-  '#1abc9c',  // Cylinder 6 - Turquoise
-  '#e67e22',  // Cylinder 7 - Carrot
-  '#34495e',  // Cylinder 8 - Dark Gray
-];
-
-/**
  * PV-Diagram Chart Component
  *
- * Displays P-V (Pressure-Volume) diagram for engine cylinders:
- * - X-axis: Volume (cm³)
- * - Y-axis: Pressure (bar)
- * - One series per cylinder
- * - Legend for cylinder selection
+ * Displays 3 types of PV-Diagrams for engine cylinders:
+ * 1. P-V Diagram (Normal): Linear axes, classic thermodynamic diagram
+ * 2. Log P-V: Logarithmic axes for polytropic process analysis
+ * 3. P-α: Pressure vs Crank Angle (0-720°) with TDC/BDC markers
+ *
+ * Features:
+ * - Cylinder filtering (individual or all)
+ * - Chart export (PNG, SVG)
  * - Zoom/pan support
+ * - Professional loading/error/empty states
  *
  * @example
  * ```tsx
@@ -63,16 +57,18 @@ export function PVDiagramChart({
   onRetry,
   selectedCylinder = null,
 }: PVDiagramChartProps) {
-  // Get chart settings from store
+  // Get chart settings and diagram type from store
   const chartSettings = useAppStore((state) => state.chartSettings);
+  const selectedDiagramType = useAppStore((state) => state.selectedDiagramType);
   const { animation, showGrid } = chartSettings;
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(() => {
     const rpm = data?.metadata.rpm || 'unknown';
     const cylinder = selectedCylinder !== null ? `_Cyl${selectedCylinder + 1}` : '_AllCyl';
-    return `${projectName}_PVDiagram_${rpm}RPM${cylinder}`;
-  }, [projectName, data, selectedCylinder]);
+    const typeLabel = selectedDiagramType === 'log-pv' ? '_LogPV' : selectedDiagramType === 'p-alpha' ? '_PAlpha' : '_PV';
+    return `${projectName}_PVDiagram${typeLabel}_${rpm}RPM${cylinder}`;
+  }, [projectName, data, selectedCylinder, selectedDiagramType]);
 
   // Hook for chart export (local)
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
@@ -91,229 +87,32 @@ export function PVDiagramChart({
     };
   }, [handleExportPNG, handleExportSVG, registerExportHandlers, unregisterExportHandlers]);
 
-  // Generate ECharts configuration
+  // Generate ECharts configuration based on selected diagram type
   const chartOption = useMemo((): EChartsOption => {
     if (!data) {
       return {};
     }
 
     const baseConfig = getBaseChartConfig(animation);
-    const numCylinders = data.metadata.cylinders;
-
-    // Determine which cylinders to show
-    const cylindersToShow = selectedCylinder !== null && selectedCylinder !== undefined
-      ? [selectedCylinder]
-      : Array.from({ length: numCylinders }, (_, i) => i);
-
-    // Create series for each cylinder
-    const series: any[] = [];
-    const legendData: string[] = [];
-
-    cylindersToShow.forEach((cylinderIndex) => {
-      if (cylinderIndex >= numCylinders) return;
-
-      // Extract Volume and Pressure data for this cylinder
-      const seriesData = data.data.map((point) => {
-        const cylinderData = point.cylinders[cylinderIndex];
-        return [
-          cylinderData.volume,   // X: Volume (cm³)
-          cylinderData.pressure, // Y: Pressure (bar)
-        ];
-      });
-
-      const cylinderNum = cylinderIndex + 1;
-      const color = CYLINDER_COLORS[cylinderIndex % CYLINDER_COLORS.length];
-
-      series.push({
-        name: `Cylinder ${cylinderNum}`,
-        type: 'line',
-        data: seriesData,
-        itemStyle: {
-          color: color,
-        },
-        lineStyle: {
-          color: color,
-          width: 2,
-        },
-        symbol: 'circle',
-        symbolSize: 4,
-        smooth: false,
-        emphasis: {
-          focus: 'series',
-        },
-        // Show area under curve for better visualization
-        areaStyle: {
-          color: color,
-          opacity: 0.1,
-        },
-      });
-
-      legendData.push(`Cylinder ${cylinderNum}`);
-    });
-
-    // Calculate Volume and Pressure ranges
-    let minVolume = Infinity;
-    let maxVolume = -Infinity;
-    let minPressure = Infinity;
-    let maxPressure = -Infinity;
-
-    data.data.forEach((point) => {
-      cylindersToShow.forEach((cylinderIndex) => {
-        const cylinderData = point.cylinders[cylinderIndex];
-        minVolume = Math.min(minVolume, cylinderData.volume);
-        maxVolume = Math.max(maxVolume, cylinderData.volume);
-        minPressure = Math.min(minPressure, cylinderData.pressure);
-        maxPressure = Math.max(maxPressure, cylinderData.pressure);
-      });
-    });
-
-    // Add 5% padding to axes
-    const volumePadding = (maxVolume - minVolume) * 0.05;
-    const pressurePadding = (maxPressure - minPressure) * 0.05;
-
-    return {
-      ...baseConfig,
-      title: {
-        text: `P-V Diagram - ${data.metadata.rpm} RPM`,
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 'bold',
-        },
-      },
-      legend: {
-        data: legendData,
-        top: 40,
-        left: 'center',
-        textStyle: {
-          fontSize: 12,
-        },
-        itemWidth: 30,
-        itemHeight: 14,
-        icon: 'roundRect',
-      },
-      xAxis: {
-        type: 'value',
-        name: 'Volume (cm³)',
-        nameLocation: 'middle',
-        nameGap: 35,
-        nameTextStyle: {
-          fontSize: 14,
-          fontWeight: 'bold',
-        },
-        min: minVolume - volumePadding,
-        max: maxVolume + volumePadding,
-        axisLine: {
-          lineStyle: {
-            color: '#666',
-          },
-        },
-        axisLabel: {
-          fontSize: 11,
-          color: '#666',
-        },
-        splitLine: {
-          show: showGrid,
-          lineStyle: {
-            color: '#e5e7eb',
-            type: 'dashed',
-          },
-        },
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Pressure (bar)',
-        nameLocation: 'middle',
-        nameGap: 50,
-        nameTextStyle: {
-          fontSize: 14,
-          fontWeight: 'bold',
-        },
-        min: minPressure - pressurePadding,
-        max: maxPressure + pressurePadding,
-        axisLine: {
-          lineStyle: {
-            color: '#666',
-          },
-        },
-        axisLabel: {
-          fontSize: 11,
-          color: '#666',
-        },
-        splitLine: {
-          show: showGrid,
-          lineStyle: {
-            color: '#e5e7eb',
-            type: 'dashed',
-          },
-        },
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross',
-          animation: false,
-          label: {
-            backgroundColor: '#505765',
-          },
-        },
-        backgroundColor: 'rgba(50, 50, 50, 0.95)',
-        borderColor: '#333',
-        borderWidth: 1,
-        textStyle: {
-          color: '#fff',
-          fontSize: 12,
-        },
-        formatter: (params: any) => {
-          if (!Array.isArray(params) || params.length === 0) return '';
-
-          const point = params[0];
-          const volume = point.value[0].toFixed(2);
-          const pressure = point.value[1].toFixed(2);
-
-          let result = `<div style="font-weight: bold; margin-bottom: 8px;">
-            Volume: ${volume} cm³<br/>
-            Pressure: ${pressure} bar
-          </div>`;
-
-          params.forEach((param: any) => {
-            const marker = param.marker;
-            const seriesName = param.seriesName;
-            const pressureValue = param.value[1].toFixed(2);
-
-            result += `
-              <div style="margin: 4px 0;">
-                ${marker}
-                <span style="display: inline-block; min-width: 100px;">${seriesName}:</span>
-                <span style="font-weight: bold;">${pressureValue} bar</span>
-              </div>
-            `;
-          });
-
-          return result;
-        },
-      },
-      dataZoom: [
-        {
-          type: 'inside',
-          xAxisIndex: [0],
-          yAxisIndex: [0],
-          zoomOnMouseWheel: true,
-          moveOnMouseMove: true,
-          moveOnMouseWheel: true,
-        },
-        {
-          type: 'slider',
-          xAxisIndex: [0],
-          bottom: 10,
-          height: 20,
-          borderColor: '#ccc',
-        },
-      ],
-      series,
+    const params = {
+      data,
+      selectedCylinder,
+      animation,
+      showGrid,
+      baseConfig,
     };
-  }, [data, animation, showGrid, selectedCylinder]);
+
+    // Select chart type based on selectedDiagramType
+    switch (selectedDiagramType) {
+      case 'log-pv':
+        return createLogPVChartOptions(params);
+      case 'p-alpha':
+        return createPAlphaChartOptions(params);
+      case 'pv':
+      default:
+        return createPVChartOptions(params);
+    }
+  }, [data, animation, showGrid, selectedCylinder, selectedDiagramType]);
 
   // Loading state
   if (loading) {

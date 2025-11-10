@@ -1,9 +1,10 @@
 /**
  * PV-Diagrams Left Panel Component
  *
- * Side panel for PV-Diagrams page with 2 sections:
+ * Side panel for PV-Diagrams page with 3 sections:
  * 1. RPM Selection - Select .pvd file by RPM
  * 2. Cylinder Filter - Select specific cylinder or "All"
+ * 3. Diagram Type - Select P-V, Log P-V, or P-α
  *
  * Layout:
  * - Fixed width: 320px (w-80)
@@ -16,6 +17,7 @@
 
 import { RPMSection } from './RPMSection';
 import { CylinderFilterSection } from './CylinderFilterSection';
+import { DiagramTypeTabs } from './DiagramTypeTabs';
 import { useAppStore } from '@/stores/appStore';
 import type { PVDFileInfo } from '@/types';
 
@@ -67,6 +69,18 @@ export function PVLeftPanel({ files, loading = false }: PVLeftPanelProps) {
               CYLINDER FILTER
             </h2>
             <CylinderFilterSection numCylinders={numCylinders} />
+          </section>
+        )}
+
+        {/* ============================================================
+            Section 3: Diagram Type
+            ============================================================ */}
+        {selectedRPM && (
+          <section>
+            <h2 className="text-sm font-semibold text-muted-foreground mb-3">
+              DIAGRAM TYPE
+            </h2>
+            <DiagramTypeTabs />
           </section>
         )}
       </div>
