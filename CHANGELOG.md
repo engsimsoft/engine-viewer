@@ -63,8 +63,18 @@
     - Loading/Error/Empty states for files list
     - Route: `/project/:id/pv-diagram-test`
     - Added to App.tsx routing configuration
-  - **Verification**: TypeScript typecheck ✓, Frontend build (2.83s) ✓, Integration complete ✓
+  - **Verification**:
+    - TypeScript typecheck ✓
+    - Frontend build (2.83s) ✓
+    - Integration complete ✓
+    - **Backend API Tests**:
+      - GET /project/v8/pvd-files → 14 файлов найдено (RPM: 1500-9000) ✓
+      - GET /project/v8/pvd/V8_2000.pvd → 721 data points, 8 cylinders ✓
+      - Metadata parsing (rpm, cylinders, engineType, systemConfig, firingOrder) ✓
+      - Data structure {deg, cylinders:[{volume, pressure}]} ✓
+    - Route /project/v8/pv-diagram-test accessible ✓
   - **Progress**: Stage 3 integration complete (36/73 tasks, 49%)
+  - **Commit**: 11c6153
   - **Next**: Visual verification (browser test with real data)
 
 - **PV-Diagrams: Stage 2 - TypeScript Types & Data Hooks**:

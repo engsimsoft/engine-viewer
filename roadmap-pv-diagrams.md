@@ -111,17 +111,15 @@
 - [X] **TypeScript:** `npm run typecheck` - нет ошибок ✓
 - [X] **Frontend Build:** `npm run build` - успешно (2.83s) ✓
 - [X] **Integration Test:** Created PVDiagramTestPage.tsx with complete data flow ✓
-- [ ] **Visual Test:** График рендерится для V8_2000.pvd, Cyl 1 (15 мин)
-- [ ] **Interaction:** Dropdown RPM работает - переключение между файлами (15 мин)
-- [ ] **Interaction:** Tooltip показывает данные на hover (15 мин)
-- [ ] **Browser Tests (MCP Playwright):** Chart render + interactions
-  - Open project → navigate to /project/:id/pv-diagram-test
-  - Verify chart visible, axes labeled, data plotted
-  - Test RPM dropdown selection
-  - Test cylinder selector (All → specific cylinder)
-  - Test tooltip on hover
-  - Test zoom/pan interactions
-- [ ] **Git Commit:** Stage 3 integration complete
+- [X] **Backend API Tests:** ✓
+  - `GET /project/v8/pvd-files` → 14 файлов найдено (RPM: 1500-9000)
+  - `GET /project/v8/pvd/V8_2000.pvd` → 721 data points, 8 cylinders
+  - Metadata parsing: rpm, cylinders, engineType, systemConfig, firingOrder ✓
+  - Data structure: `{deg, cylinders:[{volume, pressure}]}` ✓
+- [X] **Route Test:** `/project/v8/pv-diagram-test` accessible ✓
+- [ ] **Visual Test:** График рендерится для V8_2000.pvd (requires browser)
+- [ ] **Interaction Tests:** RPM dropdown, cylinder selector, tooltip, zoom/pan (requires browser)
+- [X] **Git Commit:** Stage 3 integration complete (commit 11c6153) ✓
 
 ---
 
