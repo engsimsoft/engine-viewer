@@ -1,15 +1,19 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { PVDData } from '@/types';
 import { getBaseChartConfig } from '@/lib/chartConfig';
 import { useAppStore } from '@/stores/appStore';
+import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
+import { useChartExport } from '@/contexts/ChartExportContext';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
 interface PVDiagramChartProps {
   /** Parsed PVD data (metadata + 721 data points) */
   data: PVDData | null;
+  /** Project name for export filename */
+  projectName: string;
   /** Loading state */
   loading?: boolean;
   /** Error message */
@@ -53,6 +57,7 @@ const CYLINDER_COLORS = [
  */
 export function PVDiagramChart({
   data,
+  projectName,
   loading = false,
   error = null,
   onRetry,
@@ -61,6 +66,30 @@ export function PVDiagramChart({
   // Get chart settings from store
   const chartSettings = useAppStore((state) => state.chartSettings);
   const { animation, showGrid } = chartSettings;
+
+  // Generate dynamic filename for export
+  const exportFilename = useMemo(() => {
+    const rpm = data?.metadata.rpm || 'unknown';
+    const cylinder = selectedCylinder !== null ? `_Cyl${selectedCylinder + 1}` : '_AllCyl';
+    return `${projectName}_PVDiagram_${rpm}RPM${cylinder}`;
+  }, [projectName, data, selectedCylinder]);
+
+  // Hook for chart export (local)
+  const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
+
+  // Register export handlers in context (for Header buttons)
+  const { registerExportHandlers, unregisterExportHandlers } = useChartExport();
+
+  useEffect(() => {
+    registerExportHandlers({
+      exportPNG: handleExportPNG,
+      exportSVG: handleExportSVG,
+    });
+
+    return () => {
+      unregisterExportHandlers();
+    };
+  }, [handleExportPNG, handleExportSVG, registerExportHandlers, unregisterExportHandlers]);
 
   // Generate ECharts configuration
   const chartOption = useMemo((): EChartsOption => {
@@ -304,16 +333,16 @@ export function PVDiagramChart({
     );
   }
 
-  // Empty state
+  // Empty state - no data
   if (!data) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
           <p className="text-lg font-medium text-muted-foreground">
-            No data available
+            Select RPM to display PV-Diagram
           </p>
           <p className="text-sm text-muted-foreground">
-            Select a PV-Diagram file to display
+            Use the left panel to select an RPM point
           </p>
         </div>
       </div>
@@ -322,13 +351,16 @@ export function PVDiagramChart({
 
   return (
     <div className="w-full space-y-2">
-      <ReactECharts
-        option={chartOption}
-        style={{ height: '600px', width: '100%' }}
-        notMerge={true}
-        lazyUpdate={true}
-        theme="light"
-      />
+      <div className="relative">
+        <ReactECharts
+          ref={chartRef}
+          option={chartOption}
+          style={{ height: '600px', width: '100%' }}
+          notMerge={true}
+          lazyUpdate={true}
+          theme="light"
+        />
+      </div>
     </div>
   );
 }

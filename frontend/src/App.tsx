@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import ProjectOverviewPage from '@/pages/ProjectOverviewPage';
 import PerformancePage from '@/pages/PerformancePage';
-import PVDiagramTestPage from '@/pages/PVDiagramTestPage';
+import PVDiagramsPage from '@/pages/PVDiagramsPage';
 import HelpPage from '@/pages/HelpPage';
 import { Toaster } from '@/components/ui/sonner';
 import { useAppStore } from '@/stores/appStore';
@@ -18,7 +18,8 @@ import './App.css';
  * - Route 1: `/` - HomePage (project list)
  * - Route 2: `/project/:id` - ProjectOverviewPage (analysis type selection HUB)
  * - Route 3: `/project/:id/performance` - PerformancePage (Performance & Efficiency)
- * - Route 4: `/help` - HelpPage (parameters documentation)
+ * - Route 4: `/project/:id/pv-diagrams` - PVDiagramsPage (Pressure-Volume Diagrams)
+ * - Route 5: `/help` - HelpPage (parameters documentation)
  *
  * BREAKING CHANGE (v2.0 → v3.0):
  * - `/project/:id` now shows Project Overview (was: Performance page directly)
@@ -69,8 +70,8 @@ function App() {
             {/* :id = initial project context (cross-project comparison supported) */}
             <Route path="/project/:id/performance" element={<PerformancePage />} />
 
-            {/* PV-Diagram Test Page - Stage 3 integration test */}
-            <Route path="/project/:id/pv-diagram-test" element={<PVDiagramTestPage />} />
+            {/* PV-Diagrams - Pressure-Volume diagrams visualization */}
+            <Route path="/project/:id/pv-diagrams" element={<PVDiagramsPage />} />
 
             {/* Help page - parameters documentation */}
             <Route path="/help" element={<HelpPage />} />
