@@ -59,19 +59,38 @@ $2  1000  16.20  125.00  0.8700  0.8800  0.8900  0.8600  ...
 →  RPM  P-Av  Torque  PurCyl(1)  PurCyl(2)  ...
 ```
 
-**Параметры (24 колонки):**
+**Параметры (base parameters, engine-type dependent):**
+
+### Base Parameters (all engine types)
 
 | Параметр | Единицы | Описание |
 |----------|---------|----------|
 | `RPM` | об/мин | Simulated engine rpm |
 | `P-Av` | кВт | Average engine total power over the last six cycles (kW) for a naturally aspirated engine. The same for a Supercharged engine but with the power absorbed by the Compressor and its drive subtracted. Average engine total power over the last forty cycles (kW) for a Turbocharged engine. |
 | `Torque` | Н·м | The engine torque calculated from the P-av value (Nm) |
-| `PurCyl(1-4)` | - | Purity of the mixture in the cylinder at inlet valve closure |
-| `TCylMax(1-4)` | °C | Maximum temperature per cylinder (°C) |
-| `PCylMax(1-4)` | бар | Maximum pressure per cylinder (bar) |
-| `TUbMax(1-4)` | °C | Maximum unburned mixture temperature per cylinder (°C) |
-| `Deto(1-4)` | - | The count of the number of detonations per cylinder over the last 4 cycles. 0 to 4. |
+| `PurCyl(1-N)` | - | Purity of the mixture in the cylinder at inlet valve closure |
+| `TUbMax(1-N)` | °C | Maximum unburned mixture temperature per cylinder (°C) |
+| `TCylMax(1-N)` | °C | Maximum temperature per cylinder (°C) |
+| `PCylMax(1-N)` | бар | Maximum pressure per cylinder (bar) |
+
+### TURBO Engine Additional Parameters
+
+| Параметр | Единицы | Описание |
+|----------|---------|----------|
+| `Boost(1)` | бар | The simulated boost pressure (bar gauge) at the specified boost point |
+| `TBoost` | °C | The simulated inlet temperature (°C) at the specified boost point |
+
+### Detonation and Convergence (all engine types)
+
+| Параметр | Единицы | Описание |
+|----------|---------|----------|
+| `Deto(1-N)` | - | The count of the number of detonations per cylinder over the last 4 cycles. 0 to 4. |
 | `Convergence` | - | Convergence of the calculation (quality indicator) |
+
+**Parameter Count by Engine Type:**
+- **NATUR:** 24 parameters (3 base + 5×N per-cylinder + 1 convergence)
+- **TURBO:** 26 parameters (3 base + 5×N per-cylinder + 2 turbo + 1 convergence)
+- **SUPER:** 24 parameters (no additional parameters observed in test data)
 
 **⚠️ Важно:** Первая колонка (→) служебная - пропускается при парсинге!
 

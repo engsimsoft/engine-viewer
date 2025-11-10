@@ -8,8 +8,10 @@
 
 | Feature | .det Format | .pou Format | **.pou + .det Merge** |
 |---------|-------------|-------------|----------------------|
-| **Parameters per data point** | 24 | 71 | **75** (automatic) |
+| **Parameters per data point** | 24 | **NATUR:** 71<br>**TURBO:** 78<br>**SUPER:** 78 | **NATUR:** 74<br>**TURBO:** 81<br>**SUPER:** 81 |
 | **Metadata fields** | 2 | 5 | 5 (from .pou) |
+| **Engine type support** | NATUR, TURBO, SUPER | NATUR, TURBO, SUPER | All types |
+| **Turbo/Super params** | No | Yes (+7 parameters) | Yes (from .pou) |
 | **File size (typical)** | Smaller (~100-500 KB) | Larger (~300-1500 KB) | Both files combined |
 | **Use case** | Basic analysis, quick review | Detailed engineering analysis | Complete analysis |
 | **Calculation markers** | `$` prefix | `$` prefix (identical) | `$` prefix |
@@ -514,8 +516,8 @@ project-name.det  (24 parameters)
           ↓
   Automatic merge
           ↓
-  Result: 75 parameters
-  (.pou + TCylMax + PCylMax + Deto + Convergence from .det)
+  Result: 74 parameters (NATUR)
+  (.pou + PCylMax + Deto + Convergence from .det)
 ```
 
 **Implementation:**
@@ -545,8 +547,8 @@ async function parseDetFile(filePath) {
 | Files Available | Result | Parameters |
 |----------------|--------|------------|
 | Only `.det` | .det data | 24 parameters |
-| Only `.pou` | .pou data | 71 parameters (PCylMax, Deto missing) |
-| Both `.det` + `.pou` | **Merged data** | **75 parameters** (all .pou + TCylMax + PCylMax + Deto + Convergence) ✅ |
+| Only `.pou` | .pou data | 71 parameters (PCylMax, Deto, Convergence missing) |
+| Both `.det` + `.pou` | **Merged data** | **74 parameters (NATUR)** (all .pou + PCylMax + Deto + Convergence) ✅ |
 
 #### What Gets Merged
 
@@ -558,11 +560,13 @@ async function parseDetFile(filePath) {
 - Fuel consumption (BSFC)
 - Timing data (MaxDeg, Delay, Durat)
 
-**From .det (4 parameters added):**
-- **TCylMax** - Maximum cylinder temperature [per cylinder array]
+**From .det (3 parameters added):**
 - **PCylMax** - Maximum cylinder pressure [per cylinder array]
 - **Deto** - Detonation indicator [per cylinder array]
 - **Convergence** - Calculation convergence quality [single value]
+
+**NOT merged (duplicate):**
+- **TCylMax** - .pou already has TC-Av (average cylinder temperature)
 
 #### Type Safety
 
@@ -606,7 +610,7 @@ curl http://localhost:3000/project/tm-soft-shortcut | \
 - ✅ **Automatic**: No manual configuration needed
 - ✅ **Safe**: If files missing → regular parsing works
 - ✅ **Type-safe**: TypeScript optional fields (`?:`)
-- ✅ **Complete**: Get all 75 parameters for comprehensive analysis
+- ✅ **Complete**: Get all 74-81 parameters (depends on engine type) for comprehensive analysis
 
 #### Migration Impact
 
@@ -615,18 +619,20 @@ curl http://localhost:3000/project/tm-soft-shortcut | \
 ```
 Migration from .det to .pou:
 ✅ Gain: 47 additional parameters
-❌ Lose: TCylMax, PCylMax, Deto, Convergence (critical data)
+❌ Lose: PCylMax, Deto, Convergence (critical safety data)
 ⚠️  Decision: Choose between detail OR safety data
+Note: TCylMax NOT lost - .pou has TC-Av (avg cylinder temp)
 ```
 
 **After merge feature:**
 
 ```
 Using both .det + .pou:
-✅ Gain: All 71 .pou parameters
-✅ Keep: TCylMax, PCylMax, Deto, Convergence from .det
-✅ Result: 75 total parameters
+✅ Gain: All 71-78 .pou parameters (depends on engine type: NATUR/TURBO/SUPER)
+✅ Keep: PCylMax, Deto, Convergence from .det (unique safety data)
+✅ Result: 74-81 total parameters (depends on engine type)
 ✅ Decision: Get both detail AND safety data!
+Note: TCylMax NOT merged - .pou already has TC-Av (average cylinder temperature)
 ```
 
 #### Logs

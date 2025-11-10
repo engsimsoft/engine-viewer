@@ -129,7 +129,7 @@ Note that both the last two files are appended during each batch run so the perf
 
 After a "Batch" run there are a lot more files with the results for each rpm point in the batch run. There are now two new files which we are interested in.
 
-1. **ProjectName.det** - The detonation results for a batch run is stored in this file (.det). To see the values inside it, open it with Post4T. ✅ **Used by engine-viewer.**
+1. **ProjectName.det** - Batch run performance and detonation results (24 parameters: RPM, Power, Torque, PCylMax, Deto, Convergence, etc.). Despite the name "detonation file", it contains complete performance dataset including detonation indicator. ✅ **Used by engine-viewer.**
 
 2. **ProjectName.pou** - The performance results for a batch run is stored in this file (.pou). To see the values inside it, open it with Post4T. ✅ **Used by engine-viewer.**
 
@@ -184,7 +184,7 @@ C:\4Stroke\
     ├── Blast.dat                       # Single run logs
     ├── Blast.spo                       # Single run performance
     ├── Blast.des                       # Single run detonation
-    ├── Blast.det                       # ✅ Batch detonation (engine-viewer)
+    ├── Blast.det                       # ✅ Batch performance + detonation (24 params, engine-viewer)
     ├── Blast.pou                       # ✅ Batch performance (engine-viewer)
     ├── Blast8000.epa                   # Port area data (Excel)
     ├── Blast8000.ipa                   # Port area data (Excel)
@@ -227,9 +227,10 @@ Engine Results Viewer works with files from EngMod4T Suite:
    - Intake System (ITB/IM/Carb)
    - Location: `C:\4Stroke\ProjectName.prt` or `test-data/ProjectName.prt`
 
-2. **ProjectName.det** - Batch run detonation results:
+2. **ProjectName.det** - Batch run performance and detonation results (24 parameters):
    - Location: `C:\4Stroke\ProjectName\ProjectName.det` or `test-data/ProjectName/ProjectName.det`
-   - Used for detonation charts
+   - Contains: All base performance metrics (RPM, Power, Torque, PurCyl, TUbMax, TCylMax, PCylMax, Deto, Convergence)
+   - Used for performance and detonation analysis
 
 3. **ProjectName.pou** - Batch run performance results:
    - Location: `C:\4Stroke\ProjectName\ProjectName.pou` or `test-data/ProjectName/ProjectName.pou`

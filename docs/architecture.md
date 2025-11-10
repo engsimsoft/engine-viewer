@@ -1572,7 +1572,7 @@ router.get('/status', (req, res) => {
 - Color-coded: Primary=Red, Comp1=Green, Comp2=Blue, Comp3=Yellow, Comp4=Purple
 
 **DataTable:**
-- Shows all parameters (24 from .det or 71 from .pou)
+- Shows all parameters (24 from .det or 71-78 from .pou)
 - Export: CSV, Excel (XLSX)
 - Sortable columns
 - Horizontal scroll on mobile

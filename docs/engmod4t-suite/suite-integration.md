@@ -152,10 +152,11 @@ This document explains:
 │  │ ├─ TUbMax[1..4] (exhaust temp per cylinder)         │  │
 │  │ ├─ PurCyl[1..4] (vol. efficiency per cylinder)      │  │
 │  │ ├─ Deto[1..4] (detonation per cylinder)             │  │
-│  │ └─ Convergence[1..4] (convergence per cylinder)     │  │
+│  │ └─ Convergence (calculation quality - single value) │  │
 │  │                                                        │  │
-│  │ MyTurbo4Cyl.pou (Batch Mode - 71 parameters)          │  │
-│  │ ├─ All .det parameters (24)                          │  │
+│  │ MyTurbo4Cyl.pou (Batch Mode - 78 params, TURBO)       │  │
+│  │ ├─ Base parameters (71, NATUR)                       │  │
+│  │ ├─ Turbo parameters (+7: Boost, BackPr, etc.)       │  │
 │  │ ├─ Plus: IMEP, BMEP, FMEP, PMEP                      │  │
 │  │ ├─ BSFC (brake specific fuel consumption)           │  │
 │  │ ├─ Combustion efficiencies (Seff, Teff, Ceff)       │  │
@@ -175,8 +176,8 @@ This document explains:
 │                                                              │
 │  OUTPUTS:                                                    │
 │  • MyTurbo4Cyl.det (performance data - 24 params)           │
-│  • MyTurbo4Cyl.pou (Batch Mode - 71 params, power curve)    │
-│  • MyTurbo4Cyl.spo (Screen Mode - 71 params, single point)  │
+│  • MyTurbo4Cyl.pou (Batch Mode - 78 params TURBO, power curve) │
+│  • MyTurbo4Cyl.spo (Screen Mode - 78 params TURBO, single pt)  │
 │  • MyTurbo4Cyl_*.trace (9 trace types, detailed traces)     │
 └──────────────────────────────────────────────────────────────┘
                             ↓
@@ -189,8 +190,8 @@ This document explains:
 │                                                              │
 │  ┌─ LOAD DATA ────────────────────────────────────────────┐  │
 │  │ • Parse MyTurbo4Cyl.det (24 params)                   │  │
-│  │ • Parse MyTurbo4Cyl.pou (71 params)                   │  │
-│  │ • Merge → 75 params total (.pou-merged format)       │  │
+│  │ • Parse MyTurbo4Cyl.pou (78 params TURBO)            │  │
+│  │ • Merge → 81 params total (.pou-merged format)       │  │
 │  │ • Extract calculations: $1, $2, $3, ...              │  │
 │  └───────────────────────────────────────────────────────┘  │
 │                                                              │
@@ -262,7 +263,7 @@ This document explains:
                          │                           │
                     ┌────────────┐            ┌────────────┐
                     │   .det     │            │   .pou     │
-                    │ (24 params)│            │ (71 params)│
+                    │ (24 params)│            │(71-78 par) │
                     └────────────┘            └────────────┘
                          │                           │
                          │ READ-ONLY                 │ READ-ONLY
@@ -358,7 +359,7 @@ C:/4Stroke/                          # Production data root (Windows)
 │
 ├── MyTurbo4Cyl/                     # Project 1 results folder
 │   ├── MyTurbo4Cyl.det              # EngMod4T: Performance (24 params)
-│   ├── MyTurbo4Cyl.pou              # EngMod4T: Extended (71 params)
+│   ├── MyTurbo4Cyl.pou              # EngMod4T: Extended (78 params TURBO)
 │   ├── MyTurbo4Cyl_Pressure.cbt     # EngMod4T: Pressure trace
 │   ├── MyTurbo4Cyl_Temp.trace       # EngMod4T: Temperature trace
 │   ├── MyTurbo4Cyl_Combustion.trace # EngMod4T: Combustion trace
@@ -492,7 +493,7 @@ User analyzes results           User analyzes results (better UX)
 5. **Responsive Design** - Works on any screen size (desktop, tablet, mobile)
 6. **Accessibility** - WCAG 2.1 AA compliant (screen readers, keyboard navigation)
 7. **"iPhone Quality"** - Professional, minimalist, smooth animations
-8. **Multi-Format Support** - .det, .pou, .pou-merged (75 params: best of both)
+8. **Multi-Format Support** - .det, .pou, .pou-merged (74-81 params: best of both)
 9. **Peak Values Always Visible** - No hover needed, instant information
 10. **Cross-Platform** - macOS development, Windows production, potentially Linux/cloud
 
@@ -623,7 +624,9 @@ PCylMax(1)  PCylMax(2)  PCylMax(3)  PCylMax(4)
 }
 ```
 
-**Applies To:** `PCylMax`, `TCylMax`, `TUbMax`, `PurCyl`, `Deto`, `Convergence` (all per-cylinder parameters)
+**Applies To:** `PCylMax`, `TCylMax`, `TUbMax`, `PurCyl`, `Deto` (all per-cylinder parameters)
+
+**Note:** `Convergence` is NOT per-cylinder - it's a single scalar value (calculation quality indicator).
 
 ### 6. Calculation Markers
 

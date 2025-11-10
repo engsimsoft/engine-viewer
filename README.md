@@ -59,7 +59,7 @@ cd frontend && npm install && npm run dev
 **What's New in v2.0:**
 - Complete redesign with modern, professional interface
 - Cross-project calculation comparison (mix calculations from any projects)
-- **Multi-format support**: .det (24 params) and .pou (71 params) files
+- **Multi-format support**: .det (24 params) and .pou (71-78 params) files
 - Always-visible peak values cards with hover effects
 - Settings popover with units conversion and theme switching
 - New modal dialogs for calculation selection (Primary + Comparison)

@@ -144,6 +144,21 @@
   - Responsive design verified across mobile/tablet/desktop breakpoints
   - **Files**: `frontend/src/App.css`, `frontend/src/App.tsx`, `frontend/src/components/project-overview/AnalysisTypeCard.tsx`
 
+- **.pou/.det format documentation unified to single source of truth** (2025-11-10):
+  - **Fixed parameter counts**: NATUR: 74 (was 75), TURBO: 81 (was 82), SUPER: 81 (was 82)
+  - **Corrected .det merge strategy**: Only 3 parameters merged (PCylMax, Deto, Convergence) - removed TCylMax (duplicate of .pou's TC-Av)
+  - **Updated .det file description**: Changed from "detonation results" to "performance + detonation data (24 parameters)" - file contains full performance dataset
+  - **Source of truth**: Post4T Help documentation + verified against real .pou/.det files (GRANTA TURBO, TM Soft ShortCut)
+  - **Impact**: Eliminated 19 critical inconsistencies across 7 documentation files
+  - **Files updated**:
+    - `docs/file-formats/comparison.md` - Fixed parameter counts in Quick Reference table, merge descriptions, migration impact section (removed TCylMax from kept/lost lists)
+    - `docs/file-formats/pou-format.md` - Corrected merge counts (71+3=74, 78+3=81), removed TCylMax from merge list
+    - `docs/decisions/002-pou-file-format.md` - Added missing Convergence parameter to TypeScript types section (ADR), fixed merge result counts
+    - `docs/engmod4t-suite/README.md` - Updated multi-format support description (74-81 params)
+    - `docs/engmod4t-suite/folder-structure.md` - Expanded .det description with complete parameter list
+    - `docs/engmod4t-suite/suite-integration.md` - Fixed TURBO merge count (82→81), Convergence description (not per-cylinder), multi-format support (75→74-81)
+    - `docs/file-formats/det-format.md` - Already corrected (parameter order, TURBO-specific params)
+
 ### Fixed
 - **Deep linking race condition causing state loss** (2025-11-08):
   - Fixed bug where selecting Primary Calculation → clicking Back → returning to page cleared all selections
@@ -379,9 +394,9 @@
     - **PCylMax** (max cylinder pressure) - critical for engine safety analysis
     - **Deto** (detonation indicator) - critical for engine safety analysis
     - **Convergence** (calculation quality indicator) - calculation validation
-  - ✅ New format type: 'pou-merged' (75 parameters = 71 from .pou + 4 from .det)
+  - ✅ New format type: 'pou-merged' (75-82 parameters = 71-78 from .pou + 4 from .det)
   - ✅ Improved deduplication logic in fileScanner.js with format priority:
-    - pou-merged (75 params) > pou (71 params) > det (24 params)
+    - pou-merged (75-82 params) > pou (71-78 params) > det (24 params)
   - ✅ Updated TypeScript types to support 'pou-merged' format
   - ✅ Proper merge logging for debugging
   - **Result**: When both files exist (.det + .pou), users get complete 75-parameter dataset automatically

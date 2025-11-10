@@ -10,14 +10,18 @@
 
 ## Overview
 
-`.pou` files are extended engine calculation result files containing **71 parameters** per data point. They are produced by EngMod4T simulation software (Delphi 7) and contain more detailed information compared to `.det` files (24 parameters).
+`.pou` files are extended engine calculation result files produced by EngMod4T simulation software (Delphi 7). They contain more detailed information compared to `.det` files (24 parameters).
 
 ### Key Characteristics
 
 - **Source:** EngMod4T simulation software (Delphi 7)
 - **Format:** Fixed-width ASCII text (**NOT** space-separated CSV)
 - **Encoding:** ASCII (Windows-1251 for Cyrillic metadata)
-- **Parameters:** 71 per data point (75 with automatic merge)
+- **Parameters per data point:**
+  - **NATUR engines:** 71 parameters
+  - **TURBO engines:** 78 parameters (71 base + 7 turbo-specific)
+  - **SUPER engines:** 78 parameters (71 base + 7 supercharger-specific)
+  - **With .det merge:** +3 parameters (PCylMax, Deto, Convergence)
 - **Structure:** Metadata + Headers + Calculation blocks
 - **Markers:** Same `$` calculation markers as `.det` format
 - **Per-Cylinder Data:** Arrays of values for each engine cylinder
@@ -28,20 +32,27 @@
 
 ```
 project-name.pou  (71 parameters)
-project-name.det  (adds TCylMax + PCylMax + Deto + Convergence)
+project-name.det  (adds PCylMax + Deto + Convergence)
           ↓
   Automatic merge
           ↓
-  Result: 75 parameters
+  Result: 74 parameters
 ```
 
 **What gets added:**
-- **TCylMax** - Maximum cylinder temperature (°C) - from .det file
 - **PCylMax** - Maximum cylinder pressure (bar) - from .det file
 - **Deto** - Detonation indicator - from .det file
 - **Convergence** - Calculation convergence quality - from .det file
 
-This merge is **transparent** - frontend receives already-merged data with all 75 parameters. See [comparison.md](comparison.md#automatic-data-merge-best-of-both-formats) for details.
+**NOT merged (duplicate):**
+- **TCylMax** - .pou already has TC-Av (average cylinder temperature)
+
+This merge is **transparent** - frontend receives already-merged data with all parameters. See [comparison.md](comparison.md#automatic-data-merge-best-of-both-formats) for details.
+
+**Total parameters after merge:**
+- NATUR: 71 + 3 = 74 parameters
+- TURBO: 78 + 3 = 81 parameters
+- SUPER: 78 + 3 = 81 parameters
 
 ---
 
@@ -51,7 +62,7 @@ This merge is **transparent** - frontend receives already-merged data with all 7
 
 ```
 Line 1: Metadata (5 fields)
-Line 2: Column headers (71 parameters)
+Line 2: Column headers (71-78 parameters, depends on engine type)
 Line 3+: Calculation markers ($) and data points
 ```
 
@@ -59,12 +70,20 @@ Line 3+: Calculation markers ($) and data points
 
 ```
            4 NATUR       0       0     NumCyl,Breath,NumTurbo,NumWasteGate
-     RPM        P-Av       Torque    TexAv   Power( 1)  Power( 2) ... [71 parameters]
+     RPM        P-Av       Torque    TexAv   Power( 1)  Power( 2) ... [71 parameters for NATUR]
 $Cal_1
         3200       48.30      144.14     584.6      12.08      12.07 ... [71 values]
         3400       52.52      147.60     595.3      13.13      13.13 ... [71 values]
 $Cal_2
         3200       46.85      139.90     571.2      11.71      11.71 ... [71 values]
+```
+
+**Example for TURBO engine:**
+```
+           4 TURBO       1       1     NumCyl,Breath,NumTurbo,NumWasteGate
+     RPM        P-Av       Torque    TexAv   ... [71 base] ... Boost(1) BackPr Pratio TBoost TTurbine RPMturb(1) WastRat(1)
+$Cal_1
+        2000       58.05      277.17     553.8 ... [71 values] ... 1.030 0.555 0.539 62.6 688.5 52528 0.000
 ```
 
 ---
@@ -167,9 +186,9 @@ $Cal_2
 
 | Parameter | Unit | Description |
 |-----------|------|-------------|
-| `PurCyl(1..N)` | - | Volumetric efficiency coefficient for each cylinder |
+| `PurCyl(1..N)` | - | Mixture purity at inlet valve closure for each cylinder |
 
-**Definition:** Measure of how effectively the engine moves air in and out during intake/exhaust.
+**Definition:** The ratio of fresh air trapped at inlet valve closure to the total mass of the cylinder charge.
 
 ### 9. Per-Cylinder Seff (N parameters)
 
@@ -199,9 +218,9 @@ $Cal_2
 
 | Parameter | Unit | Description |
 |-----------|------|-------------|
-| `BSFC(1..N)` | г/кВт·ч | Brake Specific Fuel Consumption for each cylinder |
+| `BSFC(1..N)` | kg/kWh | Brake Specific Fuel Consumption for each cylinder |
 
-**Definition:** Mass of fuel consumed per unit of power output per unit time.
+**Definition:** Ratio of fuel consumption rate to power produced by that fuel. Standard SI units (kg/kWh).
 
 ### 13. Per-Cylinder TC-Av (N parameters)
 
@@ -270,9 +289,47 @@ $Cal_2
 
 **Definition:** Parameters for the Vibe combustion model, which describes the heat release rate during combustion.
 
+### 21. Turbocharger Parameters (7 parameters, TURBO engines only)
+
+**Note:** These parameters are included **only** if `EngineType = TURBO` in metadata.
+
+| Parameter | Unit | Description |
+|-----------|------|-------------|
+| `Boost(1)` | bar gauge | The simulated boost pressure at the specified boost point |
+| `BackPr` | bar gauge | The simulated back pressure |
+| `Pratio` | - | The ratio between the boost pressure and the back pressure |
+| `TBoost` | °C | The simulated inlet temperature at the specified boost point |
+| `TTurbine` | °C | The simulated turbine inlet temperature |
+| `RPMturb(1)` | RPM | The turbocharger RPM |
+| `WastRat(1)` | - | The open ratio of the waste gate if one is fitted |
+
+**Example values from GRANTA TURBO.pou:**
+```
+Boost(1)   BackPr   Pratio   TBoost   TTurbine   RPMturb(1)   WastRat(1)
+1.030      0.555    0.539    62.6     688.5      52528        0.000
+```
+
+### 22. Supercharger Parameters (7 parameters, SUPER engines only)
+
+**Note:** These parameters are included **only** if `EngineType = SUPER` in metadata.
+
+| Parameter | Unit | Description |
+|-----------|------|-------------|
+| `Boost` | bar gauge | The simulated boost pressure at the specified boost point |
+| `BackPr` | bar gauge | The simulated back pressure |
+| `Pratio` | - | The ratio between the boost pressure and the back pressure |
+| `TBoost` | °C | The simulated inlet temperature at the specified boost point |
+| `RPMsup` | RPM | The supercharger RPM |
+| `PowSup` | kW | The total power absorbed by driving the supercharger compressor |
+| `BOVrat` | - | The open ratio of the blow off valve if one is fitted |
+
+**Definition:** Supercharged engines have mechanically-driven compressors. `PowSup` represents the power loss from driving the supercharger, which is subtracted from `P-Av`.
+
 ---
 
 ## Parameter Count Summary
+
+### NATUR Engines (Naturally Aspirated)
 
 | Category | Count | Description |
 |----------|-------|-------------|
@@ -282,7 +339,23 @@ $Cal_2
 | Global Timing | 1 | Ignition/injection timing |
 | Global TAF | 1 | Total air flow |
 | Vibe parameters | 4 | Combustion model |
-| **Total (4-cyl)** | **71** | 4 + (16 × 4) + 1 + 1 + 1 + 4 = 71 |
+| **Total (4-cyl NATUR)** | **71** | 4 + (16 × 4) + 1 + 1 + 1 + 4 = 71 |
+
+### TURBO Engines (Turbocharged)
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| Base parameters | 71 | All NATUR parameters (see above) |
+| Turbo-specific | 7 | Boost(1), BackPr, Pratio, TBoost, TTurbine, RPMturb(1), WastRat(1) |
+| **Total (4-cyl TURBO)** | **78** | 71 + 7 = 78 |
+
+### SUPER Engines (Supercharged)
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| Base parameters | 71 | All NATUR parameters (see above) |
+| Supercharger-specific | 7 | Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat |
+| **Total (4-cyl SUPER)** | **78** | 71 + 7 = 78 |
 
 ---
 
@@ -452,7 +525,10 @@ export interface PouMetadata {
 }
 
 /**
- * Одна точка данных из .pou файла (71 параметр)
+ * Одна точка данных из .pou файла
+ * Base parameters: 71 (NATUR)
+ * With turbo: +7 parameters (TURBO)
+ * With supercharger: +7 parameters (SUPER)
  */
 export interface PouDataPoint {
   RPM: number;                // Обороты двигателя (об/мин)
@@ -467,11 +543,11 @@ export interface PouDataPoint {
   PMEP: number[];             // Pumping Mean Effective Pressure (бар)
   FMEP: number;               // Friction Mean Effective Pressure (бар)
   DRatio: number[];           // Degree Ratio
-  PurCyl: number[];           // Коэффициент наполнения
+  PurCyl: number[];           // Mixture purity at inlet valve closure
   Seff: number[];             // Scavenging efficiency
   Teff: number[];             // Trapping efficiency
   Ceff: number[];             // Charging efficiency
-  BSFC: number[];             // Brake Specific Fuel Consumption (г/кВт·ч)
+  BSFC: number[];             // Brake Specific Fuel Consumption (kg/kWh)
   'TC-Av': number[];          // Температура в цилиндре средняя (°C)
   TUbMax: number[];           // Максимальная температура выпускных газов (°C)
   MaxDeg: number[];           // Максимальный угол (градусы)
@@ -487,6 +563,24 @@ export interface PouDataPoint {
   VibeDurat: number;          // Продолжительность Vibe (градусы)
   VibeA: number;              // Параметр A Vibe
   VibeM: number;              // Параметр M Vibe
+
+  // Turbocharger parameters (only if engineType = TURBO)
+  'Boost(1)'?: number;        // Boost pressure (bar gauge)
+  BackPr?: number;            // Back pressure (bar gauge)
+  Pratio?: number;            // Boost/back pressure ratio
+  TBoost?: number;            // Inlet temperature (°C)
+  TTurbine?: number;          // Turbine inlet temperature (°C)
+  'RPMturb(1)'?: number;      // Turbocharger RPM
+  'WastRat(1)'?: number;      // Waste gate open ratio
+
+  // Supercharger parameters (only if engineType = SUPER)
+  Boost?: number;             // Boost pressure (bar gauge)
+  // BackPr?: number;         // Already declared above (shared with TURBO)
+  // Pratio?: number;         // Already declared above (shared with TURBO)
+  // TBoost?: number;         // Already declared above (shared with TURBO)
+  RPMsup?: number;            // Supercharger RPM
+  PowSup?: number;            // Power absorbed by supercharger (kW)
+  BOVrat?: number;            // Blow off valve open ratio
 }
 ```
 

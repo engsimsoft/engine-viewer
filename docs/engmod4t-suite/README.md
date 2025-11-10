@@ -76,7 +76,7 @@
 
 **Outputs:**
 - `.det` file (24 parameters: RPM, P-Av, Torque, PCylMax, etc.)
-- `.pou` file - Batch Mode (71 parameters: IMEP, BMEP, BSFC, combustion efficiency, etc.)
+- `.pou` file - Batch Mode (71-78 parameters: IMEP, BMEP, BSFC, combustion efficiency, turbo/super data, etc.)
 - `.spo` file - Screen Mode (single RPM point, same parameters as .pou)
 - ~9 trace file types (Pressure, Temperature, Mach, Mass Flow, Wave, Combustion, etc.)
 
@@ -115,7 +115,7 @@
 - ✅ Cross-project calculation comparison (1 primary + 4 comparisons)
 - ✅ Units conversion (SI / American / HP)
 - ✅ Multiple export formats (CSV, Excel, PNG, SVG)
-- ✅ Multi-format support (.det, .pou, .pou-merged with 75 params)
+- ✅ Multi-format support (.det, .pou, .pou-merged with 74-81 params)
 - ✅ 6 chart presets (Power/Torque, Pressure, Temperature, MEP, Efficiency, Custom)
 - ✅ Accessibility (WCAG 2.1 AA), responsive design
 - ✅ Cross-platform (macOS development, Windows production)
@@ -164,7 +164,7 @@
 │                                                              │
 │  OUTPUTS:                                                    │
 │  • ProjectName.det (24 performance parameters)              │
-│  • ProjectName.pou (71 extended parameters)                 │
+│  • ProjectName.pou (71-78 parameters, depends on engine type) │
 │  • ProjectName_*.trace (12+ trace file types)               │
 └─────────────────────────────────────────────────────────────┘
                            ↓
@@ -261,18 +261,22 @@ line.split(' ');      // NO! Multiple spaces, not single
   - Convergence (simulation convergence per cylinder)
   - **Status:** ✅ Implemented in Engine Results Viewer
 
-- **`.pou`** - Extended performance (71 parameters)
-  - All .det parameters (24)
-  - Plus: IMEP, BMEP, FMEP, PMEP
+- **`.pou`** - Extended performance (71-78 parameters)
+  - Base: 71 parameters (NATUR engines)
+  - TURBO engines: +7 parameters (Boost, BackPr, Pratio, TBoost, TTurbine, RPMturb, WastRat)
+  - SUPER engines: +7 parameters (Boost, BackPr, Pratio, TBoost, RPMsup, PowSup, BOVrat)
+  - Includes: All .det params (24) + IMEP, BMEP, FMEP, PMEP
   - BSFC (brake specific fuel consumption)
   - Combustion efficiencies (Seff, Teff, Ceff)
   - Gas exchange parameters
   - Fuel consumption
   - **Status:** ✅ Implemented in Engine Results Viewer
 
-- **`.pou-merged`** - Combined format (75 parameters)
-  - All .pou parameters (71)
-  - Plus critical from .det: TCylMax, PCylMax, Deto, Convergence (4)
+- **`.pou-merged`** - Combined format (74-81 parameters)
+  - All .pou parameters (71-78, depends on engine type)
+  - Plus critical from .det: PCylMax, Deto, Convergence (3 params)
+  - NOTE: TCylMax NOT merged - .pou already has TC-Av (average cylinder temperature)
+  - NATUR: 74 params | TURBO/SUPER: 81 params
   - **Status:** ✅ Implemented (best format for visualization)
 
 #### Trace Files (~12 types)

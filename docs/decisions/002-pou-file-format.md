@@ -11,7 +11,7 @@
 После успешной реализации парсера .det файлов (см. [ADR 001](001-det-file-format.md)), появилась необходимость поддержать дополнительный формат `.pou` с расширенным набором параметров.
 
 **Требования:**
-1. Поддержать .pou файлы (71 параметр vs 24 в .det)
+1. Поддержать .pou файлы (71-78 параметров vs 24 в .det, зависит от типа двигателя)
 2. Сохранить обратную совместимость с .det файлами
 3. Подготовить архитектуру для добавления новых форматов в будущем (5+ форматов)
 4. Автоматическое определение формата файла
@@ -20,14 +20,14 @@
 ```
 Строка 1: Расширенные метаданные (5 полей vs 2 в .det)
          NumCylinders EngineType Breath NumTurbo NumWasteGate
-Строка 2: Заголовки колонок (71 параметр)
+Строка 2: Заголовки колонок (71-78 параметров, зависит от типа двигателя)
 Строка 3+: Маркеры расчётов ($) + данные
 ```
 
 **Ключевые отличия от .det:**
 - **Метаданные**: 5 полей вместо 2 (добавлены: breath, numTurbo, numWasteGate)
-- **Параметры**: 71 вместо 24
-- **Новые данные**: Combustion model (Vibe), efficiency metrics (Seff, Teff, Ceff), fuel consumption (BSFC)
+- **Параметры**: 71-78 вместо 24 (зависит от типа двигателя: NATUR=71, TURBO/SUPER=78)
+- **Новые данные**: Combustion model (Vibe), efficiency metrics (Seff, Teff, Ceff), fuel consumption (BSFC), turbo/supercharger parameters
 
 **Проблемы:**
 1. Как поддерживать несколько форматов без дублирования кода?
@@ -42,7 +42,7 @@
 Реализована **Parser Registry архитектура** с паттерном Registry:
 
 1. **Создан ParserRegistry** - централизованный реестр парсеров
-2. **Format-specific parsers**: `detParser.js` (24 params), `pouParser.js` (71 params)
+2. **Format-specific parsers**: `detParser.js` (24 params), `pouParser.js` (71-78 params)
 3. **Common utilities**: `calculationMarker.js`, `formatDetector.js`
 4. **Unified API**: `parseEngineFile(filePath)` - единая точка входа
 5. **Auto-detection**: определение формата по расширению + содержимому
@@ -57,7 +57,7 @@ backend/src/parsers/
 │   └── formatDetector.js      # Format auto-detection
 └── formats/
     ├── detParser.js      # .det format (24 params)
-    └── pouParser.js      # .pou format (71 params)
+    └── pouParser.js      # .pou format (71-78 params, engine-type specific)
 ```
 
 ---
@@ -319,7 +319,7 @@ function parseFile(filePath, parser) {
 | `Vesta 1.6 IM.det` | .det | 24 | 17 | ✅ OK |
 | `BMW M42.det` | .det | 24 | 30 | ✅ OK |
 | `TM Soft ShortCut.det` | .det | 24 | 17 | ✅ OK |
-| `TM Soft ShortCut.pou` | .pou | 71 | 8 | ✅ OK |
+| `TM Soft ShortCut.pou` | .pou | 71 (NATUR) | 8 | ✅ OK |
 
 ### Проверки:
 - ✅ Оба формата парсятся корректно
@@ -331,7 +331,7 @@ function parseFile(filePath, parser) {
 
 ### Performance:
 - ✅ .det файл (24 params): ~50-100ms
-- ✅ .pou файл (71 params): ~100-200ms
+- ✅ .pou файл (71-78 params): ~100-200ms
 - ✅ Registry overhead: negligible (<1ms)
 
 ---
@@ -339,7 +339,7 @@ function parseFile(filePath, parser) {
 ## Документация
 
 **Созданы документы:**
-1. [pou-format.md](../file-formats/pou-format.md) - полная спецификация .pou (71 параметр)
+1. [pou-format.md](../file-formats/pou-format.md) - полная спецификация .pou (71-78 параметров)
 2. [comparison.md](../file-formats/comparison.md) - детальное сравнение .det vs .pou
 3. [parsers-guide.md](../parsers-guide.md) - руководство по добавлению новых парсеров
 4. [sample.pou](../file-formats/examples/sample.pou) - аннотированный пример файла
@@ -372,9 +372,10 @@ function parseFile(filePath, parser) {
 **Добавлено:** 1 ноября 2025
 
 ### Проблема
-- .pou файлы содержат 71 параметр, НО в них отсутствуют 2 критически важных параметра:
+- .pou файлы содержат 71-78 параметров (зависит от типа двигателя), НО в них отсутствуют критически важные параметры:
   - **PCylMax** - максимальное давление в цилиндре (bar)
   - **Deto** - детонация
+  - **Convergence** - качество сходимости расчёта
 - Эти параметры есть в .det файлах (24 параметра)
 - Пользователь хочет работать с .pou файлами, но нуждается в PCylMax и Deto из .det
 
@@ -382,13 +383,13 @@ function parseFile(filePath, parser) {
 **Если существуют ОБА файла** (`.det` и `.pou` с одинаковым базовым именем), backend автоматически выполняет merge:
 
 ```
-TM Soft ShortCut.pou  (71 параметр)
-TM Soft ShortCut.det  (24 параметра, из них нужны PCylMax + Deto)
+TM Soft ShortCut.pou  (71 параметр NATUR)
+TM Soft ShortCut.det  (24 параметра, из них нужны PCylMax + Deto + Convergence)
                 ↓
        Автоматический merge
                 ↓
-    Результат: 73 параметра
-    (.pou + PCylMax + Deto из .det)
+    Результат: 74 параметра (NATUR)
+    (.pou + PCylMax + Deto + Convergence из .det)
 ```
 
 ### Реализация
@@ -432,20 +433,21 @@ async function parseDetFile(filePath) {
 ### Поведение
 | Файлы в директории | Результат |
 |-------------------|-----------|
-| Только `.pou` | 71 параметр (PCylMax и Deto отсутствуют) |
+| Только `.pou` | 71-78 параметров (PCylMax, Deto, Convergence отсутствуют) |
 | Только `.det` | 24 параметра |
-| `.pou` + `.det` | 73 параметра (автоматический merge) ✅ |
+| `.pou` + `.det` | 74-81 параметра (автоматический merge, зависит от типа двигателя) ✅ |
 
 ### TypeScript Типы
 **Обновлены типы:** [backend/src/types/engineData.ts](../../backend/src/types/engineData.ts)
 
 ```typescript
 export interface PouDataPoint {
-  // ... 71 параметр из .pou файла ...
+  // ... 71-78 параметров из .pou файла (зависит от типа двигателя) ...
 
   // Опциональные параметры, добавляемые из .det при merge:
-  PCylMax?: number[];  // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
-  Deto?: number[];     // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
+  PCylMax?: number[];    // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
+  Deto?: number[];       // [cyl1, cyl2, cyl3, cyl4, ...] (optional, from .det)
+  Convergence?: number;  // Calculation convergence quality (scalar, optional, from .det)
 }
 ```
 
