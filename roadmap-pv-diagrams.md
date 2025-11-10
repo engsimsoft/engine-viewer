@@ -5,8 +5,8 @@
 
 ## 📊 Текущий статус
 - **Этап:** Этап 1 (Backend - Parser & API)
-- **Прогресс:** 0/73 задач выполнено (0%)
-- **Следующее:** Создать PVD parser + тесты
+- **Прогресс:** 7/73 задач выполнено (10%)
+- **Следующее:** API endpoints для .pvd файлов
 
 ---
 
@@ -16,24 +16,32 @@
 **Цель:** Backend умеет парсить .pvd файлы и отдавать данные через API
 
 **1.1 PVD Parser:**
-- [ ] Создать `backend/src/parsers/formats/pvdParser.js` - базовая структура (30 мин)
-- [ ] Парсинг metadata (lines 1-16): RPM, cylinders, engineType, turbo config (1-2 часа)
-- [ ] Парсинг data (line 17+): 721 rows, deg + volume/pressure per cylinder (2-3 часа)
-- [ ] Тест parser с `test-data/V8/V8_2000.pvd` - проверить структуру output (1 час)
-- [ ] Обработка edge cases: 1-цилиндр vs 8-цилиндров (1 час)
+- [X] Создать `backend/src/parsers/formats/pvdParser.js` - базовая структура (30 мин)
+- [X] Парсинг metadata (lines 1-17): RPM, cylinders, engineType, turbo config, firing order (1-2 часа)
+- [X] Парсинг data (line 19+): 721 rows, deg + volume/pressure per cylinder (2-3 часа)
+- [X] Тест parser с `test-data/V8/V8_2000.pvd` - проверить структуру output (1 час)
+- [X] Обработка edge cases: 1-цилиндр (MOTO 250 V1) vs 8-цилиндров (V8) (1 час)
 
 **1.2 Parser Registry:**
-- [ ] Зарегистрировать PvdParser в `backend/src/parsers/index.js` (15 мин)
-- [ ] Verify: запустить backend, проверить что parser загружается без ошибок (15 мин)
+- [X] Зарегистрировать PvdParser в `backend/src/parsers/index.js` (15 мин)
+- [X] Verify: запустить backend, проверить что parser загружается без ошибок (15 мин)
 
 **1.3 API Endpoint:**
 - [ ] Добавить endpoint `/api/project/:id/pvd-files` - список .pvd с peak pressure metadata (2-3 часа)
 - [ ] Добавить endpoint `/api/files/:projectId/:filename` support для .pvd (или extend existing) (1-2 часа)
 - [ ] Тест через curl: получить список .pvd, получить данные V8_2000.pvd (30 мин)
 
-**Verify этап 1:**
-- [ ] Run `npm test` (backend) - тесты проходят (30 мин)
-- [ ] Manual test: curl endpoints возвращают корректные данные (15 мин)
+**Verify этап 1 (COMPREHENSIVE):**
+- [ ] **Unit Tests:** Run test scripts - все parser тесты проходят (30 мин)
+  - [X] `node backend/test-pvd-parser.js` - V8 (8-cyl) ✓
+  - [X] `node backend/test-pvd-1cyl.js` - MOTO 250 (1-cyl) ✓
+- [ ] **Backend Tests:** `npm test` (backend) - если есть automated tests (30 мин)
+- [ ] **Integration Tests:** curl/Postman endpoints возвращают корректные данные (15 мин)
+  - `/api/project/:id/pvd-files` - список .pvd с metadata
+  - `/api/files/:projectId/:filename` - данные .pvd файла
+- [ ] **Browser Tests (MCP Playwright):** если нужно UI тестирование
+- [ ] **Code Quality:** eslint/prettier - код соответствует стандартам
+- [ ] **Git Commit:** Stage 1 complete с описанием изменений
 
 ---
 
@@ -52,9 +60,12 @@
 - [ ] Create `frontend/src/hooks/usePVDData.ts` - fetch specific .pvd file data (1-2 часа)
 - [ ] Тест hooks: console.log данных, проверить структуру (30 мин)
 
-**Verify этап 2:**
-- [ ] `npm run typecheck` - TypeScript ошибок нет (15 мин)
-- [ ] Hooks возвращают данные в консоли (15 мин)
+**Verify этап 2 (COMPREHENSIVE):**
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок типов (15 мин)
+- [ ] **Unit Tests:** Hooks возвращают корректные данные в консоли (15 мин)
+- [ ] **Integration:** Проверить в браузере DevTools - Network tab показывает API calls
+- [ ] **Browser Tests (MCP Playwright):** если hooks используются в компонентах
+- [ ] **Git Commit:** Stage 2 complete
 
 ---
 
@@ -78,10 +89,17 @@
 - [ ] ECharts legend: click to toggle cylinders visibility (30 мин)
 - [ ] Zoom/pan: добавить dataZoom component (30 мин)
 
-**Verify этап 3:**
-- [ ] График рендерится для V8_2000.pvd, Cyl 1 (15 мин)
-- [ ] Dropdown RPM работает - переключение между файлами (15 мин)
-- [ ] Tooltip показывает данные на hover (15 мин)
+**Verify этап 3 (COMPREHENSIVE):**
+- [ ] **Visual Test:** График рендерится для V8_2000.pvd, Cyl 1 (15 мин)
+- [ ] **Interaction:** Dropdown RPM работает - переключение между файлами (15 мин)
+- [ ] **Interaction:** Tooltip показывает данные на hover (15 мин)
+- [ ] **Browser Tests (MCP Playwright):** Chart render + interactions
+  - Open project → navigate to PV Diagrams
+  - Verify chart visible, axes labeled, data plotted
+  - Test RPM dropdown selection
+  - Test tooltip on hover
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок
+- [ ] **Git Commit:** Stage 3 complete
 
 ---
 
@@ -111,10 +129,18 @@
 - [ ] State: activeTab (string) (15 мин)
 - [ ] Render разные chart configs based on activeTab (1 час)
 
-**Verify этап 4:**
-- [ ] Page доступна через navigation (15 мин)
-- [ ] Peak pressure RPM выбран по умолчанию (15 мин)
-- [ ] Tabs переключаются (график меняется) (15 мин)
+**Verify этап 4 (COMPREHENSIVE):**
+- [ ] **Visual Test:** Page доступна через navigation (15 мин)
+- [ ] **Functionality:** Peak pressure RPM выбран по умолчанию (15 мин)
+- [ ] **Interaction:** Tabs переключаются (график меняется) (15 мин)
+- [ ] **Browser Tests (MCP Playwright):** Complete page flow
+  - Navigate from project overview to PV Diagrams page
+  - Verify peak pressure RPM selected by default
+  - Verify badge shows peak pressure info
+  - Test tab switching (P-V, Log P-V, P-α)
+  - Test cylinder selection panel
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок
+- [ ] **Git Commit:** Stage 4 complete
 
 ---
 
@@ -132,9 +158,15 @@
 - [ ] Marker для peak pressure angle (жирная красная линия + label) (1 час)
 - [ ] Тест: P-α график показывает давление по углу с markers (30 мин)
 
-**Verify этап 5:**
-- [ ] Все 3 tabs работают (Normal P-V, Log P-V, P-α) (30 мин)
-- [ ] Markers видны на P-α графике (15 мин)
+**Verify этап 5 (COMPREHENSIVE):**
+- [ ] **Visual Test:** Все 3 tabs работают (Normal P-V, Log P-V, P-α) (30 мин)
+- [ ] **Visual Test:** Markers видны на P-α графике (TDC, BDC, peak pressure) (15 мин)
+- [ ] **Browser Tests (MCP Playwright):** Chart types verification
+  - Test Normal P-V: linear axes, correct scale
+  - Test Log P-V: logarithmic axes visible
+  - Test P-α: markers present (TDC, BDC, peak), angle axis 0-720°
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок
+- [ ] **Git Commit:** Stage 5 complete
 
 ---
 
@@ -162,10 +194,18 @@
 - [ ] Loading states: skeleton loader while .pvd loading (1 час)
 - [ ] Error states: если .pvd файл не найден (1 час)
 
-**Verify этап 6:**
-- [ ] Peak values отображаются корректно (15 мин)
-- [ ] Export работает (PNG скачивается) (15 мин)
-- [ ] UI выглядит профессионально на desktop/mobile (30 мин)
+**Verify этап 6 (COMPREHENSIVE):**
+- [ ] **Visual Test:** Peak values отображаются корректно (15 мин)
+- [ ] **Functionality:** Export работает (PNG/SVG скачивается) (15 мин)
+- [ ] **Visual Test:** UI выглядит профессионально на desktop/mobile (30 мин)
+- [ ] **Browser Tests (MCP Playwright):** Polish & responsiveness
+  - Verify peak values cards display correct data
+  - Test export button (PNG/SVG download)
+  - Test responsive layout (resize browser window)
+  - Verify loading states show while data fetching
+  - Test error states (invalid file, network error)
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок
+- [ ] **Git Commit:** Stage 6 complete
 
 ---
 
@@ -194,10 +234,24 @@
 - [ ] Update README если нужно (optional) (30 мин)
 - [ ] Run `./scripts/check-doc-links.sh` - passes (15 мин)
 
-**Verify этап 7:**
-- [ ] Полный user flow: Home → Project → PV-Diagrams → работает (30 мин)
-- [ ] Build проходит без ошибок (15 мин)
-- [ ] Документация обновлена (15 мин)
+**Verify этап 7 (COMPREHENSIVE - FINAL):**
+- [ ] **Full E2E Test:** Полный user flow: Home → Project → PV-Diagrams → работает (30 мин)
+- [ ] **Build:** `npm run build` (frontend + backend) успешен (15 мин)
+- [ ] **Documentation:** Changelog, README, comments обновлены (15 мин)
+- [ ] **Documentation Links:** `./scripts/check-doc-links.sh` - passes
+- [ ] **Browser Tests (MCP Playwright):** Complete E2E flow
+  - Open app → home page loads
+  - Click project (V8) → overview page loads
+  - Click PV-Diagrams card → PV page loads
+  - Verify all 3 chart types work
+  - Test with V8 (8-cyl): all RPMs work
+  - Test with MOTO 250 (1-cyl): all RPMs work
+  - Test navigation back to overview
+- [ ] **Cross-project Test:** Switch between 1-cyl and 8-cyl projects
+- [ ] **Performance:** Charts render in <500ms, no lag
+- [ ] **TypeScript:** `npm run typecheck` - нет ошибок
+- [ ] **Production Build:** Test production build locally
+- [ ] **Git Commit:** FINAL - PV-Diagrams feature complete v3.1
 
 ---
 

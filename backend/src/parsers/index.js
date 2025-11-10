@@ -6,6 +6,7 @@
  * - .det: 24 параметра (базовые характеристики)
  * - .pou: 71 параметр (расширенный набор)
  * - .prt: Метаданные проекта (engine specs, intake/exhaust configuration)
+ * - .pvd: PV-Diagrams (pressure-volume diagrams, 721 точек × N цилиндров)
  *
  * Пример использования:
  *   import { parseEngineFile } from './parsers/index.js';
@@ -20,6 +21,7 @@ import { globalRegistry } from './ParserRegistry.js';
 import { DetParser } from './formats/detParser.js';
 import { PouParser } from './formats/pouParser.js';
 import { PrtParser } from './formats/prtParser.js';
+import { PvdParser } from './formats/pvdParser.js';
 import { detectFormat } from './common/formatDetector.js';
 
 // Регистрируем парсеры при импорте модуля
@@ -28,6 +30,7 @@ function registerParsers() {
     globalRegistry.register('det', DetParser);
     globalRegistry.register('pou', PouParser);
     globalRegistry.register('prt', PrtParser);
+    globalRegistry.register('pvd', PvdParser);
   } catch (error) {
     // Игнорируем ошибку если парсеры уже зарегистрированы
     if (!error.message.includes('уже зарегистрирован')) {
