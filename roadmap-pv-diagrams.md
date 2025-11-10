@@ -180,7 +180,7 @@
 - [X] **P-α Diagram:** TDC/BDC markers present, angle axis 0-720° ✓
 - [X] **TypeScript:** `npm run typecheck` - нет ошибок ✓
 - [X] **Browser Test:** User confirmed working (math errors noted for future) ✓
-- [ ] **Git Commit:** Stage 4-5 complete (pending)
+- [X] **Git Commit:** Stage 4-5 complete ✓ (commit edd2b3c)
 
 ---
 
@@ -365,7 +365,8 @@ Frontend: hooks → components → ECharts
     - P-α: Crank Angle (0-720°), TDC/BDC markers (red/blue lines)
   - **Verification:** TypeScript ✓, Browser ✓ (user confirmed, math errors noted)
   - **Note:** Math calculation errors identified, to be fixed later
-  - ⏸️ Следующее: Git commit → Stage 6 (Polish & Metadata)
+  - **Commit:** edd2b3c (Stage 4-5 complete)
+  - ⏸️ Следующее: Stage 6 (Polish & Metadata)
 
 ---
 
