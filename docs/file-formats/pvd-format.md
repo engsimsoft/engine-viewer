@@ -45,9 +45,15 @@
 Строка 1:      RPM значение
 Строка 2:      Конфигурация двигателя (NumCyl, NumTurbo, etc.)
 Строка 3-15:   Метаданные системы (pipes, collectors, boxes)
-Строка 16:     Заголовки колонок (Deg + N × 2 параметра)
-Строка 17+:    Данные (720 строк, 0-720 градусов)
+Строка 16-17:  Firing order / Ignition timing (⚠️ 2 СТРОКИ!)
+Строка 18:     Заголовки колонок (Deg + N × 2 параметра)
+Строка 19+:    Данные (721 строка: 0-720 градусов)
 ```
+
+**⚠️ ВАЖНО:** Firing order занимает **ДВЕ строки** (16 и 17), а не одну!
+- Для V8: первая строка содержит 8 значений, вторая - 6 значений (итого 14)
+- Для 1-цилиндрового: может занимать 1-2 строки в зависимости от данных
+- **Parser MUST** объединять обе строки в один массив
 
 ### Пример структуры (8-цилиндровый двигатель)
 
@@ -171,15 +177,31 @@ Total = 1 + (NumCylinders × 2)
    10.00000       ETraceL         - Exhaust trace length
 ```
 
-### Строка 15: Firing order / Ignition timing
+### Строки 16-17: Firing order / Ignition timing ⚠️
 
 ```
 730.0  460.0  280.0  550.0  640.0  370.0  190.0  100.0
+100.0  320.0  402.0  622.0   75.5   30.0
 ```
 
-**Назначение:** Порядок работы цилиндров или углы зажигания (TBD - требует уточнения)
+**⚠️ КРИТИЧНО:** Эти данные занимают **ДВЕ строки** (строки 16 и 17)!
+- **Строка 16:** 8 значений (для V8)
+- **Строка 17:** 6 значений (для V8)
+- **Итого:** 14 значений firing order
+- **Назначение:** Порядок работы цилиндров или углы зажигания (TBD - требует уточнения)
 
-### Строка 16: Заголовки колонок
+**Parser implementation:**
+```javascript
+// Строки 16-17: Firing order (2 строки!)
+const firingOrderLine1 = cleanLine(lines[15]);
+const firingOrderLine2 = cleanLine(lines[16]);
+const firingOrder = [
+  ...firingOrderLine1.split(/\s+/).filter(Boolean).map(parseFloat),
+  ...firingOrderLine2.split(/\s+/).filter(Boolean).map(parseFloat)
+];
+```
+
+### Строка 18: Заголовки колонок
 
 ```
      Deg         Cylinder(1)     Cylinder(2)     Cylinder(3)     ...
@@ -280,13 +302,18 @@ export function parsePVD(content) {
 
   // Lines 3-15: System configuration (skip for now)
 
-  // Line 16: Headers
-  const headers = lines[15].trim().split(/\s+/);
+  // ⚠️ Lines 16-17: Firing order (2 строки!)
+  const firingOrderLine1 = lines[15].trim().split(/\s+/).filter(Boolean).map(parseFloat);
+  const firingOrderLine2 = lines[16].trim().split(/\s+/).filter(Boolean).map(parseFloat);
+  const firingOrder = [...firingOrderLine1, ...firingOrderLine2];
+
+  // Line 18: Headers
+  const headers = lines[17].trim().split(/\s+/);
   // ['Deg', 'Cylinder(1)', 'Cylinder(2)', ...]
 
-  // Line 17+: Data (720 rows)
+  // Line 19+: Data (721 rows)
   const data = [];
-  for (let i = 16; i < lines.length; i++) {
+  for (let i = 18; i < lines.length; i++) {
     const values = lines[i].trim().split(/\s+/);
     const deg = parseFloat(values[0]);
 
@@ -305,7 +332,8 @@ export function parsePVD(content) {
     metadata: {
       rpm,
       cylinders: numCylinders,
-      engineType: numTurbo > 0 ? 'TURBO' : 'NATUR'
+      engineType: numTurbo > 0 ? 'TURBO' : 'NATUR',
+      firingOrder  // ⚠️ Array из 2 строк!
     },
     data
   };
@@ -319,7 +347,8 @@ export function parsePVD(content) {
   "metadata": {
     "rpm": 2000,
     "cylinders": 8,
-    "engineType": "NATUR"
+    "engineType": "NATUR",
+    "firingOrder": [730.0, 460.0, 280.0, 550.0, 640.0, 370.0, 190.0, 100.0, 100.0, 320.0, 402.0, 622.0, 75.5, 30.0]
   },
   "data": [
     {
