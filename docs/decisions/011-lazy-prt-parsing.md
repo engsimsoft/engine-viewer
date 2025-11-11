@@ -264,6 +264,40 @@ curl http://localhost:3000/queue/status
 - New files: 4 (prtQueue.js, queue.js, useQueueStatus.ts, ParsingProgress.tsx)
 - Lines of code: ~500 new, ~200 modified
 
+## Bug Fix: Missing Auto Metadata Check (2025-11-11)
+
+**Issue Found:**
+`shouldParsePrt()` cache validation only checked modification time, but didn't verify `metadata.auto` exists.
+
+**Failure Scenario:**
+1. UI creates metadata manually (Edit Metadata dialog) → saves without `auto` field
+2. .prt file is older than metadata.modified → cache considered "valid"
+3. Parsing skipped → `auto` remains empty → "PARSING FAILED" error
+
+**Root Cause:**
+```javascript
+// ❌ BEFORE: Only time check
+if (!metadata) return true;
+if (prtStats.mtime > metadataDate) return true;
+return false; // ← Bug: doesn't check metadata.auto
+```
+
+**Fix Applied:**
+```javascript
+// ✅ AFTER: Check both existence and time
+if (!metadata) return true;
+if (!metadata.auto) return true; // ← FIX: always parse if auto missing
+if (prtStats.mtime > metadataDate) return true;
+return false;
+```
+
+**Impact:**
+- Handles edge case: manual metadata creation before .prt parsing
+- Ensures `auto` section always populated when .prt file exists
+- No performance impact: check is O(1), runs only during cache validation
+
+**Location:** `backend/src/services/fileScanner.js:230-234`
+
 ## Next Steps
 
 **Future Optimizations:**

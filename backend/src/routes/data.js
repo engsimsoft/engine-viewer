@@ -639,16 +639,17 @@ router.get('/:id/pvd-files', async (req, res, next) => {
         // Parse .pvd file using PvdParser
         const pvdData = await parseEngineFile(filePath);
 
-        // Calculate peak pressure for Cylinder 1 only (educational simplification)
-        // Note: PV-Diagrams always show Cylinder 1 data for educational purposes
         let peakPressure = 0;
-        let peakPressureAngle = 0;
+        let peakPressureAngleRaw = 0; // Physical angle (e.g., 14° ATDC)
+        let peakPressureAngleModified = 0; // TDC2-shifted angle for graph centering (e.g., 374°)
+        const lastCylinderIndex = pvdData.metadata.cylinders - 1;
 
         for (const dataPoint of pvdData.data) {
-          const cyl1 = dataPoint.cylinders[0]; // Cylinder 1 only
-          if (cyl1.pressure > peakPressure) {
-            peakPressure = cyl1.pressure;
-            peakPressureAngle = dataPoint.deg;
+          const cyl = dataPoint.cylinders[lastCylinderIndex];
+          if (cyl.pressure > peakPressure) {
+            peakPressure = cyl.pressure;
+            peakPressureAngleRaw = dataPoint.deg; // Physical angle (14°)
+            peakPressureAngleModified = (dataPoint.deg + 360) % 720; // Graph-centered (374°)
           }
         }
 
@@ -658,7 +659,8 @@ router.get('/:id/pvd-files', async (req, res, next) => {
           cylinders: pvdData.metadata.cylinders,
           engineType: pvdData.metadata.engineType,
           peakPressure: parseFloat(peakPressure.toFixed(3)),
-          peakPressureAngle: parseFloat(peakPressureAngle.toFixed(2)),
+          peakPressureAngle: parseFloat(peakPressureAngleRaw.toFixed(2)), // Physical angle for educational display
+          peakPressureAngleModified: parseFloat(peakPressureAngleModified.toFixed(2)), // TDC2-shifted for graph
           dataPoints: pvdData.data.length
         });
       } catch (error) {

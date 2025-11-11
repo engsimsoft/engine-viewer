@@ -227,6 +227,12 @@ export async function shouldParsePrt(prtPath, projectId) {
       return true; // Metadata doesn't exist → need to parse
     }
 
+    // Check if auto metadata exists (critical: handles manual metadata creation)
+    if (!metadata.auto) {
+      console.log(`[Cache] Auto metadata missing for ${projectId} → parse`);
+      return true; // Auto section missing → must parse .prt to populate it
+    }
+
     // Compare modification times
     const prtStats = await stat(prtPath);
     const metadataDate = new Date(metadata.modified);

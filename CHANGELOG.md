@@ -9,9 +9,167 @@
 
 ## [Unreleased]
 
+## [3.1.3] - 2025-01-11
+
+### Changed - PV-Diagrams Multi-RPM Comparison UX (ADR-012 Stage 5)
+
+**Tooltip Improvements:**
+- **Fixed tooltip to show ALL selected RPMs** (previously only showed one RPM on hover)
+- Updated all 3 diagram types: P-V, Log P-V, P-α
+- New format with colored markers:
+  ```
+  Volume: 51.25 cm³
+  ─────────────────
+  ● 7400 RPM: 0.68 bar (V: 51.25 cm³)
+  ● 6800 RPM: 0.72 bar (V: 51.26 cm³)
+  ```
+- Improved formatting with header separator and better spacing
+- **Educational value**: Instant comparison of all RPMs on hover
+
+**PeakValuesCards Redesign:**
+- **Before**: 3 aggregate cards showing "Max Pressure (across 2 RPMs)" - unclear which RPM
+- **After**: 1 full-width card per RPM (matching Performance page pattern)
+- Card format:
+  ```
+  🔴 7400 RPM
+  Max: 87.82 bar at 13° (373°) • Min: 0.56 bar • Volume: 477 cm³ (43 — 520 cm³)
+  ```
+- Colored dot (●) matches graph series color (red/blue/green/orange)
+- Inline statistics with bullet separators
+- Responsive layout (stacks vertically on mobile)
+- **Educational value**: Clear per-RPM comparison, easy to correlate with graph
+
+**UX Consistency:**
+- Matches Performance page multi-calculation cards pattern
+- Consistent color coding: graph series ↔ card color dots
+- Professional presentation following "iPhone Style" principles
+
+### Files Modified
+**Frontend:**
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` (lines 234-279, 324-356, 556-598)
+  - Updated tooltip formatters for all 3 diagram types
+  - Show ALL RPMs with colored markers and improved formatting
+- `frontend/src/components/pv-diagrams/PeakValuesCards.tsx` (complete redesign, 156 lines)
+  - Changed from 3 aggregate cards to per-RPM cards
+  - Added `calculateRPMStats()` helper function
+  - Import `RPM_COLORS` from chartOptionsHelpers for consistency
+
+**Documentation:**
+- `docs/decisions/012-pv-diagrams-implementation.md` (Stage 5 added, lines 210-306)
+  - Documented tooltip fix and cards redesign
+  - Updated consolidation note (now includes Stage 5)
+
+### Verification
+- TypeScript typecheck: ✓
+- Browser tests: ✓ (tooltip shows all RPMs, cards display correctly with color coding)
+
+---
+
+## [3.1.2] - 2025-01-11
+
+### Added - PV-Diagrams Atmospheric Pressure Visualization (ADR-012 Stage 4)
+
+**Physical Correctness:**
+- **Y-axis starts at 0** (no negative pressure - physically impossible, vacuum = 0 bar)
+  - P-V diagram: `yAxis: { min: 0 }`
+  - P-α diagram: `yAxis: { min: 0 }`
+  - Log P-V: `min: undefined` (log scale handles correctly)
+
+**Atmospheric Pressure Reference Line:**
+- Added **1 bar dashed line** to all 3 diagram types (P-V, Log P-V, P-α)
+- Gray color (#666), dashed style (1.5px width)
+- Label "1.0" on Y-axis when max pressure ≤ 10 bar (auto-hides if cluttered)
+- **Educational value**: Students see where atmospheric pressure is
+
+**Pumping Losses Zoom Feature:**
+- Smart button "Pumping Losses" next to "DIAGRAM TYPE" header (P-V diagram only)
+- Toggle button: Zooms Y-axis to 0-2 bar range for detailed pumping loop analysis
+- Interval: 0.5 bar (detailed scale for low-pressure region)
+- Zustand state: `showPumpingLosses: boolean` + `setShowPumpingLosses()`
+- **Educational value**: Detailed analysis of intake/exhaust pressure losses
+
+**Educational Impact:**
+- 🎓 **Physical correctness**: Students see pressure cannot go below 0
+- 🎓 **Atmospheric reference**: 1 bar line provides context for pumping loop
+- 🎓 **Pumping losses analysis**: Smart zoom for studying intake/exhaust processes
+- 🎓 **Professional presentation**: Clean, focused visualization
+
+### Changed - Documentation Consolidation
+- **Merged ADR-012 Stage 2, ADR-014 into ADR-012**: "Consolidation over Proliferation" principle
+  - ADR-012 now contains all 4 stages of PV-Diagrams development
+  - Stage 1: Initial implementation
+  - Stage 2: Educational enhancement (multi-RPM)
+  - Stage 3: Peak pressure angles fix
+  - Stage 4: Atmospheric pressure visualization (this release)
+- **Deleted**: `docs/decisions/013-pv-diagrams-educational-stage-1.md`
+- **Deleted**: `docs/decisions/014-pvd-peak-pressure-angles-fix.md`
+- **Rationale**: All PV-Diagrams history in one place, easier to maintain
+
+### Files Modified
+**Frontend:**
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` (lines 47-280, 369-575)
+  - Added atmospheric pressure line to P-V, Log P-V, P-α diagrams
+  - Set Y-axis min = 0 for physical correctness
+  - Pumping losses zoom: Y-axis max = 2 when `showPumpingLosses` true
+- `frontend/src/stores/slices/pvDiagramsSlice.ts` (lines 25-38, 98-101)
+  - Added `showPumpingLosses: boolean` state
+  - Added `setShowPumpingLosses()` action
+- `frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx` (complete rewrite, 82 lines)
+  - Added "Pumping Losses" button (toggle, only shows for P-V diagram)
+  - Button placement: next to "DIAGRAM TYPE" header
+- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx` (lines 61, 100, 114)
+  - Pass `showPumpingLosses` to chart options helpers
+- `frontend/src/components/pv-diagrams/PVLeftPanel.tsx` (minor: h2 header moved)
+
+**Documentation:**
+- `docs/decisions/012-pv-diagrams-implementation.md` (rewritten, 435 lines)
+  - Consolidated all 4 stages of PV-Diagrams development
+  - Complete history from initial implementation to atmospheric visualization
+
+### Verification
+- TypeScript typecheck: ✓
+- Frontend build: ✓
+- Backend startup: ✓
+- Browser tests: ✓ (P-V, Log P-V, P-α all show atmospheric line, pumping losses button works)
+
+---
+
+## [3.1.1] - 2025-01-11
+
+### Fixed - PV-Diagrams Peak Pressure Angles (ADR-012 Stage 3)
+- **Corrected peak pressure angles** for all engine types:
+  - Before: 4-cyl = 133°, 6-cyl = 260°, 8-cyl = 107° (physically incorrect)
+  - After: All engines = ~367° ATDC (5-30° After Top Dead Center) ✅
+  - Root cause: Using `cylinders[0]` which has different TDC for different engines
+  - Solution: Use **last cylinder** (always has TDC close to 0°) + TDC2 shift (+360°)
+
+- **Last Cylinder Convention** (verified across 1-8 cylinders):
+  - Last cylinder in .pvd data always has TDC close to 0° (81-124° range)
+  - Universal solution for all engine types
+  - Frontend: `chartOptionsHelpers.ts`, `pvDiagramUtils.ts`
+  - Backend: `routes/data.js`
+
+- **TDC2 Reference shift** (+360° with modulo % 720):
+  - Aesthetic centering of P-α diagram (peak in middle of graph)
+  - Educational presentation (matches textbook style)
+  - Data sorting eliminates jump artifacts (719° → 0° connection)
+  - Consistent with user's old program (Delphi 7 Post4T)
+
+### Added
+- **ADR-012 Stage 3**: PVD Peak Pressure Angles Fix
+  - Documents last cylinder convention
+  - Explains TDC2 reference shift
+  - Verification across all engine types (1-8 cylinders, 40+ test files)
+
+### Changed
+- **docs/file-formats/pvd-format.md**: Updated firing order documentation
+  - Clarified: Lines 16-17 contain **TDC angles** (not just firing order)
+  - Documented **Last Cylinder Convention** (TDC close to 0°)
+  - Added TDC2 reference explanation
+
 ## [3.1.0] - 2025-01-11
 
-### Added - PV-Diagrams Educational Enhancement (ADR-013, Stage 1)
+### Added - PV-Diagrams Educational Enhancement (ADR-012 Stage 2, Stage 1)
 - **Multi-RPM Comparison** (key educational feature):
   - Overlay 2-4 RPMs on same chart for direct comparison
   - Zustand state: `selectedRPM: string | null` → `selectedRPMs: string[]` (array of selected files)

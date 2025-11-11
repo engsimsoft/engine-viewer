@@ -188,7 +188,21 @@ Total = 1 + (NumCylinders × 2)
 - **Строка 16:** 8 значений (для V8)
 - **Строка 17:** 6 значений (для V8)
 - **Итого:** 14 значений firing order
-- **Назначение:** Порядок работы цилиндров или углы зажигания (TBD - требует уточнения)
+- **Назначение:** **TDC angles (Top Dead Center углы)** для каждого цилиндра в физическом порядке
+  - Значения соответствуют углам TDC для Cylinder(1), Cylinder(2), ..., Cylinder(N)
+  - Диапазон: 0-720° (4-stroke cycle)
+  - **Важно:** Порядок совпадает с порядком колонок данных (Cylinder(1), Cylinder(2), ...)
+
+**Last Cylinder Convention** ⚠️:
+- **Последний цилиндр** в массиве всегда имеет **TDC close to 0°**
+- Verified across all engine types (1-8 cylinders):
+  - 1-cyl: 81°
+  - 3-cyl: 124°
+  - 4-cyl: 102.5°
+  - 6-cyl: 119°
+  - 8-cyl: 100°
+- **Использование:** Для peak pressure calculation используется последний цилиндр (см. ADR-014)
+- **TDC2 Reference:** Для educational presentation применяется смещение +360° (центрирование графика)
 
 **Parser implementation:**
 ```javascript

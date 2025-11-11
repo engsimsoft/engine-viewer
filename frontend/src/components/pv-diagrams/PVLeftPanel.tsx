@@ -60,9 +60,6 @@ export function PVLeftPanel({ files, loading = false }: PVLeftPanelProps) {
             ============================================================ */}
         {selectedRPMs.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3">
-              DIAGRAM TYPE
-            </h2>
             <DiagramTypeTabs />
           </section>
         )}

@@ -26,12 +26,14 @@ export interface PVDiagramsSlice {
   // State
   selectedRPMs: string[];           // Selected .pvd file names for comparison (max 4)
   selectedDiagramType: DiagramType; // Diagram type (default: 'pv')
+  showPumpingLosses: boolean;       // Zoom to pumping losses (0-2 bar) for P-V diagram
 
   // Actions - RPM Selection
   addSelectedRPM: (rpm: string) => void;
   removeSelectedRPM: (rpm: string) => void;
   clearSelectedRPMs: () => void;
   setSelectedDiagramType: (type: DiagramType) => void;
+  setShowPumpingLosses: (value: boolean) => void;
   resetPVDiagrams: () => void;
 }
 
@@ -48,6 +50,7 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
 
   selectedRPMs: [], // Empty = no files selected yet
   selectedDiagramType: 'pv', // Default: Normal P-V Diagram
+  showPumpingLosses: false, // Default: full range view
 
   // ============================================================
   // Actions - RPM Selection (Multi-select)
@@ -95,9 +98,15 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
       selectedDiagramType: type,
     }),
 
+  setShowPumpingLosses: (value) =>
+    set({
+      showPumpingLosses: value,
+    }),
+
   resetPVDiagrams: () =>
     set({
       selectedRPMs: [],
       selectedDiagramType: 'pv',
+      showPumpingLosses: false,
     }),
 });

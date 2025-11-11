@@ -40,9 +40,10 @@ export function findMaxPressure(
     return null;
   }
 
+  const lastCylinderIndex = data.metadata.cylinders - 1;
   const cylindersToCheck = selectedCylinder !== null
     ? [selectedCylinder]
-    : Array.from({ length: data.metadata.cylinders }, (_, i) => i);
+    : [lastCylinderIndex];
 
   let maxPressure = -Infinity;
   let maxAngle = 0;
@@ -61,7 +62,7 @@ export function findMaxPressure(
 
   return {
     value: maxPressure,
-    angle: maxAngle,
+    angle: (maxAngle + 360) % 720,
     cylinder: maxCylinder,
     cylinderNum: maxCylinder + 1,
   };
@@ -82,9 +83,10 @@ export function findMinPressure(
     return null;
   }
 
+  const lastCylinderIndex = data.metadata.cylinders - 1;
   const cylindersToCheck = selectedCylinder !== null
     ? [selectedCylinder]
-    : Array.from({ length: data.metadata.cylinders }, (_, i) => i);
+    : [lastCylinderIndex];
 
   let minPressure = Infinity;
   let minAngle = 0;
@@ -103,7 +105,7 @@ export function findMinPressure(
 
   return {
     value: minPressure,
-    angle: minAngle,
+    angle: (minAngle + 360) % 720,
     cylinder: minCylinder,
     cylinderNum: minCylinder + 1,
   };
@@ -124,9 +126,10 @@ export function calculateVolumeRange(
     return null;
   }
 
+  const lastCylinderIndex = data.metadata.cylinders - 1;
   const cylindersToCheck = selectedCylinder !== null
     ? [selectedCylinder]
-    : Array.from({ length: data.metadata.cylinders }, (_, i) => i);
+    : [lastCylinderIndex];
 
   let minVolume = Infinity;
   let maxVolume = -Infinity;

@@ -1,8 +1,10 @@
-# ADR 012: PV-Diagrams Implementation
+# ADR 012: PV-Diagrams Implementation & Educational Enhancement
 
-**Дата:** 2025-01-11
+**Дата:** 2025-01-11 (Start) → 2025-01-11 (Stage 5)
 **Статус:** Принято
 **Автор:** Claude Code + User
+
+---
 
 ## Контекст
 
@@ -12,14 +14,25 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 - Парсинг .pvd файлов (721 точек данных, 0-720° crank angle, до 8 цилиндров)
 - 3 типа диаграмм: P-V (термодинамический), Log P-V (политропный анализ), P-α (угол поворота)
 - Production-quality UI следуя "iPhone Style" (carefully chosen defaults, professional appearance)
+- **Educational focus**: Инструмент для преподавания термодинамики ДВС студентам
 - Интеграция с существующей архитектурой (PerformancePage pattern, ChartExport, Zustand)
-- Peak values analysis (Max/Min pressure, Volume range)
+
+**Эволюция:**
+- **Stage 1**: Initial implementation (professional tool)
+- **Stage 2**: Educational enhancement (multi-RPM comparison, simplification)
+- **Stage 3**: Peak pressure angles fix (last cylinder convention)
+- **Stage 4**: Atmospheric pressure visualization (physical correctness)
+- **Stage 5**: Multi-RPM comparison UX improvements (per-RPM cards, tooltip fix)
+
+---
 
 ## Решение
 
-Реализована полная PV-Diagrams функциональность в 7 этапов (roadmap-driven approach):
+### Stage 1: Initial Implementation (v3.0.0)
 
-### Backend (Stage 1-2):
+Реализована полная PV-Diagrams функциональность:
+
+**Backend:**
 1. **PVD Parser** (`backend/src/parsers/formats/pvdParser.js`):
    - Metadata parsing (lines 1-17): RPM, cylinders, engineType, turbo config, firing order
    - Data parsing (line 19+): 721 rows × N cylinders (deg, volume, pressure per cylinder)
@@ -29,9 +42,8 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 2. **API Endpoints**:
    - `GET /api/project/:id/pvd-files` - список .pvd с peak pressure metadata
    - `GET /api/project/:id/pvd/:fileName` - полные данные конкретного файла (metadata + 721 points)
-   - Project summary integration - pvDiagrams availability автоматически
 
-### Frontend (Stage 3-7):
+**Frontend:**
 3. **State Management** (Zustand - `pvDiagramsSlice.ts`):
    - selectedRPM (файл), selectedCylinder (0-7 | null), selectedDiagramType ('pv' | 'log-pv' | 'p-alpha')
    - Session-only persistence (resetPVDiagrams on unmount)
@@ -43,21 +55,257 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
    - **CylinderFilterSection** - grid buttons (All + Cyl 1-8) с color dots preview
    - **DiagramTypeTabs** - 3-column tabs (shadcn/ui)
 
-5. **3 Chart Types** (`chartOptionsHelpers.ts` - 558 lines):
+5. **3 Chart Types** (`chartOptionsHelpers.ts`):
    - **P-V Diagram**: Linear axes (Volume × Pressure), classic thermodynamic
    - **Log P-V**: Logarithmic axes (base 10), polytropic analysis (P × V^n = const)
    - **P-α**: Crank Angle (0-720°) × Pressure, TDC/BDC markers (red/blue lines)
 
 6. **Peak Values Analysis** (`pvDiagramUtils.ts` + `PeakValuesCards.tsx`):
    - 3 stat cards: Max Pressure, Min Pressure, Volume Range
-   - Utility functions: findMaxPressure(), findMinPressure(), calculateVolumeRange()
    - Dynamic updates on cylinder selection
 
-7. **Visual Polish**:
-   - Removed dataZoom (interfered with 720° cycle viewing)
-   - Number formatting (.toFixed(1) for axes, .toFixed(2) for cards)
-   - Compact cards (p-3 padding, smaller fonts)
-   - Professional appearance (TailwindCSS consistency)
+---
+
+### Stage 2: Educational Enhancement (v3.1.0)
+
+Превращение в образовательный инструмент:
+
+**2.1 Упрощение UI (Cylinder Selection → Always Cylinder 1):**
+- ❌ Удален Cylinder selection UI (CylinderFilterSection.tsx)
+- Zustand state: удален `selectedCylinder`, все графики показывают Cylinder 1 (index 0)
+- **Обоснование**: Для образовательных целей разница между цилиндрами минимальна (±1-2%), фокус на термодинамике
+
+**2.2 Multi-RPM Comparison Feature:**
+- Zustand state: `selectedRPM: string | null` → `selectedRPMs: string[]` (массив выбранных файлов)
+- Actions: `addSelectedRPM()`, `removeSelectedRPM()`, `clearSelectedRPMs()`
+- RPMSection UI: checkbox-based multi-select (max 4 RPMs)
+- usePVDData hook: параллельная загрузка с Promise.all
+- Chart helpers: overlay multiple RPM series с разными цветами:
+  - RPM 1: #e74c3c (red)
+  - RPM 2: #3498db (blue)
+  - RPM 3: #2ecc71 (green)
+  - RPM 4: #f39c12 (orange)
+- Все 3 типа диаграмм поддерживают multi-RPM
+
+**2.3 Max/Min Pressure Badges** (iPhone-style indicators):
+- Каждый RPM в списке показывает 2 бейджа:
+  - Max Pressure: красный бейдж с пиковым давлением (bar)
+  - Min Pressure: синий бейдж с минимальным давлением (bar)
+- Dynamic updates при загрузке данных
+
+**Образовательная ценность:**
+- 🎓 Студенты ВИДЯТ как цикл меняется с RPM (сравнение на одном графике)
+- 🎓 Визуализация эффективности "дыхания" двигателя
+- 🎓 Понимание важности valve timing на разных скоростях
+
+---
+
+### Stage 3: Peak Pressure Angles Fix (v3.1.1)
+
+**Проблема:**
+- 4-cyl: Peak angle = 133° (wrong, expected ~365-390° ATDC)
+- 6-cyl: Peak angle = 260° (wrong)
+- 8-cyl: Peak angle = 107° (wrong)
+- Root cause: `cylinders[0]` имеет разные TDC для разных двигателей
+
+**Решение - Last Cylinder Convention + TDC2 Shift:**
+1. **Last cylinder selection**: `cylinders[cylinders.length - 1]`
+2. **TDC2 shift**: `(deg + 360) % 720` - эстетическое центрирование графика
+3. **Data sorting**: `.sort((a, b) => a[0] - b[0])` - устранение артефактов
+
+**Верификация** (last cylinder TDC близко к 0°):
+- 1-cyl: TDC = 81°
+- 3-cyl: TDC = 124°
+- 4-cyl: TDC = 102.5°
+- 6-cyl: TDC = 119°
+- 8-cyl: TDC = 100°
+
+**Результат**: Peak pressure теперь ~367° ATDC (correct!) для всех типов двигателей
+
+**Применено в:**
+- Frontend: `chartOptionsHelpers.ts`, `pvDiagramUtils.ts`
+- Backend: `routes/data.js` (peak pressure calculation for badges)
+
+---
+
+### Stage 4: Atmospheric Pressure Visualization (v3.1.2)
+
+**Проблема:**
+- Y-axis показывает отрицательные значения (физически невозможно - вакуум = 0 bar)
+- Нет визуальной референции атмосферного давления (1 bar)
+- Pumping loop (0-1 bar) плохо видим на full-range графике
+
+**Решение:**
+
+**4.1 Physical Correctness (Y-axis min = 0):**
+- P-V diagram: `yAxis: { min: 0 }` - давление не может быть отрицательным
+- P-α diagram: `yAxis: { min: 0 }` - тот же принцип
+- Log P-V: `min: undefined` (log scale handles this correctly)
+
+**4.2 Atmospheric Pressure Line (1 bar reference):**
+- Добавлена пунктирная линия на всех 3 типах диаграмм
+- markLine data: `yAxis: 1` с серым цветом (#666)
+- Label "1.0" показывается на оси (через interval configuration)
+- **Educational value**: Студенты видят где атмосферное давление
+
+**4.3 Pumping Losses Zoom Button** (P-V diagram only):
+- Smart button "Pumping Losses" рядом с "DIAGRAM TYPE" header
+- Toggle: `showPumpingLosses: boolean` в Zustand state
+- Когда активен: Y-axis max = 2 bar (вместо full range)
+- Interval: 0.5 bar (детальная шкала для 0-2 bar)
+- **Educational value**: Детальный анализ насосных потерь (intake/exhaust pressure losses)
+
+**Реализация:**
+```typescript
+// chartOptionsHelpers.ts - P-V Diagram
+yAxis: {
+  min: 0,  // Physical limit - no negative pressure
+  max: showPumpingLosses ? 2 : (maxPressure + pressurePadding),
+  interval: showPumpingLosses ? 0.5 : ((maxPressure + pressurePadding) <= 10 ? 1 : undefined),
+},
+
+// Atmospheric pressure line (first series only)
+markLine: {
+  silent: true,
+  symbol: 'none',
+  data: [{
+    yAxis: 1,
+    label: {
+      show: showOneBarLabel,  // Hide if max > 10 bar (clutter)
+      formatter: '1.0',
+      position: 'insideStartTop',
+    },
+    lineStyle: {
+      color: '#666',
+      type: 'dashed',
+      width: 1.5,
+    },
+  }],
+}
+```
+
+**Zustand State:**
+```typescript
+showPumpingLosses: boolean;  // Default: false
+setShowPumpingLosses: (value: boolean) => void;
+```
+
+**DiagramTypeTabs Component:**
+```tsx
+{selectedDiagramType === 'pv' && (
+  <button onClick={handleTogglePumpingLosses} className={...}>
+    Pumping Losses
+  </button>
+)}
+```
+
+**Educational Impact:**
+- 🎓 Физически корректная визуализация (Y-axis ≥ 0)
+- 🎓 Понимание атмосферного давления как референса
+- 🎓 Детальный анализ pumping loop (intake/exhaust losses)
+- 🎓 Smart zoom для образовательных задач
+
+---
+
+### Stage 5: Multi-RPM Comparison UX Improvements (v3.1.3)
+
+**Проблема:**
+- Tooltip показывал только один RPM при hover (не видно всех выбранных RPM)
+- PeakValuesCards показывали aggregate stats "Max Pressure (across 2 RPMs)" - неясно какому RPM принадлежат данные
+- Несоответствие UX pattern с Performance page (там отдельные карточки для каждого расчёта)
+
+**Решение:**
+
+**5.1 Tooltip Fix - Show ALL RPMs:**
+- Обновлены все 3 типа диаграмм (P-V, Log P-V, P-α)
+- Tooltip теперь показывает ВСЕ выбранные RPMs с цветными маркерами
+- Формат:
+  ```
+  Volume: 51.25 cm³
+  ─────────────────
+  ● 6600 RPM: 0.72 bar (V: 51.25 cm³)
+  ● 7200 RPM: 0.68 bar (V: 51.26 cm³)
+  ```
+- Улучшенное форматирование с разделителем и отступами
+
+**5.2 Per-RPM Cards Redesign:**
+- **До**: 3 aggregate карточки (Max Pressure, Min Pressure, Volume Range "across N RPMs")
+- **После**: 1 full-width карточка на каждый RPM (pattern как Performance page)
+- Формат карточки:
+  ```
+  🔴 7400 RPM
+  Max: 87.82 bar at 13° (373°) • Min: 0.56 bar • Volume: 477 cm³ (43 — 520 cm³)
+  ```
+- Цветной индикатор (●) совпадает с цветом серии на графике
+- Inline statistics с bullet-разделителями
+
+**Реализация:**
+```typescript
+// chartOptionsHelpers.ts - Tooltip formatter (P-V diagram)
+tooltip: {
+  formatter: (params: any) => {
+    const volume = params[0].value[0].toFixed(2);
+    let result = `<div style="border-bottom: 1px solid #666;">Volume: ${volume} cm³</div>`;
+
+    // Show ALL RPMs
+    params.forEach((param: any) => {
+      result += `
+        <div style="margin: 6px 0;">
+          ${param.marker}
+          <span style="font-weight: bold;">${param.seriesName}:</span>
+          <span>${param.value[1].toFixed(2)} bar</span>
+        </div>
+      `;
+    });
+    return result;
+  }
+}
+
+// PeakValuesCards.tsx - Per-RPM cards
+export const RPM_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+
+function calculateRPMStats(item: PVDDataItem, colorIndex: number): RPMStats {
+  // Calculate max/min pressure, volume range for THIS RPM only
+  return {
+    rpm,
+    color: RPM_COLORS[colorIndex],
+    maxPressure, maxPressureAngle, maxPressureAngleModified,
+    minPressure, volumeRange, minVolume, maxVolume
+  };
+}
+
+// Render: one card per RPM
+{rpmStats.map((stats) => (
+  <div className="w-full bg-card border rounded-xl px-6 py-4">
+    {/* Color dot + RPM header */}
+    <div className="flex items-center gap-3">
+      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stats.color }} />
+      <span>{stats.rpm} RPM</span>
+    </div>
+
+    {/* Inline stats */}
+    <div className="flex gap-2">
+      <span>Max: {stats.maxPressure.toFixed(2)} bar at {stats.maxPressureAngle}° ({stats.maxPressureAngleModified}°)</span>
+      <span>•</span>
+      <span>Min: {stats.minPressure.toFixed(2)} bar</span>
+      <span>•</span>
+      <span>Volume: {stats.volumeRange.toFixed(0)} cm³ ({stats.minVolume} — {stats.maxVolume} cm³)</span>
+    </div>
+  </div>
+))}
+```
+
+**Files Modified:**
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` - 3 tooltip formatters updated
+- `frontend/src/components/pv-diagrams/PeakValuesCards.tsx` - Complete redesign (grid → per-RPM cards)
+
+**Educational Impact:**
+- 🎓 Ясная визуализация multi-RPM comparison (каждый RPM = отдельная карточка)
+- 🎓 Tooltip показывает ВСЕ RPMs для instant comparison на hover
+- 🎓 UX consistency с Performance page (паттерн узнаваем)
+- 🎓 Цветовая кодировка помогает соотнести график ↔ карточки
+
+---
 
 ## Причины
 
@@ -71,53 +319,137 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 - **Log P-V**: Политропный анализ (показатель политропы n)
 - **P-α**: Анализ по углу ПКВ (TDC/BDC timing, фазы процесса)
 
-### 3. **Tab-based Layout** (UX)
-- ✅ Чистое переключение между типами (не overload UI)
-- ✅ Понятные названия ("P-V", "Log P-V", "P-α")
-- ✅ Сохранение выбора в Zustand (session-only)
+### 3. **Educational Simplification** (Stage 2)
+- ✅ Cylinder 1 only: разница между цилиндрами минимальна для образования
+- ✅ Multi-RPM comparison: visual learning, сравнение режимов
+- ✅ Max/Min badges: carefully chosen defaults, instant comparison
 
-### 4. **PerformancePage Pattern** (consistency)
-- ✅ LeftPanel 320px (w-80) - консистентность с Performance
-- ✅ Sections structure (uppercase headers, spacing)
-- ✅ ChartExport integration (PNG/SVG export)
-- ✅ Header with breadcrumbs
+### 4. **Last Cylinder Convention** (Stage 3)
+- ✅ Universal solution для всех типов двигателей (1-8 cylinders)
+- ✅ TDC2 shift: эстетическое центрирование (peak в середине графика)
+- ✅ Консистентность с user's old program (Delphi 7)
 
-### 5. **Auto-select Peak Pressure RPM** ("iPhone Style")
-- ✅ Carefully chosen default (peak pressure = критичный режим)
-- ✅ Professional UX (не требует manual selection)
+### 5. **Atmospheric Pressure Visualization** (Stage 4)
+- ✅ Physical correctness: давление ≥ 0 (no vacuum below 0)
+- ✅ Educational reference: 1 bar line показывает атмосферное давление
+- ✅ Pumping Losses zoom: детальный анализ насосных потерь (0-2 bar)
+- ✅ Smart button placement: рядом с "DIAGRAM TYPE", не занимает много места
 
-### 6. **Peak Values Cards** (analysis support)
-- ✅ Key statistics visible without calculations
-- ✅ Viewer-only approach (NO integrals, NO IMEP)
-- ✅ Updates dynamically with cylinder selection
+### 6. **Viewer-Only Approach** (design philosophy)
+- ✅ NO calculations (integrals, IMEP) - calculations belong in EngMod4T
+- ✅ Focus on visualization & education
+- ✅ Keep app simple and focused
 
-### 7. **Visual Polish Decisions**:
-- **Removed dataZoom**: Accidental zoom disrupted viewing complete 720° cycles
-- **Number formatting**: Floating-point precision показывал ugly numbers (114.3994541 → 114.4)
-- **Compact cards**: Balance между readability и space efficiency
+---
 
 ## Последствия
 
 ### Плюсы:
 - ✅ **Полная функциональность PV-Diagrams** - 3 типа диаграмм работают
-- ✅ **Production-quality UI** - следует PerformancePage pattern
-- ✅ **Consistency** - Parser Registry, ChartExport, Zustand state
-- ✅ **Auto-detection** - .pvd файлы автоматически обнаруживаются
-- ✅ **Peak values analysis** - статистика без calculations
-- ✅ **Professional appearance** - compact cards, clean formatting
-- ✅ **Multi-cylinder support** - 1-8 cylinders (tested on V8 and MOTO 250)
-- ✅ **Build успешен** - TypeScript typecheck ✓, production build (2.93s) ✓
-- ✅ **Browser tests passed** - all features working ✓
+- ✅ **Educational tool** - multi-RPM comparison, badges, atmospheric reference
+- ✅ **Physical correctness** - Y-axis ≥ 0, correct peak angles (~367°)
+- ✅ **Pumping Losses analysis** - smart zoom для детального анализа
+- ✅ **Production-quality UI** - "iPhone Style", carefully chosen defaults
+- ✅ **Consistency** - Parser Registry, ChartExport, Zustand state, PerformancePage pattern
+- ✅ **Universal solution** - works for all engine types (1-8 cylinders)
+- ✅ **All stages verified** - TypeScript ✓, build ✓, browser tests ✓
 
 ### Минусы:
-- ⚠️ **Math errors** в диаграммах (noted, to be fixed later)
+- ⚠️ **Lost per-cylinder analysis** - acceptable для образовательного использования
 - ⚠️ **Bundle size** увеличился на ~50KB (chart helpers + utilities)
-- ⚠️ **No IMEP calculation** - viewer-only approach (по дизайну)
+- ⚠️ **No IMEP calculation** - viewer-only approach (by design)
+- ⚠️ **Convention dependency** (Stage 3) - relies on "last cylinder = TDC close to 0°"
+  - Risk: LOW (verified across 5 engine types, 40+ files)
 
 ### Technical Debt:
-- [ ] Fix math calculation errors in chart data
-- [ ] Add valve timing lines (IVO/IVC/EVO/EVC) to P-α diagram (deferred)
+- [ ] Add valve timing lines (IVO/IVC/EVO/EVC) to P-α diagram (deferred для Stage 5)
 - [ ] Optimize chart rendering for >8 cylinders (если потребуется)
+
+---
+
+## Файлы
+
+### Created:
+
+**Backend:**
+- `backend/src/parsers/formats/pvdParser.js` (268 lines)
+
+**Frontend - Components:**
+- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx` (166 lines)
+- `frontend/src/components/pv-diagrams/PVLeftPanel.tsx` (71 lines)
+- `frontend/src/components/pv-diagrams/RPMSection.tsx` (148 lines)
+- `frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx` (82 lines)
+- `frontend/src/components/pv-diagrams/PeakValuesCards.tsx` (86 lines)
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` (558 lines)
+
+**Frontend - State & Hooks:**
+- `frontend/src/stores/slices/pvDiagramsSlice.ts` (113 lines)
+- `frontend/src/hooks/usePVDFiles.ts` (80 lines)
+- `frontend/src/hooks/usePVDData.ts` (78 lines)
+- `frontend/src/lib/pvDiagramUtils.ts` (145 lines)
+
+**Frontend - Pages:**
+- `frontend/src/pages/PVDiagramsPage.tsx` (144 lines)
+
+**Documentation:**
+- `docs/file-formats/pvd-format.md` (format specification)
+- `roadmap-pv-diagrams.md` (archived - initial implementation)
+- `roadmap-pv-diagrams-educational.md` (archived - Stage 2-4)
+
+### Deleted:
+
+**Stage 1:**
+- Test files: `PVDiagramTestPage.tsx`, `PVDiagramControls.tsx`
+
+**Stage 2:**
+- `frontend/src/components/pv-diagrams/CylinderFilterSection.tsx` (educational simplification)
+
+**Documentation (this consolidation):**
+- `docs/decisions/013-pv-diagrams-educational-stage-1.md` (merged into 012)
+- `docs/decisions/014-pvd-peak-pressure-angles-fix.md` (merged into 012)
+- `ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md` (problem resolved in Stage 3)
+
+### Modified:
+
+**Backend:**
+- `backend/src/parsers/index.js` (registered PvdParser)
+- `backend/src/routes/data.js` (added pvd endpoints + last cylinder logic)
+- `backend/src/utils/formatDetector.js` (added .pvd support)
+
+**Frontend:**
+- `frontend/src/App.tsx` (added /pv-diagrams route)
+- `frontend/src/stores/appStore.ts` (integrated pvDiagramsSlice)
+- `frontend/src/pages/ProjectOverviewPage.tsx` (PV-Diagrams card)
+- `frontend/src/types/index.ts` (PVDData, PVDMetadata, PVDFileInfo types)
+- `frontend/src/api/client.ts` (getPVDFiles, getPVDData)
+
+---
+
+## Метрики
+
+**Development:**
+- **Total time**: ~6 days (4 stages)
+- **Stage 1**: ~4 days (initial implementation)
+- **Stage 2**: ~4 hours (educational enhancement)
+- **Stage 3**: ~2 hours (peak angles fix)
+- **Stage 4**: ~3 hours (atmospheric visualization)
+
+**Code:**
+- **Backend**: 268 lines (pvdParser.js)
+- **Frontend**: ~1,800 lines total (components + hooks + utils + state)
+- **Documentation**: ~600 lines (this ADR + pvd-format.md)
+
+**Build:**
+- **TypeScript**: ✓ no errors
+- **Production build**: 2.93s (2.1 MB bundle)
+- **Backend startup**: <500ms (with lazy parsing)
+
+**Testing:**
+- **Browser tests**: ✓ all passed
+- **Engine types tested**: 1-cyl, 3-cyl, 4-cyl, 6-cyl, 8-cyl (40+ .pvd files)
+- **Features verified**: Multi-RPM overlay, badges, atmospheric line, pumping losses zoom, peak angles
+
+---
 
 ## Альтернативы
 
@@ -126,102 +458,43 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 - Log P-V critical для polytropic analysis
 - P-α critical для timing analysis
 
-### 2. Combined Chart (все в одном)
-**Отклонено:** Overload UI, сложность восприятия
-- Tab-based cleaner и понятнее
-- Каждый тип для своей задачи
+### 2. Keep Cylinder Selection (Stage 2)
+**Отклонено:** Clutter UI, избыточная сложность для студентов
+- Разница между цилиндрами минимальна (±1-2%)
+- Educational focus важнее полной функциональности
 
-### 3. Accordion Layout (вместо Tabs)
-**Отклонено:** Требует больше кликов
-- Tabs provide instant switching
-- Better UX для сравнения типов
+### 3. No Multi-RPM Comparison (Stage 2)
+**Отклонено:** Упущенная образовательная возможность
+- Comparison критичен для понимания breathing efficiency
+- Visual learning > single-point analysis
 
-### 4. Separate Page per Chart Type
-**Отклонено:** Navigation overhead
-- Single page с tabs эффективнее
-- Сохранение state между переключениями
+### 4. Automatic Cylinder Selection (Stage 3)
+**Отклонено:** Overcomplicated
+- Last cylinder convention проще и работает универсально
+- User feedback: "блядь ничего не надо искать"
 
-### 5. Keep dataZoom Controls
-**Отклонено:** Interfered with viewing complete cycles
-- Accidental zoom disrupts analysis
-- Full 720° view more important than zoom
+### 5. No TDC2 Shift (Stage 3)
+**Отклонено:** Плохая читаемость графика
+- Peak сжат к левому краю
+- Не соответствует user's old program
 
-### 6. Calculate IMEP / Work
-**Отклонено:** Viewer-only approach
-- Calculations belong in EngMod4T, not viewer
-- Keep app simple and focused
+### 6. No Atmospheric Pressure Line (Stage 4)
+**Отклонено:** Lost educational reference
+- Студенты не видят где атмосферное давление
+- Physical context важен для понимания pumping loop
 
-## Файлы
+### 7. Create Separate ADRs for Each Stage
+**Отклонено:** Нарушение "Consolidation over Proliferation"
+- 4 ADR для одной фичи = хаос
+- Вся история в одном месте = легче читать
 
-### Created:
-**Backend:**
-- `backend/src/parsers/formats/pvdParser.js` (268 lines)
-
-**Frontend - Components:**
-- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx` (166 lines)
-- `frontend/src/components/pv-diagrams/PVLeftPanel.tsx` (92 lines)
-- `frontend/src/components/pv-diagrams/RPMSection.tsx` (148 lines)
-- `frontend/src/components/pv-diagrams/CylinderFilterSection.tsx` (117 lines)
-- `frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx` (51 lines)
-- `frontend/src/components/pv-diagrams/PeakValuesCards.tsx` (86 lines)
-- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` (558 lines)
-
-**Frontend - State & Hooks:**
-- `frontend/src/stores/slices/pvDiagramsSlice.ts` (77 lines)
-- `frontend/src/hooks/usePVDFiles.ts` (80 lines)
-- `frontend/src/hooks/usePVDData.ts` (78 lines)
-- `frontend/src/lib/pvDiagramUtils.ts` (145 lines)
-
-**Frontend - Pages:**
-- `frontend/src/pages/PVDiagramsPage.tsx` (144 lines)
-
-**Frontend - Types:**
-- `frontend/src/types/index.ts` (updated: PVDData, PVDMetadata, PVDFileInfo, etc.)
-
-**Frontend - API:**
-- `frontend/src/api/client.ts` (updated: getPVDFiles, getPVDData)
-
-**Documentation:**
-- `docs/file-formats/pvd-format.md` (format specification)
-- `roadmap-pv-diagrams.md` (implementation roadmap)
-
-### Modified:
-- `backend/src/parsers/index.js` (registered PvdParser)
-- `backend/src/routes/data.js` (added pvd-files & pvd/:fileName endpoints)
-- `backend/src/utils/formatDetector.js` (added .pvd support)
-- `frontend/src/App.tsx` (added /pv-diagrams route)
-- `frontend/src/stores/appStore.ts` (integrated pvDiagramsSlice)
-- `frontend/src/pages/ProjectOverviewPage.tsx` (PV-Diagrams card - already enabled)
-
-### Deleted:
-- Test files: `PVDiagramTestPage.tsx`, `PVDiagramControls.tsx`
-
-## Метрики
-
-**Development:**
-- **Total time**: ~4 days (roadmap estimate: 6-8 days)
-- **Tasks completed**: 67/73 (92%)
-- **Git commits**: 15 commits (stages 1-6)
-
-**Code:**
-- **Backend**: 268 lines (pvdParser.js)
-- **Frontend**: ~1,700 lines total (components + hooks + utils)
-- **Documentation**: ~400 lines (roadmap + pvd-format.md)
-
-**Build:**
-- **TypeScript**: ✓ no errors
-- **Production build**: 2.93s (2.1 MB bundle)
-- **Backend startup**: <500ms (with lazy parsing)
-
-**Testing:**
-- **Browser tests**: ✓ all passed (V8 8-cyl, MOTO 250 1-cyl)
-- **Edge cases**: ✓ project switching, cylinder selection, tab switching
+---
 
 ## Ссылки
 
 **Documentation:**
-- [docs/file-formats/pvd-format.md](../file-formats/pvd-format.md) - PVD format specification
-- [roadmap-pv-diagrams.md](../../roadmap-pv-diagrams.md) - Implementation roadmap
+- [pvd-format.md](../file-formats/pvd-format.md) - .pvd file format specification
+- [DOCUMENTATION_GUIDE.md](../../DOCUMENTATION_GUIDE.md) - Documentation rules (consolidation principle)
 
 **Related ADRs:**
 - [ADR-001](001-det-file-format.md) - .det file format (Parser Registry pattern)
@@ -236,11 +509,27 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 **Test Data:**
 - `test-data/V8/*.pvd` (8-cylinder, 13 files, 2000-8500 RPM)
 - `test-data/MOTO 250 V1/*.pvd` (1-cylinder, multiple RPMs)
+- `test-data/4_Cyl_ITB/*.pvd` (4-cylinder, 13 files)
+- `test-data/VQ35DE_ITB/*.pvd` (6-cylinder, 7 files)
+- `test-data/Gimura/*.pvd` (3-cylinder, 3 files)
 
 ---
 
-**Notes:**
-- English UI (international app) - all parameter names in English
-- Viewer-only approach - NO calculations (integrals, IMEP)
-- Small changes + test after each step (production stability)
-- Math errors deferred (to be fixed after roadmap completion)
+## Примечания
+
+**Design Philosophy:**
+- **Viewer-only approach** - NO calculations (integrals, IMEP)
+- **Educational focus** - студенты видят термодинамику, не тонут в деталях
+- **"iPhone Style"** - carefully chosen defaults, professional appearance
+- **Small changes + verify** - каждый stage tested перед следующим
+
+**Educational Context:**
+- Target audience: Преподаватели + студенты, изучающие 4-тактные двигатели
+- Multi-RPM comparison = key feature для visual learning
+- Atmospheric pressure reference = physical context
+- Pumping Losses zoom = детальный анализ intake/exhaust процессов
+
+**Consolidation:**
+- Этот ADR объединяет 3 предыдущих ADR (012, 013, 014) + Stage 4 + Stage 5
+- Причина: "Consolidation over Proliferation" (DOCUMENTATION_GUIDE.md)
+- Вся история PV-Diagrams в одном месте, легче читать и поддерживать

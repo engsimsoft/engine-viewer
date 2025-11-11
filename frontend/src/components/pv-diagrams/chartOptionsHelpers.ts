@@ -32,6 +32,7 @@ interface ChartOptionsParams {
   dataArray: PVDDataItem[];  // Array of RPM data items
   animation: boolean;
   showGrid: boolean;
+  showPumpingLosses?: boolean; // Zoom to pumping losses (0-2 bar) - only for P-V diagram
   baseConfig: any;
 }
 
@@ -44,7 +45,27 @@ interface ChartOptionsParams {
  * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
  */
 export function createPVChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, baseConfig } = params;
+  const { dataArray, showGrid, showPumpingLosses = false, baseConfig } = params;
+
+  // Calculate Volume and Pressure ranges FIRST (needed for label decision)
+  let minVolume = Infinity;
+  let maxVolume = -Infinity;
+  let minPressure = Infinity;
+  let maxPressure = -Infinity;
+
+  dataArray.forEach(({ data }) => {
+    const lastCylinderIndex = data.data[0].cylinders.length - 1;
+    data.data.forEach((point) => {
+      const cylinderData = point.cylinders[lastCylinderIndex];
+      minVolume = Math.min(minVolume, cylinderData.volume);
+      maxVolume = Math.max(maxVolume, cylinderData.volume);
+      minPressure = Math.min(minPressure, cylinderData.pressure);
+      maxPressure = Math.max(maxPressure, cylinderData.pressure);
+    });
+  });
+
+  const pressurePadding = (maxPressure - minPressure) * 0.05;
+  const showOneBarLabel = (maxPressure + pressurePadding) > 10;
 
   // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
@@ -54,12 +75,12 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
     const { rpm, data } = item;
     const color = RPM_COLORS[index % RPM_COLORS.length];
 
-    // Extract Volume and Pressure data for Cylinder 1 (index 0)
+    const lastCylinderIndex = data.data[0].cylinders.length - 1;
     const seriesData = data.data.map((point) => {
-      const cylinderData = point.cylinders[0]; // Always Cylinder 1
+      const cylinderData = point.cylinders[lastCylinderIndex];
       return [
-        cylinderData.volume,   // X: Volume (cm³)
-        cylinderData.pressure, // Y: Pressure (bar)
+        cylinderData.volume,
+        cylinderData.pressure,
       ];
     });
 
@@ -87,35 +108,46 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
         color: color,
         opacity: 0.05, // Lower opacity for multi-RPM overlay
       },
+      // Atmospheric pressure reference line (1 bar)
+      ...(index === 0 && {
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          data: [
+            {
+              yAxis: 1,
+              label: {
+                show: showOneBarLabel,
+                formatter: '1.0',
+                position: 'insideStartTop',
+                fontSize: 10,
+                color: '#666',
+              },
+              lineStyle: {
+                color: '#666',
+                type: 'dashed',
+                width: 1.5,
+              },
+            },
+          ],
+        },
+      }),
     });
 
     legendData.push(`${rpm} RPM`);
   });
 
-  // Calculate Volume and Pressure ranges across ALL selected RPMs
-  let minVolume = Infinity;
-  let maxVolume = -Infinity;
-  let minPressure = Infinity;
-  let maxPressure = -Infinity;
-
-  dataArray.forEach(({ data }) => {
-    data.data.forEach((point) => {
-      const cylinderData = point.cylinders[0]; // Cylinder 1 only
-      minVolume = Math.min(minVolume, cylinderData.volume);
-      maxVolume = Math.max(maxVolume, cylinderData.volume);
-      minPressure = Math.min(minPressure, cylinderData.pressure);
-      maxPressure = Math.max(maxPressure, cylinderData.pressure);
-    });
-  });
-
-  // Add 5% padding to axes
+  // Add 5% padding to volume axis
   const volumePadding = (maxVolume - minVolume) * 0.05;
-  const pressurePadding = (maxPressure - minPressure) * 0.05;
 
   // Title: show RPMs list or "Comparison"
-  const titleText = dataArray.length === 1
+  let titleText = dataArray.length === 1
     ? `P-V Diagram - ${dataArray[0].rpm} RPM`
     : `P-V Diagram - Comparing ${dataArray.length} RPMs`;
+
+  if (showPumpingLosses) {
+    titleText += ' (Pumping Losses View)';
+  }
 
   return {
     ...baseConfig,
@@ -177,8 +209,10 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
         fontSize: 14,
         fontWeight: 'bold',
       },
-      min: minPressure - pressurePadding,
-      max: maxPressure + pressurePadding,
+      min: 0,
+      max: showPumpingLosses ? 2 : (maxPressure + pressurePadding),
+      // Show every 0.5 bar in pumping losses view, every 1 bar if max <= 10, otherwise auto
+      interval: showPumpingLosses ? 0.5 : ((maxPressure + pressurePadding) <= 10 ? 1 : undefined),
       axisLine: {
         lineStyle: {
           color: '#666',
@@ -218,23 +252,24 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
 
         const point = params[0];
         const volume = point.value[0].toFixed(2);
-        const pressure = point.value[1].toFixed(2);
 
-        let result = `<div style="font-weight: bold; margin-bottom: 8px;">
-          Volume: ${volume} cm³<br/>
-          Pressure: ${pressure} bar
+        let result = `<div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #666; padding-bottom: 6px;">
+          Volume: ${volume} cm³
         </div>`;
 
+        // Show ALL RPMs with their pressure values
         params.forEach((param: any) => {
           const marker = param.marker;
           const seriesName = param.seriesName;
           const pressureValue = param.value[1].toFixed(2);
+          const volumeValue = param.value[0].toFixed(2);
 
           result += `
-            <div style="margin: 4px 0;">
+            <div style="margin: 6px 0;">
               ${marker}
-              <span style="display: inline-block; min-width: 100px;">${seriesName}:</span>
-              <span style="font-weight: bold;">${pressureValue} bar</span>
+              <span style="font-weight: bold;">${seriesName}:</span>
+              <span style="margin-left: 8px;">${pressureValue} bar</span>
+              <span style="color: #999; font-size: 10px; margin-left: 4px;">(V: ${volumeValue} cm³)</span>
             </div>
           `;
         });
@@ -294,24 +329,25 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
 
         const point = params[0];
         const volume = point.value[0].toFixed(2);
-        const pressure = point.value[1].toFixed(2);
 
-        let result = `<div style="font-weight: bold; margin-bottom: 8px;">
-          Volume: ${volume} cm³<br/>
-          Pressure: ${pressure} bar<br/>
-          <span style="font-size: 10px; color: #aaa;">(log scale)</span>
+        let result = `<div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #666; padding-bottom: 6px;">
+          Volume: ${volume} cm³
+          <span style="font-size: 10px; color: #aaa; display: block;">(log scale)</span>
         </div>`;
 
+        // Show ALL RPMs with their pressure values
         params.forEach((param: any) => {
           const marker = param.marker;
           const seriesName = param.seriesName;
           const pressureValue = param.value[1].toFixed(2);
+          const volumeValue = param.value[0].toFixed(2);
 
           result += `
-            <div style="margin: 4px 0;">
+            <div style="margin: 6px 0;">
               ${marker}
-              <span style="display: inline-block; min-width: 100px;">${seriesName}:</span>
-              <span style="font-weight: bold;">${pressureValue} bar</span>
+              <span style="font-weight: bold;">${seriesName}:</span>
+              <span style="margin-left: 8px;">${pressureValue} bar</span>
+              <span style="color: #999; font-size: 10px; margin-left: 4px;">(V: ${volumeValue} cm³)</span>
             </div>
           `;
         });
@@ -335,6 +371,21 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
   const { dataArray, showGrid, baseConfig } = params;
 
+  // Calculate Pressure range
+  let minPressure = Infinity;
+  let maxPressure = -Infinity;
+
+  dataArray.forEach(({ data }) => {
+    const lastCylinderIndex = data.data[0].cylinders.length - 1;
+    data.data.forEach((point) => {
+      const cylinderData = point.cylinders[lastCylinderIndex];
+      minPressure = Math.min(minPressure, cylinderData.pressure);
+      maxPressure = Math.max(maxPressure, cylinderData.pressure);
+    });
+  });
+
+  const pressurePadding = (maxPressure - minPressure) * 0.05;
+
   // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
   const legendData: string[] = [];
@@ -343,14 +394,17 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
     const { rpm, data } = item;
     const color = RPM_COLORS[index % RPM_COLORS.length];
 
-    // Extract Angle and Pressure data for Cylinder 1 (index 0)
-    const seriesData = data.data.map((point) => {
-      const cylinderData = point.cylinders[0]; // Always Cylinder 1
-      return [
-        point.deg,                // X: Crank Angle (0-720°)
-        cylinderData.pressure,    // Y: Pressure (bar)
-      ];
-    });
+    const lastCylinderIndex = data.data[0].cylinders.length - 1;
+    const seriesData = data.data
+      .map((point) => {
+        const cylinderData = point.cylinders[lastCylinderIndex];
+        const normalizedDeg = (point.deg + 360) % 720;
+        return [
+          normalizedDeg,
+          cylinderData.pressure,
+        ];
+      })
+      .sort((a, b) => a[0] - b[0]);
 
     series.push({
       name: `${rpm} RPM`,
@@ -377,21 +431,23 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
     legendData.push(`${rpm} RPM`);
   });
 
-  // Calculate Pressure range across ALL selected RPMs
-  let minPressure = Infinity;
-  let maxPressure = -Infinity;
+  // TDC/BDC + Atmospheric Pressure markLine configuration
+  const markLineData: any[] = [
+    // TDC markers (Top Dead Center)
+    { name: 'TDC', xAxis: 0, lineStyle: { color: '#e74c3c', type: 'dashed', width: 2 } },
+    { name: 'TDC', xAxis: 360, lineStyle: { color: '#e74c3c', type: 'dashed', width: 2 } },
+    { name: 'TDC', xAxis: 720, lineStyle: { color: '#e74c3c', type: 'dashed', width: 2 } },
+    // BDC markers (Bottom Dead Center)
+    { name: 'BDC', xAxis: 180, lineStyle: { color: '#3498db', type: 'dotted', width: 2 } },
+    { name: 'BDC', xAxis: 540, lineStyle: { color: '#3498db', type: 'dotted', width: 2 } },
+    // Atmospheric pressure line (1 bar)
+    {
+      yAxis: 1,
+      label: { show: false },
+      lineStyle: { color: '#666', type: 'dashed', width: 1.5 },
+    },
+  ];
 
-  dataArray.forEach(({ data }) => {
-    data.data.forEach((point) => {
-      const cylinderData = point.cylinders[0]; // Cylinder 1 only
-      minPressure = Math.min(minPressure, cylinderData.pressure);
-      maxPressure = Math.max(maxPressure, cylinderData.pressure);
-    });
-  });
-
-  const pressurePadding = (maxPressure - minPressure) * 0.05;
-
-  // TDC and BDC markLine configuration
   const markLine = {
     silent: true,
     symbol: 'none',
@@ -402,19 +458,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
       fontSize: 11,
       fontWeight: 'bold',
     },
-    lineStyle: {
-      width: 2,
-      type: 'solid',
-    },
-    data: [
-      // TDC markers (Top Dead Center)
-      { name: 'TDC', xAxis: 0, lineStyle: { color: '#e74c3c', type: 'dashed' } },
-      { name: 'TDC', xAxis: 360, lineStyle: { color: '#e74c3c', type: 'dashed' } },
-      { name: 'TDC', xAxis: 720, lineStyle: { color: '#e74c3c', type: 'dashed' } },
-      // BDC markers (Bottom Dead Center)
-      { name: 'BDC', xAxis: 180, lineStyle: { color: '#3498db', type: 'dotted' } },
-      { name: 'BDC', xAxis: 540, lineStyle: { color: '#3498db', type: 'dotted' } },
-    ],
+    data: markLineData,
   };
 
   // Add markLine to first series only (TDC/BDC markers)
@@ -487,8 +531,10 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         fontSize: 14,
         fontWeight: 'bold',
       },
-      min: minPressure - pressurePadding,
+      min: 0, // Physical limit: pressure cannot be negative
       max: maxPressure + pressurePadding,
+      // Show every 1 bar if max <= 10, otherwise use auto interval
+      interval: (maxPressure + pressurePadding) <= 10 ? 1 : undefined,
       axisLine: {
         lineStyle: {
           color: '#666',
@@ -528,23 +574,22 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
 
         const point = params[0];
         const angle = point.value[0].toFixed(1);
-        const pressure = point.value[1].toFixed(2);
 
-        let result = `<div style="font-weight: bold; margin-bottom: 8px;">
-          Angle: ${angle}°<br/>
-          Pressure: ${pressure} bar
+        let result = `<div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #666; padding-bottom: 6px;">
+          Crank Angle: ${angle}°
         </div>`;
 
+        // Show ALL RPMs with their pressure values
         params.forEach((param: any) => {
           const marker = param.marker;
           const seriesName = param.seriesName;
           const pressureValue = param.value[1].toFixed(2);
 
           result += `
-            <div style="margin: 4px 0;">
+            <div style="margin: 6px 0;">
               ${marker}
-              <span style="display: inline-block; min-width: 100px;">${seriesName}:</span>
-              <span style="font-weight: bold;">${pressureValue} bar</span>
+              <span style="font-weight: bold;">${seriesName}:</span>
+              <span style="margin-left: 8px;">${pressureValue} bar</span>
             </div>
           `;
         });

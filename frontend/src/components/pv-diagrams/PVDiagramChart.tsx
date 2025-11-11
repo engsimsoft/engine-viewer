@@ -58,6 +58,7 @@ export function PVDiagramChart({
   // Get chart settings and diagram type from store
   const chartSettings = useAppStore((state) => state.chartSettings);
   const selectedDiagramType = useAppStore((state) => state.selectedDiagramType);
+  const showPumpingLosses = useAppStore((state) => state.showPumpingLosses);
   const { animation, showGrid } = chartSettings;
 
   // Generate dynamic filename for export
@@ -97,6 +98,7 @@ export function PVDiagramChart({
       dataArray,
       animation,
       showGrid,
+      showPumpingLosses,
       baseConfig,
     };
 
@@ -110,7 +112,7 @@ export function PVDiagramChart({
       default:
         return createPVChartOptions(params);
     }
-  }, [dataArray, animation, showGrid, selectedDiagramType]);
+  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType]);
 
   // Loading state
   if (loading) {

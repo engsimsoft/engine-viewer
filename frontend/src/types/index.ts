@@ -415,13 +415,14 @@ export interface PVDData {
  * Returned by GET /api/project/:id/pvd-files
  */
 export interface PVDFileInfo {
-  fileName: string;          // File name (e.g., "V8_2000.pvd")
-  rpm: number;               // RPM from metadata
-  cylinders: number;         // Number of cylinders
-  engineType: string;        // Engine type (NATUR, TURBO)
-  peakPressure: number;      // Peak pressure across all cylinders (bar)
-  peakPressureAngle: number; // Crank angle at peak pressure (deg)
-  dataPoints: number;        // Number of data points (721)
+  fileName: string;                  // File name (e.g., "V8_2000.pvd")
+  rpm: number;                       // RPM from metadata
+  cylinders: number;                 // Number of cylinders
+  engineType: string;                // Engine type (NATUR, TURBO)
+  peakPressure: number;              // Peak pressure across all cylinders (bar)
+  peakPressureAngle: number;         // Physical crank angle at peak pressure (e.g., 14° ATDC)
+  peakPressureAngleModified: number; // TDC2-shifted angle for graph centering (e.g., 374°)
+  dataPoints: number;                // Number of data points (721)
 }
 
 /**

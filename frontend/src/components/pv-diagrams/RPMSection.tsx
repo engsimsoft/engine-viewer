@@ -180,7 +180,9 @@ export function RPMSection({ files, loading = false }: RPMSectionProps) {
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
-                  Peak: {file.peakPressure.toFixed(1)} bar @ {file.peakPressureAngle.toFixed(0)}°
+                  Peak: {file.peakPressure.toFixed(1)} bar @{' '}
+                  <span className="font-semibold text-foreground">{file.peakPressureAngle.toFixed(0)}°</span>
+                  {' '}({file.peakPressureAngleModified.toFixed(0)}°)
                 </div>
               </label>
             </div>

@@ -28,7 +28,7 @@ Engine Results Viewer поддерживает несколько формато
 |--------|-----------|----------|--------|-----|--------|
 | **DET** | `.det` | Базовые результаты расчётов (24 параметра) | `detParser.js` | [ADR 001](../decisions/001-det-file-format.md) | ✅ Реализовано |
 | **POU** | `.pou` | Расширенные результаты расчётов (71-78 параметров) | `pouParser.js` | [ADR 002](../decisions/002-pou-file-format.md) | ✅ Реализовано |
-| **PVD** | `.pvd` | 🔜 PV-Diagram (Pressure-Volume диаграммы) | `pvdParser.js` | - | ⏳ Phase 1.5 |
+| **PVD** | `.pvd` | PV-Diagram (Pressure-Volume диаграммы) | `pvdParser.js` | [ADR 012](../decisions/012-pv-diagrams-implementation.md), [ADR 013](../decisions/013-pv-diagrams-educational-stage-1.md), [ADR 014](../decisions/014-pvd-peak-pressure-angles-fix.md) | ✅ Реализовано |
 | **PRT** | `.prt` | 🔜 Метаданные проекта и настройки расчёта | `prtParser.js` | ADR 003 | ⏳ Планируется |
 | **Trace files** | `.???` | 🔜 ~18 типов файлов с детальными циклами | `traceParser.js` | ADR 004+ | ⏳ Phase 2 |
 
@@ -175,6 +175,9 @@ Engine Results Viewer поддерживает несколько формато
 
 **Детальное описание:**
 - [pvd-format.md](pvd-format.md) - полная спецификация, parser architecture, UI implementation
+- [ADR 012: PV-Diagrams Implementation](../decisions/012-pv-diagrams-implementation.md) - original implementation
+- [ADR 013: Educational Enhancement Stage 1](../decisions/013-pv-diagrams-educational-stage-1.md) - multi-RPM comparison
+- [ADR 014: Peak Pressure Angles Fix](../decisions/014-pvd-peak-pressure-angles-fix.md) - last cylinder convention, TDC2 shift
 
 **Use case:** Термодинамический анализ, визуализация цикла Otto/Diesel, исследование утечек и потерь.
 
