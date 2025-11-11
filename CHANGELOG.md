@@ -125,6 +125,65 @@
   - **Known Issues**: Math calculation errors in chart data (to be fixed later)
   - **Status**: Stage 4-5 COMPLETE → Stage 6 (Polish & Metadata)
 
+- **PV-Diagrams: Stage 6 - Peak Values Cards & Polish** (production-ready refinements):
+  - **Peak Values Cards** (`frontend/src/components/pv-diagrams/PeakValuesCards.tsx`, 86 lines):
+    - 3 stat cards below chart: Max Pressure, Min Pressure, Volume Range
+    - Grid layout (3 columns), responsive design
+    - Shows: value, cylinder number, crank angle (for pressure), range (for volume)
+    - Updates dynamically with cylinder selection (reacts to selectedCylinder state)
+    - Compact design: p-3 padding, text-xl values, text-xs labels
+  - **Utility Functions** (`frontend/src/lib/pvDiagramUtils.ts`, 145 lines):
+    - `findMaxPressure(data, selectedCylinder)` - finds peak pressure across cylinders
+    - `findMinPressure(data, selectedCylinder)` - finds minimum pressure
+    - `calculateVolumeRange(data, selectedCylinder)` - calculates displacement range (max - min)
+    - Returns: {value, angle, cylinder, cylinderNum} for pressure, {min, max, range} for volume
+  - **Visual Polish** (user-requested fixes):
+    - **Removed dataZoom controls** from chartOptionsHelpers.ts:
+      - Interfered with viewing complete 720° cycle
+      - Accidental zoom disrupted analysis workflow
+      - Cleaner chart interaction without zoom sliders
+    - **Number formatting** for axes (`.toFixed(1)`):
+      - Fixed floating-point precision issues (114.3994541 → 114.4)
+      - Applied to xAxis and yAxis labels in all 3 chart types (6 locations total)
+      - Clean, professional appearance
+    - **Compact cards sizing**:
+      - Reduced padding: p-4 → p-3
+      - Reduced font sizes: text-sm → text-xs (labels), text-2xl → text-xl (values)
+      - Better balance between readability and space efficiency
+  - **TypeScript Fix**:
+    - Removed unused `animation` parameter from createPVChartOptions and createPAlphaChartOptions
+    - Fixed TS6133 build error after dataZoom removal
+  - **Files Created**: 2 (pvDiagramUtils.ts, PeakValuesCards.tsx)
+  - **Files Modified**: 2 (chartOptionsHelpers.ts - removed zoom + added formatters, PVDiagramsPage.tsx - integrated cards)
+  - **Verification**: TypeScript ✓, Build (2.93s) ✓, User feedback ✓ (zoom, cards, numbers fixed)
+  - **Progress**: Stage 6 complete (67/73 tasks, 92%)
+  - **Commits**: 758ae02 (Stage 6 code), 9f319d2 (TypeScript fix), 0561f1d (docs update)
+  - **Status**: Stage 6 COMPLETE → Stage 7 (Integration & Testing)
+
+- **PV-Diagrams: Stage 7 - Integration & Testing** (final polish & verification):
+  - **Project Overview Integration**:
+    - PV-Diagrams card already enabled in ProjectOverviewPage.tsx (lines 48-54)
+    - Backend `/api/project/:id/summary` automatically detects .pvd files availability
+    - Shows filesCount and rpmPointsCount in availability metadata
+  - **Browser Testing** (comprehensive verification):
+    - ✓ V8 project (8-cylinder): All charts working, all RPMs, cylinder filter (All → Cyl 1-8)
+    - ✓ MOTO 250 V1 (1-cylinder): Single cylinder project working correctly
+    - ✓ Tab switching: P-V → Log P-V → P-α transitions smooth
+    - ✓ Peak values cards: Displaying correct data, updating on selection change
+    - ✓ Edge case: Project switching (V8 → MOTO 250) - state cleanup working
+    - ✓ Navigation: Breadcrumbs, back button, routing all functional
+  - **Build Verification**:
+    - TypeScript typecheck: ✓ no errors
+    - Frontend build: ✓ 2.93s (2.1 MB bundle)
+    - Backend server: ✓ running on http://localhost:3000
+    - Frontend dev server: ✓ running on http://localhost:5174
+  - **Documentation**:
+    - Created ADR-012: PV-Diagrams Implementation (comprehensive decision record)
+    - Updated roadmap-pv-diagrams.md with Stage 6-7 completion
+    - CHANGELOG.md updated with all stages
+  - **Progress**: Stage 7 complete (67/73 tasks, 92%)
+  - **Status**: PV-DIAGRAMS FEATURE COMPLETE ✅ (deferred: math errors fix)
+
 - **PV-Diagrams: Stage 2 - TypeScript Types & Data Hooks**:
   - **TypeScript Types** (`frontend/src/types/index.ts`, lines 348-441):
     - `PVDSystemConfig` - system configuration from .pvd file (lines 3-15)
@@ -147,6 +206,47 @@
     - Both hooks include: loading states, error handling, refetch function, race condition protection (ignore flag)
   - **Verification**: TypeScript typecheck ✓, Frontend build (2.98s) ✓
   - **Commit**: a07135b
+
+- **PV-Diagrams: Stage 1 - Backend Parser & API** (foundation):
+  - **PVD Parser** (`backend/src/parsers/formats/pvdParser.js`, 268 lines):
+    - **Metadata parsing** (lines 1-17):
+      - System configuration: lines 3-15 (16 parameters: Strk, Rod, CompR, Bore, PInjSt, etc.)
+      - Basic metadata: line 1 (RPM, cylinders, engineType, numTurbo)
+      - Advanced metadata: line 17 (pCmp1, pCmp2, rpm, pInp, pOut, tInp, tOut)
+      - Firing order: line 2
+    - **Data parsing** (line 19+):
+      - 721 rows (0-720° crank angle, 1° resolution)
+      - Per row: deg + (volume, pressure) × N cylinders
+      - Example 8-cyl: deg, vol1, prs1, vol2, prs2, ..., vol8, prs8
+    - **Edge cases**: 1-cylinder (MOTO 250) and 8-cylinder (V8) support
+    - **Format validation**: Strict column count checking
+  - **Parser Registry Integration**:
+    - Registered in `backend/src/parsers/index.js` (Registry Pattern)
+    - Auto-loaded via ParserRegistry.registerDefaults()
+  - **Format Detector**:
+    - Added .pvd support in `backend/src/utils/formatDetector.js`
+    - Auto-detection for .pvd files
+  - **API Endpoints** (`backend/src/routes/data.js`):
+    - `GET /api/project/:id/pvd-files` - list of .pvd files with metadata:
+      - Returns: fileName, rpm, cylinders, engineType, peakPressure, peakPressureAngle, dataPoints
+      - Scans project folder for .pvd files, parses metadata only (performance optimization)
+      - Response format: `{ success, data: [files...], meta: { totalFiles, rpmPoints, project } }`
+    - `GET /api/project/:id/pvd/:fileName` - full .pvd file data (Stage 2):
+      - Returns complete parsed data (metadata + 721 data points)
+  - **Project Summary Integration**:
+    - `GET /api/project/:id/summary` now checks for .pvd files
+    - pvDiagrams availability: `{ available: true, filesCount, rpmPointsCount }`
+  - **Testing**:
+    - Manual test scripts: `backend/test-pvd-parser.js` (V8 8-cyl), `backend/test-pvd-1cyl.js` (MOTO 250)
+    - Test data: `test-data/V8/*.pvd` (13 files, 2000-8500 RPM), `test-data/MOTO 250 V1/*.pvd`
+  - **Documentation**:
+    - Created `docs/file-formats/pvd-format.md` - complete .pvd format specification
+  - **Verification**:
+    - Unit tests: ✓ V8 (8-cyl) parser, ✓ MOTO 250 (1-cyl) parser
+    - API test: ✓ curl `/api/project/4_Cyl_ITB/pvd-files` (12 files, 3000-8500 RPM)
+  - **Files Created**: 3 (pvdParser.js, pvd-format.md, test scripts)
+  - **Files Modified**: 2 (ParserRegistry, formatDetector.js, data.js routes)
+  - **Commits**: 977b37b (API endpoint), d2f6dec (docs), 5fc6854 (pvd-format critical structure), ac5ee90 (parser), 5ce0717 (Stage 3 verification)
 
 - **Project Summary API endpoint** (`/api/project/:id/summary`):
   - Returns availability status for all 6 analysis types (Performance, Traces, PV-Diagrams, Noise, Turbo, Configuration)
