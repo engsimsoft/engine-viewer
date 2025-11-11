@@ -41,7 +41,7 @@ interface ChartOptionsParams {
  * Y-axis: Pressure (bar)
  */
 export function createPVChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { data, selectedCylinder, animation, showGrid, baseConfig } = params;
+  const { data, selectedCylinder, showGrid, baseConfig } = params;
   const numCylinders = data.metadata.cylinders;
 
   // Determine which cylinders to show
@@ -321,7 +321,7 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
  * Markers: TDC (0°, 360°, 720°), BDC (180°, 540°)
  */
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { data, selectedCylinder, animation, showGrid, baseConfig } = params;
+  const { data, selectedCylinder, showGrid, baseConfig } = params;
   const numCylinders = data.metadata.cylinders;
 
   // Determine which cylinders to show
