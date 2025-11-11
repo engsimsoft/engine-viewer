@@ -1,21 +1,21 @@
 /**
- * PV-Diagrams Page - Pressure-Volume Diagram Visualization
+ * PV-Diagrams Page - Pressure-Volume Diagram Visualization (v3.1 - Educational)
  *
  * Route: /project/:id/pv-diagrams
  *
- * Page structure (iPhone Style):
+ * Page structure:
  * 1. Header with breadcrumbs and export buttons
- * 2. LeftPanel (320px) with RPM selection and cylinder filter
- * 3. Main area with PV-Diagram chart
+ * 2. LeftPanel (320px) with multi-RPM selection
+ * 3. Main area with PV-Diagram chart (overlay multiple RPMs)
  *
  * Features:
  * - Load .pvd files for a project
- * - Select RPM point (auto-select peak pressure RPM)
- * - Filter by cylinder or show all
+ * - Multi-select RPMs for comparison (2-4 RPMs)
+ * - Always shows Cylinder 1 data (educational simplification)
  * - Export chart as PNG/SVG
  * - Professional loading/error/empty states
  *
- * Pattern: EXACTLY matches PerformancePage.tsx
+ * Pattern: Matches PerformancePage.tsx (with educational enhancements)
  */
 
 import { useEffect } from 'react';
@@ -32,10 +32,15 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 
 /**
- * PV-Diagrams Page Component
+ * PV-Diagrams Page Component (v3.1 - Educational)
  *
  * Main page for PV-Diagram visualization. Loads .pvd files for a project,
- * allows RPM and cylinder selection, and displays interactive P-V chart.
+ * allows multi-RPM selection for comparison, and displays overlaid P-V charts.
+ *
+ * Educational enhancements:
+ * - Multi-RPM comparison (2-4 RPMs on same chart)
+ * - Simplified UI (always Cylinder 1)
+ * - Future: cycle phases, valve timing markers
  *
  * @example
  * Route: /project/v8/pv-diagrams
@@ -46,25 +51,12 @@ export default function PVDiagramsPage() {
   // Load list of .pvd files
   const { files, loading: filesLoading, error: filesError, refetch: refetchFiles } = usePVDFiles(projectId);
 
-  // Get selected RPM from store
-  const selectedRPM = useAppStore((state) => state.selectedRPM);
-  const selectedCylinder = useAppStore((state) => state.selectedCylinder);
-  const setSelectedRPM = useAppStore((state) => state.setSelectedRPM);
+  // Get selected RPMs from store (multi-select)
+  const selectedRPMs = useAppStore((state) => state.selectedRPMs);
   const resetPVDiagrams = useAppStore((state) => state.resetPVDiagrams);
 
-  // Load specific .pvd file data
-  const { data, loading: dataLoading, error: dataError, refetch: refetchData } = usePVDData(projectId, selectedRPM || undefined);
-
-  // Auto-select first file when files load (carefully chosen default - iPhone Style)
-  useEffect(() => {
-    if (files.length > 0 && !selectedRPM) {
-      // Find file with peak pressure (best default for PV-Diagrams)
-      const peakFile = files.reduce((prev, current) =>
-        current.peakPressure > prev.peakPressure ? current : prev
-      );
-      setSelectedRPM(peakFile.fileName);
-    }
-  }, [files, selectedRPM, setSelectedRPM]);
+  // Load multiple .pvd file data for comparison
+  const { dataArray, loading: dataLoading, error: dataError, refetch: refetchData } = usePVDData(projectId, selectedRPMs);
 
   // Reset state when leaving page (cleanup)
   useEffect(() => {
@@ -117,7 +109,7 @@ export default function PVDiagramsPage() {
 
         {/* Main Content: LeftPanel + Chart */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel: RPM Selection + Cylinder Filter */}
+          {/* Left Panel: Multi-RPM Selection */}
           <PVLeftPanel files={files} loading={filesLoading} />
 
           {/* Main Chart Area */}
@@ -125,16 +117,15 @@ export default function PVDiagramsPage() {
             <div className="max-w-7xl mx-auto space-y-6">
               <div className="bg-card rounded-lg border p-6">
                 <PVDiagramChart
-                  data={data}
+                  dataArray={dataArray}
                   projectName={projectId || 'Project'}
                   loading={dataLoading}
                   error={dataError}
                   onRetry={refetchData}
-                  selectedCylinder={selectedCylinder}
                 />
 
                 {/* Peak Values Cards - below chart */}
-                <PeakValuesCards data={data} selectedCylinder={selectedCylinder} />
+                <PeakValuesCards dataArray={dataArray} />
               </div>
             </div>
           </main>

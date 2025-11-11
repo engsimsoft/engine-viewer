@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import type { PVDData } from '@/types';
+import type { PVDDataItem } from '@/hooks/usePVDData';
 import { getBaseChartConfig } from '@/lib/chartConfig';
 import { useAppStore } from '@/stores/appStore';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
@@ -15,8 +15,8 @@ import {
 } from './chartOptionsHelpers';
 
 interface PVDiagramChartProps {
-  /** Parsed PVD data (metadata + 721 data points) */
-  data: PVDData | null;
+  /** Array of parsed PVD data for multi-RPM comparison */
+  dataArray: PVDDataItem[];
   /** Project name for export filename */
   projectName: string;
   /** Loading state */
@@ -25,37 +25,35 @@ interface PVDiagramChartProps {
   error?: string | null;
   /** Retry callback for error state */
   onRetry?: () => void;
-  /** Selected cylinder index (0-based, null = show all) */
-  selectedCylinder?: number | null;
 }
 
 /**
- * PV-Diagram Chart Component
+ * PV-Diagram Chart Component (v3.1 - Educational Multi-RPM)
  *
- * Displays 3 types of PV-Diagrams for engine cylinders:
+ * Displays 3 types of PV-Diagrams with multi-RPM comparison:
  * 1. P-V Diagram (Normal): Linear axes, classic thermodynamic diagram
  * 2. Log P-V: Logarithmic axes for polytropic process analysis
  * 3. P-α: Pressure vs Crank Angle (0-720°) with TDC/BDC markers
  *
- * Features:
- * - Cylinder filtering (individual or all)
+ * Educational features:
+ * - Multi-RPM comparison (2-4 RPMs overlaid)
+ * - Always shows Cylinder 1 (simplified for education)
  * - Chart export (PNG, SVG)
  * - Zoom/pan support
  * - Professional loading/error/empty states
  *
  * @example
  * ```tsx
- * const { data, loading, error } = usePVDData(projectId, 'V8_2000.pvd');
- * <PVDiagramChart data={data} loading={loading} error={error} />
+ * const { dataArray, loading, error } = usePVDData(projectId, selectedRPMs);
+ * <PVDiagramChart dataArray={dataArray} loading={loading} error={error} />
  * ```
  */
 export function PVDiagramChart({
-  data,
+  dataArray,
   projectName,
   loading = false,
   error = null,
   onRetry,
-  selectedCylinder = null,
 }: PVDiagramChartProps) {
   // Get chart settings and diagram type from store
   const chartSettings = useAppStore((state) => state.chartSettings);
@@ -64,11 +62,12 @@ export function PVDiagramChart({
 
   // Generate dynamic filename for export
   const exportFilename = useMemo(() => {
-    const rpm = data?.metadata.rpm || 'unknown';
-    const cylinder = selectedCylinder !== null ? `_Cyl${selectedCylinder + 1}` : '_AllCyl';
+    const rpms = dataArray.map((item) => item.rpm).join('-');
     const typeLabel = selectedDiagramType === 'log-pv' ? '_LogPV' : selectedDiagramType === 'p-alpha' ? '_PAlpha' : '_PV';
-    return `${projectName}_PVDiagram${typeLabel}_${rpm}RPM${cylinder}`;
-  }, [projectName, data, selectedCylinder, selectedDiagramType]);
+    return dataArray.length === 1
+      ? `${projectName}_PVDiagram${typeLabel}_${rpms}RPM`
+      : `${projectName}_PVDiagram${typeLabel}_Compare${dataArray.length}RPMs`;
+  }, [projectName, dataArray, selectedDiagramType]);
 
   // Hook for chart export (local)
   const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
@@ -89,14 +88,13 @@ export function PVDiagramChart({
 
   // Generate ECharts configuration based on selected diagram type
   const chartOption = useMemo((): EChartsOption => {
-    if (!data) {
+    if (dataArray.length === 0) {
       return {};
     }
 
     const baseConfig = getBaseChartConfig(animation);
     const params = {
-      data,
-      selectedCylinder,
+      dataArray,
       animation,
       showGrid,
       baseConfig,
@@ -112,7 +110,7 @@ export function PVDiagramChart({
       default:
         return createPVChartOptions(params);
     }
-  }, [data, animation, showGrid, selectedCylinder, selectedDiagramType]);
+  }, [dataArray, animation, showGrid, selectedDiagramType]);
 
   // Loading state
   if (loading) {
@@ -132,16 +130,16 @@ export function PVDiagramChart({
     );
   }
 
-  // Empty state - no data
-  if (!data) {
+  // Empty state - no RPMs selected
+  if (dataArray.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
         <div className="text-center space-y-2">
           <p className="text-lg font-medium text-muted-foreground">
-            Select RPM to display PV-Diagram
+            Select 2-4 RPMs to compare engine cycles
           </p>
           <p className="text-sm text-muted-foreground">
-            Use the left panel to select an RPM point
+            Use the left panel to select RPM points for comparison
           </p>
         </div>
       </div>

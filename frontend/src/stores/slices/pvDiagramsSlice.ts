@@ -1,14 +1,15 @@
 /**
- * PV-Diagrams Slice - RPM & Cylinder Selection
+ * PV-Diagrams Slice - Multi-RPM Comparison & Educational Features
  *
- * v3.0: Session-only state for PV-Diagrams page
+ * v3.1: Educational enhancements - multi-RPM comparison
  *
  * Manages user selections for PV-Diagram visualization:
- * - Selected RPM file (.pvd file selection)
- * - Cylinder filter (All or specific cylinder index)
+ * - Selected RPMs (multi-select for comparison, 2-4 files)
  * - Diagram type (P-V, Log P-V, P-α)
+ * - Educational toggles (cycle phases, markers, valve timing)
  *
  * PERSISTED: No (session-only, resets on page reload)
+ * NOTE: Cylinder selection removed - always shows Cylinder 1 (educational simplification)
  */
 
 import type { StateCreator } from 'zustand';
@@ -23,13 +24,13 @@ export type DiagramType = 'pv' | 'log-pv' | 'p-alpha';
  */
 export interface PVDiagramsSlice {
   // State
-  selectedRPM: string | null;       // Selected .pvd file name (e.g., "V8_2000.pvd")
-  selectedCylinder: number | null;  // Selected cylinder (null = All, 0-7 = specific)
+  selectedRPMs: string[];           // Selected .pvd file names for comparison (max 4)
   selectedDiagramType: DiagramType; // Diagram type (default: 'pv')
 
-  // Actions
-  setSelectedRPM: (rpm: string | null) => void;
-  setSelectedCylinder: (cylinder: number | null) => void;
+  // Actions - RPM Selection
+  addSelectedRPM: (rpm: string) => void;
+  removeSelectedRPM: (rpm: string) => void;
+  clearSelectedRPMs: () => void;
   setSelectedDiagramType: (type: DiagramType) => void;
   resetPVDiagrams: () => void;
 }
@@ -45,22 +46,48 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
   // Initial State
   // ============================================================
 
-  selectedRPM: null,
-  selectedCylinder: null, // null = "All" cylinders
+  selectedRPMs: [], // Empty = no files selected yet
   selectedDiagramType: 'pv', // Default: Normal P-V Diagram
 
   // ============================================================
-  // Actions
+  // Actions - RPM Selection (Multi-select)
   // ============================================================
 
-  setSelectedRPM: (rpm) =>
-    set({
-      selectedRPM: rpm,
+  /**
+   * Add RPM to selection (max 4 RPMs for educational comparison)
+   */
+  addSelectedRPM: (rpm) =>
+    set((state) => {
+      // Prevent duplicates
+      if (state.selectedRPMs.includes(rpm)) {
+        return state;
+      }
+
+      // Limit to 4 RPMs (educational limit - too many = clutter)
+      if (state.selectedRPMs.length >= 4) {
+        console.warn('Maximum 4 RPMs can be selected for comparison');
+        return state;
+      }
+
+      return {
+        selectedRPMs: [...state.selectedRPMs, rpm],
+      };
     }),
 
-  setSelectedCylinder: (cylinder) =>
+  /**
+   * Remove RPM from selection
+   */
+  removeSelectedRPM: (rpm) =>
+    set((state) => ({
+      selectedRPMs: state.selectedRPMs.filter((r) => r !== rpm),
+    })),
+
+  /**
+   * Clear all selected RPMs
+   */
+  clearSelectedRPMs: () =>
     set({
-      selectedCylinder: cylinder,
+      selectedRPMs: [],
     }),
 
   setSelectedDiagramType: (type) =>
@@ -70,8 +97,7 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
 
   resetPVDiagrams: () =>
     set({
-      selectedRPM: null,
-      selectedCylinder: null,
+      selectedRPMs: [],
       selectedDiagramType: 'pv',
     }),
 });

@@ -3,47 +3,54 @@ import { projectsApi } from '@/api/client';
 import type { PVDData } from '@/types';
 
 /**
- * Custom hook для загрузки полных данных конкретного .pvd файла
+ * PVD Data Item for multi-RPM comparison
+ */
+export interface PVDDataItem {
+  fileName: string;
+  rpm: number;
+  data: PVDData;
+}
+
+/**
+ * Custom hook для загрузки нескольких .pvd файлов (v3.1 - Multi-RPM)
+ *
+ * Поддерживает multi-RPM comparison: загружает 2-4 файла параллельно
+ * для отображения на одном графике.
  *
  * Возвращает:
- * - data: полные распарсенные данные (metadata + 721 data points)
+ * - dataArray: массив данных для каждого выбранного RPM
  * - loading: состояние загрузки
  * - error: ошибка при загрузке
  * - refetch: функция для повторной загрузки
  *
  * @param projectId - ID проекта
- * @param fileName - Имя .pvd файла (например "V8_2000.pvd")
- * @returns объект с данными и состоянием
+ * @param fileNames - Массив имен .pvd файлов (например ["V8_2000.pvd", "V8_4000.pvd"])
+ * @returns объект с массивом данных и состоянием
  *
  * @example
  * ```tsx
- * const { data, loading, error } = usePVDData('v8', 'V8_2000.pvd');
+ * const { dataArray, loading, error } = usePVDData('v8', ['V8_2000.pvd', 'V8_4000.pvd']);
  *
  * if (loading) return <LoadingSpinner />;
  * if (error) return <ErrorMessage message={error} />;
- * if (!data) return <div>No data</div>;
  *
  * return (
- *   <div>
- *     <p>RPM: {data.metadata.rpm}</p>
- *     <p>Cylinders: {data.metadata.cylinders}</p>
- *     <p>Data Points: {data.data.length}</p>
- *     <PVDiagramChart data={data} />
- *   </div>
+ *   <PVDiagramChart dataArray={dataArray} />
  * );
  * ```
  */
 export function usePVDData(
   projectId: string | undefined,
-  fileName: string | undefined
+  fileNames: string[]
 ) {
-  const [data, setData] = useState<PVDData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataArray, setDataArray] = useState<PVDDataItem[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadPVDData = async () => {
-    if (!projectId || !fileName) {
+    if (!projectId || fileNames.length === 0) {
       setLoading(false);
+      setDataArray([]);
       return;
     }
 
@@ -51,8 +58,18 @@ export function usePVDData(
     setError(null);
 
     try {
-      const pvdData = await projectsApi.getPVDData(projectId, fileName);
-      setData(pvdData);
+      // Load all files in parallel (Promise.all)
+      const promises = fileNames.map(async (fileName) => {
+        const pvdData = await projectsApi.getPVDData(projectId, fileName);
+        return {
+          fileName,
+          rpm: pvdData.metadata.rpm,
+          data: pvdData,
+        };
+      });
+
+      const results = await Promise.all(promises);
+      setDataArray(results);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load PV-Diagram data');
       console.error('Error loading PV-Diagram data:', err);
@@ -65,24 +82,40 @@ export function usePVDData(
     // Race condition handling: ignore flag prevents state updates after unmount
     let ignore = false;
 
-    const fetchPVDData = async () => {
-      if (!projectId || !fileName) {
-        setLoading(false);
+    const fetchMultiplePVDData = async () => {
+      if (!projectId || fileNames.length === 0) {
+        if (!ignore) {
+          setLoading(false);
+          setDataArray([]);
+        }
         return;
       }
 
-      setLoading(true);
-      setError(null);
+      if (!ignore) {
+        setLoading(true);
+        setError(null);
+      }
 
       try {
-        const pvdData = await projectsApi.getPVDData(projectId, fileName);
+        // Load all files in parallel (Promise.all)
+        const promises = fileNames.map(async (fileName) => {
+          const pvdData = await projectsApi.getPVDData(projectId, fileName);
+          return {
+            fileName,
+            rpm: pvdData.metadata.rpm,
+            data: pvdData,
+          };
+        });
+
+        const results = await Promise.all(promises);
+
         if (!ignore) {
-          setData(pvdData);
+          setDataArray(results);
         }
       } catch (err) {
         if (!ignore) {
           setError(err instanceof Error ? err.message : 'Failed to load PV-Diagram data');
-          console.error('Error loading PV-Diagram data:', err);
+          console.error('Error loading multiple PV-Diagram data:', err);
         }
       } finally {
         if (!ignore) {
@@ -91,16 +124,16 @@ export function usePVDData(
       }
     };
 
-    fetchPVDData();
+    fetchMultiplePVDData();
 
     // Cleanup function: set ignore flag to prevent state updates after unmount
     return () => {
       ignore = true;
     };
-  }, [projectId, fileName]);
+  }, [projectId, fileNames.join(',')]); // Join fileNames for dependency tracking
 
   return {
-    data,
+    dataArray,
     loading,
     error,
     refetch: loadPVDData

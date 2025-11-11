@@ -1,30 +1,37 @@
 /**
- * RPM Section Component - RPM File Selector
+ * RPM Section Component - Multi-RPM Selector (v3.1 - Educational)
  *
  * PV-Diagrams - Section 1
  *
- * Two states:
- * 1. Empty state (no RPM selected): Shows "Select RPM..." message
- * 2. Selected state (RPM selected): Shows selected file details
+ * Educational multi-select for RPM comparison:
+ * - Checkbox-based selection (2-4 RPMs)
+ * - Compare engine cycles across different speeds
+ * - Clear visual indication of selected RPMs
+ * - Color-coded for chart legend matching
  *
  * Features:
- * - Displays selected .pvd file metadata (RPM, peak pressure, peak angle)
- * - Dropdown selector for .pvd files
- * - Auto-selects first file when available
- * - Integration with Zustand store (selectedRPM)
+ * - Multi-select with checkboxes (max 4 RPMs)
+ * - Shows peak pressure for each file
+ * - "Clear All" button
+ * - Integration with Zustand store (selectedRPMs)
  */
 
-import { Gauge } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Gauge, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAppStore } from '@/stores/appStore';
 import type { PVDFileInfo } from '@/types';
+
+/**
+ * RPM colors for chart visualization (matches chart series colors)
+ */
+const RPM_COLORS = [
+  '#e74c3c', // RPM 1 - Red
+  '#3498db', // RPM 2 - Blue
+  '#2ecc71', // RPM 3 - Green
+  '#f39c12', // RPM 4 - Orange
+];
 
 interface RPMSectionProps {
   /** List of available PVD files */
@@ -34,11 +41,10 @@ interface RPMSectionProps {
 }
 
 /**
- * RPM Section Component
+ * RPM Section Component (v3.1 - Educational Multi-Select)
  *
- * Manages RPM file selection and display for PV-Diagrams.
- * Shows empty state when no files available or no RPM selected,
- * or file details when selected.
+ * Manages multi-RPM selection for educational comparison.
+ * Students can compare engine cycles at 2-4 different speeds.
  *
  * @example
  * ```tsx
@@ -46,11 +52,19 @@ interface RPMSectionProps {
  * ```
  */
 export function RPMSection({ files, loading = false }: RPMSectionProps) {
-  const selectedRPM = useAppStore((state) => state.selectedRPM);
-  const setSelectedRPM = useAppStore((state) => state.setSelectedRPM);
+  const selectedRPMs = useAppStore((state) => state.selectedRPMs);
+  const addSelectedRPM = useAppStore((state) => state.addSelectedRPM);
+  const removeSelectedRPM = useAppStore((state) => state.removeSelectedRPM);
+  const clearSelectedRPMs = useAppStore((state) => state.clearSelectedRPMs);
 
-  // Find selected file metadata
-  const selectedFile = files.find((f) => f.fileName === selectedRPM);
+  // Handle checkbox toggle
+  const handleToggleRPM = (fileName: string, checked: boolean) => {
+    if (checked) {
+      addSelectedRPM(fileName);
+    } else {
+      removeSelectedRPM(fileName);
+    }
+  };
 
   // ====================================================================
   // Empty State - No Files Available
@@ -59,15 +73,13 @@ export function RPMSection({ files, loading = false }: RPMSectionProps) {
   if (files.length === 0 && !loading) {
     return (
       <div className="p-4 bg-muted/30 rounded-lg border">
-        {/* Header */}
         <div className="flex items-center gap-2 mb-3">
           <Gauge className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold text-foreground">
-            RPM Selection
+            RPM Comparison
           </h3>
         </div>
 
-        {/* Empty State Content */}
         <div className="text-center py-6 space-y-3">
           <div className="text-4xl">📈</div>
           <div className="space-y-1">
@@ -84,69 +96,89 @@ export function RPMSection({ files, loading = false }: RPMSectionProps) {
   }
 
   // ====================================================================
-  // Selector State - Show Dropdown
+  // Multi-Select State - Show Checkboxes
   // ====================================================================
 
   return (
     <div className="p-4 bg-muted/30 rounded-lg border">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <Gauge className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold text-foreground">
-          RPM Selection
-        </h3>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold text-foreground">
+            RPM Comparison
+          </h3>
+        </div>
+        {selectedRPMs.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearSelectedRPMs}
+            className="h-6 px-2 text-xs"
+          >
+            <X className="h-3 w-3 mr-1" />
+            Clear
+          </Button>
+        )}
       </div>
 
-      {/* Dropdown Selector */}
-      <div className="space-y-2">
-        <Label htmlFor="rpm-select" className="text-xs text-muted-foreground">
-          Select RPM to display PV-Diagram
-        </Label>
-        <Select
-          value={selectedRPM || undefined}
-          onValueChange={setSelectedRPM}
-          disabled={loading}
-        >
-          <SelectTrigger id="rpm-select" className="w-full">
-            <SelectValue placeholder="Select RPM..." />
-          </SelectTrigger>
-          <SelectContent>
-            {files.map((file) => (
-              <SelectItem key={file.fileName} value={file.fileName}>
-                <div className="flex items-center justify-between w-full gap-4">
-                  <span className="font-medium">{file.rpm} RPM</span>
-                  <span className="text-xs text-muted-foreground">
-                    Peak: {file.peakPressure.toFixed(1)} bar
+      {/* Info Label */}
+      <Label className="text-xs text-muted-foreground mb-3 block">
+        Select 2-4 RPMs to compare engine cycles
+      </Label>
+
+      {/* Checkbox List */}
+      <div className="space-y-2 max-h-64 overflow-y-auto">
+        {files.map((file) => {
+          const isSelected = selectedRPMs.includes(file.fileName);
+          const selectionIndex = selectedRPMs.indexOf(file.fileName);
+          const color = selectionIndex >= 0 ? RPM_COLORS[selectionIndex] : undefined;
+
+          return (
+            <div
+              key={file.fileName}
+              className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
+            >
+              <Checkbox
+                id={`rpm-${file.fileName}`}
+                checked={isSelected}
+                onCheckedChange={(checked) => handleToggleRPM(file.fileName, checked === true)}
+                disabled={loading || (!isSelected && selectedRPMs.length >= 4)}
+                className="mt-0.5"
+              />
+              <label
+                htmlFor={`rpm-${file.fileName}`}
+                className="flex-1 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  {/* Color Dot (if selected) */}
+                  {isSelected && color && (
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: color }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="text-sm font-medium text-foreground">
+                    {file.rpm} RPM
                   </span>
                 </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Peak: {file.peakPressure.toFixed(1)} bar @ {file.peakPressureAngle.toFixed(0)}°
+                </div>
+              </label>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Selected File Details */}
-      {selectedFile && (
-        <div className="mt-3 pt-3 border-t space-y-1">
-          {/* File Name */}
-          <div className="text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {selectedFile.fileName}
-            </span>
-          </div>
-
-          {/* Peak Pressure Info */}
-          <div className="text-xs text-muted-foreground">
-            Peak pressure: <span className="font-medium">{selectedFile.peakPressure.toFixed(2)} bar</span>
-            {' '}@ {selectedFile.peakPressureAngle.toFixed(1)}° ATDC
-          </div>
-
-          {/* Engine Info */}
-          <div className="text-xs text-muted-foreground">
-            {selectedFile.engineType} • {selectedFile.cylinders} cylinders • {selectedFile.dataPoints} data points
-          </div>
-        </div>
-      )}
+      {/* Selection Count */}
+      <div className="mt-3 pt-3 border-t text-xs text-muted-foreground text-center">
+        {selectedRPMs.length === 0 && 'No RPMs selected'}
+        {selectedRPMs.length === 1 && '1 RPM selected'}
+        {selectedRPMs.length > 1 && `${selectedRPMs.length} RPMs selected (comparing)`}
+        {selectedRPMs.length >= 4 && ' • Max reached'}
+      </div>
     </div>
   );
 }

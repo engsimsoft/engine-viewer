@@ -1,10 +1,9 @@
 /**
- * PV-Diagrams Left Panel Component
+ * PV-Diagrams Left Panel Component (v3.1 - Educational)
  *
- * Side panel for PV-Diagrams page with 3 sections:
- * 1. RPM Selection - Select .pvd file by RPM
- * 2. Cylinder Filter - Select specific cylinder or "All"
- * 3. Diagram Type - Select P-V, Log P-V, or P-α
+ * Side panel for PV-Diagrams page with 2 sections:
+ * 1. RPM Selection - Multi-select .pvd files for comparison (2-4 RPMs)
+ * 2. Diagram Type - Select P-V, Log P-V, or P-α
  *
  * Layout:
  * - Fixed width: 320px (w-80)
@@ -13,10 +12,10 @@
  * - Consistent spacing (space-y-6)
  *
  * Pattern matches: PerformancePage LeftPanel
+ * NOTE: Cylinder Filter removed - always shows Cylinder 1 (educational simplification)
  */
 
 import { RPMSection } from './RPMSection';
-import { CylinderFilterSection } from './CylinderFilterSection';
 import { DiagramTypeTabs } from './DiagramTypeTabs';
 import { useAppStore } from '@/stores/appStore';
 import type { PVDFileInfo } from '@/types';
@@ -29,10 +28,10 @@ interface PVLeftPanelProps {
 }
 
 /**
- * PV-Diagrams Left Panel
+ * PV-Diagrams Left Panel (v3.1 - Educational)
  *
- * Combines RPM selection and cylinder filter sections into a cohesive side panel.
- * Automatically determines number of cylinders from selected file.
+ * Combines RPM multi-selection and diagram type into a cohesive side panel.
+ * Simplified for educational use - always shows Cylinder 1 data.
  *
  * @example
  * ```tsx
@@ -41,17 +40,13 @@ interface PVLeftPanelProps {
  * ```
  */
 export function PVLeftPanel({ files, loading = false }: PVLeftPanelProps) {
-  const selectedRPM = useAppStore((state) => state.selectedRPM);
-
-  // Determine number of cylinders from selected file
-  const selectedFile = files.find((f) => f.fileName === selectedRPM);
-  const numCylinders = selectedFile?.cylinders || 1;
+  const selectedRPMs = useAppStore((state) => state.selectedRPMs);
 
   return (
     <aside className="w-80 border-r bg-card overflow-y-auto">
       <div className="p-4 space-y-6">
         {/* ============================================================
-            Section 1: RPM Selection
+            Section 1: RPM Selection (Multi-select)
             ============================================================ */}
         <section>
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">
@@ -61,21 +56,9 @@ export function PVLeftPanel({ files, loading = false }: PVLeftPanelProps) {
         </section>
 
         {/* ============================================================
-            Section 2: Cylinder Filter
+            Section 2: Diagram Type
             ============================================================ */}
-        {selectedRPM && (
-          <section>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3">
-              CYLINDER FILTER
-            </h2>
-            <CylinderFilterSection numCylinders={numCylinders} />
-          </section>
-        )}
-
-        {/* ============================================================
-            Section 3: Diagram Type
-            ============================================================ */}
-        {selectedRPM && (
+        {selectedRPMs.length > 0 && (
           <section>
             <h2 className="text-sm font-semibold text-muted-foreground mb-3">
               DIAGRAM TYPE

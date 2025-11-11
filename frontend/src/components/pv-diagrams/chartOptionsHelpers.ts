@@ -1,34 +1,35 @@
 /**
- * Chart Options Helpers for PV-Diagrams
+ * Chart Options Helpers for PV-Diagrams (v3.1 - Educational Multi-RPM)
  *
  * Generates ECharts configuration for 3 diagram types:
  * 1. P-V Diagram (Normal) - Linear axes, classic thermodynamic diagram
  * 2. Log P-V - Logarithmic axes for polytropic process analysis
  * 3. P-α - Pressure vs Crank Angle (0-720°) with TDC/BDC markers
  *
+ * Multi-RPM Comparison:
+ * - Overlays 2-4 RPMs on same chart (educational comparison)
+ * - Each RPM = different color series
+ * - Always shows Cylinder 1 data (simplified for education)
+ *
  * Pattern: Pure functions, no side effects
  */
 
 import type { EChartsOption } from 'echarts';
-import type { PVDData } from '@/types';
+import type { PVDDataItem } from '@/hooks/usePVDData';
 
 /**
- * Cylinder color palette (8 colors for 8-cylinder engines)
+ * RPM color palette (4 colors for multi-RPM comparison)
+ * Matches RPMSection color dots for consistency
  */
-export const CYLINDER_COLORS = [
-  '#e74c3c',  // Cylinder 1 - Red
-  '#3498db',  // Cylinder 2 - Blue
-  '#2ecc71',  // Cylinder 3 - Green
-  '#f39c12',  // Cylinder 4 - Orange
-  '#9b59b6',  // Cylinder 5 - Purple
-  '#1abc9c',  // Cylinder 6 - Turquoise
-  '#e67e22',  // Cylinder 7 - Carrot
-  '#34495e',  // Cylinder 8 - Dark Gray
+export const RPM_COLORS = [
+  '#e74c3c',  // RPM 1 - Red
+  '#3498db',  // RPM 2 - Blue
+  '#2ecc71',  // RPM 3 - Green
+  '#f39c12',  // RPM 4 - Orange
 ];
 
 interface ChartOptionsParams {
-  data: PVDData;
-  selectedCylinder: number | null;
+  dataArray: PVDDataItem[];  // Array of RPM data items
   animation: boolean;
   showGrid: boolean;
   baseConfig: any;
@@ -39,37 +40,31 @@ interface ChartOptionsParams {
  *
  * X-axis: Volume (cm³)
  * Y-axis: Pressure (bar)
+ *
+ * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
  */
 export function createPVChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { data, selectedCylinder, showGrid, baseConfig } = params;
-  const numCylinders = data.metadata.cylinders;
+  const { dataArray, showGrid, baseConfig } = params;
 
-  // Determine which cylinders to show
-  const cylindersToShow = selectedCylinder !== null && selectedCylinder !== undefined
-    ? [selectedCylinder]
-    : Array.from({ length: numCylinders }, (_, i) => i);
-
-  // Create series for each cylinder
+  // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
   const legendData: string[] = [];
 
-  cylindersToShow.forEach((cylinderIndex) => {
-    if (cylinderIndex >= numCylinders) return;
+  dataArray.forEach((item, index) => {
+    const { rpm, data } = item;
+    const color = RPM_COLORS[index % RPM_COLORS.length];
 
-    // Extract Volume and Pressure data for this cylinder
+    // Extract Volume and Pressure data for Cylinder 1 (index 0)
     const seriesData = data.data.map((point) => {
-      const cylinderData = point.cylinders[cylinderIndex];
+      const cylinderData = point.cylinders[0]; // Always Cylinder 1
       return [
         cylinderData.volume,   // X: Volume (cm³)
         cylinderData.pressure, // Y: Pressure (bar)
       ];
     });
 
-    const cylinderNum = cylinderIndex + 1;
-    const color = CYLINDER_COLORS[cylinderIndex % CYLINDER_COLORS.length];
-
     series.push({
-      name: `Cylinder ${cylinderNum}`,
+      name: `${rpm} RPM`,
       type: 'line',
       data: seriesData,
       itemStyle: {
@@ -77,32 +72,35 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
       },
       lineStyle: {
         color: color,
-        width: 2,
+        width: 2.5, // Slightly thicker for multi-RPM visibility
       },
       symbol: 'circle',
-      symbolSize: 4,
+      symbolSize: 0, // Hide symbols for cleaner overlay
       smooth: false,
       emphasis: {
         focus: 'series',
+        lineStyle: {
+          width: 3.5,
+        },
       },
       areaStyle: {
         color: color,
-        opacity: 0.1,
+        opacity: 0.05, // Lower opacity for multi-RPM overlay
       },
     });
 
-    legendData.push(`Cylinder ${cylinderNum}`);
+    legendData.push(`${rpm} RPM`);
   });
 
-  // Calculate Volume and Pressure ranges
+  // Calculate Volume and Pressure ranges across ALL selected RPMs
   let minVolume = Infinity;
   let maxVolume = -Infinity;
   let minPressure = Infinity;
   let maxPressure = -Infinity;
 
-  data.data.forEach((point) => {
-    cylindersToShow.forEach((cylinderIndex) => {
-      const cylinderData = point.cylinders[cylinderIndex];
+  dataArray.forEach(({ data }) => {
+    data.data.forEach((point) => {
+      const cylinderData = point.cylinders[0]; // Cylinder 1 only
       minVolume = Math.min(minVolume, cylinderData.volume);
       maxVolume = Math.max(maxVolume, cylinderData.volume);
       minPressure = Math.min(minPressure, cylinderData.pressure);
@@ -114,10 +112,15 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
   const volumePadding = (maxVolume - minVolume) * 0.05;
   const pressurePadding = (maxPressure - minPressure) * 0.05;
 
+  // Title: show RPMs list or "Comparison"
+  const titleText = dataArray.length === 1
+    ? `P-V Diagram - ${dataArray[0].rpm} RPM`
+    : `P-V Diagram - Comparing ${dataArray.length} RPMs`;
+
   return {
     ...baseConfig,
     title: {
-      text: `P-V Diagram - ${data.metadata.rpm} RPM`,
+      text: titleText,
       left: 'center',
       top: 10,
       textStyle: {
@@ -250,16 +253,22 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
  * Y-axis: log(Pressure)
  *
  * Use case: Polytropic process analysis (P × V^n = const)
+ * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
  */
 export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOption {
   const pvOptions = createPVChartOptions(params);
+
+  // Title for Log P-V diagram
+  const titleText = params.dataArray.length === 1
+    ? `Log P-V Diagram - ${params.dataArray[0].rpm} RPM`
+    : `Log P-V Diagram - Comparing ${params.dataArray.length} RPMs`;
 
   // Modify axes to logarithmic
   return {
     ...pvOptions,
     title: {
       ...pvOptions.title,
-      text: `Log P-V Diagram - ${params.data.metadata.rpm} RPM`,
+      text: titleText,
     },
     xAxis: {
       ...(pvOptions.xAxis as any),
@@ -319,37 +328,32 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
  * X-axis: Crank Angle (0-720° for 4-stroke)
  * Y-axis: Pressure (bar)
  * Markers: TDC (0°, 360°, 720°), BDC (180°, 540°)
+ *
+ * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
+ * Educational: Will add cycle phases, valve timing markers in future stages
  */
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { data, selectedCylinder, showGrid, baseConfig } = params;
-  const numCylinders = data.metadata.cylinders;
+  const { dataArray, showGrid, baseConfig } = params;
 
-  // Determine which cylinders to show
-  const cylindersToShow = selectedCylinder !== null && selectedCylinder !== undefined
-    ? [selectedCylinder]
-    : Array.from({ length: numCylinders }, (_, i) => i);
-
-  // Create series for each cylinder
+  // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
   const legendData: string[] = [];
 
-  cylindersToShow.forEach((cylinderIndex) => {
-    if (cylinderIndex >= numCylinders) return;
+  dataArray.forEach((item, index) => {
+    const { rpm, data } = item;
+    const color = RPM_COLORS[index % RPM_COLORS.length];
 
-    // Extract Angle and Pressure data for this cylinder
+    // Extract Angle and Pressure data for Cylinder 1 (index 0)
     const seriesData = data.data.map((point) => {
-      const cylinderData = point.cylinders[cylinderIndex];
+      const cylinderData = point.cylinders[0]; // Always Cylinder 1
       return [
         point.deg,                // X: Crank Angle (0-720°)
         cylinderData.pressure,    // Y: Pressure (bar)
       ];
     });
 
-    const cylinderNum = cylinderIndex + 1;
-    const color = CYLINDER_COLORS[cylinderIndex % CYLINDER_COLORS.length];
-
     series.push({
-      name: `Cylinder ${cylinderNum}`,
+      name: `${rpm} RPM`,
       type: 'line',
       data: seriesData,
       itemStyle: {
@@ -357,26 +361,29 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
       },
       lineStyle: {
         color: color,
-        width: 2,
+        width: 2.5, // Slightly thicker for multi-RPM visibility
       },
       symbol: 'circle',
-      symbolSize: 2,
+      symbolSize: 0, // Hide symbols for cleaner overlay
       smooth: false,
       emphasis: {
         focus: 'series',
+        lineStyle: {
+          width: 3.5,
+        },
       },
     });
 
-    legendData.push(`Cylinder ${cylinderNum}`);
+    legendData.push(`${rpm} RPM`);
   });
 
-  // Calculate Pressure range
+  // Calculate Pressure range across ALL selected RPMs
   let minPressure = Infinity;
   let maxPressure = -Infinity;
 
-  data.data.forEach((point) => {
-    cylindersToShow.forEach((cylinderIndex) => {
-      const cylinderData = point.cylinders[cylinderIndex];
+  dataArray.forEach(({ data }) => {
+    data.data.forEach((point) => {
+      const cylinderData = point.cylinders[0]; // Cylinder 1 only
       minPressure = Math.min(minPressure, cylinderData.pressure);
       maxPressure = Math.max(maxPressure, cylinderData.pressure);
     });
@@ -410,15 +417,20 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
     ],
   };
 
-  // Add markLine to first series only
+  // Add markLine to first series only (TDC/BDC markers)
   if (series.length > 0) {
     series[0].markLine = markLine;
   }
 
+  // Title: show RPMs list or "Comparison"
+  const titleText = dataArray.length === 1
+    ? `P-α Diagram - ${dataArray[0].rpm} RPM`
+    : `P-α Diagram - Comparing ${dataArray.length} RPMs`;
+
   return {
     ...baseConfig,
     title: {
-      text: `P-α Diagram - ${data.metadata.rpm} RPM`,
+      text: titleText,
       left: 'center',
       top: 10,
       textStyle: {
