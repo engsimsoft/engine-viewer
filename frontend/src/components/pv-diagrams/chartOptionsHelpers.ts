@@ -155,6 +155,7 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
       axisLabel: {
         fontSize: 11,
         color: '#666',
+        formatter: (value: number) => value.toFixed(1),
       },
       splitLine: {
         show: showGrid,
@@ -183,6 +184,7 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
       axisLabel: {
         fontSize: 11,
         color: '#666',
+        formatter: (value: number) => value.toFixed(1),
       },
       splitLine: {
         show: showGrid,
@@ -237,23 +239,6 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
         return result;
       },
     },
-    dataZoom: [
-      {
-        type: 'inside',
-        xAxisIndex: [0],
-        yAxisIndex: [0],
-        zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
-        moveOnMouseWheel: true,
-      },
-      {
-        type: 'slider',
-        xAxisIndex: [0],
-        bottom: 10,
-        height: 20,
-        borderColor: '#ccc',
-      },
-    ],
     series,
   };
 }
@@ -471,6 +456,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
       axisLabel: {
         fontSize: 11,
         color: '#666',
+        formatter: (value: number) => value.toFixed(1),
       },
       splitLine: {
         show: showGrid,
@@ -499,6 +485,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
       axisLabel: {
         fontSize: 11,
         color: '#666',
+        formatter: (value: number) => value.toFixed(1),
       },
       splitLine: {
         show: showGrid,
@@ -553,23 +540,6 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         return result;
       },
     },
-    dataZoom: [
-      {
-        type: 'inside',
-        xAxisIndex: [0],
-        yAxisIndex: [0],
-        zoomOnMouseWheel: true,
-        moveOnMouseMove: true,
-        moveOnMouseWheel: true,
-      },
-      {
-        type: 'slider',
-        xAxisIndex: [0],
-        bottom: 10,
-        height: 20,
-        borderColor: '#ccc',
-      },
-    ],
     series,
   };
 }

@@ -24,6 +24,7 @@ import { ChartExportProvider } from '@/contexts/ChartExportContext';
 import Header from '@/components/performance/Header';
 import { PVLeftPanel } from '@/components/pv-diagrams/PVLeftPanel';
 import { PVDiagramChart } from '@/components/pv-diagrams/PVDiagramChart';
+import { PeakValuesCards } from '@/components/pv-diagrams/PeakValuesCards';
 import { usePVDFiles } from '@/hooks/usePVDFiles';
 import { usePVDData } from '@/hooks/usePVDData';
 import { useAppStore } from '@/stores/appStore';
@@ -131,6 +132,9 @@ export default function PVDiagramsPage() {
                   onRetry={refetchData}
                   selectedCylinder={selectedCylinder}
                 />
+
+                {/* Peak Values Cards - below chart */}
+                <PeakValuesCards data={data} selectedCylinder={selectedCylinder} />
               </div>
             </div>
           </main>
