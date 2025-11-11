@@ -16,6 +16,7 @@
 
 import type { EChartsOption } from 'echarts';
 import type { PVDDataItem } from '@/hooks/usePVDData';
+import type { CombustionCurve } from '@/types'; // v3.2.0
 
 /**
  * RPM color palette (4 colors for multi-RPM comparison)
@@ -34,6 +35,8 @@ interface ChartOptionsParams {
   showGrid: boolean;
   showPumpingLosses?: boolean; // Zoom to pumping losses (0-2 bar) - only for P-V diagram
   baseConfig: any;
+  combustionData?: CombustionCurve[]; // v3.2.0: Combustion timing curves
+  showCombustionTiming?: boolean;     // v3.2.0: Show combustion timing markers
 }
 
 /**
@@ -369,7 +372,7 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
  * Educational: Will add cycle phases, valve timing markers in future stages
  */
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, baseConfig } = params;
+  const { dataArray, showGrid, baseConfig, combustionData, showCombustionTiming } = params;
 
   // Calculate Pressure range
   let minPressure = Infinity;
@@ -464,6 +467,87 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
   // Add markLine to first series only (TDC/BDC markers)
   if (series.length > 0) {
     series[0].markLine = markLine;
+
+    // v3.2.0: Add combustion timing markers (single RPM mode only)
+    if (showCombustionTiming && combustionData && combustionData.length > 0 && dataArray.length === 1) {
+      const currentRPM = dataArray[0].rpm;
+      const curve = combustionData.find((c) => c.rpm === currentRPM);
+
+      if (curve) {
+        // Calculate crank angles
+        const ignitionAngle = 360 - curve.timing;  // BTDC → crank angle (e.g., 14° BTDC → 346°)
+        const delayEnd = ignitionAngle + curve.delay;
+        const durationEnd = delayEnd + curve.duration;
+
+        // Add ignition line to existing markLine
+        series[0].markLine.data.push({
+          name: `Spark: ${curve.timing.toFixed(1)}° BTDC`,
+          xAxis: ignitionAngle,
+          label: {
+            show: true,
+            position: 'insideEndTop',
+            formatter: `Spark: ${curve.timing.toFixed(1)}° BTDC`,
+            fontSize: 10,
+            color: '#16a34a',
+            fontWeight: 'bold',
+          },
+          lineStyle: {
+            color: '#16a34a',
+            type: 'solid',
+            width: 2,
+          },
+        });
+
+        // Add combustion zones (delay + duration) as markArea
+        series[0].markArea = {
+          silent: true,
+          data: [
+            // Delay zone (ignition → combustion start)
+            [
+              {
+                name: 'Ignition Delay',
+                xAxis: ignitionAngle,
+                label: {
+                  show: true,
+                  position: 'inside',
+                  formatter: `Delay: ${curve.delay.toFixed(1)}°`,
+                  fontSize: 9,
+                  color: '#92400e',
+                },
+                itemStyle: {
+                  color: 'rgba(251, 146, 60, 0.15)', // Light orange
+                  borderColor: 'rgba(251, 146, 60, 0.6)',
+                  borderWidth: 1,
+                  borderType: 'dashed',
+                },
+              },
+              { xAxis: delayEnd },
+            ],
+            // Burn duration zone (combustion phase)
+            [
+              {
+                name: 'Burn Duration',
+                xAxis: delayEnd,
+                label: {
+                  show: true,
+                  position: 'inside',
+                  formatter: `Burn: ${curve.duration.toFixed(1)}°`,
+                  fontSize: 9,
+                  color: '#7f1d1d',
+                },
+                itemStyle: {
+                  color: 'rgba(239, 68, 68, 0.12)', // Light red
+                  borderColor: 'rgba(239, 68, 68, 0.5)',
+                  borderWidth: 1,
+                  borderType: 'dashed',
+                },
+              },
+              { xAxis: durationEnd },
+            ],
+          ],
+        };
+      }
+    }
   }
 
   // Title: show RPMs list or "Comparison"
@@ -502,8 +586,10 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         fontSize: 14,
         fontWeight: 'bold',
       },
-      min: 0,
-      max: 720,
+      // v3.2.0: Auto-zoom to combustion phase when timing markers enabled
+      // 180-540° = BDC→BDC (compression end → power stroke → expansion)
+      min: showCombustionTiming ? 180 : 0,
+      max: showCombustionTiming ? 540 : 720,
       axisLine: {
         lineStyle: {
           color: '#666',
