@@ -66,6 +66,11 @@ export function RPMSection({ files, loading = false }: RPMSectionProps) {
     }
   };
 
+  // Calculate max/min peak pressure for badges
+  const maxPressure = files.length > 0 ? Math.max(...files.map(f => f.peakPressure)) : 0;
+  const minPressure = files.length > 0 ? Math.min(...files.map(f => f.peakPressure)) : 0;
+  const hasMultipleFiles = files.length > 1;
+
   // ====================================================================
   // Empty State - No Files Available
   // ====================================================================
@@ -162,6 +167,17 @@ export function RPMSection({ files, loading = false }: RPMSectionProps) {
                   <span className="text-sm font-medium text-foreground">
                     {file.rpm} RPM
                   </span>
+                  {/* Max/Min Badges (iPhone-style) */}
+                  {hasMultipleFiles && file.peakPressure === maxPressure && (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-700 dark:text-orange-400">
+                      Max
+                    </span>
+                  )}
+                  {hasMultipleFiles && file.peakPressure === minPressure && maxPressure !== minPressure && (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400">
+                      Min
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
                   Peak: {file.peakPressure.toFixed(1)} bar @ {file.peakPressureAngle.toFixed(0)}°

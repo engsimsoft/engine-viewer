@@ -639,16 +639,16 @@ router.get('/:id/pvd-files', async (req, res, next) => {
         // Parse .pvd file using PvdParser
         const pvdData = await parseEngineFile(filePath);
 
-        // Calculate peak pressure across all cylinders and all crank angles
+        // Calculate peak pressure for Cylinder 1 only (educational simplification)
+        // Note: PV-Diagrams always show Cylinder 1 data for educational purposes
         let peakPressure = 0;
         let peakPressureAngle = 0;
 
         for (const dataPoint of pvdData.data) {
-          for (const cylinder of dataPoint.cylinders) {
-            if (cylinder.pressure > peakPressure) {
-              peakPressure = cylinder.pressure;
-              peakPressureAngle = dataPoint.deg;
-            }
+          const cyl1 = dataPoint.cylinders[0]; // Cylinder 1 only
+          if (cyl1.pressure > peakPressure) {
+            peakPressure = cyl1.pressure;
+            peakPressureAngle = dataPoint.deg;
           }
         }
 

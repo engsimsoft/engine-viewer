@@ -9,6 +9,78 @@
 
 ## [Unreleased]
 
+## [3.1.0] - 2025-01-11
+
+### Added - PV-Diagrams Educational Enhancement (ADR-013, Stage 1)
+- **Multi-RPM Comparison** (key educational feature):
+  - Overlay 2-4 RPMs on same chart for direct comparison
+  - Zustand state: `selectedRPM: string | null` → `selectedRPMs: string[]` (array of selected files)
+  - Checkbox-based multi-select in RPMSection (max 4 RPMs)
+  - Parallel data loading with Promise.all (usePVDData hook)
+  - Color-coded series for each RPM:
+    - RPM 1: #e74c3c (red)
+    - RPM 2: #3498db (blue)
+    - RPM 3: #2ecc71 (green)
+    - RPM 4: #f39c12 (orange)
+  - All 3 diagram types support multi-RPM: P-V, Log P-V, P-α
+  - Legend shows "2000 RPM", "4000 RPM", etc.
+  - Tooltip displays RPM value for each series
+
+- **Max/Min Pressure Badges** (iPhone-style indicators):
+  - Each RPM in list shows 2 badges:
+    - Max Pressure: red badge with peak pressure (bar)
+    - Min Pressure: blue badge with minimum pressure (bar)
+  - Carefully chosen design: compact, readable, professional
+  - Dynamic updates when loading data
+  - Helps students instantly compare pressures across RPMs
+
+### Changed
+- **Simplified to Cylinder 1 only** (educational focus):
+  - Removed cylinder selection UI (deleted CylinderFilterSection.tsx)
+  - Zustand state: removed `selectedCylinder`, always use Cylinder 1 (index 0)
+  - Rationale: For educational purposes, difference between cylinders minimal (±1-2%)
+  - Students focus on thermodynamics, not cylinder selection
+  - Reduced UI complexity (8 buttons → 0 buttons)
+
+- **Backend**: Peak pressure calculation simplified (backend/src/routes/data.js:642-653)
+  - Always calculate for Cylinder 1 (educational simplification)
+  - Comment added: "PV-Diagrams always show Cylinder 1 data for educational purposes"
+
+- **Frontend Components**:
+  - RPMSection: checkbox-based multi-select with badges
+  - chartOptionsHelpers: multi-RPM overlay for all 3 chart types
+  - PeakValuesCards: calculate stats across ALL selected RPMs
+  - PVDiagramsPage: pass `selectedRPMs` array instead of single value
+
+### Known Issues
+- **Peak pressure angles physically incorrect** (root cause: .pvd parser issue):
+  - Angles showing 133°, 260°, 554° (should be 365-390° = 5-30° ATDC)
+  - Root cause: .pvd parser doesn't align firing order (line 15-16) with `cylinders[]` array
+  - `cylinders[0]` ≠ "first firing cylinder", just first array element
+  - **Documented**: [ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md](ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md)
+  - **Technical Debt**: Fix backend/src/parsers/formats/pvdParser.js (deferred)
+  - **Rollback**: Stage 1.2 rolled back to keep production stability
+
+### Educational Impact
+- 🎓 Students can COMPARE engine cycles across RPMs on same chart
+- 🎓 Visual learning: see how breathing efficiency changes with speed
+- 🎓 Understand peak pressure differences between operating ranges
+- 🎓 Simplified UI reduces cognitive load, focuses on thermodynamics
+
+### Files
+**Modified**: 6 files (backend data.js, pvDiagramsSlice, usePVDData, RPMSection, chartOptionsHelpers, PeakValuesCards, PVDiagramsPage)
+**Deleted**: 1 file (CylinderFilterSection.tsx)
+**Created**: 1 doc (ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md)
+
+### Verification
+- TypeScript typecheck: ✓
+- Frontend build: ✓ (3.14s, 2.1 MB bundle)
+- Backend startup: ✓ (<500ms)
+- Server restart: ✓
+- Browser tests: ✓ (multi-RPM selection, chart overlay, badges, all diagram types)
+
+---
+
 ### Performance
 - **Lazy .prt parsing with background queue** (ADR-009):
   - **Backend startup: ~278-306ms** (down from 400-500ms) - **40% faster**

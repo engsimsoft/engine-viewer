@@ -6,9 +6,10 @@ Transform PV-Diagrams page into an **educational tool** for teaching internal co
 **Target audience:** Teachers and students studying 4-stroke engine operation
 
 ## 📊 Current Status
-- **Stage:** Stage 1 preparation
-- **Progress:** 0/42 tasks completed (0%)
-- **Next:** Create roadmap → Start Stage 1
+- **Stage:** Stage 1 + 1.1 ✅ completed, Stage 2 pending
+- **Progress:** Stage 1 (multi-RPM) ✅ | Stage 1.1 (badges) ✅ | Stage 1.2 ❌ (rollback)
+- **Next:** Stage 2 - Cycle phases visualization
+- **Known Issue:** Peak pressure angles incorrect → [ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md](ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md)
 
 ---
 
@@ -296,13 +297,39 @@ Transform PV-Diagrams page into an **educational tool** for teaching internal co
 
 ## 📝 Current Session Notes
 
-**2025-01-XX - Session 1:**
-- [ ] Created roadmap
-- [ ] Reviewed existing implementation (ADR-012)
-- [ ] Planned 5 stages: Simplify + Comparison + Phases + Markers + Valve Timing + Docs
+**2025-01-11 - Session 1:**
+- [x] Created roadmap (complete)
+- [x] Reviewed existing implementation (ADR-012)
+- [x] Planned 5 stages: Simplify + Comparison + Phases + Markers + Valve Timing + Docs
+
+**2025-01-11 - Session 2 (Stage 1 Implementation):**
+- [x] **Stage 1**: Multi-RPM comparison implemented
+  - Removed cylinder selection (simplified to Cylinder 1 only)
+  - Updated Zustand: `selectedRPM: string | null` → `selectedRPMs: string[]`
+  - Updated RPMSection: checkbox-based multi-select (max 4 RPMs)
+  - Updated usePVDData: parallel loading with Promise.all
+  - Updated chart helpers: overlay multiple RPM series (3 colors)
+  - All 3 chart types support multi-RPM (P-V, Log P-V, P-α)
+  - Git commit: "feat(pv-diagrams): Stage 1 - remove cylinder selection + multi-RPM comparison"
+
+- [x] **Stage 1.1**: Max/Min pressure badges
+  - Added iPhone-style badges to RPM list
+  - Shows Max/Min pressure across all RPMs
+  - Color-coded indicators (red for max, blue for min)
+  - Updates dynamically when selecting RPMs
+
+- [x] **Stage 1.2 Rollback**: Peak pressure angle fix attempt
+  - Attempted to fix incorrect angles (133°, 260°, 554° - physically wrong)
+  - Root cause identified: .pvd parser doesn't align firing order with cylinders[] array
+  - Rolled back all changes (cylinders[0] everywhere)
+  - Problem documented: [ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md](ПРОБЛЕМА-PV-DIAGRAMS-ANGLES.md)
+  - To be fixed later: backend/src/parsers/formats/pvdParser.js
+
+- [x] **Verification**: TypeScript ✓, Build ✓, Server restart ✓
 
 **Next:**
-- Start Stage 1.1: Remove cylinder selection from Zustand
+- Document work: ADR-013 + CHANGELOG + archive roadmap
+- Then Stage 2: Cycle phases visualization
 
 ---
 
