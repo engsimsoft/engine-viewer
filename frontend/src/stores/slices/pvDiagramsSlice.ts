@@ -27,6 +27,7 @@ export interface PVDiagramsSlice {
   selectedRPMs: string[];           // Selected .pvd file names for comparison (max 4)
   selectedDiagramType: DiagramType; // Diagram type (default: 'pv')
   showPumpingLosses: boolean;       // Zoom to pumping losses (0-2 bar) for P-V diagram
+  showCombustionTiming: boolean;    // v3.2.0: Show combustion timing markers on P-α diagram
 
   // Actions - RPM Selection
   addSelectedRPM: (rpm: string) => void;
@@ -34,6 +35,7 @@ export interface PVDiagramsSlice {
   clearSelectedRPMs: () => void;
   setSelectedDiagramType: (type: DiagramType) => void;
   setShowPumpingLosses: (value: boolean) => void;
+  setShowCombustionTiming: (value: boolean) => void; // v3.2.0
   resetPVDiagrams: () => void;
 }
 
@@ -51,6 +53,7 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
   selectedRPMs: [], // Empty = no files selected yet
   selectedDiagramType: 'pv', // Default: Normal P-V Diagram
   showPumpingLosses: false, // Default: full range view
+  showCombustionTiming: false, // v3.2.0: Default: markers hidden
 
   // ============================================================
   // Actions - RPM Selection (Multi-select)
@@ -103,10 +106,16 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
       showPumpingLosses: value,
     }),
 
+  setShowCombustionTiming: (value) =>
+    set({
+      showCombustionTiming: value,
+    }),
+
   resetPVDiagrams: () =>
     set({
       selectedRPMs: [],
       selectedDiagramType: 'pv',
       showPumpingLosses: false,
+      showCombustionTiming: false,
     }),
 });

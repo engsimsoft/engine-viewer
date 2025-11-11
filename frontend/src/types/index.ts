@@ -165,6 +165,31 @@ export interface ProjectError {
 }
 
 /**
+ * Combustion Timing Curve (v3.2.0)
+ * Single RPM point from Ignition Model Data section of .prt file
+ */
+export interface CombustionCurve {
+  rpm: number;           // Engine speed (RPM)
+  timing: number;        // Ignition advance angle (°BTDC)
+  afr: number;           // Air-Fuel Ratio
+  delay: number;         // Ignition delay period (°)
+  duration: number;      // Combustion burn duration (°)
+  vibeA: number;         // Wiebe parameter A
+  vibeB: number;         // Wiebe parameter B
+  beff: number;          // Combustion efficiency
+}
+
+/**
+ * Combustion Data (v3.2.0)
+ * Full combustion timing information from .prt file
+ */
+export interface CombustionData {
+  fuelType: string;           // e.g., "100 UNLEADED"
+  nitromethaneRatio: number;  // 0.0 - 1.0
+  curves: CombustionCurve[];  // RPM-specific timing curves
+}
+
+/**
  * Automatic Metadata (read-only, extracted from .prt file)
  */
 export interface AutoMetadata {
@@ -180,6 +205,7 @@ export interface AutoMetadata {
   valvesPerCylinder: number;  // Total valves per cylinder (2, 3, 4, 5)
   inletValves: number;        // Number of inlet valves per cylinder
   exhaustValves: number;      // Number of exhaust valves per cylinder
+  combustion?: CombustionData; // v3.2.0: Combustion timing data (optional for backward compatibility)
 }
 
 /**

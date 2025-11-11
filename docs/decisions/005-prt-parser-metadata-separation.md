@@ -65,7 +65,15 @@
     "compressionRatio": 10.5,
     "maxPowerRPM": 7000,
     "intakeSystem": "ITB",
-    "exhaustSystem": "4-2-1"
+    "exhaustSystem": "4-2-1",
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0.0,
+      "curves": [
+        { "rpm": 2000, "timing": 14.0, "afr": 12.5, "delay": 4.34, "duration": 43.4, "vibeA": 10.0, "vibeB": 2.0, "beff": 0.87 },
+        { "rpm": 3000, "timing": 16.0, "afr": 12.5, "delay": 4.77, "duration": 47.7, "vibeA": 10.0, "vibeB": 2.0, "beff": 0.87 }
+      ]
+    }
   },
 
   "manual": {
@@ -130,7 +138,37 @@ if (line.includes('with a common airbox or plenum')) → intakeSystem = 'IM'
 "8into4into2into1" → "8-4-2-1"
 ```
 
-### 5. Разделение Auto/Manual
+### 5. Combustion Timing Data (v3.2.0)
+
+**Проблема:** Для educational визуализации на P-α диаграммах нужны данные о фазах сгорания (ignition timing, delay, duration).
+
+**Решение:** Парсинг секции "Ignition Model Data" из `.prt` файлов:
+```javascript
+combustion: {
+  fuelType: "100 UNLEADED",
+  nitromethaneRatio: 0.0,
+  curves: [
+    {
+      rpm: 2000,
+      timing: 14.0,      // Ignition advance (°BTDC)
+      afr: 12.5,         // Air-Fuel Ratio
+      delay: 4.34,       // Ignition delay (°)
+      duration: 43.4,    // Combustion duration (°)
+      vibeA: 10.0,       // Wiebe parameter A
+      vibeB: 2.0,        // Wiebe parameter B
+      beff: 0.87         // Combustion efficiency
+    },
+    // ... more RPM points
+  ]
+}
+```
+
+**Использование:**
+- Визуализация combustion timing markers на P-α диаграммах (Stage 6)
+- Educational: показывает зоны ignition delay и burn duration
+- RPM-specific: каждый RPM имеет свои timing параметры
+
+### 6. Разделение Auto/Manual
 
 **Почему не merged metadata?**
 

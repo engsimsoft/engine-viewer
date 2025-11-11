@@ -18,7 +18,7 @@
  * Pattern: Matches PerformancePage.tsx (with educational enhancements)
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChartExportProvider } from '@/contexts/ChartExportContext';
 import Header from '@/components/performance/Header';
@@ -30,6 +30,7 @@ import { usePVDData } from '@/hooks/usePVDData';
 import { useAppStore } from '@/stores/appStore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
+import type { CombustionCurve } from '@/types'; // v3.2.0
 
 /**
  * PV-Diagrams Page Component (v3.1 - Educational)
@@ -57,6 +58,36 @@ export default function PVDiagramsPage() {
 
   // Load multiple .pvd file data for comparison
   const { dataArray, loading: dataLoading, error: dataError, refetch: refetchData } = usePVDData(projectId, selectedRPMs);
+
+  // v3.2.0: Load combustion timing data from project metadata
+  const [combustionData, setCombustionData] = useState<CombustionCurve[]>([]);
+
+  useEffect(() => {
+    async function loadCombustionData() {
+      if (!projectId) return;
+
+      try {
+        // v3.2.0: Use /api prefix for Vite proxy (strips /api → forwards to /project/:id)
+        const response = await fetch(`/api/project/${projectId}`);
+        if (!response.ok) {
+          console.warn('[PVDiagramsPage] Failed to load project metadata for combustion data');
+          return;
+        }
+
+        const result = await response.json();
+        const curves = result.data?.metadata?.auto?.combustion?.curves || [];
+        setCombustionData(curves);
+
+        if (curves.length > 0) {
+          console.log(`[PVDiagramsPage] Loaded ${curves.length} combustion timing curves`);
+        }
+      } catch (error) {
+        console.error('[PVDiagramsPage] Error loading combustion data:', error);
+      }
+    }
+
+    loadCombustionData();
+  }, [projectId]);
 
   // Reset state when leaving page (cleanup)
   useEffect(() => {
@@ -122,6 +153,7 @@ export default function PVDiagramsPage() {
                   loading={dataLoading}
                   error={dataError}
                   onRetry={refetchData}
+                  combustionData={combustionData} // v3.2.0
                 />
 
                 {/* Peak Values Cards - below chart */}

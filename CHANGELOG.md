@@ -9,6 +9,60 @@
 
 ## [Unreleased]
 
+## [3.2.0] - 2025-01-11
+
+### Added - Combustion Timing Visualization (Educational Enhancement)
+
+**Backend: .prt Parser Extension**
+- **New combustion data parsing** from "Ignition Model Data" section in .prt files
+- Extracts fuel type, nitromethane ratio, and RPM-specific timing curves
+- Data includes: ignition timing (°BTDC), delay (°), duration (°), AFR, Wiebe parameters
+- Stored in project metadata: `auto.combustion.curves[]`
+- Console logging shows combustion data on parse: "Combustion: 100 UNLEADED, 8 RPM points, Timing range: 14.7° - 29.41° BTDC"
+
+**Frontend: P-α Diagram Combustion Markers**
+- **"Combustion Timing" toggle button** in DiagramTypeTabs (P-α diagram, single RPM mode only)
+- **Visual markers on P-α diagram:**
+  - **Spark ignition line**: Green (#16a34a) vertical line at ignition angle
+  - **Ignition delay zone**: Light orange semi-transparent area (rgba(251, 146, 60, 0.15))
+  - **Burn duration zone**: Light red semi-transparent area (rgba(239, 68, 68, 0.12))
+- Labels show angle values: "Spark: 14.7° BTDC", "Delay: 4.6°", "Burn: 46.4°"
+- **iPhone/macOS quality design**: minimalist, subtle colors, professional
+- **Educational value**: Students see combustion phases overlaid on pressure curve
+
+**State Management:**
+- New Zustand state: `showCombustionTiming` boolean (default: false)
+- Action: `setShowCombustionTiming(value)`
+- Reset on page leave (cleanup in `resetPVDiagrams()`)
+
+**TypeScript Interfaces:**
+- `CombustionCurve`: Single RPM point (rpm, timing, afr, delay, duration, vibeA, vibeB, beff)
+- `CombustionData`: Full data (fuelType, nitromethaneRatio, curves[])
+- Added to `AutoMetadata.combustion` (optional for backward compatibility)
+
+**Documentation:**
+- Updated ADR-005 with combustion field schema and usage notes
+- Added Section 5 "Combustion Timing Data" explaining educational purpose
+
+**Technical Details:**
+- BTDC to crank angle conversion: `ignitionAngle = 360 - timing` (e.g., 14° BTDC → 346°)
+- RPM matching: Direct lookup between .pvd file RPMs and combustion table
+- ECharts implementation: `markLine` (ignition) + `markArea` (delay/duration zones)
+- Conditional rendering: Only shows when toggle enabled AND single RPM selected AND P-α diagram active
+
+**Files Changed:**
+- Backend: `prtParser.js`, `fileScanner.js` (combustion data extraction)
+- Frontend State: `pvDiagramsSlice.ts` (toggle state)
+- Frontend UI: `DiagramTypeTabs.tsx` (button), `PVDiagramsPage.tsx` (data loading), `PVDiagramChart.tsx` (props)
+- Frontend Chart: `chartOptionsHelpers.ts` (marker rendering logic)
+- Types: `types/index.ts` (CombustionCurve, CombustionData interfaces)
+
+**Educational Impact:**
+- Visualizes combustion phases that were previously abstract numbers
+- Shows relationship between ignition timing and peak pressure
+- Helps students understand ignition delay and burn duration
+- Clear color coding: green (ignition) → orange (delay) → red (combustion)
+
 ## [3.1.3] - 2025-01-11
 
 ### Changed - PV-Diagrams Multi-RPM Comparison UX (ADR-012 Stage 5)

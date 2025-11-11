@@ -92,7 +92,7 @@ export function PeakValuesCards({ dataArray }: PeakValuesCardsProps) {
 
   return (
     <div className="w-full flex flex-col gap-3 mt-4">
-      {rpmStats.map((stats, index) => (
+      {rpmStats.map((stats) => (
         <div
           key={stats.rpm}
           className="w-full bg-card border rounded-xl px-6 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out flex flex-col gap-3"

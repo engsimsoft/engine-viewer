@@ -30,6 +30,9 @@ export function DiagramTypeTabs() {
   const setSelectedDiagramType = useAppStore((state) => state.setSelectedDiagramType);
   const showPumpingLosses = useAppStore((state) => state.showPumpingLosses);
   const setShowPumpingLosses = useAppStore((state) => state.setShowPumpingLosses);
+  const showCombustionTiming = useAppStore((state) => state.showCombustionTiming); // v3.2.0
+  const setShowCombustionTiming = useAppStore((state) => state.setShowCombustionTiming); // v3.2.0
+  const selectedRPMs = useAppStore((state) => state.selectedRPMs); // v3.2.0: check single RPM mode
 
   const handleValueChange = (value: string) => {
     setSelectedDiagramType(value as DiagramType);
@@ -39,13 +42,18 @@ export function DiagramTypeTabs() {
     setShowPumpingLosses(!showPumpingLosses);
   };
 
+  const handleToggleCombustionTiming = () => {
+    setShowCombustionTiming(!showCombustionTiming);
+  };
+
   return (
     <div className="space-y-3">
-      {/* Header with Pumping Losses button */}
+      {/* Header with toggle buttons (Pumping Losses / Combustion Timing) */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted-foreground">
           DIAGRAM TYPE
         </h2>
+        {/* Pumping Losses button (P-V diagram only) */}
         {selectedDiagramType === 'pv' && (
           <button
             onClick={handleTogglePumpingLosses}
@@ -58,6 +66,21 @@ export function DiagramTypeTabs() {
             title="Zoom to pumping losses (0-2 bar range)"
           >
             Pumping Losses
+          </button>
+        )}
+        {/* Combustion Timing button (P-α diagram, single RPM only) v3.2.0 */}
+        {selectedDiagramType === 'p-alpha' && selectedRPMs.length === 1 && (
+          <button
+            onClick={handleToggleCombustionTiming}
+            className={`
+              text-xs px-2 py-0.5 rounded border transition-colors
+              ${showCombustionTiming
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:bg-accent'}
+            `}
+            title="Show combustion timing markers (ignition, delay, burn duration)"
+          >
+            Combustion Timing
           </button>
         )}
       </div>

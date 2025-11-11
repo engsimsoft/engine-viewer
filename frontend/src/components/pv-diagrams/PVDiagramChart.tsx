@@ -2,6 +2,7 @@ import { useMemo, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { PVDDataItem } from '@/hooks/usePVDData';
+import type { CombustionCurve } from '@/types'; // v3.2.0
 import { getBaseChartConfig } from '@/lib/chartConfig';
 import { useAppStore } from '@/stores/appStore';
 import { useChartExport as useChartExportHook } from '@/hooks/useChartExport';
@@ -25,6 +26,8 @@ interface PVDiagramChartProps {
   error?: string | null;
   /** Retry callback for error state */
   onRetry?: () => void;
+  /** v3.2.0: Combustion timing curves from project metadata */
+  combustionData?: CombustionCurve[];
 }
 
 /**
@@ -54,10 +57,12 @@ export function PVDiagramChart({
   loading = false,
   error = null,
   onRetry,
+  combustionData = [], // v3.2.0
 }: PVDiagramChartProps) {
   // Get chart settings and diagram type from store
   const chartSettings = useAppStore((state) => state.chartSettings);
   const selectedDiagramType = useAppStore((state) => state.selectedDiagramType);
+  const showCombustionTiming = useAppStore((state) => state.showCombustionTiming); // v3.2.0
   const showPumpingLosses = useAppStore((state) => state.showPumpingLosses);
   const { animation, showGrid } = chartSettings;
 
@@ -100,6 +105,8 @@ export function PVDiagramChart({
       showGrid,
       showPumpingLosses,
       baseConfig,
+      combustionData, // v3.2.0
+      showCombustionTiming, // v3.2.0
     };
 
     // Select chart type based on selectedDiagramType
@@ -112,7 +119,7 @@ export function PVDiagramChart({
       default:
         return createPVChartOptions(params);
     }
-  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType]);
+  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType, combustionData, showCombustionTiming]);
 
   // Loading state
   if (loading) {

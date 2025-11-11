@@ -14,6 +14,7 @@ import { parseDetFile } from '../services/fileParser.js';
 import { getConfig, getDataFolderPath } from '../config.js';
 import { getFileInfo, normalizeFilenameToId, scanDirectory } from '../services/fileScanner.js';
 import { parseEngineFile } from '../parsers/index.js';
+import { getMetadata } from '../services/metadataService.js'; // v3.2.0: Load project metadata
 
 const router = Router();
 
@@ -243,6 +244,9 @@ router.get('/:id', async (req, res, next) => {
     // Get project name (filename without extension)
     const projectName = matchedFileInfo.name.replace(/\.(det|pou)$/i, '');
 
+    // v3.2.0: Load project metadata (includes auto.combustion from .prt)
+    const projectMetadata = await getMetadata(id);
+
     // Build response
     const response = {
       success: true,
@@ -250,7 +254,8 @@ router.get('/:id', async (req, res, next) => {
         id: id,
         name: projectName,
         fileName: matchedFileInfo.name,
-        metadata: projectData.metadata,
+        metadata: projectMetadata || projectData.metadata, // Use project metadata if available, fallback to .det metadata
+        engineMetadata: projectData.metadata, // Keep engine specs from .det file for backwards compatibility
         calculations: calculationsWithMetadata,
         fileInfo: {
           size: fileInfo.size,

@@ -273,7 +273,8 @@ export async function parsePrtFileAndUpdateMetadata(file) {
       intakeSystem: result.engine.intakeSystem,
       valvesPerCylinder: result.engine.valvesPerCylinder,
       inletValves: result.engine.inletValves,
-      exhaustValves: result.engine.exhaustValves
+      exhaustValves: result.engine.exhaustValves,
+      combustion: result.combustion // v3.2.0: Ignition model data (fuel type, timing curves)
     };
 
     // Получаем projectId из имени файла

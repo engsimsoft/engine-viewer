@@ -237,6 +237,111 @@ class PrtParser {
   }
 
   /**
+   * Парсит секцию "Ignition Model Data" из .prt файла
+   * Формат секции (lines ~368-387):
+   *   The Ignition model data:
+   *   ------------------------
+   *
+   *   The Combustion Model uses Wiebe Curves for prescribed burn rate
+   *   Type of Fuel          =    100 UNLEADED
+   *   Nitromethane Ratio   =   0.000
+   *
+   *         Ignition, AFR and Combustion curves
+   *
+   *    RPM     Timing    AFR    Delay Duration  VibeA  VibeB  Beff
+   *   2000.00   14.00   12.50    4.34   43.40   10.00  2.000  0.870
+   *   ...
+   *
+   * @param {string[]} lines - Все строки файла
+   * @param {number} startIndex - Индекс строки "The Ignition model data:"
+   * @returns {Object|null} - Объект с combustion data или null
+   */
+  parseIgnitionModelData(lines, startIndex) {
+    const result = {
+      fuelType: null,
+      nitromethaneRatio: null,
+      curves: []
+    };
+
+    let inCurvesSection = false;
+    let foundHeader = false;
+
+    // Парсим от startIndex до конца секции (asterisks или конец файла)
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      // Конец секции: asterisks или следующая секция
+      if (line.includes('*********') || line.includes('The wall temperature')) {
+        break;
+      }
+
+      // Пропускаем пустые строки
+      if (!line) {
+        continue;
+      }
+
+      // 1. Извлекаем Type of Fuel
+      if (line.includes('Type of Fuel') && !result.fuelType) {
+        const match = line.match(/Type of Fuel\s*=\s*(.+)/i);
+        if (match) {
+          result.fuelType = match[1].trim();
+        }
+      }
+
+      // 2. Извлекаем Nitromethane Ratio
+      if (line.includes('Nitromethane Ratio') && result.nitromethaneRatio === null) {
+        const match = line.match(/Nitromethane Ratio\s*=\s*([\d.]+)/i);
+        if (match) {
+          result.nitromethaneRatio = parseFloat(match[1]);
+        }
+      }
+
+      // 3. Находим начало таблицы кривых
+      if (line.includes('Ignition, AFR and Combustion curves')) {
+        inCurvesSection = true;
+        continue;
+      }
+
+      // 4. Пропускаем заголовок таблицы (RPM Timing AFR...)
+      if (inCurvesSection && line.includes('RPM') && line.includes('Timing') && line.includes('AFR')) {
+        foundHeader = true;
+        continue;
+      }
+
+      // 5. Парсим строки таблицы (после заголовка)
+      if (inCurvesSection && foundHeader) {
+        // Формат строки: "2000.00   14.00   12.50    4.34   43.40   10.00  2.000  0.870"
+        // Разделяем по пробелам и извлекаем числа
+        const parts = line.split(/\s+/).filter(p => p.length > 0);
+
+        // Проверяем что строка содержит 8 числовых значений
+        if (parts.length >= 8 && /^[\d.]+$/.test(parts[0])) {
+          const curve = {
+            rpm: parseFloat(parts[0]),
+            timing: parseFloat(parts[1]),      // °BTDC
+            afr: parseFloat(parts[2]),
+            delay: parseFloat(parts[3]),       // °
+            duration: parseFloat(parts[4]),    // °
+            vibeA: parseFloat(parts[5]),
+            vibeB: parseFloat(parts[6]),
+            beff: parseFloat(parts[7])
+          };
+
+          result.curves.push(curve);
+        }
+      }
+    }
+
+    // Валидация: проверяем что хоть что-то распарсили
+    if (result.curves.length === 0) {
+      console.warn('[PrtParser] Combustion curves table is empty');
+      return null;
+    }
+
+    return result;
+  }
+
+  /**
    * Парсит .prt файл и возвращает метаданные двигателя
    *
    * @param {string} filePath - Путь к .prt файлу
@@ -268,7 +373,8 @@ class PrtParser {
           valvesPerCylinder: null, // Total valves per cylinder (2, 3, 4, 5)
           inletValves: null, // Number of inlet valves per cylinder
           exhaustValves: null // Number of exhaust valves per cylinder
-        }
+        },
+        combustion: null // Ignition model data (v3.2.0)
       };
 
       // Парсим построчно, ищем ключевые данные
@@ -397,6 +503,11 @@ class PrtParser {
           }
         }
 
+        // 15. Ignition Model Data section (v3.2.0)
+        if (line.includes('The Ignition model data:') && !metadata.combustion) {
+          metadata.combustion = this.parseIgnitionModelData(lines, i);
+        }
+
         // 12. Exhaust system section
         if (line.includes('The EXHAUST system has the following Characteristics')) {
           inExhaustSection = true;
@@ -457,6 +568,12 @@ class PrtParser {
                   `${metadata.engine.displacement ? metadata.engine.displacement + 'L, ' : ''}` +
                   `Intake: ${metadata.engine.intakeSystem}, ` +
                   `Valves: ${metadata.engine.valvesPerCylinder} (${metadata.engine.inletValves} In + ${metadata.engine.exhaustValves} Ex)`);
+
+      if (metadata.combustion) {
+        console.log(`[PrtParser] Combustion: ${metadata.combustion.fuelType}, ` +
+                    `${metadata.combustion.curves.length} RPM points, ` +
+                    `Timing range: ${metadata.combustion.curves[0].timing}° - ${metadata.combustion.curves[metadata.combustion.curves.length - 1].timing}° BTDC`);
+      }
 
       return metadata;
 
