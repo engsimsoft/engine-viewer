@@ -307,6 +307,184 @@ function calculateRPMStats(item: PVDDataItem, colorIndex: number): RPMStats {
 
 ---
 
+### Stage 6: Combustion Timing Visualization (v3.2.0)
+
+**Проблема:**
+- P-α диаграмма показывает только кривую давления без контекста фазы сгорания
+- Студенты не видят связь между моментом зажигания и пиком давления
+- Невозможно визуализировать задержку воспламенения и длительность сгорания
+- Нет связи между теорией (Wiebe function, combustion timing) и практикой (pressure curve)
+
+**Требования:**
+- Визуализация ignition timing (момент искры в °BTDC)
+- Показ ignition delay (задержка воспламенения в °)
+- Показ burn duration (длительность сгорания в °)
+- Correlation с peak pressure angle
+- Данные из .prt файлов (Ignition Model Data table)
+
+**Решение:**
+
+**6.1 Backend - .prt Parser Enhancement:**
+- **parseIgnitionModelData()** в `prtParser.js`:
+  - Парсит "Ignition Model Data" секцию из .prt файла
+  - Извлекает fuel type, nitromethane ratio
+  - Парсит таблицу combustion curves (RPM, Timing °BTDC, AFR, Delay, Duration, Vibe parameters)
+  - Возвращает массив curves с 8+ RPM points
+- **Metadata storage**: `auto.combustion.curves[]` в `.metadata/{projectId}.json`
+- **API integration**: `/project/:id` endpoint возвращает combustion data в metadata
+
+**6.2 Frontend - Combustion Timing Toggle:**
+- **DiagramTypeTabs** компонент:
+  - Новая кнопка "Combustion Timing" (рядом с "Pumping Losses")
+  - Показывается только для P-α diagram + single RPM mode
+  - Toggle state: `showCombustionTiming: boolean` в Zustand
+- **PVDiagramsPage**:
+  - Загружает combustion data из API при монтировании
+  - Передаёт combustionData + showCombustionTiming в PVDiagramChart
+- **chartOptionsHelpers.ts - P-α Diagram Enhancement:**
+
+**6.3 Visualization Markers:**
+
+**a) Ignition Line (Green):**
+- Вертикальная зелёная линия на `ignitionAngle = 360 - timing` (BTDC → crank angle)
+- Label: "Spark: X.X° BTDC"
+- Position: insideEndTop (не конфликтует с TDC markers)
+- Width: 2px, solid line
+
+**b) Ignition Delay Zone (Orange):**
+- markArea от `ignitionAngle` до `ignitionAngle + delay`
+- Translucent orange background (rgba(251, 146, 60, 0.15))
+- Dashed border
+- Label: "Delay: X.X°" (inside zone)
+- **Physical meaning**: период от искры до начала видимого сгорания
+
+**c) Burn Duration Zone (Red):**
+- markArea от `delayEnd` до `delayEnd + duration`
+- Translucent red background (rgba(239, 68, 68, 0.12))
+- Dashed border
+- Label: "Burn: X.X°" (inside zone)
+- **Physical meaning**: фаза активного сгорания (10-90% burnt)
+
+**6.4 Auto-Zoom Enhancement:**
+- X-axis: 180-540° при включении combustion timing (BDC → BDC, power stroke)
+- Улучшает видимость markers в критической зоне сгорания
+- Компрессия + расширение + вся фаза сгорания на одном экране
+
+**Реализация:**
+```typescript
+// chartOptionsHelpers.ts - P-α Diagram
+if (showCombustionTiming && combustionData && dataArray.length === 1) {
+  const currentRPM = dataArray[0].rpm;
+  const curve = combustionData.find((c) => c.rpm === currentRPM);
+
+  if (curve) {
+    // Calculate angles
+    const ignitionAngle = 360 - curve.timing;  // BTDC → crank angle
+    const delayEnd = ignitionAngle + curve.delay;
+    const durationEnd = delayEnd + curve.duration;
+
+    // Green spark line
+    series[0].markLine.data.push({
+      name: `Spark: ${curve.timing.toFixed(1)}° BTDC`,
+      xAxis: ignitionAngle,
+      label: { /* green label */ },
+      lineStyle: { color: '#16a34a', width: 2 },
+    });
+
+    // Orange delay zone + Red burn zone
+    series[0].markArea = {
+      silent: true,
+      data: [
+        // Delay zone
+        [
+          { xAxis: ignitionAngle, label: `Delay: ${curve.delay.toFixed(1)}°`,
+            itemStyle: { color: 'rgba(251, 146, 60, 0.15)' } },
+          { xAxis: delayEnd },
+        ],
+        // Burn duration zone
+        [
+          { xAxis: delayEnd, label: `Burn: ${curve.duration.toFixed(1)}°`,
+            itemStyle: { color: 'rgba(239, 68, 68, 0.12)' } },
+          { xAxis: durationEnd },
+        ],
+      ],
+    };
+  }
+}
+
+// Auto-zoom to power stroke
+xAxis: {
+  min: showCombustionTiming ? 180 : 0,
+  max: showCombustionTiming ? 540 : 720,
+}
+```
+
+**Zustand State:**
+```typescript
+// pvDiagramsSlice.ts
+showCombustionTiming: boolean;  // Default: false
+setShowCombustionTiming: (value: boolean) => void;
+```
+
+**TypeScript Types:**
+```typescript
+// types/index.ts
+export interface CombustionCurve {
+  rpm: number;
+  timing: number;      // °BTDC
+  afr: number;
+  delay: number;       // ° (ignition delay)
+  duration: number;    // ° (burn duration 10-90%)
+  vibeA: number;       // Wiebe function parameter A
+  vibeB: number;       // Wiebe function parameter B
+  beff: number;        // Combustion efficiency
+}
+
+export interface CombustionData {
+  fuelType: string;           // "100 UNLEADED", "95 RON", etc.
+  nitromethaneRatio: number;  // 0-1 (0 = pure gasoline)
+  curves: CombustionCurve[];  // 8+ RPM points
+}
+```
+
+**Educational Value:**
+- 🎓 **Visual correlation**: Студенты ВИДЯТ связь spark timing → pressure peak
+- 🎓 **Ignition delay understanding**: оранжевая зона показывает период подготовки смеси
+- 🎓 **Burn rate impact**: красная зона показывает скорость сгорания (влияет на эффективность)
+- 🎓 **Timing optimization**: понимание почему ignition advance меняется с RPM
+- 🎓 **Wiebe function context**: связь параметров Wiebe (A, B) с физической фазой сгорания
+- 🎓 **Peak pressure explanation**: почему peak ~13-15° ATDC (зависит от timing + delay + burn rate)
+
+**Files Modified:**
+- `backend/src/parsers/formats/prtParser.js` - добавлен parseIgnitionModelData()
+- `backend/src/routes/data.js` - getMetadata() в /project/:id endpoint
+- `frontend/src/pages/PVDiagramsPage.tsx` - загрузка combustion data
+- `frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx` - Combustion Timing button
+- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx` - передача combustionData prop
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` - combustion markers + auto-zoom
+- `frontend/src/stores/slices/pvDiagramsSlice.ts` - showCombustionTiming state
+- `frontend/src/types/index.ts` - CombustionCurve, CombustionData interfaces
+- `.metadata/4-cyl-itb.json` - пример parsed combustion data (8 curves)
+
+**Test Data:**
+- `test-data/4_Cyl_ITB/4_Cyl_ITB.prt` - source .prt file
+- `.metadata/4-cyl-itb.json` - parsed combustion curves (2000-9000 RPM)
+- Playwright screenshot: `.playwright-mcp/pv-diagram-combustion-timing-test.png`
+
+**Verification:**
+- ✅ Build: passing (TypeScript no errors)
+- ✅ API: /project/4-cyl-itb returns metadata.auto.combustion with 8 curves
+- ✅ UI: "Combustion Timing" button appears for single RPM + P-α diagram
+- ✅ Markers: Green spark line, orange delay zone, red burn zone render correctly
+- ✅ Auto-zoom: X-axis zooms to 180-540° when enabled
+- ✅ Playwright E2E: markers visible and positioned correctly
+
+**Commits:**
+- `56d0612` - feat(pv-diagrams): restore combustion timing markers with auto-zoom
+- `693f9e3` - feat(pv-diagrams): complete v3.2.0 Combustion Timing Visualization
+
+---
+
 ## Причины
 
 ### 1. **Parser Registry Pattern** (consistency)
