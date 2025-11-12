@@ -64,6 +64,7 @@ export function PVDiagramChart({
   const selectedDiagramType = useAppStore((state) => state.selectedDiagramType);
   const showCombustionTiming = useAppStore((state) => state.showCombustionTiming); // v3.2.0
   const showPumpingLosses = useAppStore((state) => state.showPumpingLosses);
+  const showWorkPhases = useAppStore((state) => state.showWorkPhases); // v3.3.0
   const { animation, showGrid } = chartSettings;
 
   // Generate dynamic filename for export
@@ -107,6 +108,7 @@ export function PVDiagramChart({
       baseConfig,
       combustionData, // v3.2.0
       showCombustionTiming, // v3.2.0
+      showWorkPhases, // v3.3.0
     };
 
     // Select chart type based on selectedDiagramType
@@ -119,7 +121,7 @@ export function PVDiagramChart({
       default:
         return createPVChartOptions(params);
     }
-  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType, combustionData, showCombustionTiming]);
+  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType, combustionData, showCombustionTiming, showWorkPhases]);
 
   // Loading state
   if (loading) {

@@ -1,6 +1,6 @@
 # ADR 012: PV-Diagrams Implementation & Educational Enhancement
 
-**Дата:** 2025-01-11 (Start) → 2025-01-11 (Stage 5)
+**Дата:** 2025-01-11 (Start) → 2025-11-12 (Stage 7)
 **Статус:** Принято
 **Автор:** Claude Code + User
 
@@ -23,6 +23,8 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 - **Stage 3**: Peak pressure angles fix (last cylinder convention)
 - **Stage 4**: Atmospheric pressure visualization (physical correctness)
 - **Stage 5**: Multi-RPM comparison UX improvements (per-RPM cards, tooltip fix)
+- **Stage 6**: Combustion timing visualization (ignition, delay, burn phases)
+- **Stage 7**: Visual refinements & Work Phases (legend removal, ignition redesign, educational arrows)
 
 ---
 
@@ -482,6 +484,135 @@ export interface CombustionData {
 **Commits:**
 - `56d0612` - feat(pv-diagrams): restore combustion timing markers with auto-zoom
 - `693f9e3` - feat(pv-diagrams): complete v3.2.0 Combustion Timing Visualization
+
+---
+
+### Stage 7: Visual Refinements & Work Phases (v3.3.0)
+
+**Проблема:**
+- Legend дублирует информацию (уже есть per-RPM cards внизу)
+- Ignition marker на P-α неоптимален (вертикальная линия + "Spark: 18.1 BTDC" текст сверху)
+- Зелёный цвет ignition marker слишком яркий ("светофорный")
+- Delay/Burn zone labels verbose (с двоеточием)
+- Нужна опциональная визуализация Work Phases для образовательных целей
+
+**Решение:**
+
+**7.1 Legend Removal:**
+- Удалены legends со всех диаграмм (P-V, Log P-V, P-α)
+- **Причина**: Redundant - per-RPM cards внизу уже показывают цвета + RPM
+- **Результат**: Cleaner "iPhone-style" design, больше места для графика
+
+**7.2 Ignition Marker Redesign (P-α):**
+- **До**: Вертикальная зелёная линия + "Spark: 18.1 BTDC" label сверху
+- **После**: Точка на кривой + "Ignition" label слева
+- **Реализация**:
+  ```typescript
+  // chartOptionsHelpers.ts - P-α diagram
+  series[0].markPoint = {
+    symbol: 'circle',
+    symbolSize: 10,
+    itemStyle: {
+      color: '#374151',      // dark gray (slate-700)
+      borderColor: '#fff',
+      borderWidth: 2,
+    },
+    label: {
+      formatter: 'Ignition',
+      position: 'left',      // left of point (not top)
+      fontSize: 11,
+      color: '#374151',
+      fontWeight: 'bold',
+      distance: 10,
+    },
+    data: [{
+      coord: [ignitionAngle, pressureAtIgnition],  // on curve
+      name: 'Ignition',
+    }],
+  };
+  ```
+- **Pressure interpolation**: Linear interpolation для нахождения давления в момент ignitionAngle
+- **Причина изменений**:
+  - Точка показывает реальное давление в момент искры (физически корректно)
+  - Label слева не конфликтует с Delay/Burn zone labels сверху
+  - Тёмно-серый (slate-700) вместо зелёного - инженерный стиль, не "светофор"
+  - Упрощённый label "Ignition" (без BTDC suffix) - clean
+
+**7.3 Ignition Point on P-V Diagram:**
+- Добавлена ignition точка на P-V диаграмме (аналогично P-α)
+- **Educational value**: Показывает ГДЕ на термодинамическом цикле происходит ignition
+- **Реализация**: Поиск volume/pressure в момент ignitionAngle из raw data
+- Тот же стиль: тёмно-серая точка, "Ignition" label слева
+
+**7.4 Zone Labels Simplification:**
+- **До**: `Delay: 6.1°`, `Burn: 61.1°` (с двоеточием)
+- **После**: `Delay 6.1°`, `Burn 61.1°` (без двоеточия)
+- **Причина**: Cleaner iPhone-style дизайн
+
+**7.5 Work Phases Feature (P-α only):**
+- **Концепция**: Образовательная визуализация Negative/Positive Work фаз
+- **UI**: Кнопка "Work Phases" (рядом с "Combustion Timing")
+- **Показывается**: Только P-α diagram, single RPM mode
+- **Visualization**:
+  ```typescript
+  // P-α diagram arrows
+  data: [
+    // Negative Work (compression: 180° → ignition)
+    [
+      { coord: [180, midPressure], label: 'Negative Work', color: '#dc2626' },  // red
+      { coord: [ignitionAngle - 10, midPressure] }
+    ],
+    // Positive Work (expansion: ignition → 540°)
+    [
+      { coord: [ignitionAngle + 20, midPressure], label: 'Positive Work', color: '#1e40af' },  // blue
+      { coord: [540, midPressure] }
+    ]
+  ]
+  ```
+- **Цвета**: Красный (#dc2626) + Синий (#1e40af) - инженерная пара (не "светофор")
+- **P-V decision**: Work Phases НЕ добавлены на P-V диаграмму
+  - **Причина**: Термодинамически некорректно (работа = площадь loop, не линейные стрелки)
+  - **Результат**: P-V остаётся clean, фокус на площади цикла
+
+**Zustand State:**
+```typescript
+// pvDiagramsSlice.ts
+showWorkPhases: boolean;  // Default: false
+setShowWorkPhases: (value: boolean) => void;
+```
+
+**Files Modified:**
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts`:
+  - Удалены legends (P-V, Log P-V, P-α)
+  - Ignition markPoint (P-V, P-α) - точка на кривой, тёмно-серый
+  - Work Phases arrows (P-α only)
+  - Zone labels без двоеточия
+- `frontend/src/components/pv-diagrams/DiagramTypeTabs.tsx`:
+  - Добавлена кнопка "Work Phases" (P-α only)
+- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx`:
+  - Передача showWorkPhases в chartOptions
+- `frontend/src/stores/slices/pvDiagramsSlice.ts`:
+  - showWorkPhases state + action
+
+**Educational Impact:**
+- 🎓 **Cleaner design**: Без redundant legends, больше фокуса на графиках
+- 🎓 **Ignition clarity**: Точка показывает реальное давление в момент искры
+- 🎓 **Visual consistency**: Тёмно-серый ignition marker не конкурирует с delay/burn зонами
+- 🎓 **Work Phases (optional)**: Студенты видят фазы Negative/Positive Work на P-α
+- 🎓 **Engineering colors**: Красный + синий (классическая пара), не "светофор"
+
+**Bug Fixes:**
+- ✅ Исправлен crash ECharts (`Cannot read properties of undefined '__ec_inner_48'`)
+- **Причина**: Неправильный формат markLine данных для Work Phases стрелок
+- **Решение**: Использование правильного ECharts формата `[[{coord}, {coord}]]` для arrows
+
+**Verification:**
+- ✅ Build: passing (TypeScript no errors)
+- ✅ P-V: Clean без Work Phases, ignition точка видна
+- ✅ P-α: Work Phases toggle работает, стрелки корректны
+- ✅ Puppeteer: Проверено в браузере - no console errors
+- ✅ Colors: Красный + синий (инженерный стиль)
+- ✅ Font size: fontSize: 13 для Work Phases labels (читаемость)
 
 ---
 

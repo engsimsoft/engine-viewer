@@ -32,6 +32,8 @@ export function DiagramTypeTabs() {
   const setShowPumpingLosses = useAppStore((state) => state.setShowPumpingLosses);
   const showCombustionTiming = useAppStore((state) => state.showCombustionTiming); // v3.2.0
   const setShowCombustionTiming = useAppStore((state) => state.setShowCombustionTiming); // v3.2.0
+  const showWorkPhases = useAppStore((state) => state.showWorkPhases); // v3.3.0
+  const setShowWorkPhases = useAppStore((state) => state.setShowWorkPhases); // v3.3.0
   const selectedRPMs = useAppStore((state) => state.selectedRPMs); // v3.2.0: check single RPM mode
 
   const handleValueChange = (value: string) => {
@@ -46,43 +48,64 @@ export function DiagramTypeTabs() {
     setShowCombustionTiming(!showCombustionTiming);
   };
 
+  const handleToggleWorkPhases = () => {
+    setShowWorkPhases(!showWorkPhases);
+  };
+
   return (
     <div className="space-y-3">
-      {/* Header with toggle buttons (Pumping Losses / Combustion Timing) */}
+      {/* Header with toggle buttons */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted-foreground">
           DIAGRAM TYPE
         </h2>
-        {/* Pumping Losses button (P-V diagram only) */}
-        {selectedDiagramType === 'pv' && (
-          <button
-            onClick={handleTogglePumpingLosses}
-            className={`
-              text-xs px-2 py-0.5 rounded border transition-colors
-              ${showPumpingLosses
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-background text-muted-foreground border-border hover:bg-accent'}
-            `}
-            title="Zoom to pumping losses (0-2 bar range)"
-          >
-            Pumping Losses
-          </button>
-        )}
-        {/* Combustion Timing button (P-α diagram, single RPM only) v3.2.0 */}
-        {selectedDiagramType === 'p-alpha' && selectedRPMs.length === 1 && (
-          <button
-            onClick={handleToggleCombustionTiming}
-            className={`
-              text-xs px-2 py-0.5 rounded border transition-colors
-              ${showCombustionTiming
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-background text-muted-foreground border-border hover:bg-accent'}
-            `}
-            title="Show combustion timing markers (ignition, delay, burn duration)"
-          >
-            Combustion Timing
-          </button>
-        )}
+        <div className="flex gap-2">
+          {/* Pumping Losses button (P-V diagram only) */}
+          {selectedDiagramType === 'pv' && (
+            <button
+              onClick={handleTogglePumpingLosses}
+              className={`
+                text-xs px-2 py-0.5 rounded border transition-colors
+                ${showPumpingLosses
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background text-muted-foreground border-border hover:bg-accent'}
+              `}
+              title="Zoom to pumping losses (0-2 bar range)"
+            >
+              Pumping Losses
+            </button>
+          )}
+          {/* Combustion Timing button (P-α diagram, single RPM only) v3.2.0 */}
+          {selectedDiagramType === 'p-alpha' && selectedRPMs.length === 1 && (
+            <button
+              onClick={handleToggleCombustionTiming}
+              className={`
+                text-xs px-2 py-0.5 rounded border transition-colors
+                ${showCombustionTiming
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background text-muted-foreground border-border hover:bg-accent'}
+              `}
+              title="Show combustion timing markers (ignition, delay, burn duration)"
+            >
+              Combustion Timing
+            </button>
+          )}
+          {/* Work Phases button (P-α diagram only, single RPM) v3.3.0 */}
+          {selectedDiagramType === 'p-alpha' && selectedRPMs.length === 1 && (
+            <button
+              onClick={handleToggleWorkPhases}
+              className={`
+                text-xs px-2 py-0.5 rounded border transition-colors
+                ${showWorkPhases
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background text-muted-foreground border-border hover:bg-accent'}
+              `}
+              title="Show work phases (Negative Work compression, Positive Work expansion)"
+            >
+              Work Phases
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Diagram Type Tabs */}

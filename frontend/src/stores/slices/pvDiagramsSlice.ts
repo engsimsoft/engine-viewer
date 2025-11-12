@@ -28,6 +28,7 @@ export interface PVDiagramsSlice {
   selectedDiagramType: DiagramType; // Diagram type (default: 'pv')
   showPumpingLosses: boolean;       // Zoom to pumping losses (0-2 bar) for P-V diagram
   showCombustionTiming: boolean;    // v3.2.0: Show combustion timing markers on P-α diagram
+  showWorkPhases: boolean;          // v3.3.0: Show Negative/Positive Work phases (educational)
 
   // Actions - RPM Selection
   addSelectedRPM: (rpm: string) => void;
@@ -36,6 +37,7 @@ export interface PVDiagramsSlice {
   setSelectedDiagramType: (type: DiagramType) => void;
   setShowPumpingLosses: (value: boolean) => void;
   setShowCombustionTiming: (value: boolean) => void; // v3.2.0
+  setShowWorkPhases: (value: boolean) => void;       // v3.3.0
   resetPVDiagrams: () => void;
 }
 
@@ -54,6 +56,7 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
   selectedDiagramType: 'pv', // Default: Normal P-V Diagram
   showPumpingLosses: false, // Default: full range view
   showCombustionTiming: false, // v3.2.0: Default: markers hidden
+  showWorkPhases: false, // v3.3.0: Default: work phases hidden
 
   // ============================================================
   // Actions - RPM Selection (Multi-select)
@@ -111,11 +114,17 @@ export const createPVDiagramsSlice: StateCreator<PVDiagramsSlice> = (set) => ({
       showCombustionTiming: value,
     }),
 
+  setShowWorkPhases: (value) =>
+    set({
+      showWorkPhases: value,
+    }),
+
   resetPVDiagrams: () =>
     set({
       selectedRPMs: [],
       selectedDiagramType: 'pv',
       showPumpingLosses: false,
       showCombustionTiming: false,
+      showWorkPhases: false,
     }),
 });

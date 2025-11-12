@@ -37,6 +37,7 @@ interface ChartOptionsParams {
   baseConfig: any;
   combustionData?: CombustionCurve[]; // v3.2.0: Combustion timing curves
   showCombustionTiming?: boolean;     // v3.2.0: Show combustion timing markers
+  showWorkPhases?: boolean;           // v3.3.0: Show Negative/Positive Work phases
 }
 
 /**
@@ -117,7 +118,7 @@ function interpolateCombustionData(
  * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
  */
 export function createPVChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, showPumpingLosses = false, baseConfig } = params;
+  const { dataArray, showGrid, showPumpingLosses = false, baseConfig, combustionData } = params;
 
   // Calculate Volume and Pressure ranges FIRST (needed for label decision)
   let minVolume = Infinity;
@@ -141,7 +142,6 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
 
   // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
-  const legendData: string[] = [];
 
   dataArray.forEach((item, index) => {
     const { rpm, data } = item;
@@ -205,9 +205,63 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
         },
       }),
     });
-
-    legendData.push(`${rpm} RPM`);
   });
+
+  // Add ignition point on P-V curve (always visible if combustion data exists, single RPM mode only)
+  if (combustionData && combustionData.length > 0 && dataArray.length === 1 && series.length > 0) {
+    const currentRPM = dataArray[0].rpm;
+    const curve = interpolateCombustionData(combustionData, currentRPM);
+
+    if (curve) {
+      const ignitionAngle = 360 - curve.timing;  // BTDC → crank angle
+      const lastCylinderIndex = dataArray[0].data.data[0].cylinders.length - 1;
+
+      // Find volume and pressure at ignition angle from raw data
+      let volumeAtIgnition = 0;
+      let pressureAtIgnition = 0;
+
+      // Search for point where normalized deg matches ignitionAngle
+      for (const point of dataArray[0].data.data) {
+        const normalizedDeg = (point.deg + 360) % 720;
+        
+        // Find exact or closest match (within 1 degree)
+        if (Math.abs(normalizedDeg - ignitionAngle) < 1) {
+          const cylinderData = point.cylinders[lastCylinderIndex];
+          volumeAtIgnition = cylinderData.volume;
+          pressureAtIgnition = cylinderData.pressure;
+          break;
+        }
+      }
+
+      // Add ignition marker to first series
+      if (volumeAtIgnition > 0 && pressureAtIgnition > 0) {
+        series[0].markPoint = {
+          symbol: 'circle',
+          symbolSize: 10,
+          itemStyle: {
+            color: '#374151',
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: true,
+            formatter: 'Ignition',
+            position: 'left',
+            fontSize: 11,
+            color: '#374151',
+            fontWeight: 'bold',
+            distance: 10,
+          },
+          data: [
+            {
+              coord: [volumeAtIgnition, pressureAtIgnition],
+              name: 'Ignition',
+            },
+          ],
+        };
+      }
+    }
+  }
 
   // Add 5% padding to volume axis
   const volumePadding = (maxVolume - minVolume) * 0.05;
@@ -231,17 +285,6 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
         fontSize: 16,
         fontWeight: 'bold',
       },
-    },
-    legend: {
-      data: legendData,
-      top: 40,
-      left: 'center',
-      textStyle: {
-        fontSize: 12,
-      },
-      itemWidth: 30,
-      itemHeight: 14,
-      icon: 'roundRect',
     },
     xAxis: {
       type: 'value',
@@ -441,7 +484,7 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
  * Educational: Will add cycle phases, valve timing markers in future stages
  */
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, baseConfig, combustionData, showCombustionTiming } = params;
+  const { dataArray, showGrid, baseConfig, combustionData, showCombustionTiming, showWorkPhases = false } = params;
 
   // Calculate Pressure range
   let minPressure = Infinity;
@@ -460,7 +503,6 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
 
   // Create series for each RPM (Cylinder 1 only - educational simplification)
   const series: any[] = [];
-  const legendData: string[] = [];
 
   dataArray.forEach((item, index) => {
     const { rpm, data } = item;
@@ -499,8 +541,6 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         },
       },
     });
-
-    legendData.push(`${rpm} RPM`);
   });
 
   // TDC/BDC + Atmospheric Pressure markLine configuration
@@ -537,8 +577,8 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
   if (series.length > 0) {
     series[0].markLine = markLine;
 
-    // v3.2.0: Add combustion timing markers (single RPM mode only)
-    if (showCombustionTiming && combustionData && combustionData.length > 0 && dataArray.length === 1) {
+    // v3.2.0: Add ignition point (always visible if combustion data exists, single RPM mode only)
+    if (combustionData && combustionData.length > 0 && dataArray.length === 1) {
       const currentRPM = dataArray[0].rpm;
       const curve = interpolateCombustionData(combustionData, currentRPM);
 
@@ -548,27 +588,52 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         const delayEnd = ignitionAngle + curve.delay;
         const durationEnd = delayEnd + curve.duration;
 
-        // Add ignition line to existing markLine
-        series[0].markLine.data.push({
-          name: `Spark: ${curve.timing.toFixed(1)}° BTDC`,
-          xAxis: ignitionAngle,
+        // Find pressure at ignition angle (interpolate from seriesData)
+        const seriesData = series[0].data as [number, number][];
+        let pressureAtIgnition = 0;
+        
+        // Find two nearest points for linear interpolation
+        for (let i = 0; i < seriesData.length - 1; i++) {
+          const [angle1, pressure1] = seriesData[i];
+          const [angle2, pressure2] = seriesData[i + 1];
+          
+          if (angle1 <= ignitionAngle && ignitionAngle <= angle2) {
+            // Linear interpolation
+            const factor = (ignitionAngle - angle1) / (angle2 - angle1);
+            pressureAtIgnition = pressure1 + (pressure2 - pressure1) * factor;
+            break;
+          }
+        }
+
+        // Add ignition point on curve (iPhone-style: point + label, no vertical line)
+        series[0].markPoint = {
+          symbol: 'circle',
+          symbolSize: 10,
+          itemStyle: {
+            color: '#374151',
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
           label: {
             show: true,
-            position: 'insideEndTop',
-            formatter: `Spark: ${curve.timing.toFixed(1)}° BTDC`,
-            fontSize: 10,
-            color: '#16a34a',
+            formatter: 'Ignition',
+            position: 'left',
+            fontSize: 11,
+            color: '#374151',
             fontWeight: 'bold',
+            distance: 10,
           },
-          lineStyle: {
-            color: '#16a34a',
-            type: 'solid',
-            width: 2,
-          },
-        });
+          data: [
+            {
+              coord: [ignitionAngle, pressureAtIgnition],
+              name: 'Ignition',
+            },
+          ],
+        };
 
-        // Add combustion zones (delay + duration) as markArea
-        series[0].markArea = {
+        // Add combustion zones (delay + duration) ONLY when Combustion Timing button is active
+        if (showCombustionTiming) {
+          series[0].markArea = {
           silent: true,
           data: [
             // Delay zone (ignition → combustion start)
@@ -579,7 +644,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
                 label: {
                   show: true,
                   position: 'inside',
-                  formatter: `Delay: ${curve.delay.toFixed(1)}°`,
+                  formatter: `Delay ${curve.delay.toFixed(1)}°`,
                   fontSize: 9,
                   color: '#92400e',
                 },
@@ -600,7 +665,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
                 label: {
                   show: true,
                   position: 'inside',
-                  formatter: `Burn: ${curve.duration.toFixed(1)}°`,
+                  formatter: `Burn ${curve.duration.toFixed(1)}°`,
                   fontSize: 9,
                   color: '#7f1d1d',
                 },
@@ -615,6 +680,80 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
             ],
           ],
         };
+        }
+      }
+    }
+  }
+
+  // v3.3.0: Add Work Phases visualization (Negative/Positive Work arrows) - single RPM mode only
+  if (showWorkPhases && dataArray.length === 1 && series.length > 0 && combustionData && combustionData.length > 0) {
+    const currentRPM = dataArray[0].rpm;
+    const curve = interpolateCombustionData(combustionData, currentRPM);
+
+    if (curve) {
+      const ignitionAngle = 360 - curve.timing;
+
+      // Find mid-pressure for arrow placement
+      const midPressure = (minPressure + maxPressure) / 2;
+
+      // Create Work Phases arrows on crank angle axis
+      const workPhasesMarkLine = {
+        silent: true,
+        symbol: ['none', 'arrow'],
+        symbolSize: 10,
+        label: {
+          show: true,
+          fontSize: 13,
+          fontWeight: 'bold',
+          distance: 15,
+        },
+        lineStyle: {
+          width: 2.5,
+          type: 'solid',
+        },
+        data: [
+          // Negative Work arrow (compression: before ignition)
+          [
+            {
+              name: 'Negative Work',
+              coord: [180, midPressure],  // Start from BDC (180°)
+              label: {
+                formatter: 'Negative Work',
+                position: 'insideMiddleTop',
+                color: '#dc2626',  // red-600
+              },
+              lineStyle: {
+                color: '#dc2626',
+              },
+            },
+            {
+              coord: [ignitionAngle - 10, midPressure],  // End before ignition
+            },
+          ],
+          // Positive Work arrow (expansion: after combustion)
+          [
+            {
+              name: 'Positive Work',
+              coord: [ignitionAngle + 20, midPressure],  // Start after ignition
+              label: {
+                formatter: 'Positive Work',
+                position: 'insideMiddleTop',
+                color: '#1e40af',  // blue-800 (engineering style)
+              },
+              lineStyle: {
+                color: '#1e40af',
+              },
+            },
+            {
+              coord: [540, midPressure],  // End at BDC (540°)
+            },
+          ],
+        ],
+      };
+
+      // Add markLine to first series (merge with existing TDC/BDC markers)
+      if (series[0].markLine) {
+        series[0].markLine.data = [...series[0].markLine.data, ...workPhasesMarkLine.data];
       }
     }
   }
@@ -634,17 +773,6 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
         fontSize: 16,
         fontWeight: 'bold',
       },
-    },
-    legend: {
-      data: legendData,
-      top: 40,
-      left: 'center',
-      textStyle: {
-        fontSize: 12,
-      },
-      itemWidth: 30,
-      itemHeight: 14,
-      icon: 'roundRect',
     },
     xAxis: {
       type: 'value',
