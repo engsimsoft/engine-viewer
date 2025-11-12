@@ -197,10 +197,16 @@ export interface AutoMetadata {
 
 ## Ссылки
 
+### Related ADRs
+- **[ADR 014: .prt File Format](./014-prt-file-format.md)** - Foundation document (Intake System section structure)
+- [ADR 005: .prt Parser and Metadata Separation](005-prt-parser-metadata-separation.md) - Parser implementation
+
+### Code
 - [prtParser.js Implementation](../../backend/src/parsers/formats/prtParser.js) (lines 160-208)
 - [FiltersBar Component](../../frontend/src/components/HomePage/FiltersBar.tsx) (Intake filter)
+
+### Documentation
 - [AUDIT-FINDINGS.md](../../AUDIT-FINDINGS.md) (Section: Carb Intake System Support)
-- [ADR 005: .prt Parser and Metadata Separation](005-prt-parser-metadata-separation.md) (related)
 
 ---
 

@@ -378,10 +378,16 @@ export interface ProjectMetadata {
 
 ## Ссылки
 
+### Related ADRs
+- **[ADR 014: .prt File Format](./014-prt-file-format.md)** - Foundation document (format structure, sections, examples)
+- [ADR 007: Carb Intake System Support](./007-carb-intake-system-support.md) - ITB/IM/Carb detection logic
+- [ADR 011: Lazy .prt Parsing](./011-lazy-prt-parsing.md) - Performance optimization
+- [ADR 013: .prt Table Data Interpolation](./013-prt-table-data-interpolation.md) - Combustion curves interpolation
+
+### Documentation
+- [docs/file-formats/prt-format.md](../file-formats/prt-format.md) - .prt file format detailed specification
 - [PROJECT-METADATA-DASHBOARD-SPEC.md](../../PROJECT-METADATA-DASHBOARD-SPEC.md) - Technical specification
 - [PROJECT-METADATA-DASHBOARD-ROADMAP.md](../../PROJECT-METADATA-DASHBOARD-ROADMAP.md) - Implementation roadmap
-- [docs/file-formats/prt-format.md](../file-formats/prt-format.md) - .prt file format specification
-- [ADR-001: .det file parsing](./001-det-file-parsing.md) - Related decision for .det files
 
 ---
 

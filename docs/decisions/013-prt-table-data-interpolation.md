@@ -200,7 +200,13 @@ interpolate([2000, 3000, 4000], 5000) → null
 
 ## Ссылки
 
-- ADR-012: PV-Diagrams Combustion Timing Implementation
-- ADR-005: .prt Parser and Metadata Separation
+### Related ADRs
+- **[ADR 014: .prt File Format](./014-prt-file-format.md)** - Foundation document (Ignition Model Data section)
+- [ADR 005: .prt Parser and Metadata Separation](./005-prt-parser-metadata-separation.md) - Parser implementation
+- [ADR 012: PV-Diagrams Combustion Timing](./012-pv-diagrams-implementation.md) - Timing markers visualization
+
+### Code
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts:59-109` - Interpolation implementation
+
+### External
 - [Linear Interpolation - Wikipedia](https://en.wikipedia.org/wiki/Linear_interpolation)
-- Code: `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts:59-109`

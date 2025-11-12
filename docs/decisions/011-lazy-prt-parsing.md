@@ -298,6 +298,20 @@ return false;
 
 **Location:** `backend/src/services/fileScanner.js:230-234`
 
+---
+
+## Ссылки
+
+### Related ADRs
+- **[ADR 014: .prt File Format](./014-prt-file-format.md)** - Foundation document (.prt structure)
+- [ADR 005: .prt Parser and Metadata Separation](./005-prt-parser-metadata-separation.md) - Metadata system
+
+### Code
+- `backend/src/services/prtQueue.js` - Background queue implementation
+- `backend/src/services/fileScanner.js` - Cache checking logic
+
+---
+
 ## Next Steps
 
 **Future Optimizations:**

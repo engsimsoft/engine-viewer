@@ -29,7 +29,7 @@ Engine Results Viewer поддерживает несколько формато
 | **DET** | `.det` | Базовые результаты расчётов (24 параметра) | `detParser.js` | [ADR 001](../decisions/001-det-file-format.md) | ✅ Реализовано |
 | **POU** | `.pou` | Расширенные результаты расчётов (71-78 параметров) | `pouParser.js` | [ADR 002](../decisions/002-pou-file-format.md) | ✅ Реализовано |
 | **PVD** | `.pvd` | PV-Diagram (Pressure-Volume диаграммы) | `pvdParser.js` | [ADR 012](../decisions/012-pv-diagrams-implementation.md), [ADR 013](../decisions/013-pv-diagrams-educational-stage-1.md), [ADR 014](../decisions/014-pvd-peak-pressure-angles-fix.md) | ✅ Реализовано |
-| **PRT** | `.prt` | 🔜 Метаданные проекта и настройки расчёта | `prtParser.js` | ADR 003 | ⏳ Планируется |
+| **PRT** | `.prt` | Конфигурация двигателя (engine specs, intake/exhaust, combustion) | `prtParser.js` | [ADR 014](../decisions/014-prt-file-format.md) | ✅ Реализовано |
 | **Trace files** | `.???` | 🔜 ~18 типов файлов с детальными циклами | `traceParser.js` | ADR 004+ | ⏳ Phase 2 |
 
 ---
@@ -188,16 +188,52 @@ Engine Results Viewer поддерживает несколько формато
 
 ---
 
-### 4-5. Будущие форматы ⏳
+### 4. PRT Format ✅
 
-Планируется поддержка оставшихся форматов EngMod4T:
+**Назначение:** "Printable summary" конфигурации двигателя - источник metadata для проектов.
 
-**4. PRT Format** (`.prt`)
-- Метаданные проекта
-- Настройки расчёта
-- Конфигурация двигателя
+**Структура:**
+```
+Line 1-31:   Header (project name, date, DAT4T version)
+Line 33-63:  Engine Data (cylinders, bore, stroke, CR, type)
+Line 67-194: Exhaust/Inlet Ports (valves count)
+Line 199-267: Exhaust System (manifold: "4-2-1", "tri-y")
+Line 271-353: Intake System (ITB/IM/Carb detection)
+Line 356-375: Ignition Model Data (combustion curves)
+Line 380-395: Wall Temperatures
+```
 
-**5. Trace Files** (~18 типов, Phase 2 - MANDATORY)
+**Извлекаемые параметры:**
+- **Engine specs:** cylinders (1-16), type (NA/Turbo/Supercharged), bore/stroke (mm), compression ratio, max RPM, configuration (inline/vee)
+- **Intake System:** "ITB" (Individual Throttle Bodies), "IM" (Intake Manifold), "Carb" (Carburetor/Collector)
+- **Exhaust System:** Pattern (e.g., "4-2-1", "4-1", "tri-y", "8-4-2-1")
+- **Valves:** inlet valves, exhaust valves per cylinder (typically 2+2=4)
+- **Combustion data:** Fuel type, combustion curves (8 RPM points: timing °BTDC, AFR, delay, duration, Vibe parameters)
+
+**Примеры файлов:**
+- [test-data/4_Cyl_ITB.prt](../../test-data/4_Cyl_ITB.prt) (4-cyl NA, ITB, 4-2-1 exhaust)
+- [test-data/BMW M42.prt](../../test-data/BMW M42.prt) (4-cyl NA, ITB)
+- [test-data/Lada 1300 Carb.prt](../../test-data/Lada%201300%20Carb.prt) (4-cyl NA, Carb)
+- [test-data/Vesta 1.6 IM.prt](../../test-data/Vesta%201.6%20IM.prt) (4-cyl NA, IM)
+
+**Детальное описание:**
+- [ADR 014: .prt File Format](../decisions/014-prt-file-format.md) - foundation document
+- [prt-format.md](prt-format.md) - полная спецификация формата
+
+**Парсер:**
+- [backend/src/parsers/formats/prtParser.js](../../backend/src/parsers/formats/prtParser.js)
+
+**Use case:** Auto-population metadata для проектов (cylinders, type, intake/exhaust systems), фильтрация в Dashboard, combustion timing visualization.
+
+**Related ADRs:**
+- [ADR 005: .prt Parser and Metadata Separation](../decisions/005-prt-parser-metadata-separation.md)
+- [ADR 007: Carb Intake System Support](../decisions/007-carb-intake-system-support.md)
+- [ADR 011: Lazy .prt Parsing](../decisions/011-lazy-prt-parsing.md)
+- [ADR 013: .prt Table Data Interpolation](../decisions/013-prt-table-data-interpolation.md)
+
+---
+
+### 5. Trace Files ⏳ (Phase 2)
 - Детальные циклы (давление, температура, массовый расход, и др.)
 - 7 основных типов: .out (Pressure), .mch (Mach), .tpt (Temperature), .cbt (Combustion), .tub (Turbo), .eff (Efficiency), .dme (Mass Flow)
 - Используются для глубокого анализа рабочего цикла vs crank angle (0-720°)
