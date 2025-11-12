@@ -14,9 +14,95 @@
     "intakeSystem": "IM",
     "valvesPerCylinder": 4,
     "inletValves": 2,
-    "exhaustValves": 2
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 2000,
+          "timing": 20,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 3000,
+          "timing": 21.6,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 4000,
+          "timing": 22.9,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 5000,
+          "timing": 24.2,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 6000,
+          "timing": 25.6,
+          "afr": 12.75,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 7000,
+          "timing": 26.9,
+          "afr": 12.75,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 8000,
+          "timing": 28.2,
+          "afr": 12.75,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 9000,
+          "timing": 29.5,
+          "afr": 12.7,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.587Z",
-  "modified": "2025-11-09T19:57:42.587Z"
+  "created": "2025-11-12T07:51:27.210Z",
+  "modified": "2025-11-12T07:51:27.210Z"
 }

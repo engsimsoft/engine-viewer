@@ -14,9 +14,25 @@
     "intakeSystem": "ITB",
     "valvesPerCylinder": 2,
     "inletValves": 1,
-    "exhaustValves": 1
+    "exhaustValves": 1,
+    "combustion": {
+      "fuelType": "AV-GAS",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 8000,
+          "timing": 30,
+          "afr": 12,
+          "delay": 9,
+          "duration": 55,
+          "vibeA": 6.1,
+          "vibeB": 1.25,
+          "beff": 0.9
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.585Z",
-  "modified": "2025-11-09T19:57:42.585Z"
+  "created": "2025-11-12T07:51:27.206Z",
+  "modified": "2025-11-12T07:51:27.206Z"
 }

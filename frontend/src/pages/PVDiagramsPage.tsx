@@ -76,11 +76,8 @@ export default function PVDiagramsPage() {
 
         const result = await response.json();
         const curves = result.data?.metadata?.auto?.combustion?.curves || [];
-        setCombustionData(curves);
 
-        if (curves.length > 0) {
-          console.log(`[PVDiagramsPage] Loaded ${curves.length} combustion timing curves`);
-        }
+        setCombustionData(curves);
       } catch (error) {
         console.error('[PVDiagramsPage] Error loading combustion data:', error);
       }

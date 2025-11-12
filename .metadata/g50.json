@@ -14,9 +14,55 @@
     "intakeSystem": "ITB",
     "valvesPerCylinder": 2,
     "inletValves": 1,
-    "exhaustValves": 1
+    "exhaustValves": 1,
+    "combustion": {
+      "fuelType": "AV-GAS",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 5000,
+          "timing": 24.3,
+          "afr": 12.8,
+          "delay": 11,
+          "duration": 44,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.85
+        },
+        {
+          "rpm": 6000,
+          "timing": 25.8,
+          "afr": 12.8,
+          "delay": 12,
+          "duration": 44,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.85
+        },
+        {
+          "rpm": 7000,
+          "timing": 27.4,
+          "afr": 12.8,
+          "delay": 13,
+          "duration": 45,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.85
+        },
+        {
+          "rpm": 8000,
+          "timing": 29,
+          "afr": 12.8,
+          "delay": 14,
+          "duration": 46,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.85
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.586Z",
-  "modified": "2025-11-09T19:57:42.586Z"
+  "created": "2025-11-12T07:51:27.209Z",
+  "modified": "2025-11-12T07:51:27.209Z"
 }

@@ -14,9 +14,85 @@
     "intakeSystem": "Carb",
     "valvesPerCylinder": 2,
     "inletValves": 1,
-    "exhaustValves": 1
+    "exhaustValves": 1,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 3000,
+          "timing": 20,
+          "afr": 11.2,
+          "delay": 22.99,
+          "duration": 85,
+          "vibeA": 3.69,
+          "vibeB": 0.647,
+          "beff": 0.835
+        },
+        {
+          "rpm": 4000,
+          "timing": 21.7,
+          "afr": 11.2,
+          "delay": 22.46,
+          "duration": 86.97,
+          "vibeA": 6.24,
+          "vibeB": 0.756,
+          "beff": 0.835
+        },
+        {
+          "rpm": 5000,
+          "timing": 23.5,
+          "afr": 11.6,
+          "delay": 20.62,
+          "duration": 69.45,
+          "vibeA": 5.66,
+          "vibeB": 0.834,
+          "beff": 0.835
+        },
+        {
+          "rpm": 6000,
+          "timing": 25.2,
+          "afr": 11.8,
+          "delay": 20.52,
+          "duration": 60.94,
+          "vibeA": 5.48,
+          "vibeB": 0.844,
+          "beff": 0.835
+        },
+        {
+          "rpm": 7000,
+          "timing": 26.9,
+          "afr": 12,
+          "delay": 20.38,
+          "duration": 55.61,
+          "vibeA": 5.43,
+          "vibeB": 0.897,
+          "beff": 0.835
+        },
+        {
+          "rpm": 8000,
+          "timing": 28.6,
+          "afr": 12.42,
+          "delay": 21.12,
+          "duration": 55.98,
+          "vibeA": 5.35,
+          "vibeB": 0.942,
+          "beff": 0.835
+        },
+        {
+          "rpm": 9000,
+          "timing": 30.3,
+          "afr": 12.4,
+          "delay": 21.47,
+          "duration": 56.72,
+          "vibeA": 5.43,
+          "vibeB": 0.951,
+          "beff": 0.835
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.587Z",
-  "modified": "2025-11-09T19:57:42.587Z"
+  "created": "2025-11-12T07:51:27.209Z",
+  "modified": "2025-11-12T07:51:27.209Z"
 }

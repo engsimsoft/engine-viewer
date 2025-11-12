@@ -40,6 +40,75 @@ interface ChartOptionsParams {
 }
 
 /**
+ * Interpolate combustion data for a target RPM using linear interpolation
+ *
+ * @param combustionData - Array of combustion curves from metadata
+ * @param targetRPM - Target RPM to interpolate for
+ * @returns Interpolated combustion curve, or null if target RPM is out of range
+ *
+ * @example
+ * // Exact match
+ * interpolateCombustionData(curves, 5000) → returns exact curve at 5000 RPM
+ *
+ * // Interpolation between 3000 and 4000
+ * interpolateCombustionData(curves, 3500) → returns interpolated curve
+ *
+ * // Out of range
+ * interpolateCombustionData(curves, 1000) → returns null
+ */
+function interpolateCombustionData(
+  combustionData: CombustionCurve[],
+  targetRPM: number
+): CombustionCurve | null {
+  if (!combustionData || combustionData.length === 0) {
+    return null;
+  }
+
+  // Sort curves by RPM (ascending)
+  const sortedCurves = [...combustionData].sort((a, b) => a.rpm - b.rpm);
+
+  // Check if target RPM is exact match
+  const exactMatch = sortedCurves.find((c) => c.rpm === targetRPM);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // Find two nearest points for interpolation
+  let lowerCurve: CombustionCurve | null = null;
+  let upperCurve: CombustionCurve | null = null;
+
+  for (let i = 0; i < sortedCurves.length - 1; i++) {
+    if (sortedCurves[i].rpm < targetRPM && sortedCurves[i + 1].rpm > targetRPM) {
+      lowerCurve = sortedCurves[i];
+      upperCurve = sortedCurves[i + 1];
+      break;
+    }
+  }
+
+  // Target RPM is out of range
+  if (!lowerCurve || !upperCurve) {
+    return null;
+  }
+
+  // Calculate interpolation factor
+  const factor = (targetRPM - lowerCurve.rpm) / (upperCurve.rpm - lowerCurve.rpm);
+
+  // Linear interpolation for all combustion curve fields
+  const interpolated: CombustionCurve = {
+    rpm: targetRPM,
+    timing: lowerCurve.timing + (upperCurve.timing - lowerCurve.timing) * factor,
+    afr: lowerCurve.afr + (upperCurve.afr - lowerCurve.afr) * factor,
+    delay: lowerCurve.delay + (upperCurve.delay - lowerCurve.delay) * factor,
+    duration: lowerCurve.duration + (upperCurve.duration - lowerCurve.duration) * factor,
+    vibeA: lowerCurve.vibeA + (upperCurve.vibeA - lowerCurve.vibeA) * factor,
+    vibeB: lowerCurve.vibeB + (upperCurve.vibeB - lowerCurve.vibeB) * factor,
+    beff: lowerCurve.beff + (upperCurve.beff - lowerCurve.beff) * factor,
+  };
+
+  return interpolated;
+}
+
+/**
  * Create P-V Diagram chart options (Normal - Linear axes)
  *
  * X-axis: Volume (cm³)
@@ -471,7 +540,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
     // v3.2.0: Add combustion timing markers (single RPM mode only)
     if (showCombustionTiming && combustionData && combustionData.length > 0 && dataArray.length === 1) {
       const currentRPM = dataArray[0].rpm;
-      const curve = combustionData.find((c) => c.rpm === currentRPM);
+      const curve = interpolateCombustionData(combustionData, currentRPM);
 
       if (curve) {
         // Calculate crank angles

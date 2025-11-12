@@ -14,9 +14,95 @@
     "intakeSystem": "ITB",
     "valvesPerCylinder": 4,
     "inletValves": 2,
-    "exhaustValves": 2
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 2000,
+          "timing": 16.8,
+          "afr": 12.57,
+          "delay": 15.02,
+          "duration": 37.88,
+          "vibeA": 4.6,
+          "vibeB": 0.935,
+          "beff": 0.9
+        },
+        {
+          "rpm": 3000,
+          "timing": 18.6,
+          "afr": 12.57,
+          "delay": 15.78,
+          "duration": 45.45,
+          "vibeA": 5.14,
+          "vibeB": 0.902,
+          "beff": 0.9
+        },
+        {
+          "rpm": 4000,
+          "timing": 20.3,
+          "afr": 12.57,
+          "delay": 16.62,
+          "duration": 44.37,
+          "vibeA": 5.28,
+          "vibeB": 0.921,
+          "beff": 0.9
+        },
+        {
+          "rpm": 5000,
+          "timing": 22,
+          "afr": 12.57,
+          "delay": 16.43,
+          "duration": 37.24,
+          "vibeA": 5.22,
+          "vibeB": 0.894,
+          "beff": 0.9
+        },
+        {
+          "rpm": 6000,
+          "timing": 23.7,
+          "afr": 12.57,
+          "delay": 15.46,
+          "duration": 37.48,
+          "vibeA": 5.51,
+          "vibeB": 0.993,
+          "beff": 0.9
+        },
+        {
+          "rpm": 7000,
+          "timing": 25.4,
+          "afr": 12.57,
+          "delay": 15.69,
+          "duration": 36.04,
+          "vibeA": 5.2,
+          "vibeB": 0.989,
+          "beff": 0.9
+        },
+        {
+          "rpm": 8000,
+          "timing": 27.2,
+          "afr": 12.57,
+          "delay": 15.81,
+          "duration": 35.81,
+          "vibeA": 5.62,
+          "vibeB": 0.952,
+          "beff": 0.9
+        },
+        {
+          "rpm": 9000,
+          "timing": 28.9,
+          "afr": 12.57,
+          "delay": 16.24,
+          "duration": 37.98,
+          "vibeA": 5.8,
+          "vibeB": 1.018,
+          "beff": 0.9
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.588Z",
-  "modified": "2025-11-09T19:57:42.588Z"
+  "created": "2025-11-12T07:51:27.210Z",
+  "modified": "2025-11-12T07:51:27.210Z"
 }

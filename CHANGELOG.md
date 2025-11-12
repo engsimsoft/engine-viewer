@@ -9,6 +9,53 @@
 
 ## [Unreleased]
 
+## [3.2.1] - 2025-11-12
+
+### Fixed - Combustion Timing Interpolation
+
+**Problem:**
+- Combustion timing markers не отображались для промежуточных RPM (3500, 4500, 5500, 6500, 7500)
+- .prt файлы содержат табличные данные только для фиксированных точек (2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000)
+- .pvd файлы существуют для промежуточных RPM
+- Строгое сравнение `combustionData.find((c) => c.rpm === currentRPM)` не находило данные
+
+**Solution:**
+- Реализована линейная интерполяция между двумя ближайшими точками в таблице
+- Новая функция `interpolateCombustionData()` в `chartOptionsHelpers.ts`
+- Интерполирует все 8 полей: timing, afr, delay, duration, vibeA, vibeB, beff
+- Точные совпадения возвращаются напрямую (optimization)
+- RPM вне диапазона таблицы возвращают `null` (markers не показываются)
+
+**Impact:**
+- ✅ Combustion timing markers теперь работают для **любого RPM** в диапазоне таблицы
+- ✅ Физически обоснованные значения (плавное изменение параметров)
+- ✅ Паттерн применим к другим табличным данным из .prt файлов
+
+**Technical Details:**
+- Linear interpolation formula: `value = valueLower + (valueUpper - valueLower) * factor`
+- Factor: `(targetRPM - rpmLower) / (rpmUpper - rpmLower)`
+- Performance: O(n) где n ≈ 8 точек в таблице
+- Edge cases: exact match, out of range (< min, > max)
+
+**Files Changed:**
+- `frontend/src/components/pv-diagrams/chartOptionsHelpers.ts` - interpolation function (59-109)
+- Removed debug logs from: `chartOptionsHelpers.ts`, `PVDiagramsPage.tsx`, `backend/src/services/metadataService.js`
+
+**Documentation:**
+- Created ADR-013: Linear Interpolation for .prt Tabular Data
+- Documents ПОЧЕМУ linear interpolation, alternatives considered, future applications
+
+**Verification:**
+- ✅ Build successful (TypeScript no errors)
+- ✅ Tested on all 35 projects
+- ✅ RPM exact matches work (5000, 6000, 7000)
+- ✅ RPM intermediate values work (3500, 4500, 5500, 6500, 7500)
+- ✅ RPM out of range handled correctly (markers не показываются)
+
+### Changed
+- Re-parsed all project metadata files to include combustion data
+- 34 metadata files updated (drag-ilya-16v-itb and others now have combustion curves)
+
 ## [3.2.0] - 2025-01-11
 
 ### Added - Combustion Timing Visualization (Educational Enhancement)

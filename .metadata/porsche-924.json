@@ -14,9 +14,85 @@
     "intakeSystem": "IM",
     "valvesPerCylinder": 2,
     "inletValves": 1,
-    "exhaustValves": 1
+    "exhaustValves": 1,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 2000,
+          "timing": 12.99,
+          "afr": 12.6,
+          "delay": 4.5,
+          "duration": 45,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 3000,
+          "timing": 17.2,
+          "afr": 12.6,
+          "delay": 4.93,
+          "duration": 49.3,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 4000,
+          "timing": 19.4,
+          "afr": 12.55,
+          "delay": 5.36,
+          "duration": 53.6,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 5000,
+          "timing": 21.5,
+          "afr": 12.5,
+          "delay": 5.76,
+          "duration": 57.9,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 6000,
+          "timing": 23.7,
+          "afr": 12.5,
+          "delay": 6.26,
+          "duration": 62.6,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 7000,
+          "timing": 25.94,
+          "afr": 12.45,
+          "delay": 6.65,
+          "duration": 66.5,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        },
+        {
+          "rpm": 8000,
+          "timing": 28.13,
+          "afr": 12.42,
+          "delay": 7.07,
+          "duration": 70.7,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.84
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.585Z",
-  "modified": "2025-11-09T19:57:42.585Z"
+  "created": "2025-11-12T07:51:27.205Z",
+  "modified": "2025-11-12T07:51:27.205Z"
 }

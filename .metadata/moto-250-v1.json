@@ -14,9 +14,155 @@
     "intakeSystem": "ITB",
     "valvesPerCylinder": 4,
     "inletValves": 2,
-    "exhaustValves": 2
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 2000,
+          "timing": 24.3,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 2500,
+          "timing": 24.8,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 3000,
+          "timing": 25.3,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 3500,
+          "timing": 25.9,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 4000,
+          "timing": 26.4,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 5000,
+          "timing": 27.5,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 5500,
+          "timing": 27.5,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 6000,
+          "timing": 27.6,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 6500,
+          "timing": 28,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 7000,
+          "timing": 28,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 8000,
+          "timing": 27,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 9000,
+          "timing": 27,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 10000,
+          "timing": 27,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        },
+        {
+          "rpm": 11000,
+          "timing": 27,
+          "afr": 12.8,
+          "delay": 9,
+          "duration": 50,
+          "vibeA": 6,
+          "vibeB": 1.25,
+          "beff": 0.875
+        }
+      ]
+    }
   },
   "manual": {},
-  "created": "2025-11-09T19:57:42.586Z",
-  "modified": "2025-11-09T19:57:42.586Z"
+  "created": "2025-11-12T07:51:27.208Z",
+  "modified": "2025-11-12T07:51:27.208Z"
 }
