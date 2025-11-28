@@ -31,9 +31,9 @@ import './App.css';
  * 2. ProjectOverviewPage → select analysis type (Performance, Traces, etc.)
  * 3. Analysis Page → view charts and data
  *
- * Shortcuts:
- * - HomePage "Open Project" button → `/project/:id/performance` (direct to charts)
- * - HomePage "⋮" menu → `/project/:id` (Project Overview)
+ * Navigation:
+ * - HomePage "Open Project" button → `/project/:id` (Project Overview)
+ * - ProjectOverviewPage cards → specific analysis pages (Performance, Diagrams, etc.)
  *
  * v3.0 Features:
  * - Project Overview as central hub ✅

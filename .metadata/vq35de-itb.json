@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "vq35de-itb",
-  "displayName": "",
+  "displayName": "BR 03",
   "auto": {
     "cylinders": 6,
     "type": "NA",
@@ -102,7 +102,14 @@
       ]
     }
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "",
+    "tags": [],
+    "status": "active",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-12T07:51:27.203Z",
-  "modified": "2025-11-12T07:51:27.203Z"
+  "modified": "2025-11-25T11:13:07.349Z"
 }

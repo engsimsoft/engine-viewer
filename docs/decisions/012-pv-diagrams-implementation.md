@@ -1,6 +1,6 @@
 # ADR 012: PV-Diagrams Implementation & Educational Enhancement
 
-**Дата:** 2025-01-11 (Start) → 2025-11-12 (Stage 7)
+**Дата:** 2025-01-11 (Start) → 2025-11-12 (Stage 8)
 **Статус:** Принято
 **Автор:** Claude Code + User
 
@@ -25,6 +25,7 @@ Engine Results Viewer v3.0.0 поддерживает .det (performance data) и
 - **Stage 5**: Multi-RPM comparison UX improvements (per-RPM cards, tooltip fix)
 - **Stage 6**: Combustion timing visualization (ignition, delay, burn phases)
 - **Stage 7**: Visual refinements & Work Phases (legend removal, ignition redesign, educational arrows)
+- **Stage 8**: Empty State & Card Rename (iPhone-style feature discovery, clarity)
 
 ---
 
@@ -613,6 +614,102 @@ setShowWorkPhases: (value: boolean) => void;
 - ✅ Puppeteer: Проверено в браузере - no console errors
 - ✅ Colors: Красный + синий (инженерный стиль)
 - ✅ Font size: fontSize: 13 для Work Phases labels (читаемость)
+
+---
+
+### Stage 8: Empty State & Card Rename (v3.4.0)
+
+**Проблема:**
+- Карточка "PV-Diagrams" вводит в заблуждение (там 3 типа диаграмм, не только P-V)
+- Empty State показывает только текст "Select 2-4 RPMs..." - не использует пространство эффективно
+- Пользователь не видит ЧТО можно делать в этом разделе без чтения инструкций
+- Противоречит iPhone-style philosophy: программа должна быть self-explanatory
+
+**Требования:**
+- Rename карточки на что-то более точное и краткое
+- Empty State должен показывать возможности функционала
+- Visual feature discovery без необходимости читать мануалы
+- Clean, professional appearance (как macOS Big Sur cards)
+
+**Решение:**
+
+**8.1 Card Rename (ProjectOverviewPage):**
+- **До**: "PV-Diagrams" | "Pressure-Volume analysis"
+- **После**: "Diagrams" | "P-V • Log P-V • P-α"
+- **Причина**: 
+  - Короче, проще ("Diagrams" = universal)
+  - Subtitle сразу показывает все типы диаграмм
+  - Нет misleading expectations
+
+**8.2 Empty State Feature Discovery:**
+- **Новый компонент**: `EmptyState.tsx`
+- **3 Feature Cards** с иконками (Lucide):
+  1. **📊 Three Diagram Types**:
+     - P-V: Thermodynamic cycle work
+     - Log P-V: Polytropic analysis
+     - P-α: Pressure vs Crank Angle
+  2. **🔄 Multi-RPM Comparison**:
+     - Compare 2-4 engine speeds simultaneously
+     - Visualize breathing efficiency across RPM range
+  3. **🔥 Advanced Analysis**:
+     - Combustion Timing (ignition, delay, burn phases)
+     - Work Phases (compression vs expansion)
+     - Pumping Losses zoom (0-2 bar detail)
+- **Bottom hint**: "👈 Select 2-4 RPM points from the left panel to start"
+
+**8.3 Visual Design (iPhone-style):**
+```tsx
+// EmptyState.tsx
+<div className="max-w-4xl mx-auto px-8 py-12 text-center">
+  {/* Header */}
+  <h2>Explore Thermodynamic Cycle Analysis</h2>
+  <p>Professional tools for engine cycle visualization</p>
+
+  {/* 3-column grid */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {features.map((feature) => (
+      <div className="bg-card rounded-xl border p-6 hover:shadow-md">
+        <Icon /> {/* Lucide icon */}
+        <h3>{feature.title}</h3>
+        <ul>{feature.items}</ul>
+      </div>
+    ))}
+  </div>
+
+  {/* Subtle hint */}
+  <div>👈 Select 2-4 RPM points...</div>
+</div>
+```
+
+**Реализация:**
+- **EmptyState.tsx**: Standalone component (reusable)
+- **PVDiagramChart.tsx**: Replace simple empty state (lines 145-157) с `<EmptyState />`
+- **ProjectOverviewPage.tsx**: Update card title/description
+
+**Files Modified:**
+- `frontend/src/pages/ProjectOverviewPage.tsx` - card rename
+- `frontend/src/components/pv-diagrams/EmptyState.tsx` - NEW (100+ lines)
+- `frontend/src/components/pv-diagrams/PVDiagramChart.tsx` - integrate EmptyState
+
+**Educational Impact:**
+- 🎓 **Self-explanatory**: Пользователь сразу видит все возможности
+- 🎓 **Visual learning**: Cards с иконками понятнее текста
+- 🎓 **No manual needed**: iPhone-style UX - все очевидно
+- 🎓 **Professional appearance**: Clean design, rounded corners, hover effects
+- 🎓 **Onboarding without friction**: Feature discovery без чтения документации
+
+**Design Philosophy:**
+- ✅ "Empty space is wasted space" - используем для onboarding
+- ✅ iPhone-style: Visual, clean, self-explanatory
+- ✅ Carefully chosen defaults: не перегружаем, но показываем key features
+- ✅ Professional appearance: Big Sur aesthetic (rounded-xl, subtle shadows)
+
+**Verification:**
+- ✅ Build: TypeScript no errors
+- ✅ UI: EmptyState renders correctly when no RPMs selected
+- ✅ Responsive: 3-column grid collapses to 1 column on mobile
+- ✅ Hover effects: Cards have subtle shadow on hover
+- ✅ Icons: Lucide icons (LineChart, ArrowLeftRight, Flame) render correctly
 
 ---
 

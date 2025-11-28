@@ -14,6 +14,7 @@ import {
   createLogPVChartOptions,
   createPAlphaChartOptions,
 } from './chartOptionsHelpers';
+import { EmptyState } from './EmptyState';
 
 interface PVDiagramChartProps {
   /** Array of parsed PVD data for multi-RPM comparison */
@@ -65,6 +66,7 @@ export function PVDiagramChart({
   const showCombustionTiming = useAppStore((state) => state.showCombustionTiming); // v3.2.0
   const showPumpingLosses = useAppStore((state) => state.showPumpingLosses);
   const showWorkPhases = useAppStore((state) => state.showWorkPhases); // v3.3.0
+  const theme = useAppStore((state) => state.theme); // Theme for adaptive colors
   const { animation, showGrid } = chartSettings;
 
   // Generate dynamic filename for export
@@ -109,6 +111,7 @@ export function PVDiagramChart({
       combustionData, // v3.2.0
       showCombustionTiming, // v3.2.0
       showWorkPhases, // v3.3.0
+      theme, // Theme for adaptive colors
     };
 
     // Select chart type based on selectedDiagramType
@@ -121,7 +124,7 @@ export function PVDiagramChart({
       default:
         return createPVChartOptions(params);
     }
-  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType, combustionData, showCombustionTiming, showWorkPhases]);
+  }, [dataArray, animation, showGrid, showPumpingLosses, selectedDiagramType, combustionData, showCombustionTiming, showWorkPhases, theme]);
 
   // Loading state
   if (loading) {
@@ -143,18 +146,7 @@ export function PVDiagramChart({
 
   // Empty state - no RPMs selected
   if (dataArray.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
-        <div className="text-center space-y-2">
-          <p className="text-lg font-medium text-muted-foreground">
-            Select 2-4 RPMs to compare engine cycles
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Use the left panel to select RPM points for comparison
-          </p>
-        </div>
-      </div>
-    );
+    return <EmptyState />;
   }
 
   return (

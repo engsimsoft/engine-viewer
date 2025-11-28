@@ -38,6 +38,7 @@ interface ChartOptionsParams {
   combustionData?: CombustionCurve[]; // v3.2.0: Combustion timing curves
   showCombustionTiming?: boolean;     // v3.2.0: Show combustion timing markers
   showWorkPhases?: boolean;           // v3.3.0: Show Negative/Positive Work phases
+  theme?: 'light' | 'dark';           // Theme for adaptive colors
 }
 
 /**
@@ -118,7 +119,7 @@ function interpolateCombustionData(
  * Multi-RPM: Each RPM plotted as separate series (Cylinder 1 only)
  */
 export function createPVChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, showPumpingLosses = false, baseConfig, combustionData } = params;
+  const { dataArray, showGrid, showPumpingLosses = false, baseConfig, combustionData, theme = 'light' } = params;
 
   // Calculate Volume and Pressure ranges FIRST (needed for label decision)
   let minVolume = Infinity;
@@ -248,7 +249,7 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
             formatter: 'Ignition',
             position: 'left',
             fontSize: 11,
-            color: '#374151',
+            color: theme === 'dark' ? '#9ca3af' : '#374151',  // gray-400 for dark, gray-700 for light
             fontWeight: 'bold',
             distance: 10,
           },
@@ -284,6 +285,7 @@ export function createPVChartOptions(params: ChartOptionsParams): EChartsOption 
       textStyle: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: theme === 'dark' ? '#e5e7eb' : '#374151',  // gray-200 for dark, gray-700 for light
       },
     },
     xAxis: {
@@ -484,7 +486,7 @@ export function createLogPVChartOptions(params: ChartOptionsParams): EChartsOpti
  * Educational: Will add cycle phases, valve timing markers in future stages
  */
 export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOption {
-  const { dataArray, showGrid, baseConfig, combustionData, showCombustionTiming, showWorkPhases = false } = params;
+  const { dataArray, showGrid, baseConfig, combustionData, showCombustionTiming, showWorkPhases = false, theme = 'light' } = params;
 
   // Calculate Pressure range
   let minPressure = Infinity;
@@ -619,7 +621,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
             formatter: 'Ignition',
             position: 'left',
             fontSize: 11,
-            color: '#374151',
+            color: theme === 'dark' ? '#9ca3af' : '#374151',  // gray-400 for dark, gray-700 for light
             fontWeight: 'bold',
             distance: 10,
           },
@@ -646,7 +648,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
                   position: 'inside',
                   formatter: `Delay ${curve.delay.toFixed(1)}°`,
                   fontSize: 9,
-                  color: '#92400e',
+                  color: '#fb923c',  // Bright orange for dark theme visibility
                 },
                 itemStyle: {
                   color: 'rgba(251, 146, 60, 0.15)', // Light orange
@@ -667,7 +669,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
                   position: 'inside',
                   formatter: `Burn ${curve.duration.toFixed(1)}°`,
                   fontSize: 9,
-                  color: '#7f1d1d',
+                  color: '#f87171',  // Bright red for dark theme visibility
                 },
                 itemStyle: {
                   color: 'rgba(239, 68, 68, 0.12)', // Light red
@@ -720,10 +722,10 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
               label: {
                 formatter: 'Negative Work',
                 position: 'insideMiddleTop',
-                color: '#dc2626',  // red-600
+                color: '#ef4444',  // Brighter red for dark theme
               },
               lineStyle: {
-                color: '#dc2626',
+                color: '#ef4444',
               },
             },
             {
@@ -738,7 +740,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
               label: {
                 formatter: 'Positive Work',
                 position: 'insideMiddleTop',
-                color: '#1e40af',  // blue-800 (engineering style)
+                color: '#60a5fa',  // Bright blue for dark theme
               },
               lineStyle: {
                 color: '#1e40af',
@@ -772,6 +774,7 @@ export function createPAlphaChartOptions(params: ChartOptionsParams): EChartsOpt
       textStyle: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: theme === 'dark' ? '#e5e7eb' : '#374151',  // gray-200 for dark, gray-700 for light
       },
     },
     xAxis: {

@@ -47,8 +47,8 @@ export default function ProjectOverviewPage() {
     },
     {
       id: 'pvDiagrams',
-      title: 'PV-Diagrams',
-      description: 'Pressure-Volume analysis',
+      title: 'Diagrams',
+      description: 'P-V • Log P-V • P-α',
       href: `/project/${id}/pv-diagrams`,
       ...summary.availability.pvDiagrams
     },

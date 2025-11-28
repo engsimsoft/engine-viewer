@@ -222,6 +222,75 @@ export async function getPVDData(projectId: string, fileName: string): Promise<P
 }
 
 // ====================================================================
+// Calculations API
+// ====================================================================
+
+/**
+ * Rename a calculation (marker) in a project
+ *
+ * @param projectId - Project ID
+ * @param calculationId - Current calculation ID (e.g., "$3.1 R 0.86")
+ * @param newId - New calculation ID (e.g., "$baseline")
+ * @returns Promise with rename result
+ */
+export async function renameCalculation(
+  projectId: string,
+  calculationId: string,
+  newId: string
+): Promise<{
+  projectId: string;
+  oldId: string;
+  newId: string;
+  backupPath: string;
+}> {
+  try {
+    const encodedCalcId = encodeURIComponent(calculationId);
+    const { data } = await api.put(
+      `/project/${projectId}/calculations/${encodedCalcId}`,
+      { newId }
+    );
+
+    if (data && data.success && data.data) {
+      return data.data;
+    }
+    throw new Error('Invalid response format from server');
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+/**
+ * Delete a calculation from a project
+ *
+ * @param projectId - Project ID
+ * @param calculationId - Calculation ID to delete (e.g., "$2")
+ * @returns Promise with deletion result
+ */
+export async function deleteCalculation(
+  projectId: string,
+  calculationId: string
+): Promise<{
+  projectId: string;
+  deletedId: string;
+  linesDeleted: number;
+  backupPath: string;
+}> {
+  try {
+    const encodedCalcId = encodeURIComponent(calculationId);
+    const { data } = await api.delete(
+      `/project/${projectId}/calculations/${encodedCalcId}`
+    );
+
+    if (data && data.success && data.data) {
+      return data.data;
+    }
+    throw new Error('Invalid response format from server');
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+// ====================================================================
 // Export default API object
 // ====================================================================
 
@@ -234,6 +303,8 @@ export const projectsApi = {
   healthCheck,
   getPVDFiles,
   getPVDData,
+  renameCalculation,
+  deleteCalculation,
 };
 
 export default projectsApi;

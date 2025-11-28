@@ -126,12 +126,12 @@ export default function PVDiagramsPage() {
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header with breadcrumbs and export buttons */}
         <Header
-          title="PV-Diagrams"
+          title="Diagrams"
           backHref={`/project/${projectId}`}
           breadcrumbs={[
             { label: 'Home', href: '/' },
             { label: projectId || 'Project', href: `/project/${projectId}` },
-            { label: 'PV-Diagrams', href: `/project/${projectId}/pv-diagrams` },
+            { label: 'Diagrams', href: `/project/${projectId}/pv-diagrams` },
           ]}
         />
 

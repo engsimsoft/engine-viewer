@@ -208,12 +208,14 @@ export function getBaseChartConfig(animation = true): Partial<EChartsOption> {
  * @param min - Минимальное значение оси (опционально, для автоматического масштабирования)
  * @param max - Максимальное значение оси (опционально, для автоматического масштабирования)
  * @param showGrid - Show/hide grid lines (from settings)
+ * @param theme - Theme ('light' | 'dark') for adaptive colors
  */
 export function createXAxis(
   name: string = 'RPM',
   min?: number,
   max?: number,
-  showGrid = true
+  showGrid = true,
+  theme: 'light' | 'dark' = 'light'
 ): EChartsOption['xAxis'] {
   return {
     type: 'value',
@@ -223,17 +225,18 @@ export function createXAxis(
     nameTextStyle: {
       fontSize: 14,
       fontWeight: 'bold',
+      color: theme === 'dark' ? '#9ca3af' : '#4b5563',  // gray-400 for dark, gray-600 for light
     },
     min, // Автоматическое масштабирование если задано
     max, // Автоматическое масштабирование если задано
     axisLine: {
       lineStyle: {
-        color: '#666',
+        color: theme === 'dark' ? '#9ca3af' : '#4b5563',
       },
     },
     axisLabel: {
       fontSize: 11,
-      color: '#666',
+      color: theme === 'dark' ? '#9ca3af' : '#4b5563',
     },
     splitLine: {
       show: showGrid,
@@ -254,6 +257,7 @@ export function createXAxis(
  * @param showGrid - Show/hide grid lines (from settings, only for left axis)
  * @param min - Minimum value for Y axis (optional)
  * @param max - Maximum value for Y axis (optional)
+ * @param theme - Theme ('light' | 'dark') for adaptive colors
  */
 export function createYAxis(
   name: string,
@@ -261,7 +265,8 @@ export function createYAxis(
   color?: string,
   showGrid = true,
   min?: number,
-  max?: number
+  max?: number,
+  theme: 'light' | 'dark' = 'light'
 ): EChartsOption['yAxis'] {
   return {
     type: 'value',
@@ -272,17 +277,17 @@ export function createYAxis(
     nameTextStyle: {
       fontSize: 14,
       fontWeight: 'bold',
-      color: color || '#666',
+      color: color || (theme === 'dark' ? '#9ca3af' : '#4b5563'),
     },
     axisLine: {
       show: true,
       lineStyle: {
-        color: color || '#666',
+        color: color || (theme === 'dark' ? '#9ca3af' : '#4b5563'),
       },
     },
     axisLabel: {
       fontSize: 11,
-      color: color || '#666',
+      color: color || (theme === 'dark' ? '#9ca3af' : '#4b5563'),
     },
     splitLine: {
       show: position === 'left' && showGrid,

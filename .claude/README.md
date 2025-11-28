@@ -13,7 +13,29 @@
 ├── settings.local.json     # Personal settings (git-ignored)
 ├── .mcp.json               # MCP servers configuration (tracked in git)
 └── README.md               # This file
+
+.github/
+├── copilot-instructions.md # 🔴 Instructions for GitHub Copilot
+└── instructions/
+    ├── frontend.instructions.md  # Path-specific: frontend/**
+    └── backend.instructions.md   # Path-specific: backend/**
 ```
+
+---
+
+## 🤝 Multi-Agent Setup
+
+This project supports **both Claude Code and GitHub Copilot** with synchronized rules:
+
+| Agent | Entry Point | Details |
+|-------|-------------|---------|
+| **Claude Code** | `CLAUDE.md` → `.claude/AGENT_RULES.md` | Full rules with MCP support |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | Adapted rules for Copilot |
+
+**Keeping rules in sync:**
+- Core rules are the same in both files
+- When updating `AGENT_RULES.md` → also update `copilot-instructions.md`
+- Path-specific instructions (frontend/backend) only in `.github/instructions/`
 
 ---
 

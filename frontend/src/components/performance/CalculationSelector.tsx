@@ -1,6 +1,19 @@
+import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { RenameCalculationDialog } from './RenameCalculationDialog';
+import { DeleteCalculationDialog } from './DeleteCalculationDialog';
+import { useCalculationMutations } from '@/hooks/useCalculationMutations';
 import type { Calculation } from '@/types';
 
 // Цвета для расчётов (из config.yaml)
@@ -25,6 +38,8 @@ interface CalculationSelectorProps {
   onToggle: (calculationId: string) => void;
   isMaxReached: boolean;
   maxCount: number;
+  projectId?: string; // Для mutations
+  onDataChange?: () => void; // Callback для refetch после изменений
 }
 
 /**
@@ -52,8 +67,32 @@ export function CalculationSelector({
   onToggle,
   isMaxReached,
   maxCount,
+  projectId,
+  onDataChange,
 }: CalculationSelectorProps) {
   const isSelected = (id: string) => selectedIds.includes(id);
+
+  // State для dialog'ов
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCalculation, setSelectedCalculation] = useState<Calculation | null>(null);
+
+  // Mutations hook
+  const { renameCalculation, deleteCalculation } = useCalculationMutations(
+    projectId,
+    onDataChange
+  );
+
+  // Handlers
+  const handleRename = (calculation: Calculation) => {
+    setSelectedCalculation(calculation);
+    setRenameDialogOpen(true);
+  };
+
+  const handleDelete = (calculation: Calculation) => {
+    setSelectedCalculation(calculation);
+    setDeleteDialogOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -116,6 +155,36 @@ export function CalculationSelector({
                 {calculation.name}
               </Label>
 
+              {/* Dropdown menu с действиями */}
+              {projectId && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleRename(calculation)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(calculation)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
               {/* Бейдж для выбранного расчёта */}
               {selected && (
                 <Badge variant="default" className="ml-auto">
@@ -139,6 +208,25 @@ export function CalculationSelector({
         <p className="text-sm text-muted-foreground">
           Select calculations to display on chart
         </p>
+      )}
+
+      {/* Dialogs */}
+      {selectedCalculation && (
+        <>
+          <RenameCalculationDialog
+            open={renameDialogOpen}
+            onOpenChange={setRenameDialogOpen}
+            currentName={selectedCalculation.name}
+            onRename={(newId) => renameCalculation(selectedCalculation.id, newId)}
+          />
+
+          <DeleteCalculationDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            calculationName={selectedCalculation.name}
+            onConfirm={() => deleteCalculation(selectedCalculation.id)}
+          />
+        </>
       )}
     </div>
   );

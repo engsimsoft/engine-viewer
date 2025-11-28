@@ -62,9 +62,8 @@ export default function HomePage() {
   }, [projects, filters]);
 
   const handleOpenProject = (id: string) => {
-    // v3.0: Direct shortcut to Performance page (most common workflow)
-    // Bypass Project Overview for faster access
-    navigate(`/project/${id}/performance`);
+    // Navigate to Project Overview page to select analysis type
+    navigate(`/project/${id}`);
   };
 
   const handleEditProject = (project: ProjectInfo) => {

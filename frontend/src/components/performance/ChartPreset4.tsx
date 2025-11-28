@@ -23,6 +23,7 @@ import { findPeak, formatPeakValue, getMarkerSymbol } from '@/lib/peakValues';
 import { generateChartFilename } from '@/lib/exportFilename';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
+import { EmptyState } from './EmptyState';
 
 interface ChartPreset4Props {
   /** Array of CalculationReference from Zustand store (primary + comparisons) */
@@ -65,8 +66,8 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
     [calculations]
   );
 
-  // Hook для экспорта графика (local)
-  const { chartRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename);
+  // Hook для экспорта графика (local) - with full DOM export (chart + PeakValuesCards)
+  const { chartRef, containerRef, handleExportPNG, handleExportSVG } = useChartExportHook(exportFilename, { exportFullDOM: true });
 
   // Register export handlers in context (for Header buttons)
   const { registerExportHandlers, unregisterExportHandlers } = useChartExport();
@@ -404,18 +405,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
 
   // Empty state - no calculations selected
   if (calculations.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border-2 border-dashed">
-        <div className="text-center space-y-2">
-          <p className="text-lg font-medium text-muted-foreground">
-            Select calculations to display chart
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Use the left panel to select calculations
-          </p>
-        </div>
-      </div>
-    );
+    return <EmptyState />;
   }
 
   // Empty state - calculations selected but no data loaded
@@ -435,7 +425,7 @@ export function ChartPreset4({ calculations }: ChartPreset4Props) {
   }
 
   return (
-    <div className="w-full space-y-2">
+    <div ref={containerRef} className="w-full space-y-2">
       {/* Parameter selector button - Opens modal (Phase 2) */}
       <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
         <div className="flex items-center gap-3">

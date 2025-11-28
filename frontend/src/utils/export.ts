@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { toPng, toSvg } from 'html-to-image';
 
 /**
  * Экспорт данных в CSV формат
@@ -163,6 +164,83 @@ export function exportChartToSVG(
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+/**
+ * Экспорт DOM элемента в PNG (включая графики и карточки)
+ *
+ * @param container - HTML элемент для экспорта
+ * @param filename - Имя файла (с расширением .png)
+ * @param backgroundColor - Цвет фона (по умолчанию белый)
+ */
+export async function exportDOMToPNG(
+  container: HTMLElement | null,
+  filename: string,
+  backgroundColor: string = '#ffffff'
+): Promise<void> {
+  if (!container) {
+    console.warn('exportDOMToPNG: Container element is null or undefined');
+    return;
+  }
+
+  try {
+    // Рендерим DOM в PNG с помощью html-to-image
+    const dataUrl = await toPng(container, {
+      backgroundColor,
+      pixelRatio: 2, // Для лучшего качества (Retina)
+      cacheBust: true, // Обход кэша для актуальных данных
+    });
+
+    // Создаём ссылку для скачивания
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('exportDOMToPNG: Error during export', error);
+    throw error;
+  }
+}
+
+/**
+ * Экспорт DOM элемента в SVG
+ *
+ * @param container - HTML элемент для экспорта
+ * @param filename - Имя файла (с расширением .svg)
+ */
+export async function exportDOMToSVG(
+  container: HTMLElement | null,
+  filename: string
+): Promise<void> {
+  if (!container) {
+    console.warn('exportDOMToSVG: Container element is null or undefined');
+    return;
+  }
+
+  try {
+    // Рендерим DOM в SVG с помощью html-to-image
+    const dataUrl = await toSvg(container, {
+      backgroundColor: '#ffffff',
+      cacheBust: true,
+    });
+
+    // Создаём ссылку для скачивания
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('exportDOMToSVG: Error during export', error);
+    throw error;
+  }
 }
 
 /**

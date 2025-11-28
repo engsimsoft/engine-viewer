@@ -4,7 +4,7 @@ All combustion in the spark ignition internal combustion engine happens as turbu
 
 ## Brief Description of Turbulent Combustion
 
-Turbulent eddies are created from the bulk flow of the fluid. Kinetic energy is taken from the bulk flow and transformed into turbulent energy (the spinning of the turbulent eddy). The size of these eddies are in part determined by the size of the container or duct and in our engines are typically between 5 and 20mm diameter depending on the cylinder and transfer port sizes. (This size is known as the integral length scale) These eddies break down into progressively smaller eddies down to eddies of about 0.5 to 1mm. (The Taylor length scale) It is at this size that combustion takes place. (These eddies are damped out by the viscous forces in the fluid at an even smaller scale known as the Kolmogorov scale. This break down of bulk flow to large eddies to small eddies to viscous damping of the eddies is known as the \"Turbulent Cascade\" model.) These eddies are ignited on the surface by coming into contact with already burning eddies. They burn inward at the laminar burning rate over which we have no control other than mixture quality and purity. Only the initial ignited eddy burns from the inside out as it is ignited by the spark in the spark plug gap. The time taken from spark to the flame reaching the surface of this first eddy is the delay time from spark to combustion proper starting. 
+Turbulent eddies are created from the bulk flow of the fluid. Kinetic energy is taken from the bulk flow and transformed into turbulent energy (the spinning of the turbulent eddy). The size of these eddies are in part determined by the size of the container or duct and in our engines are typically between 5 and 20mm diameter depending on the cylinder and transfer port sizes. (This size is known as the integral length scale) These eddies break down into progressively smaller eddies down to eddies of about 0.5 to 1mm. (The Taylor length scale) It is at this size that combustion takes place. (These eddies are damped out by the viscous forces in the fluid at an even smaller scale known as the Kolmogorov scale. This break down of bulk flow to large eddies to small eddies to viscous damping of the eddies is known as the \"Turbulent Cascade\" model.) These eddies are ignited on the surface by coming into contact with already burning eddies. They burn inward at the laminar burning rate over which we have no control other than mixture quality and purity. Only the initial ignited eddy burns from the inside out as it is ignited by the spark in the spark plug gap. The time taken from spark to the flame reaching the surface of this first eddy is the delay time from spark to combustion proper starting.
 
 To decrease the delay time we need to increase the strength and duration of the spark to ignite as much of this first eddy as good possible. The size of this spark also needs to be at least the size of a turbulent eddy. Bigger does not really help because one or two eddies burning at the laminar rate has no real effect on the delay time. Increasing the spark strength and duration past the point where the eddy has been fully ignited will also have no or a very small effect. This partially explains why some engines show a performance improvement with a bigger gap - they have larger turbulent eddies.
 
@@ -20,11 +20,11 @@ So back to the 2stroke - we need a way to control bulk flow without messing up t
 
 To model combustion in a simulation package there are various approaches the developer can use and it depends on the time he is willing to spend on the model as well as on the typical user requirement and capabilities. The following is a list of most of the major types of models listed from the more simplistic to the more complex:
 
-1.  Prescribed heat release. The developer programs a heat release rate curve into the software. The user has only control over the spark timing and the combustion duration. The chamber geometry is ignored.
-2.  Prescribed burn rate. This model goes one step further in that the shape of the mass fraction burn rate is described by the user. Mass fraction burnt is usually a curve that is S-shaped. To describe this the model uses typically a Sine function or a Wiebe (Vibe) function to describe the S-shape. The user supplies the constants that describe the form of this function. The user also supplies the ignition timing, the delay period length and the duration of the combustion. The chamber geometry is ignored.
-3.  Turbulent eddy entrainment. The turbulent intensity is calculated by the simulation and from this and the mixture purity and AFR, the laminar and turbulent burn rates are determined. This is then used to calculate the burn rate. The user supplies the ignition timing. The major characteristics of the chamber is included and squish action is calculated. Blending radiuses are ignored but dome shape and piston crown shape are used to calculate the flame front characteristics.
-4.  LES (Large Eddy Simulation, a 3dimensional simulation) This is a CFD simulation (Computational Fluid Dynamics) that is fully 3dimensional and takes all the geometry into consideration. It uses cell sizes that capture the Taylor eddies but use a model to describe the turbulence further down the length scale. It has typical run times of hours to do one simulation.
-5.  DNS (Direct Numerical Simulation, a 3dimensional simulation) This is also a CFD simulation but uses cell sizes small enough to calculate turbulence down to its smallest scales. It uses many millions of cells to model the engine geometry and has run times of days to weeks to do a simulation.
+1. Prescribed heat release. The developer programs a heat release rate curve into the software. The user has only control over the spark timing and the combustion duration. The chamber geometry is ignored.
+2. Prescribed burn rate. This model goes one step further in that the shape of the mass fraction burn rate is described by the user. Mass fraction burnt is usually a curve that is S-shaped. To describe this the model uses typically a Sine function or a Wiebe (Vibe) function to describe the S-shape. The user supplies the constants that describe the form of this function. The user also supplies the ignition timing, the delay period length and the duration of the combustion. The chamber geometry is ignored.
+3. Turbulent eddy entrainment. The turbulent intensity is calculated by the simulation and from this and the mixture purity and AFR, the laminar and turbulent burn rates are determined. This is then used to calculate the burn rate. The user supplies the ignition timing. The major characteristics of the chamber is included and squish action is calculated. Blending radiuses are ignored but dome shape and piston crown shape are used to calculate the flame front characteristics.
+4. LES (Large Eddy Simulation, a 3dimensional simulation) This is a CFD simulation (Computational Fluid Dynamics) that is fully 3dimensional and takes all the geometry into consideration. It uses cell sizes that capture the Taylor eddies but use a model to describe the turbulence further down the length scale. It has typical run times of hours to do one simulation.
+5. DNS (Direct Numerical Simulation, a 3dimensional simulation) This is also a CFD simulation but uses cell sizes small enough to calculate turbulence down to its smallest scales. It uses many millions of cells to model the engine geometry and has run times of days to weeks to do a simulation.
 
 EngMod4T uses models of type 2 and 3. The user has the choice between the two types.
 
@@ -33,14 +33,6 @@ EngMod4T uses models of type 2 and 3. The user has the choice between the two ty
 There are several Prescribed Burn Rate Models available of which the most popular one is the Vibe or Wiebe function model. The Vibe model is used as the prescribed burn rate model in EngMod4T. This model uses the following equation as its basis:
 
 ![](08-Pictures/VibeFunction.jpg){border="0" width="240" height="60" align="left"}
-
- 
-
- 
-
- 
-
- 
 
 ![](08-Pictures/VibeParameters.jpg){border="0" width="350" height="207"}
 
@@ -62,15 +54,15 @@ Increasing the \"distribution\" shape factor means more of the mass is burnt lat
 
 The user has to supply 5 values to prescribe the burn rate using this model:
 
-1.  Ignition Timing - The timing of the spark in degrees before TDC
+1. Ignition Timing - The timing of the spark in degrees before TDC
 
-2.  Delay Period - The time from spark to turbulent combustion in crank angle degrees
+2. Delay Period - The time from spark to turbulent combustion in crank angle degrees
 
-3.  Burn Duration - The time from the end of the delay period to the end of turbulent combustion in crank angle degrees
+3. Burn Duration - The time from the end of the delay period to the end of turbulent combustion in crank angle degrees
 
-4.  VibeA - The \"slope\" shape factor
+4. VibeA - The \"slope\" shape factor
 
-5.  VibeM - The \"distribution\" shape factor
+5. VibeM - The \"distribution\" shape factor
 
 ## [Calculated Burn Rate (Turbulent Eddy Entrainment Model)]{.underline}
 
@@ -82,17 +74,17 @@ As this is a fully 3dimensional situation modeled by zero and 1-dimensional equa
 
 Strictly speaking the user has to supply 1 value only to use this model:
 
-1.  Ignition Timing - The timing of the spark in degrees before TDC
+1. Ignition Timing - The timing of the spark in degrees before TDC
 
 However, to enable the user to select between the two models the following values have to be supplied as well:
 
-1.  Delay Period - The time from spark to turbulent combustion in crank angle degrees
+1. Delay Period - The time from spark to turbulent combustion in crank angle degrees
 
-2.  Burn Duration - The time from the end of the delay period to the end of turbulent combustion in crank angle degrees
+2. Burn Duration - The time from the end of the delay period to the end of turbulent combustion in crank angle degrees
 
-3.  VibeA - The \"slope\" shape factor
+3. VibeA - The \"slope\" shape factor
 
-4.  VibeM - The \"distribution\" shape factor
+4. VibeM - The \"distribution\" shape factor
 
 When using this model the user must verify that the model is calculating realistic results. To do this the model calculates the previous 4 values, (delay period, burn duration, vibeA and vibeM) after each rpm point and stores the results in the power output file. After a run the user can then plot them using Post4T and inspect them for realism. The following figures show a comparison between using the prescribed values as published, then using the turbulent entrainment model and then the calculated values as input for a simulation:
 
@@ -101,8 +93,6 @@ When using this model the user must verify that the model is calculating realist
 ![](08-Pictures/delayduration.jpg){border="0" width="825" height="585"}
 
 ![](08-Pictures/vibeavibem.jpg){border="0" width="824" height="587"}
-
- 
 
 The turbulent entrainment model increases run times quite a bit so a typical way to use it is to do a baseline simulation using it to predict the 4 values required by the Vibe model and then to use these values as input to the Vibe model and use it then for further simulations.
 
@@ -146,23 +136,23 @@ The user selects the type of combustion model by selecting one of the radio butt
 
 The current version of the software allows a choice of 10 different type of fuels for spark ignition engines:
 
-1.  Regular
+1. Regular
 
-2.  Premium
+2. Premium
 
-3.  Unleaded 95
+3. Unleaded 95
 
-4.  Unleaded 100
+4. Unleaded 100
 
-5.  Aviation Gasoline (AV-Gas)
+5. Aviation Gasoline (AV-Gas)
 
-6.  Methanol
+6. Methanol
 
-7.  Ethanol
+7. Ethanol
 
-8.  Leaded Racing 110
+8. Leaded Racing 110
 
-9.  Propane and Butane mix. Selecting this fuel will open the following edit box:
+9. Propane and Butane mix. Selecting this fuel will open the following edit box:
 
     ![](08-Pictures/Propane.jpg){border="0"}
 
@@ -265,11 +255,11 @@ The combustion map consists of between 1 and 20 rows of data. The software inter
 
 The current version of the software allows a choice of 5 different type of fuels for compression ignition engines:
 
-1.  Methanol
-2.  Ethanol
-3.  JP-5 (Kerosene derivitive jet fuel)
-4.  JP-8 (Kerosene derivitive jet fuel)
-5.  Automotive Summer Diesel
+1. Methanol
+2. Ethanol
+3. JP-5 (Kerosene derivitive jet fuel)
+4. JP-8 (Kerosene derivitive jet fuel)
+5. Automotive Summer Diesel
 
 Depending on the chosen fuel the stochiometric AFR will appear in the edit box. Depending on the AFR, the mixture purity and the cylinder pressure and temperature the laminar burn rate for the chosen fuel will be calculated during turbulent combustion.
 

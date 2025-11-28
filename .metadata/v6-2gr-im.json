@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "id": "v6-2gr-im",
-  "displayName": "",
+  "displayName": "CN 3500 Toyota",
   "auto": {
     "cylinders": 6,
     "type": "NA",
@@ -82,7 +82,14 @@
       ]
     }
   },
-  "manual": {},
+  "manual": {
+    "description": "",
+    "client": "",
+    "tags": [],
+    "status": "active",
+    "notes": "",
+    "color": ""
+  },
   "created": "2025-11-12T07:51:26.557Z",
-  "modified": "2025-11-12T07:51:26.557Z"
+  "modified": "2025-11-25T11:14:20.814Z"
 }

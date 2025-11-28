@@ -22,7 +22,7 @@
 
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Search, X, ArrowUpDown } from 'lucide-react';
+import { Search, X, ArrowUpDown, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAppStore } from '@/stores/appStore';
 import { useProjectData } from '@/hooks/useProjectData';
 import { formatRPMRange, calculateAverageStep } from '@/lib/rpmCalculator';
@@ -39,6 +46,9 @@ import { CALCULATION_COLORS } from '@/types/v2';
 import type { Calculation } from '@/types';
 import type { CalculationReference } from '@/types/v2';
 import { cn } from '@/lib/utils';
+import { RenameCalculationDialog } from './RenameCalculationDialog';
+import { DeleteCalculationDialog } from './DeleteCalculationDialog';
+import { useCalculationMutations } from '@/hooks/useCalculationMutations';
 
 /**
  * Primary Selection Modal Component
@@ -59,11 +69,22 @@ export function PrimarySelectionModal() {
   const primaryCalculation = useAppStore((state) => state.primaryCalculation);
 
   // Project data - fetch from API
-  const { project, loading, error } = useProjectData(projectId);
+  const { project, loading, error, refetch } = useProjectData(projectId);
 
   // Search and sort state
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest'); // Default: newest first
+
+  // Dialogs state
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCalculation, setSelectedCalculation] = useState<Calculation | null>(null);
+
+  // Mutations hook
+  const { renameCalculation, deleteCalculation } = useCalculationMutations(
+    projectId,
+    refetch
+  );
 
   /**
    * Filter and sort calculations
@@ -94,6 +115,22 @@ export function PrimarySelectionModal() {
 
     return sorted;
   }, [project, searchQuery, sortOrder]);
+
+  /**
+   * Handle rename action
+   */
+  const handleRename = (calculation: Calculation) => {
+    setSelectedCalculation(calculation);
+    setRenameDialogOpen(true);
+  };
+
+  /**
+   * Handle delete action
+   */
+  const handleDelete = (calculation: Calculation) => {
+    setSelectedCalculation(calculation);
+    setDeleteDialogOpen(true);
+  };
 
   /**
    * Handle calculation selection
@@ -231,40 +268,75 @@ export function PrimarySelectionModal() {
                     primaryCalculation?.calculationId === calc.id;
 
                   return (
-                    <button
+                    <div
                       key={calc.id}
-                      onClick={() => handleSelect(calc)}
                       className={cn(
-                        'w-full px-4 py-3 rounded-md border transition-all text-left',
+                        'w-full px-4 py-3 rounded-md border transition-all',
                         'hover:bg-accent/50 hover:border-primary/50',
                         isSelected && 'bg-accent border-primary'
                       )}
-                      aria-label={`Select ${calc.name}`}
-                      aria-pressed={isSelected}
                     >
                       <div className="flex items-center gap-3">
                         {/* Selection Indicator - Filled/Empty Circle */}
-                        <div
-                          className={cn(
-                            'w-4 h-4 rounded-full border-2 flex-shrink-0 transition-all',
-                            isSelected
-                              ? 'bg-primary border-primary'
-                              : 'border-border'
-                          )}
-                          aria-hidden="true"
-                        />
+                        <button
+                          onClick={() => handleSelect(calc)}
+                          className="flex-shrink-0"
+                          aria-label={`Select ${calc.name}`}
+                          aria-pressed={isSelected}
+                        >
+                          <div
+                            className={cn(
+                              'w-4 h-4 rounded-full border-2 transition-all',
+                              isSelected
+                                ? 'bg-primary border-primary'
+                                : 'border-border'
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
 
-                        {/* Calculation Info */}
-                        <div className="flex-1 min-w-0">
+                        {/* Calculation Info - Clickable */}
+                        <button
+                          onClick={() => handleSelect(calc)}
+                          className="flex-1 min-w-0 text-left"
+                        >
                           <p className="font-medium text-sm truncate">
                             {calc.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {rpmInfo}
                           </p>
-                        </div>
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 flex-shrink-0"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                              <span className="sr-only">Actions</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleRename(calc)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(calc)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -272,6 +344,25 @@ export function PrimarySelectionModal() {
           </div>
         )}
       </DialogContent>
+
+      {/* Dialogs for Rename/Delete */}
+      {selectedCalculation && (
+        <>
+          <RenameCalculationDialog
+            open={renameDialogOpen}
+            onOpenChange={setRenameDialogOpen}
+            currentName={selectedCalculation.name}
+            onRename={(newId) => renameCalculation(selectedCalculation.id, newId)}
+          />
+
+          <DeleteCalculationDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            calculationName={selectedCalculation.name}
+            onConfirm={() => deleteCalculation(selectedCalculation.id)}
+          />
+        </>
+      )}
     </Dialog>
   );
 }
