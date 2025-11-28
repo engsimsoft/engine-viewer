@@ -9,6 +9,60 @@
 
 ## [Unreleased]
 
+## [3.3.1] - 2025-11-28
+
+### Fixed - Calculation Rename/Delete Dual-File Synchronization
+
+**Problem:**
+- Rename/delete operations modified only ONE file (.det OR .pou), not both
+- Маркеры расчётов (`$1`, `$2`, etc.) хранятся в **ОБОИХ** файлах
+- FileMerger combines .pou (base, 71-78 params) + .det (adds PCylMax, Deto, Convergence, TCylMax)
+- Модификация только одного файла → несогласованность данных при загрузке проекта
+- Original implementation in ADR-015 didn't account for .pou + .det dual-file architecture
+
+**Solution:**
+- Created `renameCalculationInProject(projectDir, baseName, oldId, newId)` - modifies BOTH files
+- Created `deleteCalculationInProject(projectDir, baseName, calculationId)` - modifies BOTH files
+- **Atomic Write Pattern** with rollback:
+  1. Modify .pou (PRIMARY) - always exists
+  2. Modify .det (SECONDARY) - only if exists (old projects may not have .det)
+  3. Both files get backups (.pou.backup, .det.backup)
+  4. On error → rollback BOTH files from backups
+- Updated PUT/DELETE endpoints in `data.js` to use new project-level functions
+
+**Impact:**
+- ✅ Rename/delete теперь модифицирует ОБА файла одновременно (.pou + .det)
+- ✅ Data consistency maintained between files
+- ✅ Backward compatibility: старые проекты (только .pou) работают
+- ✅ Atomic operations with full rollback на ошибках
+- ✅ Dual backup creation for safety
+
+**Technical Details:**
+- .pou файл (PRIMARY) - всегда присутствует во всех проектах
+- .det файл (SECONDARY) - может отсутствовать в старых проектах
+- API Response includes both backup paths: `pouBackup` + `detBackup` (optional)
+- Error handling: если .det модификация fails → .pou rollback from backup
+
+**Files Changed:**
+- `backend/src/services/fileModifier.js` - Added dual-file functions (+189 lines)
+- `backend/src/routes/data.js` - Updated PUT endpoint (lines 897-987)
+- `backend/src/routes/data.js` - Updated DELETE endpoint (lines 1040-1114)
+- `docs/decisions/015-calculation-management.md` - Documented dual-file architecture
+- `docs/architecture.md` - Added fileModifier service documentation
+
+**Documentation:**
+- Updated ADR-015 with section "Модификация .pou + .det файлов одновременно"
+- Added Edge Cases table rows for dual-file scenarios
+- Updated docs/architecture.md: Backend Services + API Routes sections
+
+**Verification:**
+- ✅ Frontend build successful (TypeScript no errors)
+- ✅ Backend running and responding correctly
+- ✅ Tested rename on project with .pou + .det (4_Cyl_ITB)
+- ✅ Both files modified, both backups created
+- ✅ API returns correct response with both backup paths
+- ✅ Delete validation works (last calculation protected)
+
 ## [3.2.1] - 2025-11-12
 
 ### Fixed - Combustion Timing Interpolation

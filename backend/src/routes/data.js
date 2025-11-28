@@ -859,4 +859,300 @@ router.get('/:id/pvd/:fileName', async (req, res, next) => {
   }
 });
 
+/**
+ * PUT /api/projects/:id/calculations/:calculationId
+ *
+ * Rename a calculation (marker) in a project file
+ *
+ * @param {string} id - Project identifier
+ * @param {string} calculationId - Current calculation ID (e.g., "$3.1 R 0.86")
+ * @body {string} newId - New calculation ID (e.g., "$baseline")
+ *
+ * @returns {ProjectDataResponse} Updated project data
+ * @returns {404} Project not found
+ * @returns {404} Calculation not found
+ * @returns {400} Invalid marker ID format
+ * @returns {409} New marker ID already exists
+ * @returns {500} File modification error
+ */
+router.put('/:id/calculations/:calculationId', async (req, res, next) => {
+  try {
+    const { id, calculationId } = req.params;
+    const { newId } = req.body;
+
+    console.log(`[API] PUT /api/projects/${id}/calculations/${calculationId} - Body:`, req.body);
+
+    // Validate request body
+    if (!newId || typeof newId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'Missing or invalid newId in request body',
+          details: 'newId must be a non-empty string'
+        }
+      });
+    }
+
+    // Import fileModifier functions
+    const { renameCalculationInProject, validateMarkerId } = await import('../services/fileModifier.js');
+
+    // Validate new marker ID format
+    const validationError = validateMarkerId(newId);
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_MARKER_ID',
+          message: 'Invalid marker ID format',
+          details: validationError
+        }
+      });
+    }
+
+    // Get configuration
+    const config = getConfig();
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Scan directory to find matching project file
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
+
+    // Find file matching the ID
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
+      if (fileId === id) {
+        matchedFileInfo = fileInfo;
+        break;
+      }
+    }
+
+    if (!matchedFileInfo) {
+      console.warn(`[API] PUT /api/projects/${id}/calculations/${calculationId} - Project not found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project not found',
+          details: `No project found with ID: ${id}`
+        }
+      });
+    }
+
+    // Decode URL-encoded calculationId (e.g., "$3.1%20R%200.86" → "$3.1 R 0.86")
+    const decodedOldId = decodeURIComponent(calculationId);
+
+    // Check if new ID already exists
+    const projectData = await parseDetFile(matchedFileInfo.path);
+    const existingIds = projectData.calculations.map(c => c.id);
+
+    if (decodedOldId !== newId && existingIds.includes(newId)) {
+      console.warn(`[API] PUT - Marker ID conflict: ${newId} already exists`);
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'MARKER_ID_EXISTS',
+          message: 'Marker ID already exists',
+          details: `Calculation with ID "${newId}" already exists in project`
+        }
+      });
+    }
+
+    // НОВОЕ: Определяем папку проекта и базовое имя
+    const { dirname } = await import('path');
+    const projectDir = dirname(matchedFileInfo.path);
+    const baseName = matchedFileInfo.name.replace(/\.(det|pou)$/i, '');
+
+    // Perform rename operation (модифицирует .pou + .det если существует)
+    console.log(`[API] Renaming calculation: "${decodedOldId}" → "${newId}"`);
+    const result = await renameCalculationInProject(
+      projectDir,
+      baseName,
+      decodedOldId,
+      newId
+    );
+
+    console.log(`[API] PUT /api/projects/${id}/calculations/${calculationId} - Success`);
+
+    // Return success response
+    res.json({
+      success: true,
+      data: {
+        projectId: id,
+        oldId: decodedOldId,
+        newId: newId,
+        pouBackup: result.pouResult.backupPath,
+        detBackup: result.detResult?.backupPath // optional (только если .det существует)
+      }
+    });
+
+  } catch (error) {
+    console.error(`[API] PUT /api/projects/${req.params.id}/calculations/${req.params.calculationId} - Error:`, error.message);
+
+    // Handle specific errors
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'CALCULATION_NOT_FOUND',
+          message: 'Calculation not found',
+          details: error.message
+        }
+      });
+    }
+
+    if (error.message.includes('validation failed')) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'FILE_VALIDATION_ERROR',
+          message: 'File validation failed after modification',
+          details: error.message
+        }
+      });
+    }
+
+    // Pass other errors to global error handler
+    next(error);
+  }
+});
+
+/**
+ * DELETE /api/projects/:id/calculations/:calculationId
+ *
+ * Delete a calculation from a project file
+ *
+ * @param {string} id - Project identifier
+ * @param {string} calculationId - Calculation ID to delete (e.g., "$2")
+ *
+ * @returns {Object} Deletion result with backup path
+ * @returns {404} Project not found
+ * @returns {404} Calculation not found
+ * @returns {400} Cannot delete last calculation
+ * @returns {500} File modification error
+ */
+router.delete('/:id/calculations/:calculationId', async (req, res, next) => {
+  try {
+    const { id, calculationId } = req.params;
+
+    console.log(`[API] DELETE /api/projects/${id}/calculations/${calculationId}`);
+
+    // Import fileModifier functions
+    const { deleteCalculationInProject } = await import('../services/fileModifier.js');
+
+    // Get configuration
+    const config = getConfig();
+    const dataFolderPath = getDataFolderPath(config);
+
+    // Scan directory to find matching project file
+    const allFiles = await scanDirectory(dataFolderPath, ['.det', '.pou']);
+
+    // Find file matching the ID
+    let matchedFileInfo = null;
+    for (const fileInfo of allFiles) {
+      const fileId = normalizeFilenameToId(fileInfo.name);
+      if (fileId === id) {
+        matchedFileInfo = fileInfo;
+        break;
+      }
+    }
+
+    if (!matchedFileInfo) {
+      console.warn(`[API] DELETE /api/projects/${id}/calculations/${calculationId} - Project not found`);
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PROJECT_NOT_FOUND',
+          message: 'Project not found',
+          details: `No project found with ID: ${id}`
+        }
+      });
+    }
+
+    // Decode URL-encoded calculationId
+    const decodedCalcId = decodeURIComponent(calculationId);
+
+    // Check if this is the last calculation (cannot delete)
+    const projectData = await parseDetFile(matchedFileInfo.path);
+    if (projectData.calculations.length === 1) {
+      console.warn(`[API] DELETE - Cannot delete last calculation`);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'CANNOT_DELETE_LAST_CALCULATION',
+          message: 'Cannot delete the last calculation in project',
+          details: 'File must contain at least one calculation'
+        }
+      });
+    }
+
+    // НОВОЕ: Определяем папку проекта и базовое имя
+    const { dirname } = await import('path');
+    const projectDir = dirname(matchedFileInfo.path);
+    const baseName = matchedFileInfo.name.replace(/\.(det|pou)$/i, '');
+
+    // Perform deletion (удаляет из .pou + .det если существует)
+    console.log(`[API] Deleting calculation: "${decodedCalcId}"`);
+    const result = await deleteCalculationInProject(
+      projectDir,
+      baseName,
+      decodedCalcId
+    );
+
+    console.log(`[API] DELETE /api/projects/${id}/calculations/${calculationId} - Success (${result.totalLinesDeleted} lines deleted)`);
+
+    // Return success response
+    res.json({
+      success: true,
+      data: {
+        projectId: id,
+        deletedId: decodedCalcId,
+        linesDeleted: result.totalLinesDeleted,
+        pouBackup: result.pouResult.backupPath,
+        detBackup: result.detResult?.backupPath // optional (только если .det существует)
+      }
+    });
+
+  } catch (error) {
+    console.error(`[API] DELETE /api/projects/${req.params.id}/calculations/${req.params.calculationId} - Error:`, error.message);
+
+    // Handle specific errors
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'CALCULATION_NOT_FOUND',
+          message: 'Calculation not found',
+          details: error.message
+        }
+      });
+    }
+
+    if (error.message.includes('Cannot delete the last calculation')) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'CANNOT_DELETE_LAST_CALCULATION',
+          message: 'Cannot delete the last calculation in project',
+          details: error.message
+        }
+      });
+    }
+
+    if (error.message.includes('validation failed')) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'FILE_VALIDATION_ERROR',
+          message: 'File validation failed after modification',
+          details: error.message
+        }
+      });
+    }
+
+    // Pass other errors to global error handler
+    next(error);
+  }
+});
+
 export default router;

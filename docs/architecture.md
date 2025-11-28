@@ -319,6 +319,7 @@ Data Access Layer (API, File System)
 │  ┌──────────────────────────────────┐  │
 │  │         Services                 │  │
 │  │  - fileScanner.js                │  │
+│  │  - fileModifier.js               │  │
 │  │  - metadataService.js            │  │
 │  │  - ParserRegistry                │  │
 │  └──────────────────────────────────┘  │
@@ -378,6 +379,25 @@ Data Access Layer (API, File System)
   - Returns `true` if .prt is newer (needs re-parsing)
   - Returns `false` if cache is valid (skip parsing)
 - File watcher integration with cache checks (ignoreInitial: true)
+
+**fileModifier.js** - Безопасная модификация .det/.pou файлов (NEW in v3.3.1)
+- `renameCalculationInProject(projectDir, baseName, oldId, newId)` - Переименование расчёта в обоих файлах
+- `deleteCalculationInProject(projectDir, baseName, calculationId)` - Удаление расчёта из обоих файлов
+- `renameCalculation(filePath, oldId, newId)` - Atomic rename в одном файле
+- `deleteCalculation(filePath, calculationId)` - Atomic delete в одном файле
+- **Atomic Write Pattern:**
+  1. Read original → lines[]
+  2. Apply modification → modifiedLines[]
+  3. Write to .tmp file
+  4. Validate .tmp (parse через detParser/pouParser)
+  5. Atomic replace: original → .backup, .tmp → original
+  6. Rollback on error (restore from .backup)
+- **Dual-file synchronization:**
+  - .pou файл (PRIMARY) - всегда модифицируется
+  - .det файл (SECONDARY) - модифицируется только если существует
+  - Rollback обоих файлов если ошибка при .det
+  - Backup создаётся для каждого модифицированного файла
+- **См. также:** [ADR-015](decisions/015-calculation-management.md) для детальной архитектуры
 
 ---
 
@@ -1173,6 +1193,115 @@ router.post('/api/projects/:id/metadata', async (req, res) => {
   res.json({ success: true });
 });
 ```
+
+**routes/data.js** - PUT /api/project/:id/calculations/:calculationId (NEW in v3.3.1)
+
+```javascript
+router.put('/project/:id/calculations/:calculationId', async (req, res) => {
+  const { id, calculationId } = req.params;
+  const { newId } = req.body;
+
+  // Find project and get both .pou/.det files
+  const projectDir = path.dirname(matchedFileInfo.path);
+  const baseName = matchedFileInfo.name.replace(/\.(det|pou)$/i, '');
+
+  // Rename in BOTH .pou and .det files (atomic + rollback)
+  const result = await fileModifier.renameCalculationInProject(
+    projectDir,
+    baseName,
+    calculationId,
+    newId
+  );
+
+  res.json({
+    success: true,
+    data: {
+      projectId: id,
+      oldId: calculationId,
+      newId: newId,
+      pouBackup: result.pouResult.backupPath,
+      detBackup: result.detResult?.backupPath  // optional
+    }
+  });
+});
+```
+
+**Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "projectId": "4-cyl-itb",
+    "oldId": "$1 ExSys 4-2-1",
+    "newId": "$baseline",
+    "pouBackup": "/path/4_Cyl_ITB.pou.backup",
+    "detBackup": "/path/4_Cyl_ITB.det.backup"
+  }
+}
+```
+
+**Error responses:**
+- `400 INVALID_MARKER_ID` - Invalid marker format (e.g., contains tabs/newlines)
+- `404 CALCULATION_NOT_FOUND` - Calculation not found in file
+- `409 MARKER_ID_EXISTS` - New marker ID already exists
+- `500 FILE_WRITE_ERROR` - Error during atomic write/rollback
+
+**routes/data.js** - DELETE /api/project/:id/calculations/:calculationId (NEW in v3.3.1)
+
+```javascript
+router.delete('/project/:id/calculations/:calculationId', async (req, res) => {
+  const { id, calculationId } = req.params;
+
+  // Validate: cannot delete last calculation
+  if (calculations.length <= 1) {
+    return res.status(400).json({
+      error: {
+        code: 'CANNOT_DELETE_LAST_CALCULATION',
+        message: 'Cannot delete the last calculation in project'
+      }
+    });
+  }
+
+  // Delete from BOTH .pou and .det files (atomic + rollback)
+  const result = await fileModifier.deleteCalculationInProject(
+    projectDir,
+    baseName,
+    calculationId
+  );
+
+  res.json({
+    success: true,
+    data: {
+      projectId: id,
+      deletedId: calculationId,
+      linesDeleted: result.pouResult.linesDeleted,
+      pouBackup: result.pouResult.backupPath,
+      detBackup: result.detResult?.backupPath
+    }
+  });
+});
+```
+
+**Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "projectId": "4-cyl-itb",
+    "deletedId": "$2",
+    "linesDeleted": 15,
+    "pouBackup": "/path/4_Cyl_ITB.pou.backup",
+    "detBackup": "/path/4_Cyl_ITB.det.backup"
+  }
+}
+```
+
+**Error responses:**
+- `400 CANNOT_DELETE_LAST_CALCULATION` - Cannot delete the only remaining calculation
+- `404 CALCULATION_NOT_FOUND` - Calculation not found in file
+- `500 FILE_WRITE_ERROR` - Error during atomic write/rollback
+
+**См. также:** [ADR-015](decisions/015-calculation-management.md) для детальной архитектуры rename/delete операций.
 
 **routes/queue.js** - GET /queue/status (NEW in v2.1)
 
