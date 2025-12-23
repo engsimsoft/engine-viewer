@@ -1,7 +1,11 @@
 # Windows Setup Guide
 
 **Документ для настройки проекта Engine Results Viewer на Windows.**
-**Для AI-агента:** Читай этот файл первым при работе на Windows-машине.
+
+**🤖 Для AI-агента:**
+- Читай этот файл ПЕРВЫМ при работе на Windows-машине
+- **ВАЖНО:** Создай Windows-версии скриптов (start.bat, stop.bat, status.bat) перед запуском
+- См. подробный алгоритм в конце документа (секция "🤖 Для AI-агента на Windows")
 
 ---
 
@@ -69,32 +73,70 @@ cd engine-viewer
 
 ### Шаг 4: Установить зависимости
 
+**ВАЖНО: Устанавливать в 3 местах (root + backend + frontend)!**
+
 ```powershell
-# Backend
+# 1. Root (для html-to-image - экспорт графиков)
+npm install
+
+# 2. Backend
 cd backend
 npm install
 
-# Frontend (в новом терминале или после cd ..)
+# 3. Frontend
 cd ..\frontend
 npm install
+
+# Вернуться в корень проекта
+cd ..
+```
+
+**Проверка:**
+```powershell
+# Должны существовать все три папки:
+dir node_modules          # Root: html-to-image
+dir backend\node_modules  # Backend: express, chokidar, etc.
+dir frontend\node_modules # Frontend: react, vite, echarts, etc.
 ```
 
 ### Шаг 5: Настроить путь к данным
 
-Отредактировать `config.yaml` в корне проекта:
+Проверить `config.yaml` в корне проекта:
 
 ```yaml
 files:
-  # Для Windows с реальными данными:
-  path: "C:/4Stroke"
-  
-  # Или для тестирования:
-  # path: "./test-data"
+  # ПО УМОЛЧАНИЮ стоит:
+  path: "./test-data"
+
+  # Для Windows с реальными данными изменить на:
+  # path: "C:/4Stroke"
 ```
+
+**Для первого запуска:** Оставить `./test-data` — проверить что всё работает с тестовыми данными.
+**Для production:** Изменить на `C:/4Stroke` (убедиться что папка существует и доступна).
 
 **Важно:** Использовать прямые слэши `/` даже на Windows!
 
 ### Шаг 6: Запустить проект
+
+**Вариант 1 — Автоматический запуск (рекомендуется для AI-агента):**
+
+```powershell
+# Запустить оба сервиса одной командой
+start.bat
+
+# Проверить статус
+status.bat
+
+# Остановить оба сервиса
+stop.bat
+```
+
+**⚠️ Для AI-агента:** Если файлы `start.bat`, `stop.bat`, `status.bat` не существуют в корне проекта — **создай их** перед запуском (см. алгоритм ниже в секции "🤖 Для AI-агента на Windows").
+
+---
+
+**Вариант 2 — Ручной запуск (если .bat файлы не созданы):**
 
 **Терминал 1 — Backend:**
 ```powershell
@@ -283,16 +325,81 @@ npm run typecheck    # Проверка TypeScript
 
 ## 🤖 Для AI-агента на Windows
 
-При первом запуске на Windows-машине:
+### Первый запуск на Windows-машине
 
-1. **Прочитать этот файл** (`WINDOWS-SETUP.md`)
-2. **Проверить** `config.yaml` — путь должен быть `C:/4Stroke`
-3. **Запустить** backend + frontend
-4. **Протестировать** базовую функциональность
-5. **При проблемах** — проверить чек-лист выше
+**Контекст:** Пользователь клонировал проект на Windows-компьютере. Это чистая копия с GitHub.
 
-**Основные правила работы** — в `.github/copilot-instructions.md` (одинаковы для macOS и Windows).
+**Твоя задача:** Настроить проект с нуля до рабочего состояния.
+
+**Алгоритм:**
+
+1. **Прочитать этот файл полностью** (`WINDOWS-SETUP.md`)
+
+2. **Проверить требования:**
+   ```powershell
+   git --version   # 2.x+
+   node --version  # 18.0.0+
+   npm --version   # работает
+   ```
+
+3. **Установить зависимости (3 места!):**
+   ```powershell
+   npm install                      # Root (html-to-image)
+   cd backend && npm install && cd ..   # Backend
+   cd frontend && npm install && cd ..  # Frontend
+   ```
+
+4. **Проверить `config.yaml`:**
+   - Для первого запуска: оставить `path: "./test-data"`
+   - Для production: изменить на `C:/4Stroke` (если папка существует)
+
+5. **КРИТИЧНО: Создать Windows-версии скриптов запуска**
+
+   Проверить наличие файлов в корне проекта:
+   ```powershell
+   dir start.bat
+   dir stop.bat
+   dir status.bat
+   ```
+
+   **Если файлы НЕ существуют — ОБЯЗАТЕЛЬНО создай их:**
+
+   **a) `start.bat`** — запуск backend + frontend:
+   - Логика (на основе `scripts/start.sh`):
+     1. Проверить что порты 3000 и 5173 свободны (netstat)
+     2. Если заняты → убить процессы (taskkill)
+     3. Создать папку `logs\` если нет
+     4. Запустить backend: `cd backend && start /B npm start > ..\logs\backend.log 2>&1`
+     5. Подождать 5 секунд, проверить http://localhost:3000/health
+     6. Запустить frontend: `cd frontend && start /B npm run dev > ..\logs\frontend.log 2>&1`
+     7. Подождать 10 секунд, проверить http://localhost:5173
+     8. Вывести URLs и пути к логам
+
+   **b) `stop.bat`** — остановка процессов:
+   - Найти процессы на портах 3000 и 5173 (netstat -ano)
+   - Убить через taskkill /F /PID
+
+   **c) `status.bat`** — проверка состояния:
+   - Показать процессы на портах 3000, 5173
+   - Проверить доступность http://localhost:3000/health и http://localhost:5173
+
+   **Важно:** Используй синтаксис Windows Batch, не bash!
+
+6. **Запустить проект:**
+   ```powershell
+   start.bat
+   ```
+
+7. **Проверить работоспособность:**
+   - Backend health: http://localhost:3000/health → `{"status":"ok"}`
+   - Frontend: http://localhost:5173 → UI загружается
+   - Проекты отображаются в списке
+   - Открыть любой проект → графики рисуются
+
+8. **Если проблемы** → проверить чек-лист выше (строки 160-172)
+
+**Основные правила работы** — в `.claude/AGENT_RULES.md` (одинаковы для macOS и Windows).
 
 ---
 
-**Последнее обновление:** 28 ноября 2025
+**Последнее обновление:** 23 декабря 2025 (v3.3.1 - последняя рабочая версия до Electron)
