@@ -7,6 +7,8 @@
 import express from 'express';
 import cors from 'cors';
 import { stat } from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { loadConfig, validateConfig, getDataFolderPath } from './config.js';
 import projectsRouter from './routes/projects.js';
 import dataRouter from './routes/data.js';
@@ -15,6 +17,10 @@ import { createQueueRouter } from './routes/queue.js';
 import { scanProjects, createFileWatcher, parsePrtFileAndUpdateMetadata, shouldParsePrt, normalizeFilenameToId } from './services/fileScanner.js';
 import { getGlobalQueue } from './services/prtQueue.js';
 import { basename } from 'path';
+
+// ES Module equivalent of __dirname (for static file serving)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Инициализация Express
 const app = express();
@@ -107,10 +113,39 @@ const queueRouter = createQueueRouter(globalPrtQueue);
 app.use('/queue', queueRouter);
 
 /**
+ * Static File Serving (for production deployment)
+ *
+ * Serve frontend static files from frontend/dist/
+ * This enables single-service deployment (backend serves frontend)
+ */
+if (process.env.NODE_ENV === 'production') {
+  const frontendDistPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  console.log(`📦 Serving frontend static files from: ${frontendDistPath}`);
+
+  // Serve static assets (JS, CSS, images)
+  app.use(express.static(frontendDistPath));
+
+  // SPA fallback: serve index.html for all non-API routes
+  // This enables React Router client-side routing to work
+  app.get('*', (req, res, next) => {
+    // Skip API routes (already handled above)
+    if (req.path.startsWith('/api') ||
+        req.path.startsWith('/health') ||
+        req.path.startsWith('/projects') ||
+        req.path.startsWith('/project') ||
+        req.path.startsWith('/queue')) {
+      return next();
+    }
+
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
+
+/**
  * Error Handling Middleware
  */
 
-// 404 handler
+// 404 handler (only for API routes in production)
 app.use((req, res) => {
   res.status(404).json({
     error: {

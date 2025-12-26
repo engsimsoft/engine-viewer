@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "id": "i4-turbo",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "Turbo",
+    "configuration": "inline",
+    "bore": 86,
+    "stroke": 86,
+    "displacement": 2,
+    "compressionRatio": 10,
+    "maxPowerRPM": 6500,
+    "intakeSystem": null,
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2,
+    "combustion": null
+  },
+  "manual": {},
+  "created": "2025-12-24T07:00:45.783Z",
+  "modified": "2025-12-24T07:00:45.783Z"
+}

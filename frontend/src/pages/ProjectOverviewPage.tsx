@@ -1,14 +1,12 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useParams } from 'react-router-dom';
 import AnalysisTypeCard from '@/components/project-overview/AnalysisTypeCard';
+import ProjectInfoCard from '@/components/project-overview/ProjectInfoCard';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import { useProjectSummary } from '@/hooks/useProjectSummary';
 
 export default function ProjectOverviewPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { summary, loading, error } = useProjectSummary(id!);
 
   if (loading) {
@@ -80,15 +78,6 @@ export default function ProjectOverviewPage() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-6 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-2"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Projects
-          </Button>
-
           <div>
             <h1 className="text-2xl font-bold">
               {summary.project.displayName}
@@ -103,6 +92,10 @@ export default function ProjectOverviewPage() {
       {/* Analysis Types Grid */}
       <main className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Project Info Card - First */}
+          <ProjectInfoCard metadata={summary.project.metadata} />
+
+          {/* Analysis Type Cards */}
           {analysisTypes.map((type) => (
             <AnalysisTypeCard
               key={type.id}

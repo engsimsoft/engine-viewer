@@ -64,7 +64,13 @@ export async function loadConfig(forceReload = false) {
       throw new Error('Config file is empty');
     }
 
-    console.log('✅ Configuration loaded successfully');
+    // Environment variable override для FILES_PATH (для Railway deployment)
+    if (process.env.FILES_PATH) {
+      config.files.path = process.env.FILES_PATH;
+      console.log('✅ Configuration loaded successfully (FILES_PATH overridden by environment)');
+    } else {
+      console.log('✅ Configuration loaded successfully');
+    }
     console.log(`   Data folder: ${config.files.path}`);
     console.log(`   Server: ${config.server.host}:${config.server.port}`);
 
@@ -102,7 +108,11 @@ export function getConfig() {
  * @returns {string} Абсолютный путь к папке с .det файлами
  */
 export function getDataFolderPath(config) {
-  // Путь относительно корня проекта
+  // Если путь абсолютный, используем его напрямую
+  if (path.isAbsolute(config.files.path)) {
+    return config.files.path;
+  }
+  // Иначе - путь относительно корня проекта
   const projectRoot = path.join(__dirname, '..', '..');
   return path.join(projectRoot, config.files.path);
 }

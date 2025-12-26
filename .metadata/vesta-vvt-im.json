@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "id": "vesta-vvt-im",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 84,
+    "stroke": 84,
+    "displacement": 1.86,
+    "compressionRatio": 11,
+    "maxPowerRPM": 6800,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 2000,
+          "timing": 11.13,
+          "afr": 12.75,
+          "delay": 4.14,
+          "duration": 41.4,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 3000,
+          "timing": 15.3,
+          "afr": 12.75,
+          "delay": 4.56,
+          "duration": 45.6,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 4000,
+          "timing": 17.5,
+          "afr": 12.7,
+          "delay": 4.99,
+          "duration": 49.9,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 5000,
+          "timing": 19.6,
+          "afr": 12.65,
+          "delay": 5.42,
+          "duration": 54.2,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 6000,
+          "timing": 21.8,
+          "afr": 12.6,
+          "delay": 5.84,
+          "duration": 58.4,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 7000,
+          "timing": 24,
+          "afr": 12.55,
+          "delay": 6.27,
+          "duration": 62.7,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        },
+        {
+          "rpm": 8000,
+          "timing": 26.3,
+          "afr": 12.52,
+          "delay": 6.7,
+          "duration": 67,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.86
+        }
+      ]
+    }
+  },
+  "manual": {},
+  "created": "2025-12-24T06:57:16.799Z",
+  "modified": "2025-12-24T06:57:16.799Z"
+}

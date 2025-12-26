@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "id": "honda-k24-im",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 87,
+    "stroke": 99,
+    "displacement": 2.35,
+    "compressionRatio": 11.5,
+    "maxPowerRPM": 7400,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 3000,
+          "timing": 13.98,
+          "afr": 12.7,
+          "delay": 4.3,
+          "duration": 43,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 4000,
+          "timing": 16.51,
+          "afr": 12.65,
+          "delay": 4.8,
+          "duration": 48,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 5000,
+          "timing": 19.08,
+          "afr": 12.6,
+          "delay": 5.3,
+          "duration": 53,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 6000,
+          "timing": 21.65,
+          "afr": 12.55,
+          "delay": 5.81,
+          "duration": 58.1,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 7000,
+          "timing": 24.22,
+          "afr": 12.5,
+          "delay": 6.31,
+          "duration": 63.1,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 8000,
+          "timing": 26.79,
+          "afr": 12.45,
+          "delay": 6.81,
+          "duration": 68.1,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 9000,
+          "timing": 29.36,
+          "afr": 12.4,
+          "delay": 7.31,
+          "duration": 73.1,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        }
+      ]
+    }
+  },
+  "manual": {},
+  "created": "2025-12-25T10:48:22.101Z",
+  "modified": "2025-12-25T11:33:11.443Z"
+}

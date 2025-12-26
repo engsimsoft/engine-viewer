@@ -482,6 +482,9 @@ router.get('/:id/summary', async (req, res, next) => {
     // 6. Configuration History - not implemented yet (Phase 2.1)
     const configurationAvailability = { available: false };
 
+    // Load project metadata (v3.4.0: includes manual.client, manual.description for client-facing pages)
+    const projectMetadata = await getMetadata(id);
+
     // Build response
     const response = {
       success: true,
@@ -492,7 +495,8 @@ router.get('/:id/summary', async (req, res, next) => {
           specs: {
             cylinders: projectData.metadata?.numCylinders || 0,
             engineType: projectData.metadata?.engineType || 'UNKNOWN'
-          }
+          },
+          metadata: projectMetadata // v3.4.0: Add full metadata (auto + manual sections)
         },
         availability: {
           performance: performanceAvailability,

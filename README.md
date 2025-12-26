@@ -91,6 +91,7 @@ cd frontend && npm install && npm run dev
 - **[docs/setup.md](docs/setup.md)** - Детальная установка и настройка
 - **[scripts/README.md](scripts/README.md)** - Скрипты управления проектом (start.sh, stop.sh, status.sh)
 - **[docs/troubleshooting.md](docs/troubleshooting.md)** - Решение проблем
+- **[docs/decisions/016-railway-deployment.md](docs/decisions/016-railway-deployment.md)** - Railway deployment (production)
 
 ### Референсная документация
 - **[docs/engmod4t-suite/README.md](docs/engmod4t-suite/README.md)** - 📚 EngMod4T Suite (DAT4T, EngMod4T, Post4T) - AI-friendly docs

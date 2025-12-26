@@ -1,16 +1,16 @@
 {
   "version": "1.0",
-  "id": "lada-1300-carb",
+  "id": "lada-1600-carb",
   "displayName": "",
   "auto": {
     "cylinders": 4,
     "type": "NA",
     "configuration": "inline",
     "bore": 80,
-    "stroke": 66,
-    "displacement": 1.33,
-    "compressionRatio": 10.8,
-    "maxPowerRPM": 8200,
+    "stroke": 80,
+    "displacement": 1.61,
+    "compressionRatio": 12.5,
+    "maxPowerRPM": 7600,
     "intakeSystem": "Carb",
     "valvesPerCylinder": 2,
     "inletValves": 1,
@@ -21,70 +21,70 @@
       "curves": [
         {
           "rpm": 3000,
-          "timing": 22.7,
+          "timing": 15.61,
           "afr": 11.2,
-          "delay": 6,
-          "duration": 60,
+          "delay": 4.62,
+          "duration": 46.2,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.87
+          "beff": 0.835
         },
         {
           "rpm": 4000,
-          "timing": 24.2,
+          "timing": 17.7,
           "afr": 11.6,
-          "delay": 6.32,
-          "duration": 63.2,
+          "delay": 5,
+          "duration": 50.3,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.87
+          "beff": 0.835
         },
         {
           "rpm": 5000,
-          "timing": 25.8,
+          "timing": 19.8,
           "afr": 11,
-          "delay": 6.62,
-          "duration": 66.2,
+          "delay": 5.44,
+          "duration": 54.4,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.87
+          "beff": 0.835
         },
         {
           "rpm": 6000,
-          "timing": 27.4,
-          "afr": 12.4,
-          "delay": 6.93,
-          "duration": 69.3,
+          "timing": 21.84,
+          "afr": 12.2,
+          "delay": 5.84,
+          "duration": 58.4,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.87
+          "beff": 0.835
         },
         {
           "rpm": 7000,
-          "timing": 28.9,
+          "timing": 24,
           "afr": 12.4,
-          "delay": 7.23,
-          "duration": 72.3,
+          "delay": 6.25,
+          "duration": 62.5,
           "vibeA": 10,
           "vibeB": 2,
           "beff": 0.835
         },
         {
           "rpm": 8000,
-          "timing": 30.5,
+          "timing": 26,
           "afr": 12.42,
-          "delay": 7.54,
-          "duration": 75.4,
+          "delay": 6.65,
+          "duration": 66.5,
           "vibeA": 10,
           "vibeB": 2,
           "beff": 0.835
         },
         {
           "rpm": 9000,
-          "timing": 32,
+          "timing": 28,
           "afr": 12.42,
-          "delay": 7.84,
-          "duration": 78.4,
+          "delay": 7.06,
+          "duration": 70.6,
           "vibeA": 10,
           "vibeB": 2,
           "beff": 0.835
@@ -93,6 +93,6 @@
     }
   },
   "manual": {},
-  "created": "2025-12-26T12:13:49.134Z",
-  "modified": "2025-12-26T12:13:49.134Z"
+  "created": "2025-12-26T12:13:49.117Z",
+  "modified": "2025-12-26T12:54:20.021Z"
 }

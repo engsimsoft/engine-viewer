@@ -7,9 +7,9 @@
 # ============================================
 files:
   # Путь к папке с .det файлами
-  # Для тестирования: "./test-data"
-  # Для production: абсолютный путь или относительный от корня проекта
-  path: "./test-data"
+  # Для local development: "C:/4Stroke" (рабочие проекты)
+  # Для Railway production: переопределяется через environment variable FILES_PATH
+  path: "C:/4Stroke"
 
   # Расширения файлов для сканирования
   extensions:

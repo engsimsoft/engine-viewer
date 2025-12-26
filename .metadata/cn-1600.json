@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "id": "4-cyl-itb",
-  "displayName": "",
+  "id": "cn-1600",
+  "displayName": "CN 1600",
   "auto": {
     "cylinders": 4,
     "type": "NA",
@@ -102,7 +102,14 @@
       ]
     }
   },
-  "manual": {},
-  "created": "2025-12-24T06:56:19.718Z",
-  "modified": "2025-12-24T06:56:19.718Z"
+  "manual": {
+    "description": "Racing engine project for the CN",
+    "client": "ArtLine",
+    "tags": [],
+    "status": "active",
+    "notes": "2 варианта ДВС",
+    "color": ""
+  },
+  "created": "2025-12-26T14:43:09.843Z",
+  "modified": "2025-12-26T16:40:25.060Z"
 }

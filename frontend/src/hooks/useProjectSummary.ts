@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import type { ProjectMetadata } from '@/types';
 
 interface ProjectSpecs {
   cylinders: number;
@@ -27,6 +28,7 @@ interface ProjectSummary {
     id: string;
     displayName: string;
     specs: ProjectSpecs;
+    metadata?: ProjectMetadata; // v3.4.0: Add metadata for ProjectInfoCard
   };
   availability: {
     performance: PerformanceAvailability;

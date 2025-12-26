@@ -1,15 +1,15 @@
 {
   "version": "1.0",
-  "id": "4-cyl-itb",
+  "id": "shortcut23-raf",
   "displayName": "",
   "auto": {
     "cylinders": 4,
     "type": "NA",
     "configuration": "inline",
-    "bore": 82.5,
+    "bore": 83,
     "stroke": 75.6,
-    "displacement": 1.62,
-    "compressionRatio": 11.3,
+    "displacement": 1.64,
+    "compressionRatio": 11.35,
     "maxPowerRPM": 8000,
     "intakeSystem": "ITB",
     "valvesPerCylinder": 4,
@@ -21,88 +21,88 @@
       "curves": [
         {
           "rpm": 2000,
-          "timing": 14.7,
+          "timing": 15.7,
           "afr": 12.57,
           "delay": 4.64,
           "duration": 46.4,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 3000,
           "timing": 17.6,
-          "afr": 12.55,
+          "afr": 12.57,
           "delay": 5.02,
           "duration": 50.2,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 4000,
           "timing": 19.6,
-          "afr": 12.52,
+          "afr": 12.57,
           "delay": 5.4,
           "duration": 54,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 5000,
-          "timing": 21.5,
-          "afr": 12.5,
+          "timing": 21.6,
+          "afr": 12.57,
           "delay": 5.79,
           "duration": 57.9,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 6000,
           "timing": 23.5,
-          "afr": 12.5,
+          "afr": 12.57,
           "delay": 6.17,
           "duration": 61.7,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 7000,
-          "timing": 25.48,
-          "afr": 12.5,
+          "timing": 25.5,
+          "afr": 12.57,
           "delay": 6.56,
           "duration": 65.6,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 8000,
-          "timing": 27.45,
-          "afr": 12.45,
+          "timing": 28.45,
+          "afr": 12.57,
           "delay": 6.94,
           "duration": 69.4,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         },
         {
           "rpm": 9000,
-          "timing": 29.41,
-          "afr": 12.42,
+          "timing": 30.4,
+          "afr": 12.5,
           "delay": 7.32,
           "duration": 73.2,
           "vibeA": 10,
           "vibeB": 2,
-          "beff": 0.89
+          "beff": 0.91
         }
       ]
     }
   },
   "manual": {},
-  "created": "2025-12-24T06:56:19.718Z",
-  "modified": "2025-12-24T06:56:19.718Z"
+  "created": "2025-12-24T07:00:45.773Z",
+  "modified": "2025-12-24T07:00:45.773Z"
 }

@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "id": "honda-k20-im",
+  "displayName": "",
+  "auto": {
+    "cylinders": 4,
+    "type": "NA",
+    "configuration": "inline",
+    "bore": 86,
+    "stroke": 86,
+    "displacement": 2,
+    "compressionRatio": 11.5,
+    "maxPowerRPM": 8400,
+    "intakeSystem": "IM",
+    "valvesPerCylinder": 4,
+    "inletValves": 2,
+    "exhaustValves": 2,
+    "combustion": {
+      "fuelType": "100 UNLEADED",
+      "nitromethaneRatio": 0,
+      "curves": [
+        {
+          "rpm": 3000,
+          "timing": 16,
+          "afr": 12.7,
+          "delay": 4.71,
+          "duration": 47.1,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 4000,
+          "timing": 18.3,
+          "afr": 12.65,
+          "delay": 5.15,
+          "duration": 51.5,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 5000,
+          "timing": 20.54,
+          "afr": 12.6,
+          "delay": 5.59,
+          "duration": 55.9,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 6000,
+          "timing": 22.77,
+          "afr": 12.55,
+          "delay": 6.02,
+          "duration": 60.2,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 7000,
+          "timing": 25,
+          "afr": 12.5,
+          "delay": 6.46,
+          "duration": 64.6,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 8000,
+          "timing": 27.24,
+          "afr": 12.45,
+          "delay": 6.9,
+          "duration": 69,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        },
+        {
+          "rpm": 9000,
+          "timing": 29.47,
+          "afr": 12.4,
+          "delay": 7.34,
+          "duration": 73.4,
+          "vibeA": 10,
+          "vibeB": 2,
+          "beff": 0.92
+        }
+      ]
+    }
+  },
+  "manual": {},
+  "created": "2025-12-24T06:56:19.718Z",
+  "modified": "2025-12-24T06:56:19.718Z"
+}
